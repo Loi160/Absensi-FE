@@ -1,0 +1,210 @@
+/* =================================
+   RESET
+================================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+/* =================================
+   COLOR SYSTEM
+================================= */
+:root {
+  --primary: #16a34a;
+  --primary-dark: #15803d;
+
+  --bg: #f8fafc;
+  --white: #ffffff;
+  --text: #1f2937;
+  --border: #e5e7eb;
+}
+
+
+/* =================================
+   MAIN LAYOUT
+================================= */
+.dashboard {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg);
+  font-family: "Segoe UI", sans-serif;
+}
+
+
+/* =================================
+   SIDEBAR (🔥 GRADIENT JELAS BANGET)
+================================= */
+.sidebar {
+  width: 240px;
+
+  /* 🔥 GRADIENT KONTRAS BIAR KELIHATAN */
+  background: linear-gradient(
+    to bottom,
+    #0f3d2e 0%,     /* sangat gelap */
+    #14532d 40%,    /* gelap */
+    #15803d 70%,    /* medium */
+    #22c55e 100%    /* terang */
+  );
+
+  color: white;
+  padding: 24px 16px;
+
+  box-shadow: 6px 0 20px rgba(0, 0, 0, 0.18);
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 32px;
+}
+
+
+/* =================================
+   MENU
+================================= */
+.menu {
+  list-style: none;
+}
+
+.menu li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 12px 14px;
+  border-radius: 10px;
+
+  cursor: pointer;
+  transition: 0.2s ease;
+  font-weight: 500;
+}
+
+.menu li:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.menu .active {
+  background: rgba(255, 255, 255, 0.25);
+  font-weight: 600;
+}
+
+
+/* =================================
+   ICON
+================================= */
+.icon {
+  width: 18px;
+  height: 18px;
+  filter: brightness(0) invert(1);
+}
+
+.icon-small {
+  width: 14px;
+  height: 14px;
+  filter: brightness(0) invert(1);
+}
+
+
+/* =================================
+   CONTENT
+================================= */
+.content {
+  flex: 1;
+  padding: 30px 40px;
+  color: var(--text);
+}
+
+
+/* =================================
+   HEADER
+================================= */
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.content-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.content-header p {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+
+/* =================================
+   BUTTON
+================================= */
+.btn-add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  background: var(--primary);
+  color: white;
+
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-add:hover {
+  background: var(--primary-dark);
+}
+
+
+/* =================================
+   CARD
+================================= */
+.card {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 16px;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+
+/* =================================
+   TABLE
+================================= */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: var(--primary);
+  color: white;
+}
+
+th,
+td {
+  padding: 12px;
+  text-align: left;
+  font-size: 14px;
+}
+
+tbody tr {
+  border-bottom: 1px solid var(--border);
+}
+
+tbody tr:hover {
+  background: #f3f4f6;
+}
+
+.action {
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+}
