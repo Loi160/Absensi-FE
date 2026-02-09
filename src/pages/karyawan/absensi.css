@@ -1,0 +1,183 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: #f3f4f6;
+}
+
+/* ===================== */
+/* PAGE */
+/* ===================== */
+.absensi {
+  min-height: 100vh;
+  position: relative;
+  background: #f3f4f6;
+}
+
+/* ===================== */
+/* HEADER HIJAU */
+/* ===================== */
+.header {
+  height: 330px;
+
+  background: linear-gradient(140deg, #67c24a, #3f8f2f);
+
+  text-align: center;
+  color: white;
+
+  padding-top: 40px;
+  position: relative;
+}
+
+/* tombol back */
+.back {
+  position: absolute;
+  left: 18px;
+  top: 18px;
+
+  width: 38px;
+  height: 38px;
+
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 18px;
+}
+
+/* logo */
+.logo {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: white;
+
+  margin: 0 auto 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: 700;
+  color: #3f8f2f;
+
+  box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+}
+
+.header h2 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.header p {
+  font-size: 13px;
+  margin-top: 4px;
+  opacity: 0.95;
+}
+
+/* ===================== */
+/* CARD (PENTING BANGET) */
+/* ===================== */
+.card {
+  width: 92%;
+  max-width: 390px;
+
+  background: #ffffff;
+
+  border-radius: 26px;
+
+  padding: 24px;
+
+  position: absolute;
+
+  /* 🔥 INI YANG BUAT PERSIS */
+  top: 250px;   /* masuk ke header */
+  left: 50%;
+  transform: translateX(-50%);
+
+  box-shadow:
+    0 20px 40px rgba(0,0,0,0.10),
+    0 6px 14px rgba(0,0,0,0.06);
+}
+
+/* ===================== */
+/* FORM */
+/* ===================== */
+.card h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.sub {
+  font-size: 12px;
+  color: #7b7b7b;
+  display: block;
+  margin: 6px 0 20px;
+}
+
+/* status buttons */
+.status {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.status button {
+  flex: 1;
+  padding: 11px;
+  border-radius: 12px;
+  border: none;
+  background: #eef1f3;
+}
+
+.status .active {
+  background: #4caf50;
+  color: white;
+}
+
+/* input */
+label {
+  font-size: 13px;
+  margin: 14px 0 6px;
+  display: block;
+}
+
+select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #e4e6e8;
+}
+
+/* foto */
+.foto {
+  width: 100%;
+  padding: 13px;
+  border-radius: 14px;
+  border: none;
+  background: #eef1f3;
+}
+
+/* submit */
+.submit {
+  width: 100%;
+  margin-top: 20px;
+
+  padding: 14px;
+
+  border-radius: 14px;
+  border: none;
+
+  color: white;
+
+  background: linear-gradient(145deg, #63b645, #3e8f2f);
+
+  font-weight: 600;
+}
