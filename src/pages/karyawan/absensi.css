@@ -1,183 +1,234 @@
+/* 1. Import Font Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 * {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
+  font-family: 'Inter';
 }
 
-body {
-  background: #f3f4f6;
-}
-
-/* ===================== */
-/* PAGE */
-/* ===================== */
-.absensi {
+.main-wrapper {
+  background-color: #d1a5a5; 
   min-height: 100vh;
-  position: relative;
-  background: #f3f4f6;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
 
-/* ===================== */
-/* HEADER HIJAU */
-/* ===================== */
-.header {
-  height: 330px;
+.card-container {
+  width: 100%;
+  max-width: 450px;
+  min-height: 100vh;
+  background-color: #e0e0e0; 
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
 
-  background: linear-gradient(140deg, #67c24a, #3f8f2f);
-
+/* --- HEADER HIJAU --- */
+.header-section {
+  background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
+  height: 45vh;
+  padding-top: 40px;
   text-align: center;
   color: white;
-
-  padding-top: 40px;
   position: relative;
+  border-bottom-left-radius: 40px;
+  border-bottom-right-radius: 40px;
 }
 
-/* tombol back */
-.back {
+/* --- REVISI ICON KEMBALI FINAL (Lingkaran Outline) --- */
+.btn-back {
   position: absolute;
-  left: 18px;
-  top: 18px;
-
-  width: 38px;
-  height: 38px;
-
+  top: 30px;
+  left: 25px;
+  
+  /* Lingkaran Garis Hitam */
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 1.5px solid black; 
   border-radius: 50%;
-  background: rgba(255,255,255,0.25);
-
+  
+  /* Posisi Tengah */
   display: flex;
-  align-items: center;
   justify-content: center;
-
-  font-size: 18px;
+  align-items: center;
+  
+  cursor: pointer;
+  z-index: 50;
+  
+  /* HAPUS SEMUA EFEK */
+  box-shadow: none !important;
+  outline: none !important;
 }
 
-/* logo */
-.logo {
-  width: 110px;
-  height: 110px;
-  border-radius: 50%;
+/* HAPUS Pseudo-element Bayangan Lama */
+.btn-back::after, 
+.btn-back::before {
+  display: none !important;
+  content: none !important;
+}
+
+/* Tidak perlu style img lagi karena kita pakai SVG ArrowLeft */
+
+/* --- LOGO TENGAH --- */
+.logo-center-area {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.logo-img-fix { 
+  width: 180px; 
+  height: 180px;
+  object-fit: contain;
+}
+
+.title-form { font-size: 30px; font-weight: 700; }
+.subtitle-form { font-size: 14px; opacity: 0.9; }
+
+/* --- FORM SECTION --- */
+.form-section {
   background: white;
+  margin: -60px 25px 0 25px; 
+  padding: 25px 20px;
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  z-index: 10;
+}
 
-  margin: 0 auto 18px;
+.form-header-text { 
+  font-size: 20px; 
+  margin-bottom: 20px; 
+  font-weight: 700; 
+  color: #000;
+}
 
+.input-group { 
+  margin-bottom: 18px; 
+}
+
+label { 
+  display: block; 
+  font-size: 16px; 
+  font-weight: 600; 
+  margin-bottom: 8px; 
+  color: #000;
+}
+
+/* Tab Container */
+.tab-container { 
+  display: flex; 
+  gap: 8px; 
+}
+
+.tab-item { 
+  flex: 1; 
+  padding: 10px 5px; 
+  border: 1px solid #e0e0e0; 
+  border-radius: 8px; 
+  background: white; 
+  font-size: 12px; 
+  font-weight: 600;
+  cursor: pointer; 
+  color: #000;
+}
+
+.tab-item.active { 
+  background: #008000; 
+  color: white; 
+  border-color: #008000;
+  font-weight: 700;
+}
+
+/* Select Wrapper */
+.select-wrapper { 
+  position: relative; 
+  display: flex;
+  align-items: center;
+}
+
+.custom-select { 
+  width: 100%; 
+  padding: 12px 15px; 
+  border: 1px solid #e0e0e0; 
+  border-radius: 10px; 
+  background: #ffffff; 
+  font-size: 13px; 
+  color: #333;
+  cursor: pointer;
+  appearance: none; 
+  -webkit-appearance: none;
+}
+
+.select-icon { 
+  position: absolute; 
+  right: 12px; 
+  pointer-events: none; 
+  color: #000; 
+}
+
+/* Camera Button */
+.btn-camera-open {
+  width: 100%;
+  padding: 12px;
+  background: #e3f2fd;
+  border: 1px solid #bbdefb;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-
-  font-weight: 700;
-  color: #3f8f2f;
-
-  box-shadow: 0 10px 25px rgba(0,0,0,0.18);
-}
-
-.header h2 {
-  font-size: 20px;
-  font-weight: 600;
-}
-
-.header p {
-  font-size: 13px;
-  margin-top: 4px;
-  opacity: 0.95;
-}
-
-/* ===================== */
-/* CARD (PENTING BANGET) */
-/* ===================== */
-.card {
-  width: 92%;
-  max-width: 390px;
-
-  background: #ffffff;
-
-  border-radius: 26px;
-
-  padding: 24px;
-
-  position: absolute;
-
-  /* 🔥 INI YANG BUAT PERSIS */
-  top: 250px;   /* masuk ke header */
-  left: 50%;
-  transform: translateX(-50%);
-
-  box-shadow:
-    0 20px 40px rgba(0,0,0,0.10),
-    0 6px 14px rgba(0,0,0,0.06);
-}
-
-/* ===================== */
-/* FORM */
-/* ===================== */
-.card h3 {
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.sub {
-  font-size: 12px;
-  color: #7b7b7b;
-  display: block;
-  margin: 6px 0 20px;
-}
-
-/* status buttons */
-.status {
-  display: flex;
   gap: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Time Row */
+.time-row {
+  display: flex;
+  gap: 12px;
   margin-bottom: 18px;
 }
 
-.status button {
-  flex: 1;
-  padding: 11px;
-  border-radius: 12px;
-  border: none;
-  background: #eef1f3;
-}
+.flex-1 { flex: 1; }
 
-.status .active {
-  background: #4caf50;
-  color: white;
-}
-
-/* input */
-label {
-  font-size: 13px;
-  margin: 14px 0 6px;
-  display: block;
-}
-
-select {
+.time-display {
   width: 100%;
   padding: 12px;
-  border-radius: 12px;
-  border: 1px solid #e4e6e8;
-}
-
-/* foto */
-.foto {
-  width: 100%;
-  padding: 13px;
-  border-radius: 14px;
-  border: none;
-  background: #eef1f3;
-}
-
-/* submit */
-.submit {
-  width: 100%;
-  margin-top: 20px;
-
-  padding: 14px;
-
-  border-radius: 14px;
-  border: none;
-
-  color: white;
-
-  background: linear-gradient(145deg, #63b645, #3e8f2f);
-
+  background: #e3f2fd; 
+  border: 1px solid #bbdefb;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 13px;
   font-weight: 600;
+}
+
+/* Submit Button */
+.btn-submit-primary {
+  width: 100%;
+  padding: 15px;
+  background: #44bd32; 
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 15px;
+  margin-top: 10px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bottom-gap { height: 60px; }
+
+/* Responsive */
+@media (max-width: 480px) {
+  .main-wrapper { background-color: #e0e0e0; padding: 0; }
+  .card-container { max-width: 100%; border-radius: 0; box-shadow: none; }
+  .header-section { border-radius: 0; }
 }
