@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; 
+import { useAuth } from "../../context/AuthContext"; // <--- TAMBAHAN: Import Context
 import "./login.css";
 
 import logoAmaga from "../../assets/logoamaga.svg";
@@ -9,14 +10,33 @@ import passwordIcon from "../../assets/password.svg";
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  
   const navigate = useNavigate();
+  const { login } = useAuth(); // <--- TAMBAHAN: Ambil fungsi login dari Context
 
   const handleLogin = (e) => {
     e.preventDefault();
     
-    // REVISI: Mengarahkan user ke halaman Absensi Karyawan
-    // Pastikan path ini sesuai dengan yang ada di App.jsx
-    navigate("/karyawan/absensi"); 
+    // --- LOGIKA LOGIN DIMULAI ---
+    
+    // 1. Cek jika user adalah HRD
+    if (username === 'hrd' && password === '123') {
+      // Simpan data user ke 'Otak' aplikasi
+      login({ username: 'hrd', role: 'hrd' }); 
+      // Arahkan ke Dashboard HRD
+      navigate('/hrd/dashboard'); 
+      
+    // 2. Cek jika user adalah Karyawan
+    } else if (username === 'karyawan' && password === '123') {
+      // Simpan data user
+      login({ username: 'karyawan', role: 'karyawan' });
+      // Arahkan ke Dashboard Karyawan (atau Absensi)
+      navigate('/karyawan/dashboard'); 
+      
+    // 3. Jika salah
+    } else {
+      alert("Username atau Password salah! (Coba: hrd / 123)");
+    }
   };
 
   return (
@@ -26,7 +46,6 @@ const Login = () => {
         {/* Header Hijau Petak */}
         <div className="login-header-section">
           <div className="logo-only-wrapper">
-            {/* Sekarang Logo Langsung Tanpa Bulatan Putih */}
             <img src={logoAmaga} alt="Logo Amaga" className="logo-main-pure" />
           </div>
           <h1 className="login-title">Sistem Absensi</h1>

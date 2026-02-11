@@ -1,37 +1,64 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
-// Import Halaman sesuai struktur folder Abang
-import Login from "./pages/auth/login"; 
-import Dashboard from "./pages/karyawan/dashboard";
-import Absensi from "./pages/karyawan/absensi"; 
-import FormPerizinan from "./pages/karyawan/formperizinan"; 
+// 1. IMPORT PENTING (Context & Security)
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-// 1. TAMBAHKAN IMPORT RIWAYAT
-import Riwayat from "./pages/karyawan/riwayat"; 
+// 2. IMPORT HALAMAN
+import Login from "./pages/auth/login";
+
+// --- HALAMAN HRD ---
+import DashboardHRD from "./pages/hrd/dashboard"; 
+import KelolaCabang from "./pages/hrd/kelolacabang"; 
+import DataKaryawan from "./pages/hrd/datakaryawan"; // <--- TAMBAHAN: Import Data Karyawan
+
+// --- HALAMAN KARYAWAN ---
+import DashboardKaryawan from "./pages/karyawan/dashboard"; 
+import Absensi from "./pages/karyawan/absensi";
+import FormPerizinan from "./pages/karyawan/formperizinan";
+import Riwayat from "./pages/karyawan/riwayat";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Jalur utama (Login) */}
-        <Route path="/" element={<Login />} />
+    // 3. WAJIB BUNGKUS DENGAN AUTHPROVIDER
+    <AuthProvider>
+      <Router>
+        <Routes>
+          
+          {/* --- ROUTE PUBLIK --- */}
+          <Route path="/" element={<Navigate to="/auth/login" replace />} />
+          <Route path="/auth/login" element={<Login />} />
 
-        {/* Dashboard */}
-        <Route path="/dashboard" element={<Dashboard />} />
-        
-        {/* Halaman Absensi */}
-        <Route path="/karyawan/absensi" element={<Absensi />} />
+          {/* --- ROUTE KHUSUS HRD (Diproteksi) --- */}
+          <Route element={<ProtectedRoute allowedRoles={['hrd']} />}>
+            {/* Dashboard HRD */}
+            <Route path="/hrd/dashboard" element={<DashboardHRD />} />
+            
+            {/* Kelola Cabang */}
+            <Route path="/hrd/kelolacabang" element={<KelolaCabang />} />
 
-        {/* Halaman Perizinan */}
-        <Route path="/karyawan/perizinan" element={<FormPerizinan />} />
-        
-        {/* 2. TAMBAHKAN JALUR RIWAYAT INI */}
-        {/* Path ini harus "/riwayat" agar cocok dengan tombol di Dashboard */}
-        <Route path="/riwayat" element={<Riwayat />} />
-        
-      </Routes>
-    </Router>
+            {/* Data Karyawan (HALAMAN BARU) */}
+            <Route path="/hrd/datakaryawan" element={<DataKaryawan />} />
+          </Route>
+
+          {/* --- ROUTE KHUSUS KARYAWAN (Diproteksi) --- */}
+          <Route element={<ProtectedRoute allowedRoles={['karyawan']} />}>
+            {/* Dashboard Utama Karyawan */}
+            <Route path="/karyawan/dashboard" element={<DashboardKaryawan />} />
+            
+            {/* Fitur-fitur Karyawan */}
+            <Route path="/karyawan/absensi" element={<Absensi />} />
+            <Route path="/karyawan/perizinan" element={<FormPerizinan />} />
+            <Route path="/karyawan/riwayat" element={<Riwayat />} />
+          </Route>
+
+          {/* Fallback Route */}
+          <Route path="*" element={<Navigate to="/auth/login" replace />} />
+
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

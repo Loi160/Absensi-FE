@@ -1,9 +1,1 @@
-<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<rect width="30" height="30" fill="url(#pattern0_145_759)"/>
-<defs>
-<pattern id="pattern0_145_759" patternContentUnits="objectBoundingBox" width="1" height="1">
-<use xlink:href="#image0_145_759" transform="scale(0.0111111)"/>
-</pattern>
-<image id="image0_145_759" width="90" height="90" preserveAspectRatio="none" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAABaCAYAAAA4qEECAAAACXBIWXMAAAsTAAALEwEAmpwYAAADI0lEQVR4nO2dz27TQBCH9wRcOUFD0uxEPfEAnDhwAiHBm/DnRAsPCIhT4U2CMgPNyWgdUTWp7XTjOL+dyXzST02VbKv96oztnW0bguM4juM4jh6m1YMQ5WOI/CMQcyCpYIm8DJG/BpJnwRRnMg5RfkHlUlP4b4j8Mhg6kguULMZkp3IBlylHILuuyWiRcgSyIy8KEyo2ZcPFynpmf553/vAjXwXiN0EdaLG0kYRJ2SWKNim7VNHmZJcs2pTs0kWbka1BtAnZWkSrl61JtGrZ2kSrla1RtErZWkWrk61ZtCrZ2kWrkW1BdGK6eLF1iRXag0SLpY1MZDSY7NTwhYEWS7dkXPSaT5fs1F2HgRZLDTKS7KGObBhosXTguGhx0aYCAz1xctE2AwM9cXLRNgMDPXFy0TYDAz1xarkznPLjOulxvfq29pqrhtcsXTT1XOuY8utr2elj+nyTGX920ZSRdIQ2EflViDIPJG+b57F4pFP06i38KZzyydrrT/kkRD7vfKv2Gbs5Zm38/GH7c3yiVfR557jIF4OMTSVgp3nwF52ity1TTmQ0yNi2GtzFzRpuTvRYngwy9n/paavFTbV71aa62zkAxq6djlnHWb7P2OuvIfPOmpxIz69OkJVm0c2djomMtl639hmbWz5yykaRolGJx1ajtTVnZ37DUu3lhsXsdXSZd4a/W69Gui4ZXbTc7YblLmsdam9YUIm8rGWnUpCSHjet3t1+ja/ehZLiosVFmwoM9MTJRdsMDPTEyUXrSMxs1Lpo2U1ybqMWhl7Jy50atTBKa85SjyP55vdRJBrTnKWekrete8AorTlLPSVvawLAKE10bNkStg/JRYpGNWdjy5awfUguVDSmOTvt6LC04T1DyU+uaPX7OlCZZWwJy91q4KIlf7vBLpJdtORtCcstFy5a8mX3keyipU12UxM2v1y4aDl8XLS4aFOBUdyfnpfhkraUAUUr+WcKsofwd6Bo+YAXIIfKO5zos+p+IPlZgIRq4FyGp9U9nOhatoyNy76sf0GpCNKRHeV9XccsnCBjmgN/q8sF/Eh2HMdxHMcJGfwD1wN1XKhUw+UAAAAASUVORK5CYII="/>
-</defs>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-closed-icon lucide-folder-closed"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="M2 10h20"/></svg>
