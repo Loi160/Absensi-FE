@@ -2,7 +2,6 @@ import React from "react";
 import { useNavigate } from "react-router-dom"; 
 import "./dashboard.css"; 
 
-// ... import chartjs dan assets ...
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -36,44 +35,19 @@ ChartJS.register(
 const DashboardHRD = () => {
   const navigate = useNavigate();
 
-  // --- WARNA GRADASI KREATIF ---
+  const handleLogout = () => {
+    localStorage.removeItem("user"); 
+    localStorage.removeItem("token");
+    navigate("/auth/login");
+  };
+
   const statsCards = [
-    { 
-      label: "Hadir", 
-      value: 270, 
-      gradient: "linear-gradient(135deg, #2fb800 0%, #1f8f3d 100%)", 
-      shadow: "rgba(47, 184, 0, 0.3)" 
-    },
-    { 
-      label: "Sakit", 
-      value: 270, 
-      gradient: "linear-gradient(135deg, #f1c40f 0%, #d4ac0d 100%)", 
-      shadow: "rgba(241, 196, 15, 0.3)"
-    }, 
-    { 
-      label: "Izin", 
-      value: 270, 
-      gradient: "linear-gradient(135deg, #2980b9 0%, #094b75 100%)", 
-      shadow: "rgba(41, 128, 185, 0.3)"
-    },
-    { 
-      label: "Terlambat", 
-      value: 270, 
-      gradient: "linear-gradient(135deg, #9b59b6 0%, #71368a 100%)", 
-      shadow: "rgba(155, 89, 182, 0.3)"
-    },
-    { 
-      label: "Alpha", 
-      value: 270, 
-      gradient: "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)", 
-      shadow: "rgba(231, 76, 60, 0.3)"
-    },
-    { 
-      label: "Cuti", 
-      value: 270, 
-      gradient: "linear-gradient(135deg, #1abc9c 0%, #16a085 100%)", 
-      shadow: "rgba(26, 188, 156, 0.3)"
-    },
+    { label: "Hadir", value: 270, gradient: "linear-gradient(135deg, #2fb800 0%, #1f8f3d 100%)", shadow: "rgba(47, 184, 0, 0.3)" },
+    { label: "Sakit", value: 270, gradient: "linear-gradient(135deg, #f1c40f 0%, #d4ac0d 100%)", shadow: "rgba(241, 196, 15, 0.3)" }, 
+    { label: "Izin", value: 270, gradient: "linear-gradient(135deg, #2980b9 0%, #094b75 100%)", shadow: "rgba(41, 128, 185, 0.3)" },
+    { label: "Terlambat", value: 270, gradient: "linear-gradient(135deg, #9b59b6 0%, #71368a 100%)", shadow: "rgba(155, 89, 182, 0.3)" },
+    { label: "Alpha", value: 270, gradient: "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)", shadow: "rgba(231, 76, 60, 0.3)" },
+    { label: "Cuti", value: 270, gradient: "linear-gradient(135deg, #1abc9c 0%, #16a085 100%)", shadow: "rgba(26, 188, 156, 0.3)" },
   ];
 
   const dataGrafik = {
@@ -113,42 +87,46 @@ const DashboardHRD = () => {
         <nav className="menu-nav">
           <div className="menu-item active" onClick={() => navigate('/hrd/dashboard')}>
             <div className="menu-left">
-                <img src={iconDashboard} alt="dash" className="menu-icon"/> 
-                <span>Dashboard</span>
+                <img src={iconDashboard} alt="dash" className="menu-icon-main"/> 
+                <span className="menu-text-main">Dashboard</span>
             </div>
           </div>
           
           <div className="menu-item" onClick={() => navigate('/hrd/kelolacabang')}> 
             <div className="menu-left">
-                <img src={iconKelola} alt="kelola" className="menu-icon"/> 
-                <span>Kelola Cabang</span>
+                <img src={iconKelola} alt="kelola" className="menu-icon-main"/> 
+                <span className="menu-text-main">Kelola Cabang</span>
             </div>
           </div>
 
-          {/* --- REVISI DISINI: MENAMBAHKAN ONCLICK KE DATA KARYAWAN --- */}
           <div className="menu-item" onClick={() => navigate('/hrd/datakaryawan')}>
             <div className="menu-left">
-                <img src={iconKaryawan} alt="karyawan" className="menu-icon"/> 
-                <span>Data Karyawan</span>
+                <img src={iconKaryawan} alt="karyawan" className="menu-icon-main"/> 
+                <span className="menu-text-main">Data Karyawan</span>
             </div>
           </div>
-          {/* ----------------------------------------------------------- */}
 
           <div className="menu-item has-arrow">
             <div className="menu-left">
-                <img src={iconKehadiran} alt="hadir" className="menu-icon"/> 
-                <span>Kehadiran</span>
+                <img src={iconKehadiran} alt="hadir" className="menu-icon-main"/> 
+                <span className="menu-text-main">Kehadiran</span>
             </div>
-            <img src={iconBawah} alt="down" className="arrow-icon-large" /> 
+            <img src={iconBawah} alt="down" className="arrow-icon-main" /> 
           </div>
 
           <div className="menu-item">
             <div className="menu-left">
-                <img src={iconLaporan} alt="lapor" className="menu-icon"/> 
-                <span>Laporan</span>
+                <img src={iconLaporan} alt="lapor" className="menu-icon-main"/> 
+                <span className="menu-text-main">Laporan</span>
             </div>
           </div>
         </nav>
+
+        <div className="sidebar-footer">
+            <button className="btn-logout" onClick={handleLogout}>
+                Log Out
+            </button>
+        </div>
       </aside>
 
       <main className="main-content">
