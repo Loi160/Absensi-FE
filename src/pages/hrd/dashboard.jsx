@@ -106,7 +106,8 @@ const DashboardHRD = () => {
             </div>
           </div>
 
-          <div className="menu-item has-arrow">
+          {/* SAYA TAMBAHKAN ONCLICK KE SINI JUGA BIAR AMAN */}
+          <div className="menu-item has-arrow" onClick={() => navigate('/hrd/absenmanual')}>
             <div className="menu-left">
                 <img src={iconKehadiran} alt="hadir" className="menu-icon-main"/> 
                 <span className="menu-text-main">Kehadiran</span>
@@ -114,7 +115,8 @@ const DashboardHRD = () => {
             <img src={iconBawah} alt="down" className="arrow-icon-main" /> 
           </div>
 
-          <div className="menu-item">
+          {/* SAYA TAMBAHKAN ONCLICK DI SINI BANG */}
+          <div className="menu-item" onClick={() => navigate('/hrd/laporan')}>
             <div className="menu-left">
                 <img src={iconLaporan} alt="lapor" className="menu-icon-main"/> 
                 <span className="menu-text-main">Laporan</span>

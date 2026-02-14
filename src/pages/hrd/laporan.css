@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+.hrd-container { display: flex; width: 100vw; height: 100vh; background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%); overflow: hidden; }
+
+/* SIDEBAR */
+.sidebar { width: 320px; padding: 40px 30px; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+.logo-title { font-size: 30px; font-weight: 800; letter-spacing: -1px; margin-bottom: 30px; }
+.logo-img { width: 100%; max-width: 260px; margin-bottom: 20px; }
+.menu-nav { display: flex; flex-direction: column; gap: 15px; }
+.menu-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; border-radius: 14px; cursor: pointer; color: #fff; transition: 0.3s; }
+.menu-item.active { background-color: rgba(255, 255, 255, 0.25); border: 1px solid rgba(255, 255, 255, 0.3); }
+.sidebar-footer { margin-top: auto; }
+.btn-logout { background: transparent; border: 1px solid #fff; color: #fff; padding: 10px; border-radius: 50px; cursor: pointer; width: 100%; font-weight: 700; }
+
+/* CONTENT AREA */
+.main-content { flex: 1; background-color: #fdfdfd; margin: 25px 35px 30px 0; border-radius: 40px; padding: 40px; overflow-y: auto; }
+
+.header-laporan-neo h1 { font-size: 36px; font-weight: 800; color: #000; }
+.header-laporan-neo p { font-size: 16px; color: #555; margin-top: 5px; }
+
+/* REVISI POSISI ZONE */
+.neo-filter-zone { margin-top: 30px; display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; }
+
+.input-group-neo { display: flex; gap: 20px; }
+.neo-field { display: flex; flex-direction: column; gap: 5px; }
+.neo-field label { font-size: 11px; font-weight: 800; color: #8dae12; margin-left: 10px; text-transform: uppercase; }
+
+.neo-input { 
+    background-color: #8dae12; color: white; border: none; padding: 12px 20px; 
+    border-radius: 20px 20px 5px 20px; font-size: 14px; font-weight: 600; outline: none; width: 200px;
+}
+
+/* BUTTON GROUP KANAN & VERTIKAL */
+.button-group-vertical-right { display: flex; flex-direction: column; gap: 12px; align-items: flex-end; }
+
+.btn-neo-print-top { 
+    background-color: #8dae12; color: white; border: none; padding: 10px 45px; 
+    border-radius: 15px; font-weight: 800; cursor: pointer; transition: 0.3s;
+}
+.btn-neo-print-top:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(141, 174, 18, 0.3); }
+
+.dropdown-neo-bottom-wrapper { position: relative; }
+.btn-neo-filter-bottom { 
+    background: white; color: #2fb800; border: 2px solid #8dae12; padding: 8px 20px; 
+    border-radius: 15px; font-weight: 800; cursor: pointer; display: flex; 
+    align-items: center; gap: 10px; min-width: 170px; justify-content: space-between;
+}
+.btn-neo-filter-bottom img { width: 10px; transition: 0.3s; }
+.btn-neo-filter-bottom img.rotate { transform: rotate(180deg); }
+
+.neo-dropdown-list-right { 
+    position: absolute; bottom: 110%; right: 0; width: 100%; /* Dropdown muncul ke atas agar tidak tertutup tabel */
+    background: white; border-radius: 15px; padding: 8px; z-index: 100;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #eee;
+}
+.neo-drop-item { padding: 10px 15px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; color: #444; }
+.neo-drop-item:hover { background: #f0ffea; color: #2fb800; }
+
+/* TABLE AREA */
+.neo-table-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #f0f0f0; }
+.neo-table-header { background: #8dae12; color: white; padding: 15px 25px; font-weight: 800; font-size: 15px; }
+
+.neo-table { width: 100%; border-collapse: collapse; }
+.neo-table th { text-align: left; padding: 15px 20px; background: #fafafa; border-bottom: 2px solid #eee; color: #888; font-size: 11px; letter-spacing: 1px; }
+.neo-table td { padding: 15px 20px; border-bottom: 1px solid #f9f9f9; font-size: 14px; }
+.neo-td-name { font-weight: 700; color: #111; }
+
+.neo-badge { background: #eee; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 12px; min-width: 35px; display: inline-block; }
+.neo-badge.warn { background: #fffcea; color: #f1c40f; }
+.neo-badge.alert { background: #fff5f4; color: #e74c3c; }
+.neo-badge.info { background: #f0f7ff; color: #2980b9; }
+
+.text-center { text-align: center; }
+
+@media print { .no-print { display: none !important; } .main-content { margin: 0; padding: 0; } }
