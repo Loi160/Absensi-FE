@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./laporan.css"; 
 
+/* ================= ICON IMPORT ================= */
 import iconDashboard from "../../assets/dashboard.svg";
 import iconKelola from "../../assets/kelola.svg";
 import iconKaryawan from "../../assets/datakaryawan.svg";
@@ -27,14 +28,16 @@ const Laporan = () => {
     setShowFilter(false); 
   };
 
+  /* DATA DUMMY DENGAN 2 KOTAK HADIR (APP & MANUAL) */
   const dataLaporan = [
-    { id: 1, nama: "Syahrul", hadir: "10", izin: "2", sakit: "3", cuti: "2", terlambat: "1", fimtk: "1 Jam", lembur: "1 Jam", alpha: "1" },
-    { id: 2, nama: "Budi", hadir: "12", izin: "0", sakit: "0", cuti: "0", terlambat: "0", fimtk: "-", lembur: "2 Jam", alpha: "0" },
-    { id: 3, nama: "Siti", hadir: "11", izin: "1", sakit: "0", cuti: "1", terlambat: "2", fimtk: "-", lembur: "-", alpha: "0" },
+    { id: 1, nama: "Syahrul", hadirApp: "10", hadirManual: "10", izin: "2", sakit: "3", cuti: "2", terlambat: "1", fimtk: "1 Jam", lembur: "1 Jam", alpha: "1" },
+    { id: 2, nama: "Budi", hadirApp: "12", hadirManual: "0", izin: "0", sakit: "0", cuti: "0", terlambat: "0", fimtk: "-", lembur: "2 Jam", alpha: "0" },
+    { id: 3, nama: "Siti", hadirApp: "11", hadirManual: "1", izin: "1", sakit: "0", cuti: "1", terlambat: "2", fimtk: "-", lembur: "-", alpha: "0" },
   ];
 
   return (
     <div className="hrd-container">
+      {/* SIDEBAR */}
       <aside className="sidebar no-print">
         <div className="logo-area">
           <h2 className="logo-title">SISTEM ABSENSI</h2>
@@ -50,13 +53,14 @@ const Laporan = () => {
         <div className="sidebar-footer"><button className="btn-logout" onClick={handleLogout}>Log Out</button></div>
       </aside>
 
+      {/* MAIN CONTENT */}
       <main className="main-content">
         <div className="header-laporan-neo">
             <h1>Laporan</h1>
             <p>Data rekapitulasi absensi seluruh unit kerja AmagaCorp</p>
         </div>
 
-        {/* NEO FILTER ZONE (REVISI POSISI KANAN & VERTIKAL) */}
+        {/* ZONE FILTER & BUTTONS */}
         <div className="neo-filter-zone no-print">
             <div className="input-group-neo">
                 <div className="neo-field">
@@ -73,13 +77,14 @@ const Laporan = () => {
                 </div>
             </div>
 
-            {/* BUTTON GROUP PINDAH KANAN & VERTIKAL (PRINT ATAS, FILTER BAWAH) */}
+            {/* BUTTON GROUP (PRINT & FILTER CABANG) */}
             <div className="button-group-vertical-right">
                 <button className="btn-neo-print-top" onClick={() => window.print()}>Print</button>
                 
                 <div className="dropdown-neo-bottom-wrapper">
                     <button className="btn-neo-filter-bottom" onClick={toggleFilter}>
-                        {selectedFilter} <img src={iconBawah} alt="v" className={showFilter ? 'rotate' : ''} />
+                        {selectedFilter} 
+                        <img src={iconBawah} alt="v" className={showFilter ? 'rotate' : ''} />
                     </button>
                     {showFilter && (
                         <div className="neo-dropdown-list-right">
@@ -93,6 +98,7 @@ const Laporan = () => {
             </div>
         </div>
 
+        {/* TABLE REKAPITULASI */}
         <div className="neo-table-card">
             <div className="neo-table-header">Data Kehadiran Karyawan</div>
             <div className="neo-table-wrapper">
@@ -114,7 +120,15 @@ const Laporan = () => {
                         {dataLaporan.map((item) => (
                             <tr key={item.id}>
                                 <td className="neo-td-name">{item.nama}</td>
-                                <td className="text-center"><span className="neo-badge">{item.hadir}</span></td>
+                                
+                                {/* KOLOM HADIR: 2 KOTAK (APP & MANUAL) */}
+                                <td className="text-center">
+                                    <div className="neo-dual-badge-container">
+                                        <span className="neo-badge">{item.hadirApp}</span>
+                                        <span className="neo-badge">{item.hadirManual}</span>
+                                    </div>
+                                </td>
+
                                 <td className="text-center"><span className="neo-badge">{item.izin}</span></td>
                                 <td className="text-center"><span className="neo-badge">{item.sakit}</span></td>
                                 <td className="text-center"><span className="neo-badge">{item.cuti}</span></td>

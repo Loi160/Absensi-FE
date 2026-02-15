@@ -1,4 +1,6 @@
 import React from "react";
+// Ganti BrowserRouter jadi Router di sini kalau abang pakai alias, 
+// tapi biasanya: import { BrowserRouter as Router, ... }
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -8,10 +10,11 @@ import DashboardHRD from "./pages/hrd/dashboard";
 import KelolaCabang from "./pages/hrd/kelolacabang"; 
 import DataKaryawan from "./pages/hrd/datakaryawan"; 
 
+// --- 1. TAMBAHAN PENTING: IMPORT DETAIL KARYAWAN ---
+import DetailKaryawan from "./pages/hrd/detailkaryawan"; 
+
 // Import dari file 'kehadiran.jsx', tapi kita namain komponennya AbsenManual
 import AbsenManual from "./pages/hrd/kehadiran"; 
-
-// --- 1. TAMBAHAN: IMPORT LAPORAN ---
 import Laporan from "./pages/hrd/laporan"; 
 
 // ... import halaman karyawan lainnya ...
@@ -32,12 +35,14 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={['hrd']} />}>
             <Route path="/hrd/dashboard" element={<DashboardHRD />} />
             <Route path="/hrd/kelolacabang" element={<KelolaCabang />} />
-            <Route path="/hrd/datakaryawan" element={<DataKaryawan />} />
             
+            {/* DATA KARYAWAN & DETAILNYA */}
+            <Route path="/hrd/datakaryawan" element={<DataKaryawan />} />
+            {/* INI ROUTE BARU YANG KITA BUTUHKAN: */}
+            <Route path="/hrd/detail-karyawan" element={<DetailKaryawan />} />
+
             {/* Route Absen Manual / Kehadiran */}
             <Route path="/hrd/absenmanual" element={<AbsenManual />} />
-
-            {/* --- 2. TAMBAHAN: ROUTE LAPORAN --- */}
             <Route path="/hrd/laporan" element={<Laporan />} />
           </Route>
 
