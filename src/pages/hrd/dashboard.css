@@ -202,11 +202,10 @@
 }
 
 .btn-logout:hover {
-  background-color: white;
-  color: #2fb800; 
-  border-color: white;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  transform: translateY(-2px);
+    background-color: #ffffff !important; /* Latar belakang dipaksa putih bersih */
+    color: #2fb800 !important; /* Tulisan dipaksa hijau Amaga */
+    border-color: #ffffff !important; /* Garis pinggir ikut putih */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; /* Tambahan sedikit bayangan */
 }
 
 /* RESPONSIVE */

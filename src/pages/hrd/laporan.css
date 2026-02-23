@@ -24,7 +24,12 @@
 .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; border-radius: 14px; cursor: pointer; color: #fff; transition: 0.3s; }
 .menu-item.active { background-color: rgba(255, 255, 255, 0.25); border: 1px solid rgba(255, 255, 255, 0.3); }
 .sidebar-footer { margin-top: auto; }
-.btn-logout { background: transparent; border: 1px solid #fff; color: #fff; padding: 10px; border-radius: 50px; cursor: pointer; width: 100%; font-weight: 700; }
+.btn-logout:hover {
+    background-color: #ffffff; /* Latar belakang jadi putih bersih */
+    color: #2fb800; /* Tulisan berubah jadi hijau Amaga */
+    border-color: #ffffff; /* Garis pinggir ikut putih biar rapi */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Tambahan sedikit bayangan biar lebih elegan */
+}
 
 /* ================= MAIN CONTENT ================= */
 .main-content { 

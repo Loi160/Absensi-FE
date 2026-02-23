@@ -30,12 +30,19 @@ const Login = () => {
     } else if (username === 'karyawan' && password === '123') {
       // Simpan data user
       login({ username: 'karyawan', role: 'karyawan' });
-      // Arahkan ke Dashboard Karyawan (atau Absensi)
+      // Arahkan ke Dashboard Karyawan
       navigate('/karyawan/dashboard'); 
       
-    // 3. Jika salah
+    // 3. Cek jika user adalah Manager Cabang
+    } else if (username === 'managercabang' && password === '123') {
+      // Simpan data user
+      login({ username: 'managercabang', role: 'managerCabang' });
+      // Arahkan ke Dashboard Manager Cabang
+      navigate('/managerCabang/dashboard'); 
+      
+    // 4. Jika salah
     } else {
-      alert("Username atau Password salah! (Coba: hrd / 123)");
+      alert("Username atau Password salah! (Coba: hrd / karyawan / managercabang dengan password 123)");
     }
   };
 
