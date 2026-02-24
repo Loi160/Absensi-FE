@@ -19,12 +19,10 @@ import Riwayat from "./pages/karyawan/riwayat";
 import DashboardManagerCabang from "./pages/managerCabang/dashboard";
 import DataKaryawanManager from "./pages/managerCabang/datakaryawan";
 import DetailKaryawanManager from "./pages/managerCabang/detailkaryawan";
-
-// SUDAH DIAKTIFKAN UNTUK PERIZINAN:
 import PerizinanManager from "./pages/managerCabang/perizinan";
 
-// Nanti aktifkan import ini kalau filenya sudah dibuat:
-// import LaporanManager from "./pages/managerCabang/laporan";
+// SEKARANG SUDAH AKTIF:
+import LaporanManager from "./pages/managerCabang/laporan";
 
 function App() {
   return (
@@ -57,12 +55,10 @@ function App() {
             <Route path="/managerCabang/dashboard" element={<DashboardManagerCabang />} />
             <Route path="/managerCabang/datakaryawan" element={<DataKaryawanManager />} />
             <Route path="/managerCabang/detail-karyawan" element={<DetailKaryawanManager />} />
-            
-            {/* ROUTE PERIZINAN SUDAH DIAKTIFKAN: */}
             <Route path="/managerCabang/perizinan" element={<PerizinanManager />} />
             
-            {/* Hapus komentar di bawah ini kalau file sudah dibuat: */}
-            {/* <Route path="/managerCabang/laporan" element={<LaporanManager />} /> */}
+            {/* ROUTE LAPORAN SUDAH DIAKTIFKAN: */}
+            <Route path="/managerCabang/laporan" element={<LaporanManager />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/auth/login" replace />} />

@@ -35,6 +35,53 @@ const Laporan = () => {
     { id: 3, nama: "Siti", hadirApp: "11", hadirManual: "1", izin: "1", sakit: "0", cuti: "1", terlambat: "2", fimtk: "-", lembur: "-", alpha: "0" },
   ];
 
+  // Helper function buat render tabel biar kode ga redundan
+  const renderTable = (headerText) => (
+    <div className="neo-table-card">
+      <div className="neo-table-header">{headerText}</div>
+      <div className="neo-table-wrapper">
+        <table className="neo-table">
+          <thead>
+            <tr>
+              <th>Nama Karyawan</th>
+              <th className="text-center">Hadir</th>
+              <th className="text-center">Izin</th>
+              <th className="text-center">Sakit</th>
+              <th className="text-center">Cuti</th>
+              <th className="text-center">Terlambat</th>
+              <th className="text-center">FIMTK</th>
+              <th className="text-center">Lembur</th>
+              <th className="text-center">Alpha</th>
+            </tr>
+          </thead>
+          <tbody>
+            {dataLaporan.map((item) => (
+              <tr key={item.id}>
+                <td className="neo-td-name">{item.nama}</td>
+                
+                {/* KOLOM HADIR: 2 KOTAK (APP & MANUAL) */}
+                <td className="text-center">
+                  <div className="neo-dual-badge-container">
+                    <span className="neo-badge">{item.hadirApp}</span>
+                    <span className="neo-badge">{item.hadirManual}</span>
+                  </div>
+                </td>
+
+                <td className="text-center"><span className="neo-badge">{item.izin}</span></td>
+                <td className="text-center"><span className="neo-badge">{item.sakit}</span></td>
+                <td className="text-center"><span className="neo-badge">{item.cuti}</span></td>
+                <td className="text-center"><span className="neo-badge warn">{item.terlambat}</span></td>
+                <td className="text-center"><span className="neo-badge info">{item.fimtk}</span></td>
+                <td className="text-center"><span className="neo-badge info">{item.lembur}</span></td>
+                <td className="text-center"><span className="neo-badge alert">{item.alpha}</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
   return (
     <div className="hrd-container">
       {/* SIDEBAR */}
@@ -98,50 +145,31 @@ const Laporan = () => {
             </div>
         </div>
 
-        {/* TABLE REKAPITULASI */}
-        <div className="neo-table-card">
-            <div className="neo-table-header">Data Kehadiran Karyawan</div>
-            <div className="neo-table-wrapper">
-                <table className="neo-table">
-                    <thead>
-                        <tr>
-                            <th>Nama Karyawan</th>
-                            <th className="text-center">Hadir</th>
-                            <th className="text-center">Izin</th>
-                            <th className="text-center">Sakit</th>
-                            <th className="text-center">Cuti</th>
-                            <th className="text-center">Terlambat</th>
-                            <th className="text-center">FIMTK</th>
-                            <th className="text-center">Lembur</th>
-                            <th className="text-center">Alpha</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {dataLaporan.map((item) => (
-                            <tr key={item.id}>
-                                <td className="neo-td-name">{item.nama}</td>
-                                
-                                {/* KOLOM HADIR: 2 KOTAK (APP & MANUAL) */}
-                                <td className="text-center">
-                                    <div className="neo-dual-badge-container">
-                                        <span className="neo-badge">{item.hadirApp}</span>
-                                        <span className="neo-badge">{item.hadirManual}</span>
-                                    </div>
-                                </td>
-
-                                <td className="text-center"><span className="neo-badge">{item.izin}</span></td>
-                                <td className="text-center"><span className="neo-badge">{item.sakit}</span></td>
-                                <td className="text-center"><span className="neo-badge">{item.cuti}</span></td>
-                                <td className="text-center"><span className="neo-badge warn">{item.terlambat}</span></td>
-                                <td className="text-center"><span className="neo-badge info">{item.fimtk}</span></td>
-                                <td className="text-center"><span className="neo-badge info">{item.lembur}</span></td>
-                                <td className="text-center"><span className="neo-badge alert">{item.alpha}</span></td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+        {/* LOGIKA CONDITIONAL RENDERING CABANG 4 vs LAINNYA */}
+        {selectedFilter === "Cabang 4" ? (
+          <div className="multi-cabang-wrapper">
+            {/* CABANG A */}
+            <div className="cabang-section" style={{ marginBottom: "24px" }}>
+              <h3 style={{ marginBottom: "12px", fontSize: "16px", color: "#333" }}>Cabang A</h3>
+              {renderTable("Data Kehadiran Karyawan")}
             </div>
-        </div>
+
+            {/* CABANG B */}
+            <div className="cabang-section" style={{ marginBottom: "24px" }}>
+              <h3 style={{ marginBottom: "12px", fontSize: "16px", color: "#333" }}>Cabang B</h3>
+              {renderTable("Data Kehadiran Karyawan")}
+            </div>
+
+            {/* CABANG C */}
+            <div className="cabang-section">
+              <h3 style={{ marginBottom: "12px", fontSize: "16px", color: "#333" }}>Cabang C</h3>
+              {renderTable("Data Kehadiran Karyawan")}
+            </div>
+          </div>
+        ) : (
+          /* TAMPILAN DEFAULT UNTUK CABANG 1, 2, 3 ATAU BELUM MILIH */
+          renderTable("Data Kehadiran Karyawan")
+        )}
       </main>
     </div>
   );

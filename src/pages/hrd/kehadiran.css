@@ -50,17 +50,17 @@
     overflow-y: auto; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
 }
 
+/* Absen Manual Header */
 .page-header h1 { font-size: 42px; font-weight: 800; color: #000; margin-bottom: 5px; }
 .page-header p { color: #333; margin-bottom: 30px; font-size: 18px; }
 
-/* ================= FORM ABSENSI (FIX TOMBOL) ================= */
+/* ================= FORM ABSENSI ================= */
 .absen-form-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 40px; row-gap: 25px; }
 .form-group { display: flex; flex-direction: column; gap: 8px; }
 .form-group label { font-size: 16px; font-weight: 600; color: #000; }
 .input-field { border: 1px solid #aaa; border-radius: 8px; padding: 12px 15px; font-size: 16px; outline: none; }
 .full-width { grid-column: span 2; }
 
-/* FIX: Jarak Tombol */
 .form-actions-bottom { 
     grid-column: span 2; 
     display: flex; 
@@ -69,7 +69,6 @@
     margin-top: 30px; 
 }
 
-/* FIX: Munculkan Tombol Simpan */
 .btn-simpan-green { 
     background-color: #2fb800 !important; 
     color: white !important; 
@@ -101,10 +100,205 @@ img[alt="-"] {
     opacity: 1 !important;
 }
 
-/* TABLE & BADGES */
-.perizinan-card { background: white; border-radius: 8px; border: 1px solid #ddd; margin-top: 20px; overflow: hidden; }
-.card-header-green { background-color: #8dae12; color: white; padding: 12px 20px; font-weight: 600; }
-.table-izin { width: 100%; border-collapse: collapse; }
-.table-izin td { padding: 12px 15px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
-.badge-status.pending { background-color: #ffab00; color: white; padding: 4px 10px; border-radius: 20px; }
-.badge-status.approve { background-color: #00c853; color: white; padding: 4px 10px; border-radius: 20px; }
+/* ================= HEADER PERIZINAN & FILTER ================= */
+.page-header-flex { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: flex-end; 
+    margin-bottom: 5px; 
+}
+
+.header-titles h1 { 
+    font-size: 32px; 
+    font-weight: 800; 
+    color: #000; 
+    margin-bottom: 5px; 
+}
+
+.header-titles p { 
+    font-size: 14px; 
+    color: #555; 
+    margin: 0; 
+}
+
+.filter-wrapper { 
+    position: relative; 
+}
+
+.btn-filter-green { 
+    background: #8dae12; 
+    color: white; 
+    border: none; 
+    padding: 8px 16px; 
+    border-radius: 20px; 
+    font-weight: 700; 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    font-size: 13px; 
+}
+
+.filter-arrow {
+    width: 10px; 
+    filter: brightness(0) invert(1);
+    transition: transform 0.2s ease;
+}
+
+.filter-arrow.rotate { 
+    transform: rotate(180deg); 
+}
+
+/* KOTAK FILTER */
+.filter-dropdown { 
+    position: absolute; 
+    top: 110%; 
+    right: 0; 
+    background-color: #ffffff !important; 
+    border-radius: 12px; 
+    padding: 5px; 
+    z-index: 1000; 
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12); 
+    border: 1px solid #eee; 
+    min-width: 130px; 
+    display: flex; 
+    flex-direction: column; 
+}
+
+.dropdown-item { 
+    padding: 8px 12px; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    font-size: 13px; 
+    font-weight: 600; 
+    background-color: transparent; 
+    color: #444 !important; 
+    transition: all 0.2s ease; 
+}
+
+.dropdown-item:hover { 
+    background-color: #8dae12 !important; 
+    color: #ffffff !important; 
+}
+
+/* ================= TABLE & BADGES ================= */
+.section-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-top: 15px; 
+    margin-bottom: 5px; 
+    color: #000;
+}
+
+.perizinan-card { 
+    background: white; 
+    border-radius: 8px; 
+    border: 1px solid #ddd; 
+    margin-top: 5px; 
+    margin-bottom: 15px;
+    overflow: hidden; 
+}
+
+.card-header-green { 
+    background-color: #8dae12; 
+    color: white; 
+    padding: 12px 20px; 
+    font-weight: 600; 
+}
+
+.table-izin { 
+    width: 100%; 
+    border-collapse: collapse; 
+}
+
+.table-izin th {
+    text-align: left;
+    padding: 12px 15px;
+    background-color: #fafafa;
+    border-bottom: 2px solid #eee;
+    font-size: 13px;
+    color: #555;
+}
+
+.table-izin td { 
+    padding: 12px 15px; 
+    border-bottom: 1px solid #f0f0f0; 
+    font-size: 14px; 
+    vertical-align: middle;
+}
+
+.text-center { text-align: center !important; }
+
+/* Badge Types */
+.badge-jenis {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+    border: 1px solid transparent;
+    background-color: transparent;
+}
+.badge-jenis.sakit { color: #e74c3c; border-color: #e74c3c; }
+.badge-jenis.cuti { color: #2ecc71; border-color: #2ecc71; }
+.badge-jenis.lainnya { color: #34495e; border-color: #34495e; }
+
+/* Badge Statuses */
+.badge-status {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-block;
+}
+.badge-status.pending { background-color: #f39c12; color: white; }
+.badge-status.approve { background-color: #00e676; color: white; }
+
+/* Actions */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+.btn-approve {
+    background-color: #00e676;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+}
+.btn-reject {
+    background-color: #ff1744;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.5);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 9999;
+}
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    width: 600px;
+    max-width: 90%;
+}
+.clickable-name {
+    cursor: pointer;
+    color: #2980b9;
+    font-weight: 600;
+}
+.clickable-name:hover { text-decoration: underline; }
