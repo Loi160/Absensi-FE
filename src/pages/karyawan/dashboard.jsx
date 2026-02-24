@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "./dashboard.css"; 
+import "./dashboard.css";
 
 // --- IMPORT ASSETS ---
-import logoPersegi from "../../assets/logopersegi.svg"; 
+import logoPersegi from "../../assets/logopersegi.svg";
 import perizinanIcon from "../../assets/perizinan.svg";
 import riwayatIcon from "../../assets/riwayat.svg";
 import kalenderIcon from "../../assets/kalender.svg";
 import jamIcon from "../../assets/jam.svg";
 import cameraIcon from "../../assets/camera.svg";
 import profileImg from "../../assets/profile.svg";
-import logoutIcon from "../../assets/kembalidashbord.svg"; 
+import logoutIcon from "../../assets/kembalidashbord.svg";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -39,10 +39,10 @@ const Dashboard = () => {
   return (
     <div className="main-wrapper">
       <div className="card-container">
-        
+
         {/* ================= HEADER LAYER ================= */}
         <div className="header-section">
-          
+
           {/* HEADER MOBILE: Profil Kiri, Sapaan Tengah, Logout Kanan */}
           <div className="header-top-mobile mobile-only">
              <div className="header-user-info">
@@ -80,17 +80,17 @@ const Dashboard = () => {
 
         {/* ================= CONTENT AREA ================= */}
         <div className="dashboard-content">
-          
+
           {/* --- 1. CARD ATAS (INFO TANGGAL & WAKTU) --- */}
           <div className="info-card">
             {/* Logo Amaga Persegi (Mobile Only) */}
             <img src={logoPersegi} alt="AMAGACORP" className="company-logo mobile-only" />
-            
+
             <div className="datetime-row">
               {/* BAGIAN TANGGAL */}
               <div className="date-box">
                 <div className="dt-label">
-                  <img src={kalenderIcon} alt="Kalender" className="mini-icon black-icon" /> 
+                  <img src={kalenderIcon} alt="Kalender" className="mini-icon black-icon" />
                   Tanggal
                 </div>
                 <div className="dt-value">
@@ -104,7 +104,7 @@ const Dashboard = () => {
               {/* BAGIAN WAKTU */}
               <div className="time-box">
                 <div className="dt-label">
-                  <img src={jamIcon} alt="Jam" className="mini-icon black-icon" /> 
+                  <img src={jamIcon} alt="Jam" className="mini-icon black-icon" />
                   Waktu
                 </div>
                 <div className="time-big">
