@@ -1,11 +1,13 @@
-/* 1. Import Font Inter */
+/* =========================================
+   1. BASE & MOBILE LAYOUT
+   ========================================= */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Inter';
+  font-family: 'Inter', sans-serif;
 }
 
 .main-wrapper {
@@ -26,7 +28,6 @@
   flex-direction: column;
 }
 
-/* --- HEADER HIJAU --- */
 .header-section {
   background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
   height: 45vh;
@@ -38,49 +39,34 @@
   border-bottom-right-radius: 40px;
 }
 
-/* --- REVISI ICON KEMBALI FINAL (Lingkaran Outline) --- */
+/* Visibility Control */
+.desktop-only { display: none; }
+.mobile-only { display: block; }
+button.mobile-only { display: flex; } /* Spesifik untuk tombol agar flex tetap jalan */
+
 .btn-back {
   position: absolute;
   top: 30px;
   left: 25px;
-  
-  /* Lingkaran Garis Hitam */
   width: 40px;
   height: 40px;
   background: transparent;
   border: 1.5px solid black; 
   border-radius: 50%;
-  
-  /* Posisi Tengah */
   display: flex;
   justify-content: center;
   align-items: center;
-  
   cursor: pointer;
   z-index: 50;
-  
-  /* HAPUS SEMUA EFEK */
-  box-shadow: none !important;
-  outline: none !important;
 }
 
-/* HAPUS Pseudo-element Bayangan Lama */
-.btn-back::after, 
-.btn-back::before {
-  display: none !important;
-  content: none !important;
-}
-
-/* Tidak perlu style img lagi karena kita pakai SVG ArrowLeft */
-
-/* --- LOGO TENGAH --- */
 .logo-center-area {
   display: flex;
   justify-content: center;
   margin-bottom: 15px;
 }
 
-.logo-img-fix { 
+.img-circle-content { 
   width: 180px; 
   height: 180px;
   object-fit: contain;
@@ -89,7 +75,6 @@
 .title-form { font-size: 30px; font-weight: 700; }
 .subtitle-form { font-size: 14px; opacity: 0.9; }
 
-/* --- FORM SECTION --- */
 .form-section {
   background: white;
   margin: -60px 25px 0 25px; 
@@ -99,6 +84,15 @@
   z-index: 10;
 }
 
+/* Wrapper judul (Mobile biarkan normal) */
+.form-header-wrapper {
+  display: block; 
+}
+
+.btn-back-desktop {
+  display: none;
+}
+
 .form-header-text { 
   font-size: 20px; 
   margin-bottom: 20px; 
@@ -106,71 +100,17 @@
   color: #000;
 }
 
-.input-group { 
-  margin-bottom: 18px; 
-}
+.input-group { margin-bottom: 18px; }
+label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #000; }
 
-label { 
-  display: block; 
-  font-size: 16px; 
-  font-weight: 600; 
-  margin-bottom: 8px; 
-  color: #000;
-}
+.tab-container { display: flex; gap: 8px; }
+.tab-item { flex: 1; padding: 10px 5px; border: 1px solid #e0e0e0; border-radius: 8px; background: white; font-size: 12px; font-weight: 600; cursor: pointer; color: #000; }
+.tab-item.active { background: #008000; color: white; border-color: #008000; font-weight: 700; }
 
-/* Tab Container */
-.tab-container { 
-  display: flex; 
-  gap: 8px; 
-}
+.select-wrapper { position: relative; display: flex; align-items: center; }
+.custom-select { width: 100%; padding: 12px 15px; border: 1px solid #e0e0e0; border-radius: 10px; background: #ffffff; font-size: 13px; color: #333; cursor: pointer; appearance: none; -webkit-appearance: none; }
+.select-icon { position: absolute; right: 12px; pointer-events: none; color: #000; }
 
-.tab-item { 
-  flex: 1; 
-  padding: 10px 5px; 
-  border: 1px solid #e0e0e0; 
-  border-radius: 8px; 
-  background: white; 
-  font-size: 12px; 
-  font-weight: 600;
-  cursor: pointer; 
-  color: #000;
-}
-
-.tab-item.active { 
-  background: #008000; 
-  color: white; 
-  border-color: #008000;
-  font-weight: 700;
-}
-
-/* Select Wrapper */
-.select-wrapper { 
-  position: relative; 
-  display: flex;
-  align-items: center;
-}
-
-.custom-select { 
-  width: 100%; 
-  padding: 12px 15px; 
-  border: 1px solid #e0e0e0; 
-  border-radius: 10px; 
-  background: #ffffff; 
-  font-size: 13px; 
-  color: #333;
-  cursor: pointer;
-  appearance: none; 
-  -webkit-appearance: none;
-}
-
-.select-icon { 
-  position: absolute; 
-  right: 12px; 
-  pointer-events: none; 
-  color: #000; 
-}
-
-/* Camera Button */
 .btn-camera-open {
   width: 100%;
   padding: 12px;
@@ -187,27 +127,10 @@ label {
   color: #333;
 }
 
-/* Time Row */
-.time-row {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 18px;
-}
-
+.time-row { display: flex; gap: 12px; margin-bottom: 18px; }
 .flex-1 { flex: 1; }
+.time-display { width: 100%; padding: 12px; background: #e3f2fd; border: 1px solid #bbdefb; border-radius: 10px; text-align: center; font-size: 13px; font-weight: 600; }
 
-.time-display {
-  width: 100%;
-  padding: 12px;
-  background: #e3f2fd; 
-  border: 1px solid #bbdefb;
-  border-radius: 10px;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-/* Submit Button */
 .btn-submit-primary {
   width: 100%;
   padding: 15px;
@@ -226,9 +149,219 @@ label {
 
 .bottom-gap { height: 60px; }
 
-/* Responsive */
 @media (max-width: 480px) {
   .main-wrapper { background-color: #e0e0e0; padding: 0; }
   .card-container { max-width: 100%; border-radius: 0; box-shadow: none; }
   .header-section { border-radius: 0; }
+}
+
+/* ============================================================
+   2. DESKTOP SIDEBAR & CONTENT (1366x768 Optimized)
+   ============================================================ */
+
+@media (min-width: 1024px) {
+  
+  .main-wrapper {
+    background-color: #F0F2F5; 
+    padding: 0;
+  }
+
+  .card-container {
+    max-width: 100% !important;
+    width: 100%;
+    min-height: 100vh;
+    border-radius: 0;
+    display: grid !important;
+    grid-template-columns: 310px 1fr; 
+    grid-template-rows: 1fr;
+    box-shadow: none;
+    overflow: visible !important;
+    background-color: transparent;
+  }
+
+  /* Visibility Control Desktop */
+  .desktop-only { display: block !important; }
+  button.desktop-only { display: flex !important; }
+  div.desktop-only { display: flex !important; }
+  .mobile-only { display: none !important; }
+
+  /* SIDEBAR UTAMA */
+  .header-section {
+    grid-column: 1 / 2;
+    height: 100vh;
+    border-radius: 0;
+    padding: 0 !important; 
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important; 
+    align-items: center !important;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-section > .logo-center-area,
+  .header-section > .title-form,
+  .header-section > .subtitle-form {
+    position: relative;
+    top: -40px; 
+  }
+
+  /* --- LOGO AMAGA CORP (POJOK ATAS) --- */
+  .sidebar-logo-desktop {
+    position: absolute !important;
+    top: 0 !important; 
+    left: 0 !important;
+    width: 100% !important;
+    padding: 50px 20px !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .sidebar-logo-desktop img {
+    width: 260px !important; 
+    height: auto !important;
+    filter: brightness(0) invert(1) !important; 
+    opacity: 1 !important;
+  }
+
+  /* --- PROFIL LINGKARAN --- */
+  .logo-center-area {
+    margin: 0 0 20px 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .img-circle-content {
+    width: 130px !important;
+    height: 130px !important;
+    background: white !important;
+    border-radius: 50% !important;
+    border: 5px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+    padding: 0 !important; 
+    object-fit: cover !important; 
+  }
+
+  .title-form {
+    font-size: 24px !important;
+    font-weight: 800 !important;
+    color: white !important;
+    margin: 0 !important;
+    text-align: center !important;
+  }
+
+  .subtitle-form {
+    font-size: 15px !important;
+    color: white !important;
+    opacity: 0.85 !important;
+    margin-top: 5px !important;
+    text-align: center !important;
+  }
+
+  /* --- TOMBOL LOG OUT DESKTOP (POJOK BAWAH) --- */
+  .btn-logout-desktop {
+    position: absolute !important;
+    bottom: 40px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 240px !important;
+    padding: 16px !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border-radius: 12px !important;
+    color: white !important;
+    font-weight: 700 !important;
+    font-size: 16px !important;
+    cursor: pointer !important;
+    transition: all 0.3s !important;
+    
+    /* Flexbox untuk meratakan tulisan ke tengah */
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  .btn-logout-desktop:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+  }
+
+  /* --- AREA KANAN (FORM CARD) --- */
+  .form-section {
+    grid-column: 2 / 3;
+    margin: 40px auto !important; 
+    padding: 50px 80px !important; 
+    border-radius: 30px;
+    background: white;
+    max-width: 1100px !important; 
+    width: 92% !important; 
+    height: fit-content;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+  }
+
+  /* --- FLEXBOX UNTUK SEJAJARKAN BACK BUTTON & JUDUL --- */
+  .form-header-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    gap: 20px !important; /* Jarak antara icon panah dan teks */
+    border-bottom: 2px solid #f8f8f8 !important;
+    padding-bottom: 20px !important;
+    margin-bottom: 30px !important;
+  }
+
+  .btn-back-desktop {
+    background: white !important;
+    border: 1.5px solid #d1d1d1 !important;
+    border-radius: 50% !important;
+    width: 45px !important;
+    height: 45px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    transition: all 0.2s !important;
+  }
+
+  .btn-back-desktop:hover {
+    background: #f0f0f0 !important;
+  }
+
+  .form-header-text {
+    font-size: 32px !important;
+    margin-bottom: 0 !important; /* Hilangkan margin bawah bawaan mobile */
+  }
+
+  /* --- Sisa elemen form (Input & Button Submit) --- */
+  .tab-item {
+    font-size: 20px !important; 
+    padding: 15px 5px !important; 
+    font-weight: 700 !important;
+  }
+
+  .input-group label {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .custom-select, .btn-camera-open, .time-display {
+    padding: 18px;
+    font-size: 16px;
+    border-radius: 15px;
+  }
+
+  .btn-submit-primary {
+    padding: 20px;
+    font-size: 20px;
+    margin-top: 30px; 
+    border-radius: 18px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-submit-primary:hover {
+    background-color: #3ca32b;
+    transform: translateY(-3px);
+  }
 }

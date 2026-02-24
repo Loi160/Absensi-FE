@@ -1,4 +1,6 @@
-/* 1. Import Font Inter */
+/* =========================================
+   1. BASE & MOBILE LAYOUT
+   ========================================= */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 * {
@@ -17,234 +19,390 @@
 
 .card-container {
   width: 100%;
-  max-width: 480px;
+  max-width: 480px; 
   min-height: 100vh;
-  background-color: #F4F4F4; 
+  background-color: #e5e5e5; /* Background abu-abu luar */
   position: relative;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 0 30px rgba(0,0,0,0.05);
+  overflow-x: hidden; 
 }
 
-/* --- HEADER HIJAU --- */
-.dashboard-header {
+/* Visibility Control */
+.desktop-only { display: none !important; }
+.mobile-only { display: flex !important; }
+
+
+/* =========================================
+   HEADER HIJAU MOBILE
+   ========================================= */
+.header-section {
   background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
-  height: 440px; 
-  padding: 50px 24px;
+  height: 40vh; 
+  min-height: 320px; 
+  padding: 40px 20px 0 20px;
   color: white;
-  position: relative;
-  z-index: 1;
-  border-radius: 0; 
+  position: relative; 
+  z-index: 1; 
+  border-bottom-left-radius: 40px;
+  border-bottom-right-radius: 40px;
 }
 
-/* --- USER PROFILE --- */
-.user-profile-row {
-  display: flex;
+/* Layout Profil Mobile */
+.header-top-mobile {
+  display: flex !important;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  width: 100%;
+  padding: 0 10px;
 }
 
-.user-info {
+.header-user-info {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
-.avatar-circle {
-  width: 48px;
-  height: 48px;
-  background-color: white;
+.mobile-profile-img {
+  width: 55px;
+  height: 55px;
   border-radius: 50%;
+  background-color: white;
+  object-fit: cover;
+  border: 2px solid rgba(255,255,255,0.8);
 }
 
-.greeting-text h2 {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 2px;
+.mobile-greeting {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; 
+  text-align: left;        
 }
 
-.greeting-text p {
-  font-size: 12px;
-  opacity: 0.9;
-  font-weight: 400;
+.mobile-greeting h2 { font-size: 18px; font-weight: 800; margin: 0; color: white; }
+.mobile-greeting p { font-size: 13px; font-weight: 500; margin: 0; opacity: 0.9; color: white; }
+
+.mobile-header-logout { background: transparent; border: none; cursor: pointer; }
+.mobile-header-logout img { width: 28px; height: 28px; }
+
+
+/* =========================================
+   KONTEN UTAMA (KARTU-KARTU)
+   ========================================= */
+.dashboard-content {
+  position: relative;
+  z-index: 10; 
+  display: flex;
+  flex-direction: column;
 }
 
-.btn-logout {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 5px;
-}
-
-/* --- CARD 1: INFO --- */
+/* =========================================
+   KARTU INFO (PUTIH) - TANGGAL & WAKTU
+   ========================================= */
 .info-card {
-  position: absolute;
-  top: 150px; 
-  left: 20px; 
-  right: 20px;
-  background: #FFFFFF;
-  padding: 24px 20px;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  position: relative;
   z-index: 20;
+  margin-top: -260px; /* Menarik kartu ke atas menimpa hijau */
+  margin-left: 20px;
+  margin-right: 20px;
+  background: #FFFFFF;
+  padding: 40px 20px; 
+  border-radius: 20px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .company-logo {
+  width: 250px; 
+  margin-bottom: 25px; /* Jarak pas antara logo dan tanggal */
   display: block;
-  margin: 0 auto 20px auto;
-  width: 70%; 
-  max-width: 220px;
-  height: auto;
-  object-fit: contain;
 }
 
 .datetime-row {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 5px;
-  gap: 10px;
+  width: 100%;
+  justify-content: space-between; 
+  align-items: center; 
 }
 
+/* UI/UX Update: 
+  Teks dibuat rata kiri (flex-start), tapi didorong menggunakan 
+  padding-left agar posisinya berada di tengah area 50%-nya.
+*/
 .date-box {
-  flex: 1;
+  flex: 1; 
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-start; 
+  padding-left: 15px; /* Mendorong teks tanggal ke arah tengah */
 }
 
 .time-box {
-  flex: 1;
+  flex: 1; 
   display: flex;
   flex-direction: column;
-  align-items: flex-end; 
-  text-align: right;
+  align-items: flex-start; 
+  padding-left: 25px; /* Mendorong teks waktu menjauh dari divider */
 }
 
-.divider-vertical {
-  width: 2px;
-  height: 45px;
-  background-color: #000;
-  opacity: 0.15;
-  margin: 0 10px;
-}
-
-.dt-label {
-  font-size: 14px;
-  color: #000;
-  font-weight: 700; 
-  display: flex;
-  align-items: center;
+.dt-label { 
+  font-size: 14px; 
+  font-weight: 400; 
+  letter-spacing: 0px;
+  display: flex; 
+  align-items: center; 
   gap: 6px; 
-  margin-bottom: 4px;
+  color: #888; 
+  margin-bottom: 8px;
 }
 
-.black-icon {
-  width: 24px; 
-  height: 24px;
-  object-fit: contain;
-  filter: brightness(0);
+.black-icon { 
+  width: 16px; 
+  height: 16px; 
+  opacity: 0.6; 
+  filter: grayscale(1);
 }
 
-.dt-value {
-  font-size: 11px;
-  color: #555;
-  font-weight: 500;
-  line-height: 1.3;
+.dt-value { 
+  font-size: 14px; 
+  color: #222; 
+  font-weight: 700;
+  text-align: left; 
+  white-space: nowrap; /* Memaksa 1 baris */
 }
 
-.time-big {
-  font-size: 18px; 
-  font-weight: 800;
-  color: #000;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
+.time-big { 
+  font-size: 20px; 
+  font-weight: 800; 
+  color: #222; 
+  letter-spacing: 1px;
+  text-align: left; 
+  white-space: nowrap; /* Memaksa 1 baris */
 }
 
-/* --- CARD 2: MENU --- */
+.divider-vertical { 
+  width: 1.5px; 
+  background-color: #eee; 
+  height: 50px; 
+  margin: 0 10px; 
+}
+
+
+/* =========================================
+   KARTU MENU (WRAPPER PUTIH BESAR)
+   ========================================= */
 .menu-card {
+  margin: 20px 20px 40px 20px;
   background: #FFFFFF;
-  margin-top: -60px; 
-  margin-left: 20px;
-  margin-right: 20px;
-  margin-bottom: 30px;
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 25px 20px;
+  border-radius: 25px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 20;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  position: relative;
-  z-index: 10;
+  gap: 15px;
 }
 
 .menu-btn-item {
   background-color: #0029FF; 
   color: white;
   width: 100%;
-  padding: 16px 20px;
-  border-radius: 16px;
+  padding: 20px 25px; 
+  border-radius: 20px; 
   border: none;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 41, 255, 0.2);
-  transition: transform 0.1s ease;
+  box-shadow: 0 4px 15px rgba(0, 41, 255, 0.2);
+}
+
+.icon-box { display: flex; justify-content: center; align-items: center; }
+.white-icon { width: 40px; height: 40px; filter: brightness(0) invert(1); }
+
+.text-content {
+  display: flex;
+  flex-direction: column;
   text-align: left;
 }
 
-.menu-btn-item:active {
-  transform: scale(0.98);
+.btn-title { font-size: 18px; font-weight: 800; margin-bottom: 2px; }
+.btn-subtitle { font-size: 12px; opacity: 0.85; font-weight: 400; }
+
+/* TULISAN KELUAR APLIKASI DISEMBUNYIKAN */
+.mobile-logout-btn {
+  display: none !important;
 }
 
-.icon-box {
-  background: none;
-  min-width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
-/* Icon Menu Putih Standar (38px) */
-.white-icon {
-  width: 48px;
-  height: 48px;
-  filter: brightness(0) invert(1);
-}
+/* ============================================================
+   2. DESKTOP SIDEBAR & CONTENT (DIKUNCI / AMAN)
+   ============================================================ */
 
-.text-content {
-  flex: 1;
-}
-
-.btn-title {
-  display: block;
-  font-size: 15px;
-  font-weight: 700;
-  margin-bottom: 2px;
-}
-
-.btn-subtitle {
-  display: block;
-  font-size: 11px;
-  font-weight: 400;
-  opacity: 0.85;
-}
-
-@media (max-width: 480px) {
+@media (min-width: 1024px) {
+  
   .main-wrapper {
-    background-color: #f8f8f8;
+    background-color: #F0F2F5; 
   }
-  .card-container { 
-    box-shadow: none; 
-    max-width: 100%;
-  }
-}
 
-/* --- TAMBAHAN KHUSUS ICON RIWAYAT --- */
-/* Ini akan menimpa ukuran standar 38px menjadi 48px khusus untuk riwayat */
-.icon-riwayat-besar {
-  width: 48px !important;
-  height: 48px !important;
+  .card-container {
+    max-width: 100% !important;
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: 300px 1fr; 
+    grid-template-rows: 1fr;
+    background-color: transparent;
+  }
+
+  /* Visibility Control */
+  .desktop-only { display: flex !important; }
+  .mobile-only { display: none !important; }
+
+  /* SIDEBAR SECTION */
+  .header-section {
+    position: sticky; 
+    grid-column: 1 / 2;
+    height: 100vh;
+    border-radius: 0;
+    padding: 0 !important; 
+    z-index: 100;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important; 
+    align-items: center !important;
+  }
+
+  .desktop-sidebar-content {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  .logo-center-area, .title-form, .subtitle-form {
+    position: relative;
+    top: -40px; 
+  }
+
+  /* LOGO AMAGA CORP (POJOK ATAS) */
+  .sidebar-logo-desktop {
+    position: absolute !important;
+    top: 0 !important; 
+    left: 0 !important;
+    width: 100% !important;
+    padding: 50px 20px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .sidebar-logo-desktop img {
+    width: 260px !important; 
+    filter: brightness(0) invert(1) !important; 
+  }
+
+  /* PROFIL TENGAH */
+  .logo-center-area { margin-bottom: 10px !important; }
+  .img-circle-content {
+    width: 130px !important;
+    height: 130px !important;
+    border: 5px solid rgba(255, 255, 255, 0.3) !important;
+  }
+
+  .title-form { font-size: 24px !important; font-weight: 800 !important; text-align: center; }
+  .subtitle-form { font-size: 15px !important; margin-top: 5px; text-align: center; opacity: 0.9; }
+
+  /* TOMBOL LOG OUT (POJOK BAWAH) */
+  .btn-logout-desktop {
+    position: absolute !important;
+    bottom: 40px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 240px !important;
+    padding: 16px !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border-radius: 12px !important;
+    color: white !important;
+    font-weight: 700 !important;
+    font-size: 16px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    cursor: pointer !important;
+  }
+
+  /* KONTEN AREA KANAN */
+  .dashboard-content {
+    padding: 40px 60px;
+    padding-top: 40px;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .info-card {
+    margin: 0 0 30px 0 !important;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 40px;
+    border-radius: 30px;
+  }
+
+  .datetime-row { justify-content: space-around; width: 100%; }
+  .dt-label { font-size: 16px !important; }
+  .dt-value { font-size: 22px !important; }
+  .time-big { font-size: 32px !important; }
+  .divider-vertical { height: 80px !important; }
+
+  /* RESET LAYOUT MENU MOBILE KE DESKTOP */
+  .menu-card {
+    margin: 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    background: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  .menu-btn-item {
+    background: white !important;
+    color: #333 !important;
+    flex-direction: column;
+    height: 300px;
+    justify-content: center;
+    text-align: center;
+    border-radius: 35px;
+    border: 1px solid #eee;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+  }
+
+  .menu-btn-item .white-icon {
+    filter: brightness(0) saturate(100%) invert(15%) sepia(96%) saturate(6862%) hue-rotate(244deg) brightness(96%) contrast(108%);
+    width: 80px;
+    height: 80px;
+    margin-bottom: 15px;
+  }
+
+  .text-content { text-align: center; }
+  .btn-title { font-size: 26px !important; color: #0029FF; text-align: center; }
+  .btn-subtitle { font-size: 14px !important; color: #777; text-align: center; margin-top: 8px;}
+
+  .menu-btn-item:hover {
+    background: #0029FF !important;
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 41, 255, 0.2);
+  }
+
+  .menu-btn-item:hover .white-icon { filter: brightness(0) invert(1); }
+  .menu-btn-item:hover .btn-title,
+  .menu-btn-item:hover .btn-subtitle { color: white !important; }
 }
