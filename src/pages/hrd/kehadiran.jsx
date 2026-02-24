@@ -11,7 +11,7 @@ import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 import iconAbsen from "../../assets/tambah.svg"; 
-import iconIzin from "../../assets/perizinan.svg"; // Pastikan icon ini benar (bisa pakai laporan.svg atau perizinan.svg)
+import iconIzin from "../../assets/perizinan.svg"; 
 
 const Kehadiran = () => {
   const navigate = useNavigate();
@@ -98,7 +98,6 @@ const Kehadiran = () => {
             </div>
           </div>
 
-          {/* --- BAGIAN INI SAYA PERBAIKI: TAMBAHKAN ONCLICK KE LAPORAN --- */}
           <div className="menu-item" onClick={() => navigate('/hrd/laporan')}>
             <div className="menu-left"><img src={iconLaporan} alt="lapor" className="menu-icon-main" /><span className="menu-text-main">Laporan</span></div>
           </div>
@@ -159,21 +158,34 @@ const Kehadiran = () => {
         {/* TAB 2: PERIZINAN */}
         {activeTab === 'perizinan' && (
             <>
+                {/* --- HEADER PERIZINAN --- */}
                 <div className="page-header-flex">
-                    <div>
+                    <div className="header-titles">
                         <h1>Perizinan</h1>
                         <p>Perizinan</p>
                     </div>
+                    
                     <div className="filter-wrapper">
                         <button className="btn-filter-green" onClick={toggleFilter}>
-                            {selectedFilter} <img src={iconBawah} alt="v" className={`filter-arrow ${showFilter ? 'rotate' : ''}`}/>
+                            {selectedFilter} 
+                            <img 
+                                src={iconBawah} 
+                                alt="v" 
+                                className={`filter-arrow ${showFilter ? 'rotate' : ''}`}
+                            />
                         </button>
+
                         {showFilter && (
                             <div className="filter-dropdown">
-                                <div className="dropdown-item" onClick={() => handleSelectFilter("Cabang 1")}>Cabang 1</div>
-                                <div className="dropdown-item" onClick={() => handleSelectFilter("Cabang 2")}>Cabang 2</div>
-                                <div className="dropdown-item" onClick={() => handleSelectFilter("Cabang 3")}>Cabang 3</div>
-                                <div className="dropdown-item" onClick={() => handleSelectFilter("Cabang 4")}>Cabang 4</div>
+                                {["Cabang 1", "Cabang 2", "Cabang 3", "Cabang 4"].map(cabang => (
+                                    <div 
+                                        key={cabang}
+                                        className="dropdown-item" 
+                                        onClick={() => handleSelectFilter(cabang)}
+                                    >
+                                        {cabang}
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </div>
@@ -254,7 +266,7 @@ const Kehadiran = () => {
                     </table>
                 </div>
 
-                {/* TABEL 3: CUTI (DENGAN CLICKABLE NAME) */}
+                {/* TABEL 3: CUTI */}
                 <h3 className="section-title">Formulir Cuti Karyawan Amaga Corporation</h3>
                 <div className="perizinan-card">
                     <div className="card-header-green">Permintaan Menunggu Approval</div>
@@ -327,7 +339,7 @@ const Kehadiran = () => {
                             <option>C THN/ C KHS</option>
                         </select>
                     </div>
-                    <div className="form-group"></div> {/* Spacer */}
+                    <div className="form-group"></div> 
 
                     <div className="form-group"><label>Tanggal Mulai</label><input type="text" className="input-field" placeholder="dd/mm/yyyy"/></div>
                     <div className="form-group"><label>Tanggal Akhir</label><input type="text" className="input-field" placeholder="dd/mm/yyyy"/></div>
