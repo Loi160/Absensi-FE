@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate, Link } from "react-router-dom"; 
 import "./dashboard.css"; 
 
 import {
@@ -82,35 +82,35 @@ const DashboardManagerCabang = () => {
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
 
-        {/* --- BAGIAN SIDEBAR YANG DIPERBARUI --- */}
+        {/* --- BAGIAN SIDEBAR YANG DIPERBARUI MENGGUNAKAN LINK --- */}
         <nav className="menu-nav">
-          <div className="menu-item active" onClick={() => navigate('/managerCabang/dashboard')}>
+          <Link to="/managerCabang/dashboard" className="menu-item active" style={{ textDecoration: 'none', color: 'inherit' }}>
             <div className="menu-left">
                 <img src={iconDashboard} alt="dash" className="menu-icon-main"/> 
                 <span className="menu-text-main">Dashboard</span>
             </div>
-          </div>
+          </Link>
           
-          <div className="menu-item" onClick={() => navigate('/managerCabang/datakaryawan')}>
+          <Link to="/managerCabang/datakaryawan" className="menu-item" style={{ textDecoration: 'none', color: 'inherit' }}>
             <div className="menu-left">
                 <img src={iconKaryawan} alt="karyawan" className="menu-icon-main"/> 
                 <span className="menu-text-main">Data Karyawan</span>
             </div>
-          </div>
+          </Link>
 
-          <div className="menu-item" onClick={() => navigate('/managerCabang/perizinan')}>
+          <Link to="/managerCabang/perizinan" className="menu-item" style={{ textDecoration: 'none', color: 'inherit' }}>
             <div className="menu-left">
                 <img src={iconPerizinan} alt="izin" className="menu-icon-main"/> 
                 <span className="menu-text-main">Perizinan</span>
             </div>
-          </div>
+          </Link>
 
-          <div className="menu-item" onClick={() => navigate('/managerCabang/laporan')}>
+          <Link to="/managerCabang/laporan" className="menu-item" style={{ textDecoration: 'none', color: 'inherit' }}>
             <div className="menu-left">
                 <img src={iconLaporan} alt="lapor" className="menu-icon-main"/> 
                 <span className="menu-text-main">Laporan</span>
             </div>
-          </div>
+          </Link>
         </nav>
 
         <div className="sidebar-footer">
