@@ -184,25 +184,41 @@ const DataKaryawan = () => {
       {/* SIDEBAR */}
       <aside className="sidebar">
         <div className="logo-area">
-          <h2 className="logo-title">SISTEM ABSENSI</h2>
+          {/* Tulisan Sistem Absensi sudah dihapus */}
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
         <nav className="menu-nav">
           <div className="menu-item" onClick={() => navigate("/hrd/dashboard")}>
-            <div className="menu-left"><img src={iconDashboard} alt="" className="menu-icon-main" /><span className="menu-text-main">Dashboard</span></div>
+            <div className="menu-left">
+                <img src={iconDashboard} alt="" className="menu-icon-main" />
+                <span className="menu-text-main">Dashboard</span>
+            </div>
           </div>
           <div className="menu-item" onClick={() => navigate("/hrd/kelolacabang")}>
-            <div className="menu-left"><img src={iconKelola} alt="" className="menu-icon-main" /><span className="menu-text-main">Kelola Cabang</span></div>
+            <div className="menu-left">
+                <img src={iconKelola} alt="" className="menu-icon-main" />
+                <span className="menu-text-main">Kelola Cabang</span>
+            </div>
           </div>
+          {/* Menu Active: Data Karyawan */}
           <div className="menu-item active">
-            <div className="menu-left"><img src={iconKaryawan} alt="" className="menu-icon-main" /><span className="menu-text-main">Data Karyawan</span></div>
+            <div className="menu-left">
+                <img src={iconKaryawan} alt="" className="menu-icon-main" />
+                <span className="menu-text-main">Data Karyawan</span>
+            </div>
           </div>
           <div className="menu-item has-arrow" onClick={() => navigate("/hrd/absenmanual")}>
-            <div className="menu-left"><img src={iconKehadiran} alt="" className="menu-icon-main" /><span className="menu-text-main">Kehadiran</span></div>
+            <div className="menu-left">
+                <img src={iconKehadiran} alt="" className="menu-icon-main" />
+                <span className="menu-text-main">Kehadiran</span>
+            </div>
             <img src={iconBawah} alt="" className="arrow-icon-main" />
           </div>
           <div className="menu-item" onClick={() => navigate("/hrd/laporan")}>
-            <div className="menu-left"><img src={iconLaporan} alt="" className="menu-icon-main" /><span className="menu-text-main">Laporan</span></div>
+            <div className="menu-left">
+                <img src={iconLaporan} alt="" className="menu-icon-main" />
+                <span className="menu-text-main">Laporan</span>
+            </div>
           </div>
         </nav>
         <div className="sidebar-footer">
@@ -214,7 +230,7 @@ const DataKaryawan = () => {
       <main className="main-content">
         <div className="page-header">
           <h1>Data Karyawan</h1>
-          <p>Informasi karyawan anda saat ini</p>
+          <p>Daftar pusat informasi dan detail administrasi karyawan</p>
         </div>
 
         {selectedCabang !== "Cabang 4" && (

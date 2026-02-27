@@ -42,31 +42,61 @@ const Kehadiran = () => {
     setSelectedCutiData(null);
   };
 
-  // DATA DUMMY
-  const dataPerizinanUtama = [
+  // --- HANDLER SUBMIT FORM ---
+  const handleSimpanAbsenManual = (e) => {
+    e.preventDefault(); 
+    alert("Form Absensi Manual berhasil disubmit!");
+  };
+
+  const handleSimpanCuti = (e) => {
+    e.preventDefault();
+    alert("Form Cuti berhasil disubmit!");
+    handleCloseCutiModal();
+  };
+
+  // =========================================================
+  // DATA DUMMY DIUBAH MENJADI STATE AGAR BISA DIUBAH (REAKTIF)
+  // =========================================================
+  const [dataPerizinanUtama, setDataPerizinanUtama] = useState([
     { id: 1, nama: "Syahrul", tanggal: "01/01/2026", jenis: "Sakit", ket: "Keperluan Keluarga", status: "Pending" },
-    { id: 2, nama: "Syahrul", tanggal: "01/01/2026", jenis: "Cuti", ket: "Keperluan Keluarga", status: "Approve" },
-    { id: 3, nama: "Syahrul", tanggal: "01/01/2026", jenis: "Lainnya", ket: "Keperluan Keluarga", status: "Approve" },
-  ];
+    { id: 2, nama: "Budi", tanggal: "01/01/2026", jenis: "Cuti", ket: "Keperluan Keluarga", status: "Disetujui" },
+    { id: 3, nama: "Siti", tanggal: "01/01/2026", jenis: "Lainnya", ket: "Keperluan Keluarga", status: "Disetujui" },
+  ]);
 
-  const dataIzinMeninggalkan = [
+  const [dataIzinMeninggalkan, setDataIzinMeninggalkan] = useState([
     { id: 1, nama: "Syahrul", jabatan: "CEO", tanggal: "Senin, 01/01/2026", jam: "09.00 - 10.00", perlu: "Kantor", status: "Pending" },
-    { id: 2, nama: "Syahrul", jabatan: "Direktur", tanggal: "-", jam: "-", perlu: "Pribadi", status: "Approve" },
-    { id: 3, nama: "Syahrul", jabatan: "Owner", tanggal: "-", jam: "-", perlu: "Pribadi", status: "Approve" },
-  ];
+    { id: 2, nama: "Budi", jabatan: "Direktur", tanggal: "-", jam: "-", perlu: "Pribadi", status: "Disetujui" },
+    { id: 3, nama: "Siti", jabatan: "Owner", tanggal: "-", jam: "-", perlu: "Pribadi", status: "Disetujui" },
+  ]);
 
-  const dataCuti = [
+  const [dataCuti, setDataCuti] = useState([
     { id: 1, nama: "Syahrul", jabatan: "CEO", tanggal: "Senin, 01/01/2026", jam: "09.00 - 10.00", alasan: "Kantor", status: "Pending" },
-    { id: 2, nama: "Syahrul", jabatan: "Direktur", tanggal: "-", jam: "-", alasan: "Keperluan Keluarga", status: "Approve" },
-    { id: 3, nama: "Syahrul", jabatan: "Owner", tanggal: "-", jam: "-", alasan: "Keperluan Keluarga", status: "Approve" },
-  ];
+    { id: 2, nama: "Budi", jabatan: "Direktur", tanggal: "-", jam: "-", alasan: "Keperluan Keluarga", status: "Disetujui" },
+    { id: 3, nama: "Siti", jabatan: "Owner", tanggal: "-", jam: "-", alasan: "Keperluan Keluarga", status: "Disetujui" },
+  ]);
+
+  // --- FUNGSI UNTUK MENGUBAH STATUS (APPROVE/REJECT) ---
+  const handleUpdateStatus = (tabelTarget, id, newStatus) => {
+    if (tabelTarget === "utama") {
+      setDataPerizinanUtama(prevData => 
+        prevData.map(item => item.id === id ? { ...item, status: newStatus } : item)
+      );
+    } else if (tabelTarget === "meninggalkan") {
+      setDataIzinMeninggalkan(prevData => 
+        prevData.map(item => item.id === id ? { ...item, status: newStatus } : item)
+      );
+    } else if (tabelTarget === "cuti") {
+      setDataCuti(prevData => 
+        prevData.map(item => item.id === id ? { ...item, status: newStatus } : item)
+      );
+    }
+  };
 
   return (
     <div className="hrd-container">
-      {/* SIDEBAR */}
+      {/* SIDEBAR TERBARU */}
       <aside className="sidebar">
         <div className="logo-area">
-          <h2 className="logo-title">SISTEM ABSENSI</h2>
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
         <nav className="menu-nav">
@@ -80,7 +110,7 @@ const Kehadiran = () => {
             <div className="menu-left"><img src={iconKaryawan} alt="karyawan" className="menu-icon-main" /><span className="menu-text-main">Data Karyawan</span></div>
           </div>
           
-          {/* Menu Kehadiran Aktif */}
+          {/* Menu Kehadiran Aktif (Parent) */}
           <div className="menu-item active has-arrow">
             <div className="menu-left">
               <img src={iconKehadiran} alt="hadir" className="menu-icon-main" />
@@ -89,6 +119,7 @@ const Kehadiran = () => {
             <img src={iconBawah} alt="down" className="arrow-icon-main rotate-up" />
           </div>
           
+          {/* Submenu Item (Akan menjadi putih jika active-sub) */}
           <div className="submenu-container">
             <div className={`submenu-item ${activeTab === 'absenManual' ? 'active-sub' : ''}`} onClick={() => setActiveTab('absenManual')}>
                 <img src={iconAbsen} alt="-" className="submenu-icon" /><span>Absen Manual</span>
@@ -115,16 +146,16 @@ const Kehadiran = () => {
             <>
                 <div className="page-header">
                     <h1>Absensi Manual</h1>
-                    <p>Absensi manual</p>
+                    <p>Formulir penginputan data absensi karyawan</p>
                 </div>
                 <div className="form-container-box">
-                    <form className="absen-form-grid">
-                        <div className="form-group"><label>Nama</label><input type="text" className="input-field" /></div>
-                        <div className="form-group"><label>NIK</label><input type="text" className="input-field" /></div>
-                        <div className="form-group"><label>Jabatan</label><input type="text" className="input-field" /></div>
-                        <div className="form-group"><label>Divisi</label><input type="text" className="input-field" /></div>
+                    <form className="absen-form-grid" onSubmit={handleSimpanAbsenManual}>
+                        <div className="form-group"><label>Nama</label><input type="text" className="input-field" required /></div>
+                        <div className="form-group"><label>NIK</label><input type="text" className="input-field" required /></div>
+                        <div className="form-group"><label>Jabatan</label><input type="text" className="input-field" required /></div>
+                        <div className="form-group"><label>Divisi</label><input type="text" className="input-field" required /></div>
                         <div className="form-group"><label>Cabang</label>
-                            <select className="input-field">
+                            <select className="input-field" required>
                                 <option value="">Pilih Cabang</option>
                                 <option value="Cabang 1">Cabang 1</option>
                                 <option value="Cabang 2">Cabang 2</option>
@@ -133,7 +164,7 @@ const Kehadiran = () => {
                             </select>
                         </div>
                         <div className="form-group"><label>Tipe Absen</label>
-                            <select className="input-field">
+                            <select className="input-field" required>
                                 <option value="">Pilih Tipe</option>
                                 <option value="Masuk">Masuk</option>
                                 <option value="Istirahat">Istirahat</option>
@@ -143,12 +174,19 @@ const Kehadiran = () => {
                                 <option value="FIMTK">FIMTK</option>
                             </select>
                         </div>
-                        <div className="form-group"><label>Cabang (Shift)</label><select className="input-field"><option value="">Pilih</option></select></div>
+                        <div className="form-group"><label>Cabang (Shift)</label>
+                            <select className="input-field" required>
+                                <option value="">Pilih Shift</option>
+                                <option value="Pagi">Pagi</option>
+                                <option value="Siang">Siang</option>
+                                <option value="Malam">Malam</option>
+                            </select>
+                        </div>
                         <div className="form-group"></div> 
-                        <div className="form-group full-width"><label>Keterangan</label><textarea className="input-field textarea-field"></textarea></div>
+                        <div className="form-group full-width"><label>Keterangan</label><textarea className="input-field textarea-field" required></textarea></div>
                         <div className="form-actions-bottom">
-                            <button type="button" className="btn-simpan-green">Simpan</button>
-                            <button type="button" className="btn-batal-red">Batal</button>
+                            <button type="submit" className="btn-simpan-green">Simpan</button>
+                            <button type="reset" className="btn-batal-red">Batal</button>
                         </div>
                     </form>
                 </div>
@@ -158,33 +196,21 @@ const Kehadiran = () => {
         {/* TAB 2: PERIZINAN */}
         {activeTab === 'perizinan' && (
             <>
-                {/* --- HEADER PERIZINAN --- */}
-                <div className="page-header-flex">
-                    <div className="header-titles">
-                        <h1>Perizinan</h1>
-                        <p>Perizinan</p>
-                    </div>
-                    
+                <div className="header-titles">
+                    <h1>Perizinan</h1>
+                    <p>Daftar permohonan izin dan cuti karyawan</p>
+                </div>
+                
+                <div className="action-row-perizinan">
                     <div className="filter-wrapper">
                         <button className="btn-filter-green" onClick={toggleFilter}>
                             {selectedFilter} 
-                            <img 
-                                src={iconBawah} 
-                                alt="v" 
-                                className={`filter-arrow ${showFilter ? 'rotate' : ''}`}
-                            />
+                            <img src={iconBawah} alt="v" className={`filter-arrow ${showFilter ? 'rotate' : ''}`} />
                         </button>
-
                         {showFilter && (
                             <div className="filter-dropdown">
                                 {["Cabang 1", "Cabang 2", "Cabang 3", "Cabang 4"].map(cabang => (
-                                    <div 
-                                        key={cabang}
-                                        className="dropdown-item" 
-                                        onClick={() => handleSelectFilter(cabang)}
-                                    >
-                                        {cabang}
-                                    </div>
+                                    <div key={cabang} className="dropdown-item" onClick={() => handleSelectFilter(cabang)}>{cabang}</div>
                                 ))}
                             </div>
                         )}
@@ -212,13 +238,16 @@ const Kehadiran = () => {
                                     <td>{item.tanggal}</td>
                                     <td><span className={`badge-jenis ${item.jenis.toLowerCase()}`}>{item.jenis}</span></td>
                                     <td>{item.ket}</td>
-                                    <td className="text-center"><span className={`badge-status ${item.status.toLowerCase()}`}>{item.status}</span></td>
+                                    {/* Class status dinamis berdasarkan teks Disetujui/Ditolak/Pending */}
+                                    <td className="text-center"><span className={`badge-status ${item.status === 'Disetujui' ? 'approve' : item.status === 'Ditolak' ? 'reject' : 'pending'}`}>{item.status}</span></td>
                                     <td className="text-center">
-                                        {item.status === 'Pending' && (
+                                        {item.status === 'Pending' ? (
                                             <div className="action-buttons center-btn">
-                                                <button className="btn-approve">Approve</button>
-                                                <button className="btn-reject">Reject</button>
+                                                <button className="btn-approve" onClick={() => handleUpdateStatus('utama', item.id, 'Disetujui')}>Disetujui</button>
+                                                <button className="btn-reject" onClick={() => handleUpdateStatus('utama', item.id, 'Ditolak')}>Ditolak</button>
                                             </div>
+                                        ) : (
+                                            <span style={{color: '#999', fontSize: '13px'}}>- Selesai -</span>
                                         )}
                                     </td>
                                 </tr>
@@ -251,13 +280,15 @@ const Kehadiran = () => {
                                     <td>{item.tanggal}</td>
                                     <td>{item.jam}</td>
                                     <td>{item.perlu}</td>
-                                    <td className="text-center"><span className={`badge-status ${item.status.toLowerCase()}`}>{item.status}</span></td>
+                                    <td className="text-center"><span className={`badge-status ${item.status === 'Disetujui' ? 'approve' : item.status === 'Ditolak' ? 'reject' : 'pending'}`}>{item.status}</span></td>
                                     <td className="text-center">
-                                        {item.status === 'Pending' && (
+                                        {item.status === 'Pending' ? (
                                             <div className="action-buttons center-btn">
-                                                <button className="btn-approve">Approve</button>
-                                                <button className="btn-reject">Reject</button>
+                                                <button className="btn-approve" onClick={() => handleUpdateStatus('meninggalkan', item.id, 'Disetujui')}>Disetujui</button>
+                                                <button className="btn-reject" onClick={() => handleUpdateStatus('meninggalkan', item.id, 'Ditolak')}>Ditolak</button>
                                             </div>
+                                        ) : (
+                                            <span style={{color: '#999', fontSize: '13px'}}>- Selesai -</span>
                                         )}
                                     </td>
                                 </tr>
@@ -285,23 +316,20 @@ const Kehadiran = () => {
                         <tbody>
                             {dataCuti.map(item => (
                                 <tr key={item.id}>
-                                    <td 
-                                        className="clickable-name"
-                                        onClick={() => handleCutiNameClick(item)}
-                                    >
-                                        {item.nama}
-                                    </td>
+                                    <td className="clickable-name" onClick={() => handleCutiNameClick(item)}>{item.nama}</td>
                                     <td>{item.jabatan}</td>
                                     <td>-</td>
                                     <td>{item.tanggal}<br/>{item.jam}</td>
                                     <td>{item.alasan}</td>
-                                    <td className="text-center"><span className={`badge-status ${item.status.toLowerCase()}`}>{item.status}</span></td>
+                                    <td className="text-center"><span className={`badge-status ${item.status === 'Disetujui' ? 'approve' : item.status === 'Ditolak' ? 'reject' : 'pending'}`}>{item.status}</span></td>
                                     <td className="text-center">
-                                        {item.status === 'Pending' && (
+                                        {item.status === 'Pending' ? (
                                             <div className="action-buttons center-btn">
-                                                <button className="btn-approve">Approve</button>
-                                                <button className="btn-reject">Reject</button>
+                                                <button className="btn-approve" onClick={() => handleUpdateStatus('cuti', item.id, 'Disetujui')}>Disetujui</button>
+                                                <button className="btn-reject" onClick={() => handleUpdateStatus('cuti', item.id, 'Ditolak')}>Ditolak</button>
                                             </div>
+                                        ) : (
+                                            <span style={{color: '#999', fontSize: '13px'}}>- Selesai -</span>
                                         )}
                                     </td>
                                 </tr>
@@ -318,11 +346,11 @@ const Kehadiran = () => {
       {showCutiModal && (
         <div className="modal-overlay" onClick={handleCloseCutiModal}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <form className="absen-form-grid">
-                    <div className="form-group"><label>Nama</label><input type="text" className="input-field" defaultValue={selectedCutiData?.nama}/></div>
+                <form className="absen-form-grid" onSubmit={handleSimpanCuti}>
+                    <div className="form-group"><label>Nama</label><input type="text" className="input-field" defaultValue={selectedCutiData?.nama} required/></div>
                     
                     <div className="form-group"><label>Cabang</label>
-                        <select className="input-field">
+                        <select className="input-field" required>
                             <option value="">Pilih cabang</option>
                             <option value="Cabang 1">Cabang 1</option>
                             <option value="Cabang 2">Cabang 2</option>
@@ -331,22 +359,29 @@ const Kehadiran = () => {
                         </select>
                     </div>
 
-                    <div className="form-group"><label>Jabatan</label><input type="text" className="input-field" defaultValue={selectedCutiData?.jabatan}/></div>
-                    <div className="form-group"><label>Divisi</label><input type="text" className="input-field" /></div>
+                    <div className="form-group"><label>Jabatan</label><input type="text" className="input-field" defaultValue={selectedCutiData?.jabatan} required/></div>
+                    <div className="form-group"><label>Divisi</label><input type="text" className="input-field" required/></div>
 
                     <div className="form-group"><label>Izin Cuti</label>
-                        <select className="input-field">
-                            <option>C THN/ C KHS</option>
+                        <select className="input-field" required>
+                            <option value="">Pilih Jenis</option>
+                            <option value="C THN">C THN</option>
+                            <option value="C KHS">C KHS</option>
                         </select>
                     </div>
                     <div className="form-group"></div> 
 
-                    <div className="form-group"><label>Tanggal Mulai</label><input type="text" className="input-field" placeholder="dd/mm/yyyy"/></div>
-                    <div className="form-group"><label>Tanggal Akhir</label><input type="text" className="input-field" placeholder="dd/mm/yyyy"/></div>
+                    <div className="form-group"><label>Tanggal Mulai</label><input type="date" className="input-field" required/></div>
+                    <div className="form-group"><label>Tanggal Akhir</label><input type="date" className="input-field" required/></div>
 
-                    <div className="form-group full-width"><label>Keterangan</label><textarea className="input-field" style={{height: '80px'}}></textarea></div>
+                    <div className="form-group full-width"><label>Keterangan</label><textarea className="input-field" style={{height: '80px'}} required></textarea></div>
                     
-                    <div className="form-group full-width"><label>Nomor Telefon</label><input type="text" className="input-field" placeholder="Nomor HP"/></div>
+                    <div className="form-group full-width"><label>Nomor Telefon</label><input type="tel" className="input-field" placeholder="Nomor HP" required/></div>
+                    
+                    <div className="form-actions-bottom">
+                        <button type="submit" className="btn-simpan-green">Simpan</button>
+                        <button type="button" className="btn-batal-red" onClick={handleCloseCutiModal}>Batal</button>
+                    </div>
                 </form>
             </div>
         </div>

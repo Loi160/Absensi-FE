@@ -53,11 +53,11 @@ const DashboardHRD = () => {
   const dataGrafik = {
      labels: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"],
      datasets: [
-        { label: "H", data: [100, 20, 35, 10, 30, 60], borderColor: "#2fb800", backgroundColor: "#2fb800", tension: 0.3, pointRadius: 4 },
-        { label: "S", data: [25, 30, 15, 40, 50, 60], borderColor: "#f1c40f", backgroundColor: "#f1c40f", tension: 0.3, pointRadius: 4 },
-        { label: "I", data: [15, 18, 22, 25, 23, 20], borderColor: "#2980b9", backgroundColor: "#2980b9", tension: 0.3, pointRadius: 4 },
-        { label: "T", data: [30, 35, 40, 35, 35, 30], borderColor: "#9b59b6", backgroundColor: "#9b59b6", tension: 0.3, pointRadius: 4 },
-        { label: "A", data: [10, 15, 30, 55, 38, 70], borderColor: "#e74c3c", backgroundColor: "#e74c3c", tension: 0.3, pointRadius: 4 },
+        { label: "Hadir", data: [100, 20, 35, 10, 30, 60], borderColor: "#2fb800", backgroundColor: "#2fb800", tension: 0.3, pointRadius: 4 },
+        { label: "Sakit", data: [25, 30, 15, 40, 50, 60], borderColor: "#f1c40f", backgroundColor: "#f1c40f", tension: 0.3, pointRadius: 4 },
+        { label: "Izin", data: [15, 18, 22, 25, 23, 20], borderColor: "#2980b9", backgroundColor: "#2980b9", tension: 0.3, pointRadius: 4 },
+        { label: "Terlambat", data: [30, 35, 40, 35, 35, 30], borderColor: "#9b59b6", backgroundColor: "#9b59b6", tension: 0.3, pointRadius: 4 },
+        { label: "Alpha", data: [10, 15, 30, 55, 38, 70], borderColor: "#e74c3c", backgroundColor: "#e74c3c", tension: 0.3, pointRadius: 4 },
      ]
   };
 
@@ -131,8 +131,8 @@ const DashboardHRD = () => {
 
       <main className="main-content">
         <header className="content-header">
-          <h1>Sistem Absensi</h1>
-          <p>Sistem Absensi</p>
+          <h1>Dashboard Operasional</h1>
+          <p>Manajemen data kehadiran dan statistik karyawan</p>
         </header>
 
         <div className="chart-section shadow-box">

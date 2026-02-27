@@ -11,48 +11,203 @@
     overflow: hidden; 
 }
 
-/* ================= SIDEBAR ================= */
-.sidebar { width: 320px; padding: 40px 30px; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
-.logo-title { font-size: 30px; font-weight: 800; text-transform: uppercase; }
-.logo-img { width: 100%; max-width: 260px; }
+/* ================================================= */
+/* ==================== SIDEBAR ==================== */
+/* ================================================= */
 
-.menu-nav { display: flex; flex-direction: column; gap: 20px; margin-top: -20px; }
-.menu-item { display: flex; align-items: center; justify-content: space-between; padding: 15px 25px; border-radius: 12px; cursor: pointer; color: #fff; transition: background 0.2s; }
-.menu-left { display: flex; align-items: center; gap: 18px; }
+.sidebar {
+  width: 300px;
+  padding: 25px 25px; 
+  color: white;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
 
-.menu-icon-main { width: 28px; height: 28px; filter: brightness(0) invert(1); }
-.menu-text-main { font-size: 18px; font-weight: 600; }
-.arrow-icon-main { width: 20px; height: 20px; filter: brightness(0) invert(1); transition: transform 0.3s; }
+.logo-area {
+  margin-top: 38px; 
+  margin-bottom: 26px !important;
+  padding-left: 10px;
+}
 
-.menu-item.active { background-color: rgba(255, 255, 255, 0.25); border: 1px solid rgba(255, 255, 255, 0.3); }
-.menu-item:hover { background-color: rgba(255, 255, 255, 0.1); }
+.logo-img {
+  width: 100%;
+  max-width: 250px; 
+  height: auto;
+  display: block;
+  filter: grayscale(100%) brightness(0) invert(1) contrast(1000%) !important;
+}
 
-.submenu-container { display: flex; flex-direction: column; gap: 10px; margin-top: -10px; padding-left: 20px; }
-.submenu-item { display: flex; align-items: center; gap: 15px; padding: 10px 20px; cursor: pointer; color: rgba(255, 255, 255, 0.8); border-radius: 10px; font-size: 16px; font-weight: 500; }
-.submenu-item.active-sub { background-color: rgba(255, 255, 255, 0.15); color: white; font-weight: 700; }
+/* --- MENU NAV --- */
+.menu-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 18px; 
+}
 
-.sidebar-footer { margin-top: auto; padding-top: 25px; border-top: 1px solid rgba(255, 255, 255, 0.2); text-align: center; }
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; 
+  padding: 12px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #fff;
+}
 
-.btn-logout { 
-    background: transparent; border: 1px solid rgba(255, 255, 255, 0.7); color: #fff; 
-    font-size: 20px; font-weight: 700; cursor: pointer; padding: 12px 0; width: 100%; border-radius: 50px; 
+.menu-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.menu-icon-main {
+  width: 28px;
+  height: 28px;
+  filter: brightness(0) invert(1);
+  transition: all 0.3s ease;
+}
+
+.menu-text-main {
+  font-size: 18px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.arrow-icon-main {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) invert(1);
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.arrow-icon-main.rotate-up {
+  transform: rotate(180deg);
+}
+
+/* MENU ITEM ACTIVE (PUTIH & TEKS HIJAU) */
+.menu-item.active {
+  background-color: #ffffff !important; 
+  color: #2fb800 !important; 
+  border: 1px solid #ffffff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.menu-item.active .menu-icon-main,
+.menu-item.active .arrow-icon-main {
+  filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg) brightness(95%) contrast(105%) !important;
+  opacity: 1;
+}
+
+.menu-item.active .menu-text-main {
+  color: #2fb800 !important;
+}
+
+.menu-item:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* --- SUBMENU STYLING --- */
+.submenu-container { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 10px; 
+  margin-top: -10px; 
+  padding-left: 20px; 
+}
+
+.submenu-item { 
+  display: flex; 
+  align-items: center; 
+  gap: 15px; 
+  padding: 10px 20px; 
+  cursor: pointer; 
+  color: #fff; 
+  border-radius: 10px; 
+  font-size: 16px; 
+  font-weight: 500; 
+  transition: all 0.3s ease;
+}
+
+.submenu-icon {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) invert(1);
+  transition: all 0.3s ease;
+}
+
+/* SUBMENU ACTIVE (PUTIH & TEKS HIJAU) */
+.submenu-item.active-sub { 
+  background-color: #ffffff !important; 
+  color: #2fb800 !important; 
+  font-weight: 700; 
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.submenu-item.active-sub .submenu-icon {
+  filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg) brightness(95%) contrast(105%) !important;
+}
+
+.submenu-item:hover:not(.active-sub) {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* --- SIDEBAR FOOTER (LOG OUT) --- */
+.sidebar-footer {
+  margin-top: auto; 
+  padding-top: 25px; 
+  border-top: 1px solid rgba(255, 255, 255, 0.2); 
+  text-align: center;
+  padding-bottom: 15px;
+}
+
+.btn-logout {
+  background: transparent; 
+  border: 1px solid rgba(255, 255, 255, 0.7); 
+  color: #fff; 
+  font-family: 'Inter', sans-serif;
+  font-size: 20px; 
+  font-weight: 700; 
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 12px 0;
+  width: 100%;
+  border-radius: 50px;
 }
 
 .btn-logout:hover {
     background-color: #ffffff !important; 
     color: #2fb800 !important; 
     border-color: #ffffff !important; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; 
 }
 
-/* ================= MAIN CONTENT ================= */
+/* ================================================= */
+/* ================= MAIN CONTENT ================== */
+/* ================================================= */
+
 .main-content { 
     flex: 1; background-color: #fdfdfd; margin: 25px 35px 30px 0; border-radius: 40px; padding: 40px; 
     overflow-y: auto; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
 }
 
-/* Absen Manual Header */
-.page-header h1 { font-size: 42px; font-weight: 800; color: #000; margin-bottom: 5px; }
-.page-header p { color: #333; margin-bottom: 30px; font-size: 18px; }
+/* ================= HEADER ABSEN MANUAL ================= */
+.page-header h1 { 
+    font-size: 32px !important; 
+    font-weight: 700 !important; 
+    color: #111 !important; 
+    margin-bottom: 5px; 
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+}
+
+.page-header p { 
+    color: #666 !important; 
+    margin-bottom: 30px; 
+    font-size: 16px !important; 
+}
 
 /* ================= FORM ABSENSI ================= */
 .absen-form-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 40px; row-gap: 25px; }
@@ -91,34 +246,32 @@
     min-width: 140px;
 }
 
-/* ================= FORCE WHITE ICONS ================= */
-.menu-icon-main, 
-.submenu-icon, 
-.arrow-icon-main,
-img[alt="-"] {
-    filter: brightness(0) invert(1) !important;
-    opacity: 1 !important;
-}
-
 /* ================= HEADER PERIZINAN & FILTER ================= */
-.page-header-flex { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: flex-end; 
-    margin-bottom: 5px; 
-}
 
+/* Judul dibuat sejajar kiri dan normal di atas */
 .header-titles h1 { 
-    font-size: 32px; 
-    font-weight: 800; 
-    color: #000; 
+    font-size: 32px !important; 
+    font-weight: 700 !important; 
+    color: #111 !important;
     margin-bottom: 5px; 
+    letter-spacing: -0.5px;
+    line-height: 1.2;
 }
 
 .header-titles p { 
-    font-size: 14px; 
-    color: #555; 
+    font-size: 16px !important; 
+    color: #666 !important;
     margin: 0; 
+    margin-bottom: 40px; /* Jarak dari teks ke tombol di bawahnya */
+}
+
+/* Membungkus tombol dan memposisikannya di kanan bawah (Mendekati tabel) */
+.action-row-perizinan {
+    display: flex;
+    justify-content: flex-end; 
+    margin-bottom: -18px; /* MENARIK TABEL KE ATAS MENDEKATI TOMBOL */
+    position: relative;
+    z-index: 2; /* Agar filter dropdown tidak tertutup tabel */
 }
 
 .filter-wrapper { 
@@ -129,14 +282,14 @@ img[alt="-"] {
     background: #8dae12; 
     color: white; 
     border: none; 
-    padding: 8px 16px; 
+    padding: 10px 20px; /* Ditebalkan agar sama dengan Kelola Cabang */
     border-radius: 20px; 
     font-weight: 700; 
     cursor: pointer; 
     display: flex; 
     align-items: center; 
     gap: 8px; 
-    font-size: 13px; 
+    font-size: 14px; 
 }
 
 .filter-arrow {
@@ -149,7 +302,7 @@ img[alt="-"] {
     transform: rotate(180deg); 
 }
 
-/* KOTAK FILTER */
+/* KOTAK DROPDOWN FILTER */
 .filter-dropdown { 
     position: absolute; 
     top: 110%; 
@@ -182,28 +335,35 @@ img[alt="-"] {
 }
 
 /* ================= TABLE & BADGES ================= */
+
+/* Judul tabel tambahan di bawahnya */
 .section-title {
     font-size: 16px;
     font-weight: 700;
-    margin-top: 15px; 
-    margin-bottom: 5px; 
+    margin-top: 25px; 
+    margin-bottom: 10px; 
     color: #000;
 }
 
+/* Card Tabel */
 .perizinan-card { 
     background: white; 
     border-radius: 8px; 
     border: 1px solid #ddd; 
-    margin-top: 5px; 
-    margin-bottom: 15px;
+    margin-top: 0; 
+    margin-bottom: 25px; 
     overflow: hidden; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Sama dengan Kelola Cabang */
+    position: relative;
+    z-index: 1;
 }
 
 .card-header-green { 
     background-color: #8dae12; 
     color: white; 
-    padding: 12px 20px; 
-    font-weight: 600; 
+    padding: 15px 25px; 
+    font-weight: 700; 
+    font-size: 16px;
 }
 
 .table-izin { 
@@ -243,7 +403,7 @@ img[alt="-"] {
 .badge-jenis.cuti { color: #2ecc71; border-color: #2ecc71; }
 .badge-jenis.lainnya { color: #34495e; border-color: #34495e; }
 
-/* Badge Statuses */
+/* Badge Statuses (Pending, Disetujui/Approve, Ditolak/Reject) */
 .badge-status {
     padding: 6px 14px;
     border-radius: 20px;
@@ -253,6 +413,7 @@ img[alt="-"] {
 }
 .badge-status.pending { background-color: #f39c12; color: white; }
 .badge-status.approve { background-color: #00e676; color: white; }
+.badge-status.reject { background-color: #ff1744; color: white; } /* Tambahan untuk status Ditolak */
 
 /* Actions */
 .action-buttons {

@@ -43,27 +43,72 @@ const KelolaCabang = () => {
     setShowModal(true);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("user"); 
+    localStorage.removeItem("token");
+    navigate("/auth/login");
+  };
+
   return (
     <div className="hrd-container">
+      {/* ================= SIDEBAR TERBARU ================= */}
       <aside className="sidebar">
         <div className="logo-area">
-          <h2 className="logo-title">SISTEM ABSENSI</h2>
+          {/* Tulisan Sistem Absensi sudah dihapus dari sini */}
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
+
         <nav className="menu-nav">
-          <div className="menu-item" onClick={() => navigate('/hrd/dashboard')}><div className="menu-left"><img src={iconDashboard} alt="dash" /><span className="menu-text-main">Dashboard</span></div></div>
-          <div className="menu-item active" onClick={() => navigate('/hrd/kelolacabang')}><div className="menu-left"><img src={iconKelola} alt="kelola" /><span className="menu-text-main">Kelola Cabang</span></div></div>
-          <div className="menu-item" onClick={() => navigate('/hrd/datakaryawan')}><div className="menu-left"><img src={iconKaryawan} alt="karyawan" /><span className="menu-text-main">Data Karyawan</span></div></div>
-          <div className="menu-item has-arrow" onClick={() => navigate('/hrd/absenmanual')}><div className="menu-left"><img src={iconKehadiran} alt="hadir" /><span className="menu-text-main">Kehadiran</span></div><img src={iconBawah} alt="down" /></div>
-          <div className="menu-item" onClick={() => navigate('/hrd/laporan')}><div className="menu-left"><img src={iconLaporan} alt="lapor" /><span className="menu-text-main">Laporan</span></div></div>
+          <div className="menu-item" onClick={() => navigate('/hrd/dashboard')}>
+            <div className="menu-left">
+                <img src={iconDashboard} alt="dash" className="menu-icon-main"/> 
+                <span className="menu-text-main">Dashboard</span>
+            </div>
+          </div>
+          
+          {/* Menu ini yang ACTIVE di halaman Kelola Cabang */}
+          <div className="menu-item active" onClick={() => navigate('/hrd/kelolacabang')}> 
+            <div className="menu-left">
+                <img src={iconKelola} alt="kelola" className="menu-icon-main"/> 
+                <span className="menu-text-main">Kelola Cabang</span>
+            </div>
+          </div>
+
+          <div className="menu-item" onClick={() => navigate('/hrd/datakaryawan')}>
+            <div className="menu-left">
+                <img src={iconKaryawan} alt="karyawan" className="menu-icon-main"/> 
+                <span className="menu-text-main">Data Karyawan</span>
+            </div>
+          </div>
+
+          <div className="menu-item has-arrow" onClick={() => navigate('/hrd/absenmanual')}>
+            <div className="menu-left">
+                <img src={iconKehadiran} alt="hadir" className="menu-icon-main"/> 
+                <span className="menu-text-main">Kehadiran</span>
+            </div>
+            <img src={iconBawah} alt="down" className="arrow-icon-main" /> 
+          </div>
+
+          <div className="menu-item" onClick={() => navigate('/hrd/laporan')}>
+            <div className="menu-left">
+                <img src={iconLaporan} alt="lapor" className="menu-icon-main"/> 
+                <span className="menu-text-main">Laporan</span>
+            </div>
+          </div>
         </nav>
-        <div className="sidebar-footer"><button className="btn-logout">Log Out</button></div>
+
+        <div className="sidebar-footer">
+            <button className="btn-logout" onClick={handleLogout}>
+                Log Out
+            </button>
+        </div>
       </aside>
+      {/* ================= END SIDEBAR ================= */}
 
       <main className="main-content">
         <div className="header-cabang-content">
-            <h1>Data Cabang</h1>
-            <p>Informasi cabang anda saat ini</p>
+            <h1>Kelola Cabang</h1>
+            <p>Manajemen lokasi dan unit operasional Amaga Corporation</p>
             <div className="action-row-cabang">
                 <button className="btn-tambah-cabang-baru" onClick={() => {setModalTitle("Tambah Cabang"); setShowModal(true);}}>
                     <img src={iconTambah} alt="add" /> Tambah Cabang Baru

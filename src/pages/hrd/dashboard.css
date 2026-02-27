@@ -26,10 +26,9 @@
 }
 
 .logo-area {
-  /* Margin top ditambahkan agar logo sejajar dengan card putih */
-  margin-top: 15px; 
-  margin-bottom: 50px;
-  padding-left: 5px;
+  margin-top: 38px; 
+  margin-bottom: 26px !important;
+  padding-left: 10px;
 }
 
 .logo-img {
@@ -54,7 +53,7 @@
   padding: 12px 20px;
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   color: #fff;
 }
 
@@ -68,11 +67,13 @@
   width: 28px;
   height: 28px;
   filter: brightness(0) invert(1);
+  transition: all 0.3s ease;
 }
 
 .menu-text-main {
   font-size: 18px;
   font-weight: 600;
+  transition: all 0.3s ease;
 }
 
 .arrow-icon-main {
@@ -80,14 +81,33 @@
   height: 20px;
   filter: brightness(0) invert(1);
   opacity: 0.8;
+  transition: all 0.3s ease;
 }
 
+/* =========================================
+   MENU ITEM ACTIVE (PUTIH & TEKS HIJAU)
+   ========================================= */
 .menu-item.active {
-  background-color: rgba(255, 255, 255, 0.25); 
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background-color: #ffffff !important; 
+  color: #2fb800 !important; 
+  border: 1px solid #ffffff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.menu-item:hover {
+/* Mengubah warna Ikon saat Active */
+.menu-item.active .menu-icon-main,
+.menu-item.active .arrow-icon-main {
+  /* Filter ini mengubah putih menjadi hijau #2fb800 */
+  filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg) brightness(95%) contrast(105%) !important;
+  opacity: 1;
+}
+
+/* Mengubah warna Teks saat Active */
+.menu-item.active .menu-text-main {
+  color: #2fb800 !important;
+}
+
+.menu-item:hover:not(.active) {
   background-color: rgba(255, 255, 255, 0.15);
 }
 
