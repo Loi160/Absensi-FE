@@ -18,7 +18,7 @@
 /* ================= SIDEBAR ================= */
 .sidebar {
   width: 300px;
-  padding: 30px 25px;
+  padding: 25px 25px; 
   color: white;
   display: flex;
   flex-direction: column;
@@ -26,18 +26,10 @@
 }
 
 .logo-area {
+  /* Margin top ditambahkan agar logo sejajar dengan card putih */
+  margin-top: 15px; 
   margin-bottom: 50px;
   padding-left: 5px;
-}
-
-.logo-title {
-  font-size: 28px;       
-  font-weight: 800;    
-  margin-bottom: 5px;    
-  color: #ffffff;
-  letter-spacing: -0.5px;
-  text-transform: uppercase;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.1); 
 }
 
 .logo-img {
@@ -45,14 +37,14 @@
   max-width: 250px; 
   height: auto;
   display: block;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+  filter: grayscale(100%) brightness(0) invert(1) contrast(1000%) !important;
 }
 
 /* --- UPDATE UKURAN MENU --- */
 .menu-nav {
   display: flex;
   flex-direction: column;
-  gap: 18px; /* Tambah gap biar proporsional */
+  gap: 18px; 
 }
 
 .menu-item {
@@ -72,20 +64,17 @@
   gap: 15px;
 }
 
-/* Icon Utama Jadi 28px */
 .menu-icon-main {
   width: 28px;
   height: 28px;
   filter: brightness(0) invert(1);
 }
 
-/* Teks Menu Jadi 18px */
 .menu-text-main {
   font-size: 18px;
   font-weight: 600;
 }
 
-/* Icon Panah Kehadiran Jadi 20px */
 .arrow-icon-main {
   width: 20px;
   height: 20px;
@@ -202,10 +191,10 @@
 }
 
 .btn-logout:hover {
-    background-color: #ffffff !important; /* Latar belakang dipaksa putih bersih */
-    color: #2fb800 !important; /* Tulisan dipaksa hijau Amaga */
-    border-color: #ffffff !important; /* Garis pinggir ikut putih */
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; /* Tambahan sedikit bayangan */
+    background-color: #ffffff !important; 
+    color: #2fb800 !important; 
+    border-color: #ffffff !important; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; 
 }
 
 /* RESPONSIVE */

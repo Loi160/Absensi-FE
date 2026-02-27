@@ -80,7 +80,7 @@ const DashboardHRD = () => {
     <div className="hrd-container">
       <aside className="sidebar">
         <div className="logo-area">
-          <h2 className="logo-title">SISTEM ABSENSI</h2>
+          {/* Bagian ini sudah bersih dari tag <h2> */}
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
 
@@ -106,7 +106,6 @@ const DashboardHRD = () => {
             </div>
           </div>
 
-          {/* SAYA TAMBAHKAN ONCLICK KE SINI JUGA BIAR AMAN */}
           <div className="menu-item has-arrow" onClick={() => navigate('/hrd/absenmanual')}>
             <div className="menu-left">
                 <img src={iconKehadiran} alt="hadir" className="menu-icon-main"/> 
@@ -115,7 +114,6 @@ const DashboardHRD = () => {
             <img src={iconBawah} alt="down" className="arrow-icon-main" /> 
           </div>
 
-          {/* SAYA TAMBAHKAN ONCLICK DI SINI BANG */}
           <div className="menu-item" onClick={() => navigate('/hrd/laporan')}>
             <div className="menu-left">
                 <img src={iconLaporan} alt="lapor" className="menu-icon-main"/> 
