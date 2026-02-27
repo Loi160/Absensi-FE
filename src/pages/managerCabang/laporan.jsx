@@ -1,13 +1,13 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "./laporan.css"; 
 
 /* ================= ICON IMPORT ================= */
 import iconDashboard from "../../assets/dashboard.svg";
 import iconKaryawan from "../../assets/datakaryawan.svg";
-import iconKehadiran from "../../assets/kehadiran.svg";
+// iconKehadiran dihapus, diganti Perizinan biar sama kayak Dashboard
+import iconPerizinan from "../../assets/perizinan.svg"; 
 import iconLaporan from "../../assets/laporan.svg";
-import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 
 const LaporanManager = () => {
@@ -34,21 +34,39 @@ const LaporanManager = () => {
           <h2 className="logo-title">SISTEM ABSENSI</h2>
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
+        
+        {/* SIDEBAR DISAMAKAN DENGAN DASHBOARD + PAKAI LINK */}
         <nav className="menu-nav">
-          <div className="menu-item" onClick={() => navigate('/manager/dashboard')}>
-            <div className="menu-left"><img src={iconDashboard} alt="dash" className="menu-icon-main" /><span className="menu-text-main">Dashboard</span></div>
-          </div>
-          <div className="menu-item" onClick={() => navigate('/manager/datakaryawan')}>
-            <div className="menu-left"><img src={iconKaryawan} alt="karyawan" className="menu-icon-main" /><span className="menu-text-main">Data Karyawan</span></div>
-          </div>
-          <div className="menu-item has-arrow" onClick={() => navigate('/manager/kehadiran')}>
-            <div className="menu-left"><img src={iconKehadiran} alt="hadir" className="menu-icon-main" /><span className="menu-text-main">Kehadiran</span></div>
-            <img src={iconBawah} alt="down" className="arrow-icon-main" />
-          </div>
-          <div className="menu-item active" onClick={() => navigate('/manager/laporan')}>
-            <div className="menu-left"><img src={iconLaporan} alt="lapor" className="menu-icon-main" /><span className="menu-text-main">Laporan</span></div>
-          </div>
+          <Link to="/managerCabang/dashboard" className="menu-item" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="menu-left">
+                <img src={iconDashboard} alt="dash" className="menu-icon-main"/> 
+                <span className="menu-text-main">Dashboard</span>
+            </div>
+          </Link>
+          
+          <Link to="/managerCabang/datakaryawan" className="menu-item" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="menu-left">
+                <img src={iconKaryawan} alt="karyawan" className="menu-icon-main"/> 
+                <span className="menu-text-main">Data Karyawan</span>
+            </div>
+          </Link>
+
+          {/* PERIZINAN KEMBALI */}
+          <Link to="/managerCabang/perizinan" className="menu-item" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="menu-left">
+                <img src={iconPerizinan} alt="izin" className="menu-icon-main"/> 
+                <span className="menu-text-main">Perizinan</span>
+            </div>
+          </Link>
+
+          <Link to="/managerCabang/laporan" className="menu-item active" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="menu-left">
+                <img src={iconLaporan} alt="lapor" className="menu-icon-main"/> 
+                <span className="menu-text-main">Laporan</span>
+            </div>
+          </Link>
         </nav>
+
         <div className="sidebar-footer">
           <button className="btn-logout" onClick={handleLogout}>Log Out</button>
         </div>
