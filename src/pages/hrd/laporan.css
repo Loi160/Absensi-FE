@@ -1,12 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 /* ================= RESET & BASE ================= */
-* { 
-    margin: 0; 
-    padding: 0; 
-    box-sizing: border-box; 
-    font-family: 'Inter', sans-serif; 
-}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
 .hrd-container { 
     display: flex; 
@@ -16,203 +11,114 @@
     overflow: hidden; 
 }
 
-/* ================= SIDEBAR ================= */
-.sidebar { width: 320px; padding: 40px 30px; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
-.logo-title { font-size: 30px; font-weight: 800; letter-spacing: -1px; margin-bottom: 30px; }
-.logo-img { width: 100%; max-width: 260px; margin-bottom: 20px; }
-.menu-nav { display: flex; flex-direction: column; gap: 15px; }
-.menu-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; border-radius: 14px; cursor: pointer; color: #fff; transition: 0.3s; }
-.menu-item.active { background-color: rgba(255, 255, 255, 0.25); border: 1px solid rgba(255, 255, 255, 0.3); }
-.sidebar-footer { margin-top: auto; }
-.btn-logout:hover {
-    background-color: #ffffff; /* Latar belakang jadi putih bersih */
-    color: #2fb800; /* Tulisan berubah jadi hijau Amaga */
-    border-color: #ffffff; /* Garis pinggir ikut putih biar rapi */
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Tambahan sedikit bayangan biar lebih elegan */
-}
+/* ================================================= */
+/* ==================== SIDEBAR ==================== */
+/* ================================================= */
 
-/* ================= MAIN CONTENT ================= */
+.sidebar { width: 300px; padding: 25px 25px; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+.logo-area { margin-top: 38px; margin-bottom: 26px !important; padding-left: 10px; }
+.logo-img { width: 100%; max-width: 250px; height: auto; display: block; filter: grayscale(100%) brightness(0) invert(1) contrast(1000%) !important; }
+
+/* --- MENU NAV --- */
+.menu-nav { display: flex; flex-direction: column; gap: 18px; }
+.menu-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; color: #fff; }
+.menu-left { display: flex; align-items: center; gap: 15px; }
+.menu-icon-main { width: 28px; height: 28px; filter: brightness(0) invert(1); transition: all 0.3s ease; }
+.menu-text-main { font-size: 18px; font-weight: 600; transition: all 0.3s ease; }
+.arrow-icon-main { width: 20px; height: 20px; filter: brightness(0) invert(1); opacity: 0.8; transition: all 0.3s ease; }
+
+/* MENU ITEM ACTIVE (Konsisten dengan halaman lain) */
+.menu-item.active { background-color: #ffffff !important; color: #2fb800 !important; border: 1px solid #ffffff; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
+.menu-item.active .menu-icon-main, .menu-item.active .arrow-icon-main { filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg) brightness(95%) contrast(105%) !important; opacity: 1; }
+.menu-item.active .menu-text-main { color: #2fb800 !important; }
+.menu-item:hover:not(.active) { background-color: rgba(255, 255, 255, 0.15); }
+
+/* --- SIDEBAR FOOTER --- */
+.sidebar-footer { margin-top: auto; padding-top: 25px; border-top: 1px solid rgba(255, 255, 255, 0.2); text-align: center; padding-bottom: 15px; }
+.btn-logout { background: transparent; border: 1px solid rgba(255, 255, 255, 0.7); color: #fff; font-size: 20px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; padding: 12px 0; width: 100%; border-radius: 50px; }
+.btn-logout:hover { background-color: #ffffff !important; color: #2fb800 !important; border-color: #ffffff !important; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; }
+
+/* ================================================= */
+/* ================= MAIN CONTENT ================== */
+/* ================================================= */
+
 .main-content { 
-    flex: 1; 
-    background-color: #fdfdfd; 
-    margin: 25px 35px 30px 0; 
-    border-radius: 40px; 
-    padding: 40px; 
-    overflow-y: auto; 
+    flex: 1; background-color: #fdfdfd; margin: 25px 35px 30px 0; border-radius: 40px; padding: 40px; 
+    overflow-y: auto; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
 }
 
-.header-laporan-neo h1 { font-size: 36px; font-weight: 800; color: #000; }
+/* ================= HEADER LAPORAN ================= */
+.header-laporan-neo h1 { font-size: 36px; font-weight: 800; color: #000; letter-spacing: -0.5px; }
 .header-laporan-neo p { font-size: 16px; color: #555; margin-top: 5px; }
 
 /* ================= FILTER ZONE ================= */
-.neo-filter-zone { 
-    margin-top: 30px; 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: flex-end; 
-    margin-bottom: 30px; 
-}
-
+.neo-filter-zone { margin-top: 30px; display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; }
 .input-group-neo { display: flex; gap: 20px; }
 .neo-field { display: flex; flex-direction: column; gap: 5px; }
 .neo-field label { font-size: 11px; font-weight: 800; color: #8dae12; margin-left: 10px; text-transform: uppercase; }
 
 .neo-input { 
-    background-color: #8dae12; 
-    color: white; 
-    border: none; 
-    padding: 12px 20px; 
-    border-radius: 20px 20px 5px 20px; 
-    font-size: 14px; 
-    font-weight: 600; 
-    outline: none; 
-    width: 200px;
+    background-color: #8dae12; color: white; border: none; padding: 12px 20px; 
+    border-radius: 20px 20px 5px 20px; font-size: 14px; font-weight: 600; outline: none; width: 200px;
 }
 
 /* ================= BUTTON GROUP (PRINT & FILTER) ================= */
-.button-group-vertical-right { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 12px; 
-    align-items: flex-end; 
-}
-
+.button-group-vertical-right { display: flex; flex-direction: column; gap: 12px; align-items: flex-end; }
 .btn-neo-print-top { 
-    background-color: #8dae12; 
-    color: white; 
-    border: none; 
-    padding: 10px 45px; 
-    border-radius: 15px; 
-    font-weight: 800; 
-    cursor: pointer; 
-    transition: 0.3s;
+    background-color: #8dae12; color: white; border: none; padding: 10px 45px; 
+    border-radius: 15px; font-weight: 800; cursor: pointer; transition: 0.3s;
 }
+.btn-neo-print-top:hover { background-color: #7a9710; }
 
-/* ================= DROPDOWN SUPER SLIM (FIX) ================= */
-.dropdown-neo-bottom-wrapper { 
-    position: relative; 
-    display: inline-block; 
-}
-
+/* ================= DROPDOWN SUPER SLIM ================= */
+.dropdown-neo-bottom-wrapper { position: relative; display: inline-block; }
 .btn-neo-filter-bottom { 
-    background: white; 
-    color: #8dae12; 
-    border: 1.5px solid #8dae12; 
-    padding: 5px 12px; /* Padding kecil agar pas dengan teks */
-    border-radius: 20px; 
-    font-weight: 700; 
-    cursor: pointer; 
-    display: flex; 
-    align-items: center; 
-    gap: 8px; 
-    width: auto; /* Mengecilkan frame sesuai isi */
-    font-size: 13px;
-    transition: 0.2s;
+    background: white; color: #8dae12; border: 1.5px solid #8dae12; padding: 5px 12px; 
+    border-radius: 20px; font-weight: 700; cursor: pointer; display: flex; align-items: center; 
+    gap: 8px; width: auto; font-size: 13px; transition: 0.2s;
 }
-
-.neo-dropdown-list-right { 
-    position: absolute; 
-    top: 110%; 
-    right: 0; 
-    min-width: 130px; 
-    background: white; 
-    border-radius: 12px; 
-    padding: 5px; 
-    z-index: 1000;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.12); 
-    border: 1px solid #eee;
-    display: flex;
-    flex-direction: column;
-}
-
-.neo-drop-item { 
-    padding: 8px 12px; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    font-size: 13px; 
-    font-weight: 600; 
-    color: #444; 
-    transition: 0.2s;
-}
-.neo-drop-item:hover { background: #8dae12; color: white; }
-
-.btn-neo-filter-bottom img { 
-    width: 8px; 
-    filter: invert(56%) sepia(88%) saturate(354%) hue-rotate(34deg) brightness(94%) contrast(87%);
-}
+.btn-neo-filter-bottom img { width: 8px; filter: invert(56%) sepia(88%) saturate(354%) hue-rotate(34deg) brightness(94%) contrast(87%); transition: transform 0.2s; }
 .btn-neo-filter-bottom img.rotate { transform: rotate(180deg); }
 
-/* ================= TABLE AREA ================= */
-.neo-table-card { 
-    background: white; 
-    border-radius: 20px; 
-    overflow: hidden; 
-    border: 1px solid #f0f0f0; 
+.neo-dropdown-list-right { 
+    position: absolute; top: 110%; right: 0; min-width: 130px; background: white; 
+    border-radius: 12px; padding: 5px; z-index: 1000; box-shadow: 0 8px 20px rgba(0,0,0,0.12); 
+    border: 1px solid #eee; display: flex; flex-direction: column;
 }
+.neo-drop-item { padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; color: #444; transition: 0.2s; }
+.neo-drop-item:hover { background: #8dae12; color: white; }
 
+
+/* ================= TABLE AREA ================= */
+.neo-table-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #f0f0f0; }
 .neo-table-header { background: #8dae12; color: white; padding: 15px 25px; font-weight: 800; font-size: 15px; }
 
 .neo-table { width: 100%; border-collapse: collapse; }
-.neo-table th { 
-    text-align: center; 
-    padding: 15px 10px; 
-    background: #fafafa; 
-    border-bottom: 2px solid #eee; 
-    color: #888; 
-    font-size: 11px; 
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
+.neo-table th { text-align: center; padding: 15px 10px; background: #fafafa; border-bottom: 2px solid #eee; color: #888; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
 .neo-table th:first-child { text-align: left; padding-left: 25px; }
 
 .neo-table td { padding: 15px 10px; border-bottom: 1px solid #f9f9f9; font-size: 14px; vertical-align: middle; }
 .neo-td-name { font-weight: 700; color: #111; padding-left: 25px !important; }
-
-/* DUAL BADGE CONTAINER (HADIR) */
-.neo-dual-badge-container {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-}
-
-/* BADGE STATUS STYLE */
-.neo-badge { 
-    background: #eee; 
-    padding: 5px 10px; 
-    border-radius: 6px; 
-    font-weight: 800; 
-    font-size: 12px; 
-    min-width: 35px; 
-    display: inline-block; 
-    text-align: center;
-    color: #444;
-}
-
-.neo-badge.warn { background: #fffcea; color: #f1c40f; }  /* Terlambat */
-.neo-badge.info { background: #f0f7ff; color: #2980b9; }  /* Lembur/FIMTK */
-.neo-badge.alert { background: #fff5f4; color: #e74c3c; } /* Alpha */
-
 .text-center { text-align: center; }
 
+/* ================= BADGES ================= */
+.neo-dual-badge-container { display: flex; justify-content: center; gap: 6px; }
+.neo-badge { 
+    background: #eee; padding: 5px 10px; border-radius: 6px; font-weight: 800; 
+    font-size: 12px; min-width: 35px; display: inline-block; text-align: center; color: #444;
+}
+.neo-badge.warn { background: #fffcea; color: #f1c40f; }  
+.neo-badge.info { background: #f0f7ff; color: #2980b9; }  
+.neo-badge.alert { background: #fff5f4; color: #e74c3c; } 
+
 /* ================= MULTI CABANG (CABANG 4) ================= */
-.multi-cabang-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 35px; /* Memberikan jarak antar tabel cabang */
-    margin-top: 10px;
-}
+.multi-cabang-wrapper { display: flex; flex-direction: column; gap: 35px; margin-top: 10px; }
+.cabang-section { display: flex; flex-direction: column; gap: 12px; }
+.cabang-section h3 { font-size: 18px; font-weight: 800; color: #111; margin-left: 5px; }
 
-.cabang-section {
-    display: flex;
-    flex-direction: column;
-    gap: 12px; /* Jarak antara judul (Cabang A/B/C) dengan tabelnya */
+/* ================= PRINT STYLES ================= */
+@media print { 
+    .no-print { display: none !important; } 
+    .main-content { margin: 0; padding: 0; box-shadow: none; border-radius: 0; } 
+    .hrd-container { background: none; }
 }
-
-.cabang-section h3 {
-    font-size: 18px;
-    font-weight: 800;
-    color: #111;
-    margin-left: 5px; /* Menyelaraskan teks judul dengan garis kiri tabel */
-}
-
-@media print { .no-print { display: none !important; } .main-content { margin: 0; padding: 0; } }

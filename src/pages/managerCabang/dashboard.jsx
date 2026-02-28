@@ -1,6 +1,6 @@
 import React from "react";
-import { useNavigate, Link } from "react-router-dom"; 
-import "./dashboard.css"; 
+import { useNavigate } from "react-router-dom"; 
+import "../hrd/dashboard.css"; // Mengambil CSS dari HRD
 
 import {
   Chart as ChartJS,
@@ -16,7 +16,7 @@ import { Line } from "react-chartjs-2";
 
 import iconDashboard from "../../assets/dashboard.svg";
 import iconKaryawan from "../../assets/datakaryawan.svg";
-import iconPerizinan from "../../assets/perizinan.svg"; 
+import iconKehadiran from "../../assets/kehadiran.svg"; // Asumsi pakai icon ini untuk perizinan
 import iconLaporan from "../../assets/laporan.svg";
 import logoPersegi from "../../assets/logopersegi.svg"; 
 
@@ -30,7 +30,7 @@ ChartJS.register(
   Legend
 );
 
-const DashboardManagerCabang = () => {
+const DashboardManager = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -51,11 +51,11 @@ const DashboardManagerCabang = () => {
   const dataGrafik = {
      labels: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"],
      datasets: [
-        { label: "H", data: [100, 20, 35, 10, 30, 60], borderColor: "#2fb800", backgroundColor: "#2fb800", tension: 0.3, pointRadius: 4 },
-        { label: "S", data: [25, 30, 15, 40, 50, 60], borderColor: "#f1c40f", backgroundColor: "#f1c40f", tension: 0.3, pointRadius: 4 },
-        { label: "I", data: [15, 18, 22, 25, 23, 20], borderColor: "#2980b9", backgroundColor: "#2980b9", tension: 0.3, pointRadius: 4 },
-        { label: "T", data: [30, 35, 40, 35, 35, 30], borderColor: "#9b59b6", backgroundColor: "#9b59b6", tension: 0.3, pointRadius: 4 },
-        { label: "A", data: [10, 15, 30, 55, 38, 70], borderColor: "#e74c3c", backgroundColor: "#e74c3c", tension: 0.3, pointRadius: 4 },
+        { label: "Hadir", data: [100, 20, 35, 10, 30, 60], borderColor: "#2fb800", backgroundColor: "#2fb800", tension: 0.3, pointRadius: 4 },
+        { label: "Sakit", data: [25, 30, 15, 40, 50, 60], borderColor: "#f1c40f", backgroundColor: "#f1c40f", tension: 0.3, pointRadius: 4 },
+        { label: "Izin", data: [15, 18, 22, 25, 23, 20], borderColor: "#2980b9", backgroundColor: "#2980b9", tension: 0.3, pointRadius: 4 },
+        { label: "Terlambat", data: [30, 35, 40, 35, 35, 30], borderColor: "#9b59b6", backgroundColor: "#9b59b6", tension: 0.3, pointRadius: 4 },
+        { label: "Alpha", data: [10, 15, 30, 55, 38, 70], borderColor: "#e74c3c", backgroundColor: "#e74c3c", tension: 0.3, pointRadius: 4 },
      ]
   };
 
@@ -78,39 +78,40 @@ const DashboardManagerCabang = () => {
     <div className="hrd-container">
       <aside className="sidebar">
         <div className="logo-area">
-          <h2 className="logo-title">SISTEM ABSENSI</h2>
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
 
-        {/* --- BAGIAN SIDEBAR YANG DIPERBARUI MENGGUNAKAN LINK --- */}
         <nav className="menu-nav">
-          <Link to="/managerCabang/dashboard" className="menu-item active" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <div className="menu-item active" onClick={() => navigate('/managerCabang/dashboard')}>
             <div className="menu-left">
                 <img src={iconDashboard} alt="dash" className="menu-icon-main"/> 
                 <span className="menu-text-main">Dashboard</span>
             </div>
-          </Link>
+          </div>
           
-          <Link to="/managerCabang/datakaryawan" className="menu-item" style={{ textDecoration: 'none', color: 'inherit' }}>
+          {/* Menu Kelola Cabang dihilangkan */}
+
+          <div className="menu-item" onClick={() => navigate('/managerCabang/datakaryawan')}>
             <div className="menu-left">
                 <img src={iconKaryawan} alt="karyawan" className="menu-icon-main"/> 
                 <span className="menu-text-main">Data Karyawan</span>
             </div>
-          </Link>
+          </div>
 
-          <Link to="/managerCabang/perizinan" className="menu-item" style={{ textDecoration: 'none', color: 'inherit' }}>
+          {/* Menu Kehadiran diubah jadi Perizinan, class arrow & icon bawah dibuang */}
+          <div className="menu-item" onClick={() => navigate('/managerCabang/perizinan')}>
             <div className="menu-left">
-                <img src={iconPerizinan} alt="izin" className="menu-icon-main"/> 
+                <img src={iconKehadiran} alt="izin" className="menu-icon-main"/> 
                 <span className="menu-text-main">Perizinan</span>
             </div>
-          </Link>
+          </div>
 
-          <Link to="/managerCabang/laporan" className="menu-item" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <div className="menu-item" onClick={() => navigate('/managerCabang/laporan')}>
             <div className="menu-left">
                 <img src={iconLaporan} alt="lapor" className="menu-icon-main"/> 
                 <span className="menu-text-main">Laporan</span>
             </div>
-          </Link>
+          </div>
         </nav>
 
         <div className="sidebar-footer">
@@ -122,8 +123,8 @@ const DashboardManagerCabang = () => {
 
       <main className="main-content">
         <header className="content-header">
-          <h1>Sistem Absensi</h1>
-          <p>Sistem Absensi</p>
+          <h1>Dashboard Manager Cabang</h1>
+          <p>Manajemen operasional dan statistik cabang</p>
         </header>
 
         <div className="chart-section shadow-box">
@@ -152,4 +153,4 @@ const DashboardManagerCabang = () => {
   );
 };
 
-export default DashboardManagerCabang;
+export default DashboardManager;
