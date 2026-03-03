@@ -365,7 +365,6 @@
 .neo-drop-item { padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; color: #444; transition: 0.2s; }
 .neo-drop-item:hover { background: #8dae12; color: white; }
 
-<<<<<<< HEAD
 /* Judul Tabel tetap diam di atas */
 .neo-table-header { 
     background: #8dae12; 
@@ -398,15 +397,6 @@
     top: 0; 
     z-index: 10; 
 }
-=======
-
-/* ================= TABLE AREA ================= */
-.neo-table-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #f0f0f0; }
-.neo-table-header { background: #8dae12; color: white; padding: 15px 25px; font-weight: 800; font-size: 15px; }
-
-.neo-table { width: 100%; border-collapse: collapse; }
-.neo-table th { text-align: center; padding: 15px 10px; background: #fafafa; border-bottom: 2px solid #eee; color: #888; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
->>>>>>> caef18282616a190a6874beec58c59cdc2fd63ac
 .neo-table th:first-child { text-align: left; padding-left: 25px; }
 
 .neo-table td { 

@@ -23,7 +23,6 @@
 /* ==================== SIDEBAR ==================== */
 /* ================================================= */
 
-<<<<<<< HEAD
 .sidebar {
   width: 300px;
   padding: 25px 25px;
@@ -64,26 +63,6 @@
   transition: all 0.3s ease;
   color: #fff;
 }
-=======
-.sidebar { width: 300px; padding: 25px 25px; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
-.logo-area { margin-top: 38px; margin-bottom: 26px !important; padding-left: 10px; }
-.logo-img { width: 100%; max-width: 250px; height: auto; display: block; filter: grayscale(100%) brightness(0) invert(1) contrast(1000%) !important; }
-
-/* --- MENU NAV --- */
-.menu-nav { display: flex; flex-direction: column; gap: 18px; }
-.menu-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; color: #fff; }
-.menu-left { display: flex; align-items: center; gap: 15px; }
-.menu-icon-main { width: 28px; height: 28px; filter: brightness(0) invert(1); transition: all 0.3s ease; }
-.menu-text-main { font-size: 18px; font-weight: 600; transition: all 0.3s ease; }
-.arrow-icon-main { width: 20px; height: 20px; filter: brightness(0) invert(1); opacity: 0.8; transition: all 0.3s ease; }
-.arrow-icon-main.rotate-up { transform: rotate(180deg); }
-
-/* MENU ITEM ACTIVE */
-.menu-item.active { background-color: #ffffff !important; color: #2fb800 !important; border: 1px solid #ffffff; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
-.menu-item.active .menu-icon-main, .menu-item.active .arrow-icon-main { filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg) brightness(95%) contrast(105%) !important; opacity: 1; }
-.menu-item.active .menu-text-main { color: #2fb800 !important; }
-.menu-item:hover:not(.active) { background-color: rgba(255, 255, 255, 0.15); }
->>>>>>> caef18282616a190a6874beec58c59cdc2fd63ac
 
 /* --- SUBMENU STYLING (Untuk HRD) --- */
 .submenu-container { display: flex; flex-direction: column; gap: 10px; margin-top: -10px; padding-left: 20px; }
