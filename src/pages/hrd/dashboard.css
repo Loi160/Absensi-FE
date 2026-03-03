@@ -97,7 +97,6 @@
 /* Mengubah warna Ikon saat Active */
 .menu-item.active .menu-icon-main,
 .menu-item.active .arrow-icon-main {
-  /* Filter ini mengubah putih menjadi hijau #2fb800 */
   filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg) brightness(95%) contrast(105%) !important;
   opacity: 1;
 }
@@ -125,7 +124,22 @@
   box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
 }
 
-.content-header h1 {
+/* Cari bagian ini di dashboard.css */
+.content-header {
+  display: flex;
+  flex-direction: column; /* Mengubah arah dari samping ke bawah */
+  align-items: flex-end;  /* Menarik semua isi header ke arah kanan */
+  gap: 40px;             /* Mengatur jarak antara teks judul dan tombol filter */
+  margin-bottom: -18px !important;
+}
+
+/* Tambahkan ini agar teks judul tetap di kiri */
+.header-text {
+  align-self: flex-start; /* Memaksa judul dan subjudul tetap di kiri */
+  width: 100%;
+}
+
+.header-text h1 {
   font-size: 32px;
   font-weight: 700;
   color: #111;
@@ -133,11 +147,72 @@
   letter-spacing: -0.5px;
 }
 
-.content-header p {
+.header-text p {
   color: #666;
   font-size: 16px;
 }
 
+/* FILTER DROPDOWN STYLE */
+.filter-wrapper {
+  position: relative;
+}
+
+.btn-filter-green {
+  background: #8dae12;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.filter-arrow {
+  width: 10px;
+  filter: brightness(0) invert(1);
+  transition: transform 0.2s ease;
+}
+
+.filter-arrow.rotate {
+  transform: rotate(180deg);
+}
+
+.filter-dropdown {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  background-color: #ffffff !important;
+  border-radius: 12px;
+  padding: 5px;
+  z-index: 1000;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  border: 1px solid #eee;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-item {
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  background-color: transparent;
+  color: #444 !important;
+  transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background-color: #8dae12 !important;
+  color: #ffffff !important;
+}
+
+/* CHART & STATS */
 .chart-section.shadow-box {
   background: white;
   padding: 25px;
@@ -227,6 +302,10 @@
   .sidebar { width: 100%; padding: 20px; }
   .logo-img { max-width: 200px; }
   .main-content { margin: 0; border-radius: 25px 25px 0 0; padding: 25px; }
+  
+  .content-header { flex-direction: column; align-items: flex-start; gap: 15px;}
+  .filter-wrapper { align-self: flex-start; }
+
   .chart-container-inner { height: 300px; }
   .stats-grid { grid-template-columns: 1fr; }
   .sidebar-footer { margin-top: 30px; }

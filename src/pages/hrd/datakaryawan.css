@@ -193,11 +193,42 @@
 .custom-table th { padding: 12px 15px; text-align: left; font-size: 13px; font-weight: 700; background-color: #f9f9f9; border-bottom: 2px solid #ddd; color: #333; }
 .custom-table td { padding: 12px 15px; font-size: 13px; color: #444; border-bottom: 1px solid #eee; }
 .text-center { text-align: center !important; }
-.status-dots-spaced { display: flex; justify-content: center; gap: 15px; }
-.dot { width: 8px; height: 8px; border-radius: 50%; }
-.dot-green { background-color: #00c853; }
-.dot-red { background-color: #d50000; }
-.hover-underline:hover { text-decoration: underline; color: #8dae12 !important; }
+
+/* STATUS DOTS */
+.status-dots-spaced { display: flex; justify-content: center; align-items: center; gap: 15px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.dot-green { background-color: #00c853; box-shadow: 0 0 5px rgba(0, 200, 83, 0.5); }
+.dot-red { background-color: #ff1744; box-shadow: 0 0 5px rgba(255, 23, 68, 0.5); }
+
+/* Tambahan: Efek hover pada baris yang bisa diklik */
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.clickable-row:hover {
+  background-color: #f1f8e9; /* Hijau sangat muda saat di-hover */
+}
+/* Menghapus garis bawah pada nama, cukup ditebalkan saja */
+.clickable-name {
+  color: #222;
+  font-weight: 700;
+}
+
+/* Menghilangkan background button edit bawaan agar bersih */
+.btn-edit-clean {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}
+.img-edit-gray {
+  width: 18px;
+  filter: brightness(0) invert(0.5);
+  transition: 0.2s;
+}
+.btn-edit-clean:hover .img-edit-gray {
+  filter: brightness(0); /* Menjadi hitam saat di-hover */
+}
 
 /* ================= MODAL STYLE ================= */
 .modal-overlay {
@@ -220,7 +251,7 @@
 .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 15px; }
 .form-group { display: flex; flex-direction: column; }
 .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #222; }
-.input-white { width: 100%; padding: 10px 12px; background-color: #fff; border: 1px solid #ccc; border-radius: 6px; outline: none; font-size: 14px; color: #333; }
+.input-white, .input-gray { width: 100%; padding: 10px 12px; background-color: #f9f9f9; border: 1px solid #ccc; border-radius: 6px; outline: none; font-size: 14px; color: #333; }
 
 /* FOOTER BUTTONS */
 .modal-footer { display: flex; gap: 15px; margin-top: 30px; }

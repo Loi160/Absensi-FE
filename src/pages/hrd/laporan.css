@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 /* ================= RESET & BASE ================= */
 * { 
@@ -17,18 +17,125 @@
 }
 
 /* ================= SIDEBAR ================= */
-.sidebar { width: 320px; padding: 40px 30px; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
-.logo-title { font-size: 30px; font-weight: 800; letter-spacing: -1px; margin-bottom: 30px; }
-.logo-img { width: 100%; max-width: 260px; margin-bottom: 20px; }
-.menu-nav { display: flex; flex-direction: column; gap: 15px; }
-.menu-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; border-radius: 14px; cursor: pointer; color: #fff; transition: 0.3s; }
-.menu-item.active { background-color: rgba(255, 255, 255, 0.25); border: 1px solid rgba(255, 255, 255, 0.3); }
-.sidebar-footer { margin-top: auto; }
+.sidebar {
+    width: 300px;
+    padding: 25px 25px; 
+    color: white;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.logo-area {
+    margin-top: 38px; 
+    margin-bottom: 26px !important;
+    padding-left: 10px;
+}
+
+.logo-img {
+    width: 100%;
+    max-width: 250px; 
+    height: auto;
+    display: block;
+    filter: grayscale(100%) brightness(0) invert(1) contrast(1000%) !important;
+}
+
+.menu-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 18px; 
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; 
+    padding: 12px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #fff;
+}
+
+.menu-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.menu-icon-main {
+    width: 28px;
+    height: 28px;
+    filter: brightness(0) invert(1);
+    transition: all 0.3s ease;
+}
+
+.menu-text-main {
+    font-size: 18px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.arrow-icon-main {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+    transition: all 0.3s ease;
+}
+.arrow-icon-main.rotate-up {
+    transform: rotate(180deg);
+}
+
+.menu-item.active {
+    background-color: #ffffff !important; 
+    color: #2fb800 !important; 
+    border: 1px solid #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.menu-item.active .menu-icon-main,
+.menu-item.active .arrow-icon-main {
+    filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg) brightness(95%) contrast(105%) !important;
+    opacity: 1;
+}
+
+.menu-item.active .menu-text-main {
+    color: #2fb800 !important;
+}
+
+.menu-item:hover:not(.active) {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* SIDEBAR FOOTER (LOG OUT) */
+.sidebar-footer {
+    margin-top: auto; 
+    padding-top: 25px; 
+    border-top: 1px solid rgba(255, 255, 255, 0.2); 
+    text-align: center;
+    padding-bottom: 15px;
+}
+
+.btn-logout {
+    background: transparent; 
+    border: 1px solid rgba(255, 255, 255, 0.7); 
+    color: #fff; 
+    font-family: 'Inter', sans-serif;
+    font-size: 20px; 
+    font-weight: 700; 
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 12px 0;
+    width: 100%;
+    border-radius: 50px;
+}
+
 .btn-logout:hover {
-    background-color: #ffffff; /* Latar belakang jadi putih bersih */
-    color: #2fb800; /* Tulisan berubah jadi hijau Amaga */
-    border-color: #ffffff; /* Garis pinggir ikut putih biar rapi */
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Tambahan sedikit bayangan biar lebih elegan */
+    background-color: #ffffff !important; 
+    color: #2fb800 !important; 
+    border-color: #ffffff !important; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; 
 }
 
 /* ================= MAIN CONTENT ================= */
@@ -38,24 +145,59 @@
     margin: 25px 35px 30px 0; 
     border-radius: 40px; 
     padding: 40px; 
-    overflow-y: auto; 
+    /* Mematikan scroll utama agar bisa di-scroll di dalam tabel saja */
+    overflow-y: hidden; 
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
 }
 
-.header-laporan-neo h1 { font-size: 36px; font-weight: 800; color: #000; }
-.header-laporan-neo p { font-size: 16px; color: #555; margin-top: 5px; }
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end; 
+  margin-bottom: 30px;
+  flex-shrink: 0; /* Mencegah header menyusut */
+}
+
+.header-text {
+  align-self: flex-start; 
+}
+
+.header-text h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 5px;
+  letter-spacing: -0.5px;
+}
+
+.header-text p {
+  color: #666;
+  font-size: 16px;
+}
 
 /* ================= FILTER ZONE ================= */
 .neo-filter-zone { 
-    margin-top: 30px; 
     display: flex; 
     justify-content: space-between; 
     align-items: flex-end; 
+    width: 100%; 
+    margin-top: 20px; 
     margin-bottom: 30px; 
+    flex-shrink: 0; /* Mencegah area filter menyusut */
 }
 
 .input-group-neo { display: flex; gap: 20px; }
-.neo-field { display: flex; flex-direction: column; gap: 5px; }
-.neo-field label { font-size: 11px; font-weight: 800; color: #8dae12; margin-left: 10px; text-transform: uppercase; }
+.neo-field { display: flex; flex-direction: column; gap: 0px !important; }
+
+.neo-field label { 
+    font-size: 14px !important; 
+    font-weight: 600 !important; 
+    color: black !important; 
+    margin-left: 10px; 
+    text-transform: none !important; 
+}
 
 .neo-input { 
     background-color: #8dae12; 
@@ -69,7 +211,11 @@
     width: 200px;
 }
 
-/* ================= BUTTON GROUP (PRINT & FILTER) ================= */
+.neo-input::placeholder { color: rgba(255, 255, 255, 0.8); }
+.neo-input::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+.neo-input:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ================= BUTTON GROUP ================= */
 .button-group-vertical-right { 
     display: flex; 
     flex-direction: column; 
@@ -82,30 +228,28 @@
     color: white; 
     border: none; 
     padding: 10px 45px; 
-    border-radius: 15px; 
+    border-radius: 50px !important; 
     font-weight: 800; 
     cursor: pointer; 
     transition: 0.3s;
 }
 
-/* ================= DROPDOWN SUPER SLIM (FIX) ================= */
-.dropdown-neo-bottom-wrapper { 
-    position: relative; 
-    display: inline-block; 
-}
+.btn-neo-print-top:hover { background-color: #7a9610; }
+
+.dropdown-neo-bottom-wrapper { position: relative; display: inline-block; }
 
 .btn-neo-filter-bottom { 
     background: white; 
     color: #8dae12; 
     border: 1.5px solid #8dae12; 
-    padding: 5px 12px; /* Padding kecil agar pas dengan teks */
-    border-radius: 20px; 
+    padding: 5px 12px; 
+    border-radius: 50px; 
     font-weight: 700; 
     cursor: pointer; 
     display: flex; 
     align-items: center; 
     gap: 8px; 
-    width: auto; /* Mengecilkan frame sesuai isi */
+    width: auto; 
     font-size: 13px;
     transition: 0.2s;
 }
@@ -139,20 +283,42 @@
 .btn-neo-filter-bottom img { 
     width: 8px; 
     filter: invert(56%) sepia(88%) saturate(354%) hue-rotate(34deg) brightness(94%) contrast(87%);
+    transition: transform 0.2s;
 }
 .btn-neo-filter-bottom img.rotate { transform: rotate(180deg); }
 
-/* ================= TABLE AREA ================= */
+/* ================= TABLE AREA DENGAN SCROLL ================= */
+
+/* Wrapper Kartu agar memakan sisa tinggi layar */
 .neo-table-card { 
     background: white; 
     border-radius: 20px; 
     overflow: hidden; 
     border: 1px solid #f0f0f0; 
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* Penting: Mengambil sisa ruang di main-content */
 }
 
-.neo-table-header { background: #8dae12; color: white; padding: 15px 25px; font-weight: 800; font-size: 15px; }
+/* Judul Tabel tetap diam di atas */
+.neo-table-header { 
+    background: #8dae12; 
+    color: white; 
+    padding: 15px 25px; 
+    font-weight: 800; 
+    font-size: 15px; 
+    flex-shrink: 0; 
+}
+
+/* Area khusus yang bisa di-scroll (isi tabelnya) */
+.neo-table-wrapper {
+    flex: 1; 
+    overflow-y: auto; /* Mengaktifkan scroll vertikal di sini */
+}
 
 .neo-table { width: 100%; border-collapse: collapse; }
+
+/* Membuat Nama Kolom (Header Tabel) tetap diam saat di-scroll */
 .neo-table th { 
     text-align: center; 
     padding: 15px 10px; 
@@ -162,20 +328,24 @@
     font-size: 11px; 
     letter-spacing: 1px;
     text-transform: uppercase;
+    position: sticky; /* Membuatnya nempel di atas */
+    top: 0; 
+    z-index: 10; 
 }
 .neo-table th:first-child { text-align: left; padding-left: 25px; }
 
-.neo-table td { padding: 15px 10px; border-bottom: 1px solid #f9f9f9; font-size: 14px; vertical-align: middle; }
+.neo-table td { 
+    padding: 15px 10px; 
+    border-bottom: 1px solid #f9f9f9; 
+    font-size: 14px; 
+    vertical-align: middle; 
+}
 .neo-td-name { font-weight: 700; color: #111; padding-left: 25px !important; }
 
-/* DUAL BADGE CONTAINER (HADIR) */
-.neo-dual-badge-container {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-}
+/* DUAL BADGE CONTAINER */
+.neo-dual-badge-container { display: flex; justify-content: center; gap: 6px; }
 
-/* BADGE STATUS STYLE */
+/* BADGE STATUS */
 .neo-badge { 
     background: #eee; 
     padding: 5px 10px; 
@@ -188,31 +358,67 @@
     color: #444;
 }
 
-.neo-badge.warn { background: #fffcea; color: #f1c40f; }  /* Terlambat */
-.neo-badge.info { background: #f0f7ff; color: #2980b9; }  /* Lembur/FIMTK */
-.neo-badge.alert { background: #fff5f4; color: #e74c3c; } /* Alpha */
+.neo-badge.manual { background: #e3f2fd; color: #1565c0; }
+
+/* WARNA KHUSUS TERLAMBAT */
+tr.row-warn-yellow td { background-color: #fff3bf !important; border-bottom: 1px solid #f59f00 !important; }
+tr.row-warn-orange td { background-color: #ffd8a8 !important; border-bottom: 1px solid #e8590c !important; }
+tr.row-warn-red td { background-color: #ffc9c9 !important; border-bottom: 1px solid #e03131 !important; }
+
+tr.row-warn-yellow .neo-td-name { color: #b06500 !important; } 
+tr.row-warn-orange .neo-td-name { color: #d9480f !important; } 
+tr.row-warn-red .neo-td-name { color: #c92a2a !important; }    
+
+tr.row-warn-yellow .neo-badge.warn-badge { background-color: #f59f00; color: white; box-shadow: 0 2px 6px rgba(245, 159, 0, 0.4); }
+tr.row-warn-orange .neo-badge.warn-badge { background-color: #e8590c; color: white; box-shadow: 0 2px 6px rgba(232, 89, 12, 0.4); }
+tr.row-warn-red .neo-badge.warn-badge { background-color: #e03131; color: white; box-shadow: 0 2px 6px rgba(224, 49, 49, 0.4); }
+
+.neo-badge.info { background: #f0f7ff; color: #2980b9; }  
+.neo-badge.alert { background: #fff5f4; color: #e74c3c; } 
 
 .text-center { text-align: center; }
 
-/* ================= MULTI CABANG (CABANG 4) ================= */
+.empty-state { text-align: center; padding: 30px; color: #888; font-style: italic; font-size: 14px; }
+
+/* ================= MULTI CABANG (CABANG 4) SCROLL ================= */
+/* Jika menampilkan banyak tabel, biarkan main-content yang scroll khusus untuk mode ini */
 .multi-cabang-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 35px; /* Memberikan jarak antar tabel cabang */
+    gap: 35px; 
     margin-top: 10px;
+    overflow-y: auto; /* Scroll diaktifkan untuk pembungkus multi-cabang */
+    flex: 1;
+    padding-right: 10px;
 }
 
 .cabang-section {
     display: flex;
     flex-direction: column;
-    gap: 12px; /* Jarak antara judul (Cabang A/B/C) dengan tabelnya */
+    gap: 12px; 
+    flex-shrink: 0;
+}
+
+/* Membatasi tinggi tabel di dalam multi-cabang agar tidak terlalu panjang */
+.cabang-section .neo-table-card {
+    max-height: 400px; 
 }
 
 .cabang-section h3 {
     font-size: 18px;
     font-weight: 800;
     color: #111;
-    margin-left: 5px; /* Menyelaraskan teks judul dengan garis kiri tabel */
+    margin-left: 5px; 
 }
 
-@media print { .no-print { display: none !important; } .main-content { margin: 0; padding: 0; } }
+/* Kustomisasi Tampilan Scrollbar agar lebih rapi */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #ccc; }
+
+@media print { 
+    .no-print { display: none !important; } 
+    .main-content { overflow: visible !important; height: auto; }
+    .neo-table-wrapper { overflow: visible !important; height: auto; }
+}

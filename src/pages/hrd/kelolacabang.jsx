@@ -108,7 +108,7 @@ const KelolaCabang = () => {
       <main className="main-content">
         <div className="header-cabang-content">
             <h1>Kelola Cabang</h1>
-            <p>Manajemen lokasi dan unit operasional Amaga Corporation</p>
+            <p>Manajemen lokasi dan unit operasional</p>
             <div className="action-row-cabang">
                 <button className="btn-tambah-cabang-baru" onClick={() => {setModalTitle("Tambah Cabang"); setShowModal(true);}}>
                     <img src={iconTambah} alt="add" /> Tambah Cabang Baru

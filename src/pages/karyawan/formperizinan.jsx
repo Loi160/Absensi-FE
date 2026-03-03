@@ -5,23 +5,23 @@ import { ChevronDown, ArrowLeft } from "lucide-react";
 
 // Import assets
 import logoAmaga from "../../assets/logoamaga.svg";
-import logoPersegi from "../../assets/logopersegi.svg"; // <-- IMPORT INI DIKEMBALIKAN
+import logoPersegi from "../../assets/logopersegi.svg"; 
 import profileImg from "../../assets/profile.svg";
 import cameraIcon from "../../assets/camera.svg"; 
 
 const FormPerizinan = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("Izin"); 
+  const [activeTab, setActiveTab] = useState("Harian"); 
   const [tanggalMulai, setTanggalMulai] = useState("");
 
   const getTitle = () => {
-    if (activeTab === "Izin") return "Form Perizinan";
+    if (activeTab === "Harian") return "Form Perizinan";
     if (activeTab === "Cuti") return "Form Cuti";
     if (activeTab === "FIMTK") return "Form FIMTK";
   };
 
   const getSubtitle = () => {
-    if (activeTab === "Izin") return "Silahkan Melakukan Perizinan";
+    if (activeTab === "Harian") return "Silahkan Melakukan Perizinan";
     if (activeTab === "Cuti") return "Silahkan Melakukan Perizinan Cuti";
     if (activeTab === "FIMTK") return "Silahkan Melakukan Perizinan FIMTK";
   };
@@ -46,29 +46,22 @@ const FormPerizinan = () => {
         
         {/* ================= HEADER / SIDEBAR ================= */}
         <div className="fp-header">
-          {/* Tombol Back Mobile */}
           <button className="fp-btn-back mobile-only" type="button" onClick={() => navigate("/karyawan/dashboard")}>
             <ArrowLeft size={20} color="black" strokeWidth={2.5} />
           </button>
 
-          {/* Logo Persegi Desktop (Pojok Atas) */}
           <div className="fp-sidebar-logo-desktop desktop-only">
-             {/* DI SINI PERBAIKANNYA: Menggunakan logoPersegi, bukan logoAmaga */}
              <img src={logoPersegi} alt="Amaga Corp" />
           </div>
           
           <div className="fp-logo-center-area">
-            {/* Tampilan Mobile: Logo Amaga Bulat */}
             <img src={logoAmaga} alt="Logo Amaga" className="fp-img-circle-content mobile-only" />
-            
-            {/* Tampilan Desktop Sidebar: Foto Profil */}
             <img src={profileImg} alt="Profile User" className="fp-img-circle-content desktop-only" />
           </div>
 
           <h2 className="fp-title">{getTitle()}</h2>
           <p className="fp-subtitle">{getSubtitle()}</p>
 
-          {/* Tombol Logout Desktop */}
           <button className="fp-btn-logout-desktop desktop-only" onClick={() => navigate("/")}>
              Log Out
           </button>
@@ -77,7 +70,6 @@ const FormPerizinan = () => {
         {/* ================= FORM CONTENT ================= */}
         <div className="fp-form-card">
           
-          {/* Header Form Desktop (Sejajar dengan Back Button) */}
           <div className="fp-form-header-wrapper">
             <button className="fp-btn-back-desktop desktop-only" onClick={() => navigate("/karyawan/dashboard")}>
               <ArrowLeft size={24} color="#333" strokeWidth={2.5} />
@@ -88,7 +80,7 @@ const FormPerizinan = () => {
           <div className="fp-input-group">
             <label className="fp-label">Jenis Izin</label>
             <div className="fp-tab-container">
-              {["Izin", "Cuti", "FIMTK"].map((tab) => (
+              {["Harian", "Cuti", "FIMTK"].map((tab) => (
                 <button
                   key={tab}
                   type="button" 
@@ -106,8 +98,8 @@ const FormPerizinan = () => {
 
           <form onSubmit={handleAbsen}>
             
-            {/* IZIN */}
-            {activeTab === "Izin" && (
+            {/* IZIN HARIAN */}
+            {activeTab === "Harian" && (
               <>
                 <div className="fp-input-group">
                   <label className="fp-label">Nama</label>
@@ -119,24 +111,22 @@ const FormPerizinan = () => {
                     <select className="fp-select" required>
                       <option value="">Pilih cabang</option>
                       <option value="pusat">Cabang Pusat</option>
+                      <option value="cabang1">Cabang 1</option>
                     </select>
                     <ChevronDown className="fp-select-icon" size={16} />
                   </div>
                 </div>
                 <div className="fp-input-group">
-                  <label className="fp-label">Perizinan</label>
+                  <label className="fp-label">Tipe Izin</label>
                   <div className="fp-select-wrapper">
                     <select className="fp-select" required>
-                      <option value="">Pilih Izin</option>
+                      <option value="">Pilih Tipe Izin</option>
+                      <option value="acara">Acara Pribadi</option>
                       <option value="sakit">Sakit</option>
-                      <option value="acara">Acara Keluarga</option>
+                      <option value="lainnya">Lainnya</option>
                     </select>
                     <ChevronDown className="fp-select-icon" size={16} />
                   </div>
-                </div>
-                <div className="fp-input-group">
-                  <label className="fp-label">Keterangan</label>
-                  <textarea className="fp-textarea" placeholder="Keterangan" rows={3} required />
                 </div>
                 <div className="fp-input-group fp-row-2">
                   <div className="fp-col">
@@ -144,12 +134,16 @@ const FormPerizinan = () => {
                     <input type="date" className="fp-input" required min={getTodayDate()} onChange={(e) => setTanggalMulai(e.target.value)} />
                   </div>
                   <div className="fp-col">
-                    <label className="fp-label">Tanggal Akhir</label>
+                    <label className="fp-label">Tanggal Selesai</label>
                     <input type="date" className="fp-input" required min={tanggalMulai || getTodayDate()} />
                   </div>
                 </div>
                 <div className="fp-input-group">
-                  <label className="fp-label">Bukti Foto</label>
+                  <label className="fp-label">Keterangan</label>
+                  <textarea className="fp-textarea" placeholder="Masukkan Keterangan" rows={3} required />
+                </div>
+                <div className="fp-input-group">
+                  <label className="fp-label">Bukti Foto (Opsional)</label>
                   <button className="btn-camera-open" type="button">
                     <img src={cameraIcon} alt="Cam" style={{width: "20px"}} />
                     <span>Buka Camera</span>
@@ -159,7 +153,7 @@ const FormPerizinan = () => {
               </>
             )}
 
-            {/* CUTI */}
+            {/* IZIN CUTI */}
             {activeTab === "Cuti" && (
               <>
                 <div className="fp-input-group fp-row-2">
@@ -189,12 +183,16 @@ const FormPerizinan = () => {
                   </div>
                 </div>
                 <div className="fp-input-group">
-                  <label className="fp-label">Perizinan</label>
+                  <label className="fp-label">Nomor Telepon</label>
+                  <input type="text" className="fp-input" placeholder="Masukkan Nomor Telepon" required />
+                </div>
+                <div className="fp-input-group">
+                  <label className="fp-label">Tipe Izin</label>
                   <div className="fp-select-wrapper">
                     <select className="fp-select" required>
-                      <option value="">Pilih cuti</option>
-                      <option value="tahunan">Cuti Tahunan</option>
+                      <option value="">Pilih Tipe Cuti</option>
                       <option value="khusus">Cuti Khusus</option>
+                      <option value="tahunan">Cuti Tahunan</option>
                     </select>
                     <ChevronDown className="fp-select-icon" size={16} />
                   </div>
@@ -205,17 +203,13 @@ const FormPerizinan = () => {
                     <input type="date" className="fp-input" required min={getTodayDate()} onChange={(e) => setTanggalMulai(e.target.value)} />
                   </div>
                   <div className="fp-col">
-                    <label className="fp-label">Tanggal Akhir</label>
+                    <label className="fp-label">Tanggal Selesai</label>
                     <input type="date" className="fp-input" required min={tanggalMulai || getTodayDate()} />
                   </div>
                 </div>
                 <div className="fp-input-group">
                   <label className="fp-label">Keterangan</label>
-                  <textarea className="fp-textarea" placeholder="Keterangan" rows={3} required />
-                </div>
-                <div className="fp-input-group">
-                  <label className="fp-label">Nomor Telepon</label>
-                  <input type="number" className="fp-input" placeholder="Masukkan Nomor Telepon" required />
+                  <textarea className="fp-textarea" placeholder="Masukkan Keterangan" rows={3} required />
                 </div>
                 <button type="submit" className="btn-submit-green">Masuk Absensi</button>
               </>
@@ -252,10 +246,10 @@ const FormPerizinan = () => {
                 </div>
                 <div className="fp-input-group fp-row-2">
                   <div className="fp-col">
-                    <label className="fp-label">Izin MTK</label>
+                    <label className="fp-label">Tipe Izin</label>
                     <div className="fp-select-wrapper">
                       <select className="fp-select" required>
-                        <option value="">Izin</option>
+                        <option value="">Pilih Tipe</option>
                         <option value="keluar">Keluar Kantor</option>
                         <option value="pulang">Pulang Cepat</option>
                       </select>
@@ -273,7 +267,7 @@ const FormPerizinan = () => {
                     <input type="time" className="fp-input" required />
                   </div>
                   <div className="fp-col">
-                    <label className="fp-label">Jam Akhir</label>
+                    <label className="fp-label">Jam Selesai</label>
                     <input type="time" className="fp-input" required />
                   </div>
                 </div>
@@ -282,7 +276,7 @@ const FormPerizinan = () => {
                     <label className="fp-label">Keperluan</label>
                     <div className="fp-select-wrapper">
                       <select className="fp-select" required>
-                        <option value="">Keperluan</option>
+                        <option value="">Pilih Keperluan</option>
                         <option value="kantor">Kantor</option>
                         <option value="pribadi">Pribadi</option>
                       </select>
@@ -302,8 +296,8 @@ const FormPerizinan = () => {
                   </div>
                 </div>
                 <div className="fp-input-group">
-                  <label className="fp-label">Alasan</label>
-                  <textarea className="fp-textarea" placeholder="Alasan" rows={3} required />
+                  <label className="fp-label">Keterangan</label>
+                  <textarea className="fp-textarea" placeholder="Masukkan Keterangan" rows={3} required />
                 </div>
                 <button type="submit" className="btn-submit-green">Masuk Absensi</button>
               </>
