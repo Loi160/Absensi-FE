@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-=======
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
->>>>>>> caef18282616a190a6874beec58c59cdc2fd63ac
 
 /* ================= RESET & BASE ================= */
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -15,7 +11,6 @@
     overflow: hidden; 
 }
 
-<<<<<<< HEAD
 /* ================= SIDEBAR ================= */
 .sidebar {
     width: 300px;
@@ -137,41 +132,8 @@
     border-color: #ffffff !important; 
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; 
 }
-=======
-/* ================================================= */
-/* ==================== SIDEBAR ==================== */
-/* ================================================= */
-
-.sidebar { width: 300px; padding: 25px 25px; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
-.logo-area { margin-top: 38px; margin-bottom: 26px !important; padding-left: 10px; }
-.logo-img { width: 100%; max-width: 250px; height: auto; display: block; filter: grayscale(100%) brightness(0) invert(1) contrast(1000%) !important; }
-
-/* --- MENU NAV --- */
-.menu-nav { display: flex; flex-direction: column; gap: 18px; }
-.menu-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; color: #fff; }
-.menu-left { display: flex; align-items: center; gap: 15px; }
-.menu-icon-main { width: 28px; height: 28px; filter: brightness(0) invert(1); transition: all 0.3s ease; }
-.menu-text-main { font-size: 18px; font-weight: 600; transition: all 0.3s ease; }
-.arrow-icon-main { width: 20px; height: 20px; filter: brightness(0) invert(1); opacity: 0.8; transition: all 0.3s ease; }
-
-/* MENU ITEM ACTIVE (Konsisten dengan halaman lain) */
-.menu-item.active { background-color: #ffffff !important; color: #2fb800 !important; border: 1px solid #ffffff; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
-.menu-item.active .menu-icon-main, .menu-item.active .arrow-icon-main { filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg) brightness(95%) contrast(105%) !important; opacity: 1; }
-.menu-item.active .menu-text-main { color: #2fb800 !important; }
-.menu-item:hover:not(.active) { background-color: rgba(255, 255, 255, 0.15); }
-
-/* --- SIDEBAR FOOTER --- */
-.sidebar-footer { margin-top: auto; padding-top: 25px; border-top: 1px solid rgba(255, 255, 255, 0.2); text-align: center; padding-bottom: 15px; }
-.btn-logout { background: transparent; border: 1px solid rgba(255, 255, 255, 0.7); color: #fff; font-size: 20px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; padding: 12px 0; width: 100%; border-radius: 50px; }
-.btn-logout:hover { background-color: #ffffff !important; color: #2fb800 !important; border-color: #ffffff !important; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; }
-
-/* ================================================= */
-/* ================= MAIN CONTENT ================== */
-/* ================================================= */
->>>>>>> caef18282616a190a6874beec58c59cdc2fd63ac
 
 .main-content { 
-<<<<<<< HEAD
     flex: 1; 
     background-color: #fdfdfd; 
     margin: 25px 35px 30px 0; 
@@ -220,18 +182,6 @@
     flex-shrink: 0; /* Mencegah area filter menyusut */
 }
 
-=======
-    flex: 1; background-color: #fdfdfd; margin: 25px 35px 30px 0; border-radius: 40px; padding: 40px; 
-    overflow-y: auto; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
-}
-
-/* ================= HEADER LAPORAN ================= */
-.header-laporan-neo h1 { font-size: 36px; font-weight: 800; color: #000; letter-spacing: -0.5px; }
-.header-laporan-neo p { font-size: 16px; color: #555; margin-top: 5px; }
-
-/* ================= FILTER ZONE ================= */
-.neo-filter-zone { margin-top: 30px; display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; }
->>>>>>> caef18282616a190a6874beec58c59cdc2fd63ac
 .input-group-neo { display: flex; gap: 20px; }
 .neo-field { display: flex; flex-direction: column; gap: 0px !important; }
 
@@ -248,7 +198,6 @@
     border-radius: 20px 20px 5px 20px; font-size: 14px; font-weight: 600; outline: none; width: 200px;
 }
 
-<<<<<<< HEAD
 .neo-input::placeholder { color: rgba(255, 255, 255, 0.8); }
 .neo-input::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
 .neo-input:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -275,20 +224,10 @@
 .btn-neo-print-top:hover { background-color: #7a9610; }
 
 .dropdown-neo-bottom-wrapper { position: relative; display: inline-block; }
-=======
-/* ================= BUTTON GROUP (PRINT & FILTER) ================= */
-.button-group-vertical-right { display: flex; flex-direction: column; gap: 12px; align-items: flex-end; }
-.btn-neo-print-top { 
-    background-color: #8dae12; color: white; border: none; padding: 10px 45px; 
-    border-radius: 15px; font-weight: 800; cursor: pointer; transition: 0.3s;
-}
-.btn-neo-print-top:hover { background-color: #7a9710; }
->>>>>>> caef18282616a190a6874beec58c59cdc2fd63ac
 
 /* ================= DROPDOWN SUPER SLIM ================= */
 .dropdown-neo-bottom-wrapper { position: relative; display: inline-block; }
 .btn-neo-filter-bottom { 
-<<<<<<< HEAD
     background: white; 
     color: #8dae12; 
     border: 1.5px solid #8dae12; 
@@ -334,16 +273,10 @@
     width: 8px; 
     filter: invert(56%) sepia(88%) saturate(354%) hue-rotate(34deg) brightness(94%) contrast(87%);
     transition: transform 0.2s;
-=======
-    background: white; color: #8dae12; border: 1.5px solid #8dae12; padding: 5px 12px; 
-    border-radius: 20px; font-weight: 700; cursor: pointer; display: flex; align-items: center; 
-    gap: 8px; width: auto; font-size: 13px; transition: 0.2s;
->>>>>>> caef18282616a190a6874beec58c59cdc2fd63ac
 }
 .btn-neo-filter-bottom img { width: 8px; filter: invert(56%) sepia(88%) saturate(354%) hue-rotate(34deg) brightness(94%) contrast(87%); transition: transform 0.2s; }
 .btn-neo-filter-bottom img.rotate { transform: rotate(180deg); }
 
-<<<<<<< HEAD
 /* ================= TABLE AREA DENGAN SCROLL ================= */
 
 /* Wrapper Kartu agar memakan sisa tinggi layar */
@@ -355,12 +288,6 @@
     display: flex;
     flex-direction: column;
     flex: 1; /* Penting: Mengambil sisa ruang di main-content */
-=======
-.neo-dropdown-list-right { 
-    position: absolute; top: 110%; right: 0; min-width: 130px; background: white; 
-    border-radius: 12px; padding: 5px; z-index: 1000; box-shadow: 0 8px 20px rgba(0,0,0,0.12); 
-    border: 1px solid #eee; display: flex; flex-direction: column;
->>>>>>> caef18282616a190a6874beec58c59cdc2fd63ac
 }
 .neo-drop-item { padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; color: #444; transition: 0.2s; }
 .neo-drop-item:hover { background: #8dae12; color: white; }
