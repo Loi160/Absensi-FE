@@ -1,6 +1,3 @@
-/* =========================================
-   1. BASE & MOBILE LAYOUT (DEFAULT)
-   ========================================= */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 * {
@@ -248,45 +245,47 @@ button.mobile-only { display: flex; }
 }
 
 /* ============================================================
-   2. DESKTOP SIDEBAR & CONTENT (SAMA SEPERTI ABSENSI)
+   2. DESKTOP SIDEBAR & CONTENT (IDENTIK DENGAN ABSENSI & DASHBOARD)
    ============================================================ */
 
 @media (min-width: 1024px) {
   
   .fp-wrapper {
-    background-color: #F0F2F5; 
+    /* Background Full Gradasi Hijau */
+    background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
+    height: 100vh;
     padding: 0;
-    overflow: visible;
+    overflow: hidden; 
   }
 
   .fp-container {
     max-width: 100% !important;
     width: 100%;
-    min-height: 100vh;
-    display: grid !important;
-    grid-template-columns: 310px 1fr; 
-    grid-template-rows: 1fr;
-    background-color: transparent;
+    height: 100vh;
+    display: flex !important; /* Diubah jadi Flex agar kembar identik */
+    flex-direction: row;
+    background-color: transparent !important;
   }
 
   /* Visibility Control Desktop */
-  .desktop-only { display: block !important; }
+  .desktop-only { display: flex !important; }
   button.desktop-only { display: flex !important; }
   div.desktop-only { display: flex !important; }
   .mobile-only { display: none !important; }
 
-  /* SIDEBAR UTAMA */
+  /* SIDEBAR KIRI (Transparan & Lebar 300px) */
   .fp-header {
-    grid-column: 1 / 2;
+    position: relative;
+    width: 300px; /* Lebar dikunci 300px */
+    flex-shrink: 0;
     height: 100vh;
     border-radius: 0;
-    padding: 0 !important; 
+    padding: 25px !important; 
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important; 
     align-items: center !important;
-    position: sticky;
-    top: 0;
+    background: transparent !important;
     z-index: 100;
     text-shadow: none; 
   }
@@ -298,29 +297,31 @@ button.mobile-only { display: flex; }
     top: -40px; 
   }
 
-  /* --- LOGO AMAGA CORP (POJOK ATAS) - TANPA GARIS PEMBATAS --- */
+  /* ==========================================
+     LOGO AMAGA CORP - RATA KIRI, 260px
+     ========================================== */
   .fp-sidebar-logo-desktop {
     position: absolute !important;
-    top: 0 !important; 
-    left: 0 !important;
-    width: 100% !important;
-    padding: 50px 20px !important;
-    justify-content: center !important;
-    align-items: center !important;
-    /* GARIS PEMBATAS DIHAPUS SESUAI PERMINTAAN */
+    top: 60px !important; 
+    left: 35px !important; /* Rata Kiri */
+    width: auto !important;
+    padding: 0 !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
     border-bottom: none !important; 
   }
 
   .fp-sidebar-logo-desktop img {
-    width: 260px !important; 
+    width: 260px !important; /* Ukuran identik dengan file lain */
     height: auto !important;
     filter: brightness(0) invert(1) !important; 
     opacity: 1 !important;
   }
 
-  /* --- PROFIL LINGKARAN --- */
+  /* --- PROFIL KARYAWAN (TENGAH) --- */
   .fp-logo-center-area {
-    margin: 0 0 20px 0 !important;
+    margin: 0 0 10px 0 !important;
     display: flex !important;
     justify-content: center !important;
     width: 100% !important;
@@ -333,7 +334,6 @@ button.mobile-only { display: flex; }
     background: white !important;
     border-radius: 50% !important;
     border: 5px solid rgba(255, 255, 255, 0.3) !important;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
     padding: 0 !important; 
     object-fit: cover !important; 
   }
@@ -349,53 +349,66 @@ button.mobile-only { display: flex; }
   .fp-subtitle {
     font-size: 15px !important;
     color: white !important;
-    opacity: 0.85 !important;
+    opacity: 0.9 !important;
     margin-top: 5px !important;
     text-align: center !important;
   }
 
-  /* --- TOMBOL LOG OUT DESKTOP (POJOK BAWAH) --- */
+  /* ==========================================
+     TOMBOL LOG OUT - OVAL & SEJAJAR LOGO
+     ========================================== */
   .fp-btn-logout-desktop {
     position: absolute !important;
     bottom: 40px !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: 240px !important;
-    padding: 16px !important;
-    background: rgba(255, 255, 255, 0.12) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    border-radius: 12px !important;
-    color: white !important;
+    left: 30px !important; /* Sejajar dengan logo */
+    width: calc(100% - 60px) !important; /* Spasi aman kiri-kanan */
+    transform: none !important; /* Jangan ditengahin paksa */
+    padding: 12px 0 !important;
+    background: transparent !important; 
+    border: 1px solid rgba(255, 255, 255, 0.8) !important; 
+    border-radius: 50px !important; /* Pill shape */
+    color: #fff !important; 
     font-weight: 700 !important;
-    font-size: 16px !important;
+    font-size: 18px !important;
     cursor: pointer !important;
-    transition: all 0.3s !important;
+    transition: all 0.3s ease !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
-    text-align: center !important;
+  }
+
+  /* Garis tipis pembatas */
+  .fp-btn-logout-desktop::before {
+    content: "";
+    position: absolute;
+    top: -25px; 
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.3); 
   }
 
   .fp-btn-logout-desktop:hover {
-    background: rgba(255, 255, 255, 0.2) !important;
+    background-color: #ffffff !important; 
+    color: #2fb800 !important; 
+    border-color: #ffffff !important; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; 
   }
 
-  /* --- AREA KANAN (FORM CARD) - SCROLLABLE INTERNAL --- */
+  /* =========================================
+     AREA KANAN (FORM MENGAMBANG / FLOATING)
+     ========================================= */
   .fp-form-card {
-    grid-column: 2 / 3;
-    margin: 40px auto !important; 
+    flex: 1; 
+    background-color: #fdfdfd; 
+    margin: 30px 40px 30px 20px !important; /* Ruang napas persis dashboard */
     padding: 50px 80px !important; 
-    border-radius: 30px;
-    background: white;
-    max-width: 1100px !important; 
-    width: 92% !important; 
-    
-    /* SETTING SCROLLABLE DESKTOP */
-    height: 85vh !important; 
-    max-height: 850px; 
+    border-radius: 40px !important; 
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    height: calc(100vh - 60px) !important; 
+    max-height: none !important;
+    max-width: none !important;
     overflow-y: auto !important; 
-    
-    box-shadow: 0 10px 40px rgba(0,0,0,0.04);
   }
 
   /* Memperhalus scrollbar desktop */
@@ -406,7 +419,7 @@ button.mobile-only { display: flex; }
   .fp-form-card::-webkit-scrollbar-track {
     background: #f1f1f1; 
     border-radius: 10px;
-    margin: 20px 0;
+    margin: 40px 0; /* Jarak agar scrollbar tidak mentok ujung form */
   }
   .fp-form-card::-webkit-scrollbar-thumb {
     background: #ccc; 
@@ -445,7 +458,7 @@ button.mobile-only { display: flex; }
 
   .fp-card-title {
     font-size: 32px !important;
-    margin-bottom: 0 !important; /* Hilangkan margin bawah karena sudah diatur wrapper */
+    margin-bottom: 0 !important; 
   }
 
   /* --- Sisa elemen form (Input & Button Submit) --- */
@@ -475,7 +488,7 @@ button.mobile-only { display: flex; }
   }
 
   .btn-submit-green:hover {
-    background: #3ca32b;
+    background-color: #3ca32b;
     transform: translateY(-3px);
   }
 }

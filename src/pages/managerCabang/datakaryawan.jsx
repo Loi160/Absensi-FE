@@ -1,19 +1,19 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../hrd/datakaryawan.css"; // Mengambil CSS dari HRD
+// FIX: Mengambil CSS langsung dari folder hrd
+import "../hrd/datakaryawan.css";
 
 /* ================= ICON IMPORT ================= */
 import iconDashboard from "../../assets/dashboard.svg";
-// iconKelola dihapus karena tidak dipakai
 import iconKaryawan from "../../assets/datakaryawan.svg";
-import iconKehadiran from "../../assets/kehadiran.svg"; // Dipakai untuk menu Perizinan
+import iconPerizinan from "../../assets/perizinan.svg"; // Icon khusus Manager Cabang
 import iconLaporan from "../../assets/laporan.svg";
-import iconBawah from "../../assets/bawah.svg"; // Tetap dipertahankan untuk FilterDropdown
+import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 import iconTambah from "../../assets/tambah.svg";
 import iconEdit from "../../assets/edit.svg";
 
-const DataKaryawanManager = () => {
+const DataKaryawanManagerCabang = () => {
   const navigate = useNavigate();
 
   /* ================= DATA DUMMY ================= */
@@ -30,7 +30,8 @@ const DataKaryawanManager = () => {
       divisi: "Operasional",
       tanggalMasuk: "01/01/2023",
       jenisKelamin: "Laki-laki",
-      cabang: "1"
+      cabang: "1",
+      status: "Aktif" 
     },
     {
       id: 2,
@@ -44,7 +45,8 @@ const DataKaryawanManager = () => {
       divisi: "Marketing",
       tanggalMasuk: "15/03/2023",
       jenisKelamin: "Laki-laki",
-      cabang: "2"
+      cabang: "2",
+      status: "Aktif"
     },
     {
       id: 3,
@@ -58,7 +60,8 @@ const DataKaryawanManager = () => {
       divisi: "HR",
       tanggalMasuk: "20/05/2023",
       jenisKelamin: "Perempuan",
-      cabang: "3"
+      cabang: "3",
+      status: "Resign" 
     },
   ]);
 
@@ -94,7 +97,8 @@ const DataKaryawanManager = () => {
     setShowModal(true);         
   };
 
-  const handleOpenEdit = (employee) => {
+  const handleOpenEdit = (employee, e) => {
+    e.stopPropagation(); 
     setIsEditMode(true);        
     setSelectedEmployee(employee); 
     setShowModal(true);         
@@ -106,8 +110,8 @@ const DataKaryawanManager = () => {
   };
 
   // --- LOGIC PINDAH KE HALAMAN DETAIL ---
-  const handleNameClick = (employee) => {
-    // Navigasi ke route detail manager cabang
+  const handleRowClick = (employee) => {
+    // FIX UTAMA: Path disamakan dengan App.jsx (tambah tanda strip)
     navigate("/managerCabang/detail-karyawan", { state: { employee: employee } });
   };
 
@@ -136,7 +140,7 @@ const DataKaryawanManager = () => {
         <tr>
           <th>Nama</th>
           <th>Jabatan</th>
-          <th>Nik</th>
+          <th>NIK</th>
           <th>Password</th>
           <th>Tempat Lahir</th>
           <th>Tanggal Lahir</th>
@@ -147,30 +151,32 @@ const DataKaryawanManager = () => {
       </thead>
       <tbody>
         {karyawanList.map((item) => (
-          <tr key={item.id}>
-            {/* CLICK NAMA -> PINDAH HALAMAN */}
-            <td 
-              style={{ fontWeight: 600, cursor: "pointer", color: "#222" }} 
-              onClick={() => handleNameClick(item)}
-              className="hover-underline"
-            >
-              {item.nama}
-            </td>
+          <tr 
+            key={item.id} 
+            className="clickable-row" 
+            onClick={() => handleRowClick(item)} 
+          >
+            <td className="clickable-name">{item.nama}</td>
             <td>{item.jabatan}</td>
             <td>{item.nik}</td>
             <td>{item.password}</td>
             <td>{item.tempatLahir}</td>
             <td>{item.tanggalLahir}</td>
             <td>{item.alamat}</td>
-            <td className="text-center">
-              <button className="btn-edit-clean" onClick={() => handleOpenEdit(item)}>
+            
+            <td className="text-center" onClick={(e) => e.stopPropagation()}>
+              <button className="btn-edit-clean" onClick={(e) => handleOpenEdit(item, e)}>
                 <img src={iconEdit} alt="Edit" className="img-edit-gray" />
               </button>
             </td>
-            <td className="text-center">
+            
+            <td className="text-center" onClick={(e) => e.stopPropagation()}>
               <div className="status-dots-spaced">
-                <span className="dot dot-green"></span>
-                <span className="dot dot-red"></span>
+                {item.status === 'Aktif' ? (
+                  <span className="dot dot-green" title="Aktif"></span>
+                ) : (
+                  <span className="dot dot-red" title="Resign"></span>
+                )}
               </div>
             </td>
           </tr>
@@ -181,44 +187,42 @@ const DataKaryawanManager = () => {
 
   return (
     <div className="hrd-container">
-      {/* SIDEBAR */}
+      {/* SIDEBAR MANAGER CABANG */}
       <aside className="sidebar">
         <div className="logo-area">
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
+        
         <nav className="menu-nav">
-          <div className="menu-item" onClick={() => navigate("/managerCabang/dashboard")}>
+          <div className="menu-item" onClick={() => navigate('/managerCabang/dashboard')}>
             <div className="menu-left">
-                <img src={iconDashboard} alt="" className="menu-icon-main" />
+                <img src={iconDashboard} alt="dash" className="menu-icon-main"/> 
                 <span className="menu-text-main">Dashboard</span>
             </div>
           </div>
-          
-          {/* Menu Kelola Cabang Dihapus */}
 
-          {/* Menu Active: Data Karyawan */}
           <div className="menu-item active">
             <div className="menu-left">
-                <img src={iconKaryawan} alt="" className="menu-icon-main" />
+                <img src={iconKaryawan} alt="karyawan" className="menu-icon-main"/> 
                 <span className="menu-text-main">Data Karyawan</span>
             </div>
           </div>
 
-          {/* Menu Kehadiran diubah jadi Perizinan */}
-          <div className="menu-item" onClick={() => navigate("/managerCabang/perizinan")}>
+          <div className="menu-item" onClick={() => navigate('/managerCabang/perizinan')}>
             <div className="menu-left">
-                <img src={iconKehadiran} alt="" className="menu-icon-main" />
+                <img src={iconPerizinan} alt="perizinan" className="menu-icon-main"/> 
                 <span className="menu-text-main">Perizinan</span>
             </div>
           </div>
 
-          <div className="menu-item" onClick={() => navigate("/managerCabang/laporan")}>
+          <div className="menu-item" onClick={() => navigate('/managerCabang/laporan')}>
             <div className="menu-left">
-                <img src={iconLaporan} alt="" className="menu-icon-main" />
+                <img src={iconLaporan} alt="lapor" className="menu-icon-main"/> 
                 <span className="menu-text-main">Laporan</span>
             </div>
           </div>
         </nav>
+
         <div className="sidebar-footer">
           <button className="btn-logout" onClick={handleLogout}>Log Out</button>
         </div>
@@ -228,7 +232,7 @@ const DataKaryawanManager = () => {
       <main className="main-content">
         <div className="page-header">
           <h1>Data Karyawan</h1>
-          <p>Daftar pusat informasi dan detail administrasi karyawan cabang</p>
+          <p>Daftar pusat informasi dan detail administrasi karyawan</p>
         </div>
 
         {selectedCabang !== "Cabang 4" && (
@@ -270,35 +274,47 @@ const DataKaryawanManager = () => {
 
       {/* MODAL ADD / EDIT */}
       {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2 className="modal-title">{isEditMode ? "Edit" : "Tambah Karyawan"}</h2>
-              <p className="modal-subtitle">{isEditMode ? "Data Pribadi" : "Silahkan lengkapi data karyawan baru"}</p>
-              <hr className="modal-divider" />
+              <h2 className="modal-title">{isEditMode ? "Edit Karyawan" : "Tambah Karyawan"}</h2>
+              <p className="modal-subtitle">{isEditMode ? "Ubah data pribadi karyawan" : "Silahkan lengkapi data karyawan baru"}</p>
+              <hr className="modal-divider" style={{margin: '15px 0', border: 'none', borderBottom: '1px solid #ddd'}} />
             </div>
             <div className="modal-form">
-              <div className="form-grid">
+              <div className="form-grid-3">
                 <div className="form-group"><label>Nama</label><input type="text" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.nama : ""} /></div>
-                <div className="form-group"><label>Tanggal Masuk</label><input type="text" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.tanggalMasuk : ""} /></div>
+                <div className="form-group"><label>Tanggal Masuk</label><input type="date" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.tanggalMasuk : ""} /></div>
                 <div className="form-group"><label>Jabatan</label><input type="text" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.jabatan : ""} /></div>
+                
                 <div className="form-group"><label>Divisi</label><input type="text" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.divisi : ""} /></div>
                 <div className="form-group"><label>Nik (Username)</label><input type="text" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.nik : ""} /></div>
-                <div className="form-group"><label>Password</label><input type="password" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.password : ""} /></div>
+                <div className="form-group"><label>Password</label><input type="text" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.password : ""} /></div>
+                
                 <div className="form-group"><label>Tempat Lahir</label><input type="text" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.tempatLahir : ""} /></div>
-                <div className="form-group"><label>Tanggal Lahir</label><input type="text" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.tanggalLahir : ""} /></div>
-                <div className="form-group"><label>Jenis Kelamin</label><select className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.jenisKelamin : ""}><option value="">Pilih</option><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></div>
+                <div className="form-group"><label>Tanggal Lahir</label><input type="date" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.tanggalLahir : ""} /></div>
+                <div className="form-group"><label>Jenis Kelamin</label><select className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.jenisKelamin : ""}><option value="">Pilih</option><option value="Laki-laki">Laki-laki</option><option value="Perempuan">Perempuan</option></select></div>
+                
                 <div className="form-group"><label>Cabang</label><select className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.cabang : ""}><option value="">Pilih Cabang</option><option value="1">Cabang 1</option><option value="2">Cabang 2</option><option value="3">Cabang 3</option><option value="4">Cabang 4</option></select></div>
+                
+                <div className="form-group">
+                  <label>Status Karyawan</label>
+                  <select className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.status : "Aktif"}>
+                    <option value="Aktif">Aktif</option>
+                    <option value="Resign">Resign</option>
+                  </select>
+                </div>
+
               </div>
-              <div className="form-group full-width"><label>Alamat</label><input type="text" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.alamat : ""} /></div>
+              <div className="form-group" style={{marginBottom: '20px'}}><label>Alamat</label><input type="text" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.alamat : ""} /></div>
+              
               <div className="docs-section">
-                <h4 className="docs-title">Dokumen Pendukung</h4>
-                <hr className="modal-divider" />
-                <div className="upload-grid">
-                  {["Foto Diri", "Foto KTP", "KK (Kartu Keluarga)", "SKCK", "SIM", "Sertifikat Pendukung", "Dokumen Tambahan"].map((label, idx) => (
-                    <div key={idx} className="upload-box">
-                      <p className="upload-label">{label}</p>
-                      <div className="upload-content"><span className="upload-icon">⬆</span><span className="upload-text">Klik untuk upload</span></div>
+                <h4 style={{fontSize: '14px', marginBottom: '10px'}}>Dokumen Pendukung</h4>
+                <div className="form-grid-3">
+                  {["Foto Diri", "Foto KTP", "KK", "SKCK", "SIM", "Sertifikat"].map((label, idx) => (
+                    <div key={idx} className="form-group">
+                        <label>{label}</label>
+                        <input type="file" className="input-gray" style={{fontSize: '12px'}} />
                     </div>
                   ))}
                 </div>
@@ -315,4 +331,4 @@ const DataKaryawanManager = () => {
   );
 };
 
-export default DataKaryawanManager;
+export default DataKaryawanManagerCabang;

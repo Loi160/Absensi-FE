@@ -1,16 +1,16 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import "../hrd/datakaryawan.css"; // Mengambil CSS dari HRD
+// Mengambil CSS langsung dari folder HRD agar layout tetap sama persis
+import "../hrd/datakaryawan.css"; 
 
 /* ================= ICON IMPORT ================= */
 import iconDashboard from "../../assets/dashboard.svg";
-// iconKelola dan iconBawah dihapus karena tidak dipakai di manager cabang
 import iconKaryawan from "../../assets/datakaryawan.svg";
-import iconKehadiran from "../../assets/kehadiran.svg"; // Dipakai untuk menu Perizinan
+import iconPerizinan from "../../assets/perizinan.svg"; // Icon khusus Manager Cabang
 import iconLaporan from "../../assets/laporan.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 
-const DetailKaryawanManager = () => {
+const DetailKaryawanManagerCabang = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const employee = location.state?.employee;
@@ -43,30 +43,40 @@ const DetailKaryawanManager = () => {
 
   return (
     <div className="hrd-container">
-      {/* SIDEBAR */}
+      {/* ================= SIDEBAR MANAGER CABANG ================= */}
       <aside className="sidebar">
         <div className="logo-area">
-          {/* H2 title dihapus agar konsisten dengan layout dashboard */}
+          {/* Tag h2 dihapus agar logo AMAGACORP tidak numpuk dua kali */}
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
         <nav className="menu-nav">
           <div className="menu-item" onClick={() => navigate("/managerCabang/dashboard")}>
-            <div className="menu-left"><img src={iconDashboard} alt="" className="menu-icon-main" /><span className="menu-text-main">Dashboard</span></div>
+            <div className="menu-left">
+                <img src={iconDashboard} alt="" className="menu-icon-main" />
+                <span className="menu-text-main">Dashboard</span>
+            </div>
           </div>
           
-          {/* Menu Kelola Cabang Dihapus */}
-
+          {/* Menu Data Karyawan Active karena Detail Karyawan adalah bagian dari sini */}
           <div className="menu-item active" onClick={() => navigate("/managerCabang/datakaryawan")}>
-            <div className="menu-left"><img src={iconKaryawan} alt="" className="menu-icon-main" /><span className="menu-text-main">Data Karyawan</span></div>
+            <div className="menu-left">
+                <img src={iconKaryawan} alt="" className="menu-icon-main" />
+                <span className="menu-text-main">Data Karyawan</span>
+            </div>
           </div>
-
-          {/* Menu Kehadiran diubah jadi Perizinan */}
+          
           <div className="menu-item" onClick={() => navigate("/managerCabang/perizinan")}>
-            <div className="menu-left"><img src={iconKehadiran} alt="" className="menu-icon-main" /><span className="menu-text-main">Perizinan</span></div>
+            <div className="menu-left">
+                <img src={iconPerizinan} alt="" className="menu-icon-main" />
+                <span className="menu-text-main">Perizinan</span>
+            </div>
           </div>
-
+          
           <div className="menu-item" onClick={() => navigate("/managerCabang/laporan")}>
-            <div className="menu-left"><img src={iconLaporan} alt="" className="menu-icon-main" /><span className="menu-text-main">Laporan</span></div>
+            <div className="menu-left">
+                <img src={iconLaporan} alt="" className="menu-icon-main" />
+                <span className="menu-text-main">Laporan</span>
+            </div>
           </div>
         </nav>
         <div className="sidebar-footer">
@@ -74,11 +84,11 @@ const DetailKaryawanManager = () => {
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
+      {/* ================= MAIN CONTENT (SAMA PERSIS DENGAN HRD) ================= */}
       <main className="main-content">
         <div className="page-header">
           <h1>Detail Karyawan</h1>
-          <p>Informasi detail data diri karyawan cabang</p>
+          <p>Informasi detail data diri karyawan</p>
         </div>
 
         {/* CARD PUTIH (SCROLLABLE) */}
@@ -123,7 +133,7 @@ const DetailKaryawanManager = () => {
           {/* TOMBOL KEMBALI DI BAWAH KANAN */}
           <div style={{ marginTop: '40px', display: 'flex', justifyContent: 'flex-end' }}>
              <button className="btn-batal" onClick={() => navigate(-1)} style={{ width: '150px' }}>
-               Kembali
+                Kembali
              </button>
           </div>
 
@@ -133,4 +143,4 @@ const DetailKaryawanManager = () => {
   );
 };
 
-export default DetailKaryawanManager;
+export default DetailKaryawanManagerCabang;

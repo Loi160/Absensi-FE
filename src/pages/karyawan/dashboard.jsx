@@ -24,7 +24,6 @@ const Dashboard = () => {
   }, []);
 
   const formatDateIndo = (date) => {
-    // UI/UX Update: Menggunakan 'short' untuk bulan agar menjadi singkatan (Feb)
     const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
     return date.toLocaleDateString('id-ID', options);
   };
@@ -40,10 +39,10 @@ const Dashboard = () => {
     <div className="main-wrapper">
       <div className="card-container">
 
-        {/* ================= HEADER LAYER ================= */}
+        {/* ================= HEADER / SIDEBAR ================= */}
         <div className="header-section">
 
-          {/* HEADER MOBILE: Profil Kiri, Sapaan Tengah, Logout Kanan */}
+          {/* HEADER MOBILE: Profil Kiri, Sapaan Tengah, Logout Kanan (TIDAK BERUBAH) */}
           <div className="header-top-mobile mobile-only">
              <div className="header-user-info">
                <img src={profileImg} alt="Profile" className="mobile-profile-img" />
@@ -57,25 +56,21 @@ const Dashboard = () => {
              </button>
           </div>
 
-          {/* SIDEBAR DESKTOP CONTENT */}
-          <div className="desktop-sidebar-content desktop-only">
-            {/* Logo Persegi Desktop (Pojok Atas) */}
-            <div className="sidebar-logo-desktop">
-               <img src={logoPersegi} alt="Amaga Corp" />
-            </div>
-
-            <div className="logo-center-area">
-              <img src={profileImg} alt="Profile User" className="img-circle-content" />
-            </div>
-
-            <h2 className="title-form">Dashboard</h2>
-            <p className="subtitle-form">Halo, Syahrul. Selamat Bekerja!</p>
-
-            {/* Tombol Logout Desktop (Pojok Bawah) */}
-            <button className="btn-logout-desktop" onClick={() => navigate("/")}>
-               Log Out
-            </button>
+          {/* STRUKTUR DESKTOP BARU: Disamakan dengan Absensi (Tanpa wrapper tambahan) */}
+          <div className="sidebar-logo-desktop desktop-only">
+             <img src={logoPersegi} alt="Amaga Corp" />
           </div>
+
+          <div className="logo-center-area desktop-only">
+            <img src={profileImg} alt="Profile User" className="img-circle-content" />
+          </div>
+
+          <h2 className="title-form desktop-only">Dashboard</h2>
+          <p className="subtitle-form desktop-only">Halo, Syahrul. Selamat Bekerja!</p>
+
+          <button className="btn-logout-desktop desktop-only" onClick={() => navigate("/")}>
+             Log Out
+          </button>
         </div>
 
         {/* ================= CONTENT AREA ================= */}

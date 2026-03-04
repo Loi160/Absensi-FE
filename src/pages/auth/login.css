@@ -7,145 +7,198 @@
   font-family: 'Inter', sans-serif;
 }
 
-/* WRAPPER */
+/* Visibility Control */
+.desktop-only { display: none !important; }
+.mobile-only { display: block !important; }
+
+/* ================= MOBILE LAYOUT (LAYOUT ASLI ABANG) ================= */
+
 .login-wrapper {
-  background-color: #f1dede;
+  background-color: #f0f2f5;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: flex-start;
 }
 
-/* CONTAINER */
-.login-container {
+.login-split-container {
   width: 100%;
   max-width: 450px;
   min-height: 100vh;
-  background-color: #f5f5f5;
-  position: relative;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
-/* HEADER */
-.login-header-section {
+.login-brand-section {
   background: linear-gradient(
     180deg,
     #4cff00 0%,
     #2fb800 55%,
     #1f8f3d 100%
   );
-  height: 48vh;
-  padding-top: 70px;
+  height: 48vh; /* Dikembalikan ke ukuran asli abang */
+  min-height: 350px;
+  padding-top: 70px; /* Dikembalikan ke ukuran asli abang */
   text-align: center;
   color: white;
+  /* LENGKUNGAN DIHAPUS BIAR KEMBALI LURUS! */
+  z-index: 1;
 }
 
-/* LOGO */
-.logo-only-wrapper {
+.brand-content-centered {
   display: flex;
-  justify-content: center;
-  margin-bottom: 18px;
-}
-
-.logo-main-pure { 
-  width: 135px;
-  height: auto;
-  object-fit: contain;
-  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.18));
-}
-
-/* TITLE */
-.login-title { 
-  font-size: 28px; 
-  font-weight: 800; 
-  margin-bottom: 6px;
-}
-
-/* SUBTITLE */
-.login-subtitle { 
-  font-size: 13px; 
-  opacity: 0.85;
-  margin-bottom: 30px;
-}
-
-/* CARD */
-.login-card-floating {
-  background: #ffffff;
-  margin: -70px 30px 0 30px;
-  padding: 36px 28px;
-  border-radius: 26px;
-  box-shadow: 0 18px 40px rgba(0,0,0,0.18);
-  z-index: 10;
-}
-
-/* FORM */
-.login-field-group { 
-  margin-bottom: 18px; 
-}
-
-.login-field-group label { 
-  display: block; 
-  font-size: 12px; 
-  font-weight: 700; 
-  margin-bottom: 6px; 
-  color: #000;
-}
-
-/* INPUT */
-.login-input-wrapper {
-  position: relative;
-  display: flex;
+  flex-direction: column;
   align-items: center;
 }
 
-.login-input-wrapper input {
-  width: 100%;
-  padding: 12px 14px 12px 46px;
-  border: 1.6px solid #555;
-  border-radius: 10px;
-  font-size: 13px;
-  outline: none;
-  background-color: #fafafa;
+.logo-mobile-wrapper {
+  margin-bottom: 20px;
+}
+.login-logo-mobile {
+  width: 130px;
+  height: auto;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
 }
 
-.login-input-wrapper input::placeholder {
-  color: #aaa;
+.login-brand-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 8px;
 }
-
-/* ICON FIX (LEBIH ABU & JELAS) */
-.login-field-icon {
-  position: absolute;
-  left: 16px;
-  width: 20px;
-  height: 20px;
-  opacity: 0.65;            /* FIX */
-  filter: grayscale(100%); /* FIX */
-}
-
-/* BUTTON */
-.login-btn-green {
-  width: 100%;
-  padding: 14px;
-  background: #44c000; 
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-weight: 700;
+.login-brand-subtitle {
   font-size: 14px;
-  margin-top: 14px;
-  cursor: pointer;
-  box-shadow: 0 6px 16px rgba(68, 192, 0, 0.25);
+  opacity: 0.9;
 }
 
-.login-btn-green:hover {
-  background: #39a800;
+.login-form-section {
+  padding: 0 25px;
+  z-index: 10;
 }
 
-/* FOOTER */
-.login-help-text {
-  text-align: center;
-  font-size: 10px;
-  color: #888;
-  margin-top: 22px;
+.login-form-box {
+  background: #ffffff;
+  margin-top: -80px; 
+  padding: 40px 30px;
+  border-radius: 30px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+}
+
+.login-field-group { margin-bottom: 20px; }
+.login-field-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #333; }
+.login-input-wrapper { position: relative; display: flex; align-items: center; }
+.login-input-wrapper input { width: 100%; padding: 14px 14px 14px 48px; border: 1.5px solid #ddd; border-radius: 12px; font-size: 14px; outline: none; background-color: #fdfdfd; transition: border-color 0.3s; }
+.login-input-wrapper input:focus { border-color: #4cff00; }
+.login-field-icon { position: absolute; left: 16px; width: 22px; height: 22px; opacity: 0.5; filter: grayscale(100%); }
+.login-btn-green { width: 100%; padding: 16px; background: linear-gradient(to right, #44c000, #39a800); color: white; border: none; border-radius: 14px; font-weight: 700; font-size: 16px; margin-top: 20px; cursor: pointer; box-shadow: 0 8px 20px rgba(68, 192, 0, 0.2); transition: transform 0.2s, box-shadow 0.2s; }
+.login-btn-green:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(68, 192, 0, 0.3); }
+.login-help-text { text-align: center; font-size: 11px; color: #999; margin-top: 25px; }
+
+
+/* ================= DESKTOP LAYOUT (SPLIT SCREEN RAPI) ================= */
+@media (min-width: 1024px) {
+  
+  .desktop-only { display: flex !important; }
+  .mobile-only { display: none !important; }
+
+  .login-wrapper {
+    background: white;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .login-split-container {
+    max-width: 100%;
+    flex-direction: row-reverse !important; 
+    height: 100vh;
+  }
+
+  /* --- BAGIAN BRANDING (KANAN, Full Hijau) --- */
+  .login-brand-section {
+    flex: 1; 
+    height: 100vh; 
+    border-radius: 0; 
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative; 
+    overflow: hidden; 
+  }
+
+  .brand-content-centered {
+    position: relative;
+    z-index: 5; 
+  }
+
+  .login-logo-desktop {
+    width: 320px; 
+    height: auto;
+    margin-bottom: 0; 
+    filter: brightness(0) invert(1); 
+  }
+
+  /* === WATERMARK POJOKAN (UKURAN TETAP JUMBO, NAIK DIKIT & MAKIN MIRING) === */
+  .login-watermark-bg {
+    position: absolute;
+    top: auto;
+    left: auto;
+    bottom: -40px;
+    right: -100px;
+    width: 930px; 
+    height: auto;
+    transform: rotate(-25deg); 
+    opacity: 0.1; 
+    filter: brightness(0) invert(1); 
+    z-index: 1; 
+    pointer-events: none; 
+  }
+
+  /* --- BAGIAN FORM (KIRI, Full Putih) --- */
+  .login-form-section {
+    flex: 1; 
+    height: 100vh;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+  }
+
+  .login-form-box {
+    width: 100%;
+    max-width: 450px; 
+    margin-top: 0; 
+    box-shadow: none; 
+    padding: 40px;
+    border-radius: 0;
+  }
+
+  .desktop-form-header {
+    margin-bottom: 35px;
+    text-align: left;
+    display: flex !important;
+    flex-direction: column !important; 
+    align-items: flex-start !important;
+  }
+
+  .desktop-form-header h2 {
+    font-size: 38px; 
+    font-weight: 800; 
+    color: #111; 
+    margin-bottom: 8px !important;
+    white-space: nowrap !important;
+  }
+
+  .desktop-form-header p {
+    font-size: 15px; 
+    color: #666;
+    margin: 0 !important;
+  }
+
+  .login-field-group label { font-size: 14px; }
+  .login-input-wrapper input { padding: 16px 16px 16px 52px; font-size: 15px; }
+  .login-field-icon { width: 24px; height: 24px; left: 18px; }
+  .login-btn-green { padding: 18px; font-size: 18px; }
+  .login-help-text { text-align: left; font-size: 12px; }
 }

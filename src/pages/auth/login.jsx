@@ -1,46 +1,34 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; 
-import { useAuth } from "../../context/AuthContext"; // <--- TAMBAHAN: Import Context
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import "./login.css";
 
+// Import Asset
 import logoAmaga from "../../assets/logoamaga.svg";
+import logoPersegi from "../../assets/logopersegi.svg"; 
 import profileIcon from "../../assets/profile.svg";
 import passwordIcon from "../../assets/password.svg";
+import loginWatermark from "../../assets/login.svg"; // <--- IMPORT ASET BARU ABANG
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  
+
   const navigate = useNavigate();
-  const { login } = useAuth(); // <--- TAMBAHAN: Ambil fungsi login dari Context
+  const { login } = useAuth();
 
   const handleLogin = (e) => {
     e.preventDefault();
-    
-    // --- LOGIKA LOGIN DIMULAI ---
-    
-    // 1. Cek jika user adalah HRD
+
     if (username === 'hrd' && password === '123') {
-      // Simpan data user ke 'Otak' aplikasi
-      login({ username: 'hrd', role: 'hrd' }); 
-      // Arahkan ke Dashboard HRD
-      navigate('/hrd/dashboard'); 
-      
-    // 2. Cek jika user adalah Karyawan
+      login({ username: 'hrd', role: 'hrd' });
+      navigate('/hrd/dashboard');
     } else if (username === 'karyawan' && password === '123') {
-      // Simpan data user
       login({ username: 'karyawan', role: 'karyawan' });
-      // Arahkan ke Dashboard Karyawan
-      navigate('/karyawan/dashboard'); 
-      
-    // 3. Cek jika user adalah Manager Cabang
+      navigate('/karyawan/dashboard');
     } else if (username === 'managercabang' && password === '123') {
-      // Simpan data user
       login({ username: 'managercabang', role: 'managerCabang' });
-      // Arahkan ke Dashboard Manager Cabang
-      navigate('/managerCabang/dashboard'); 
-      
-    // 4. Jika salah
+      navigate('/managerCabang/dashboard');
     } else {
       alert("Username atau Password salah! (Coba: hrd / karyawan / managercabang dengan password 123)");
     }
@@ -48,56 +36,76 @@ const Login = () => {
 
   return (
     <div className="login-wrapper">
-      <div className="login-container">
-        
-        {/* Header Hijau Petak */}
-        <div className="login-header-section">
-          <div className="logo-only-wrapper">
-            <img src={logoAmaga} alt="Logo Amaga" className="logo-main-pure" />
-          </div>
-          <h1 className="login-title">Sistem Absensi</h1>
-          <p className="login-subtitle">Masuk ke akun anda</p>
+      <div className="login-split-container">
+
+        {/* === BAGIAN 1: BRANDING (Sekarang di Kanan untuk Desktop) === */}
+        <div className="login-brand-section">
+            
+            {/* === WATERMARK RAKSASA (Hanya Desktop) === */}
+            <img src={loginWatermark} alt="Watermark" className="login-watermark-bg desktop-only" />
+
+            {/* Konten Utama Branding */}
+            <div className="brand-content-centered">
+                {/* Logo Persegi Besar untuk Desktop */}
+                <img src={logoPersegi} alt="Amaga Corp" className="login-logo-desktop desktop-only" />
+                
+                {/* Logo Bulat Kecil untuk Mobile */}
+                <div className="logo-mobile-wrapper mobile-only">
+                   <img src={logoAmaga} alt="Logo Amaga" className="login-logo-mobile" />
+                </div>
+
+                <h1 className="login-brand-title mobile-only">Sistem Absensi</h1>
+                <p className="login-brand-subtitle mobile-only">Masuk ke akun anda</p>
+            </div>
         </div>
 
-        {/* Card Putih - Dibuat Lebih Naik */}
-        <div className="login-card-floating">
-          <form onSubmit={handleLogin}>
-            <div className="login-field-group">
-              <label>Username</label>
-              <div className="login-input-wrapper">
-                <img src={profileIcon} alt="user" className="login-field-icon" />
-                <input 
-                  type="text" 
-                  placeholder="Masukkan Username" 
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required 
-                />
+        {/* === BAGIAN 2: FORM (Sekarang di Kiri untuk Desktop) === */}
+        <div className="login-form-section">
+          <div className="login-form-box">
+
+             <div className="desktop-form-header desktop-only">
+                <h2>Sistem Absensi</h2>
+                <p>Masuk ke akun anda</p>
+             </div>
+
+            <form onSubmit={handleLogin}>
+              <div className="login-field-group">
+                <label>Username</label>
+                <div className="login-input-wrapper">
+                  <img src={profileIcon} alt="user" className="login-field-icon" />
+                  <input
+                    type="text"
+                    placeholder="Masukkan Username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="login-field-group">
-              <label>Password</label>
-              <div className="login-input-wrapper">
-                <img src={passwordIcon} alt="pass" className="login-field-icon" />
-                <input 
-                  type="password" 
-                  placeholder="Masukkan Password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required 
-                />
+              <div className="login-field-group">
+                <label>Password</label>
+                <div className="login-input-wrapper">
+                  <img src={passwordIcon} alt="pass" className="login-field-icon" />
+                  <input
+                    type="password"
+                    placeholder="Masukkan Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
               </div>
-            </div>
 
-            <button type="submit" className="login-btn-green">
-              Masuk Absensi
-            </button>
-          </form>
+              <button type="submit" className="login-btn-green">
+                Masuk Absensi
+              </button>
+            </form>
 
-          <p className="login-help-text">
-            Jika terjadi masalah hubungi 0123456789
-          </p>
+            <p className="login-help-text">
+              Jika terjadi masalah hubungi 0123456789
+            </p>
+          </div>
         </div>
 
       </div>

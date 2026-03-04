@@ -1,6 +1,3 @@
-/* =========================================
-   1. BASE & MOBILE LAYOUT
-   ========================================= */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 * {
@@ -21,7 +18,7 @@
   width: 100%;
   max-width: 480px; 
   min-height: 100vh;
-  background-color: #e5e5e5; /* Background abu-abu luar */
+  background-color: #e5e5e5; 
   position: relative;
   display: flex;
   flex-direction: column;
@@ -102,7 +99,7 @@
 .info-card {
   position: relative;
   z-index: 20;
-  margin-top: -260px; /* Menarik kartu ke atas menimpa hijau */
+  margin-top: -260px; 
   margin-left: 20px;
   margin-right: 20px;
   background: #FFFFFF;
@@ -116,7 +113,7 @@
 
 .company-logo {
   width: 250px; 
-  margin-bottom: 25px; /* Jarak pas antara logo dan tanggal */
+  margin-bottom: 25px; 
   display: block;
 }
 
@@ -127,16 +124,13 @@
   align-items: center; 
 }
 
-/* UI/UX Update: 
-  Teks dibuat rata kiri (flex-start), tapi didorong menggunakan 
-  padding-left agar posisinya berada di tengah area 50%-nya.
-*/
+/* FIX JAM KELUAR BATAS PADA MOBILE */
 .date-box {
   flex: 1; 
   display: flex;
   flex-direction: column;
   align-items: flex-start; 
-  padding-left: 15px; /* Mendorong teks tanggal ke arah tengah */
+  padding-left: 5px; 
 }
 
 .time-box {
@@ -144,7 +138,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start; 
-  padding-left: 25px; /* Mendorong teks waktu menjauh dari divider */
+  padding-left: 10px; 
 }
 
 .dt-label { 
@@ -170,16 +164,16 @@
   color: #222; 
   font-weight: 700;
   text-align: left; 
-  white-space: nowrap; /* Memaksa 1 baris */
+  white-space: nowrap; 
 }
 
 .time-big { 
-  font-size: 20px; 
+  font-size: 18px; 
   font-weight: 800; 
   color: #222; 
-  letter-spacing: 1px;
+  letter-spacing: 0px; 
   text-align: left; 
-  white-space: nowrap; /* Memaksa 1 baris */
+  white-space: nowrap; 
 }
 
 .divider-vertical { 
@@ -232,57 +226,46 @@
 .btn-title { font-size: 18px; font-weight: 800; margin-bottom: 2px; }
 .btn-subtitle { font-size: 12px; opacity: 0.85; font-weight: 400; }
 
-/* TULISAN KELUAR APLIKASI DISEMBUNYIKAN */
-.mobile-logout-btn {
-  display: none !important;
-}
-
 
 /* ============================================================
-   2. DESKTOP SIDEBAR & CONTENT (DIKUNCI / AMAN)
+   2. DESKTOP SIDEBAR & CONTENT (100% IDENTIK DENGAN ABSENSI)
    ============================================================ */
 
 @media (min-width: 1024px) {
   
   .main-wrapper {
-    background-color: #F0F2F5; 
+    background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
+    height: 100vh;
+    overflow: hidden; 
   }
 
   .card-container {
     max-width: 100% !important;
     width: 100%;
-    display: grid !important;
-    grid-template-columns: 300px 1fr; 
-    grid-template-rows: 1fr;
-    background-color: transparent;
+    display: flex !important;
+    flex-direction: row;
+    background-color: transparent !important;
+    height: 100vh;
   }
 
-  /* Visibility Control */
+  /* Visibility Control Desktop */
   .desktop-only { display: flex !important; }
   .mobile-only { display: none !important; }
 
-  /* SIDEBAR SECTION */
+  /* SIDEBAR SECTION (300px lebar tetap) */
   .header-section {
-    position: sticky; 
-    grid-column: 1 / 2;
+    position: relative; 
+    width: 300px;
+    flex-shrink: 0;
     height: 100vh;
     border-radius: 0;
-    padding: 0 !important; 
+    padding: 25px !important; 
     z-index: 100;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important; 
     align-items: center !important;
-  }
-
-  .desktop-sidebar-content {
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-    align-items: center !important;
-    width: 100%;
-    height: 100%;
-    position: relative;
+    background: transparent !important;
   }
 
   .logo-center-area, .title-form, .subtitle-form {
@@ -290,68 +273,103 @@
     top: -40px; 
   }
 
-  /* LOGO AMAGA CORP (POJOK ATAS) */
+  /* ==========================================
+     LOGO AMAGA CORP - FIX RATA KIRI, 260px
+     ========================================== */
   .sidebar-logo-desktop {
     position: absolute !important;
-    top: 0 !important; 
-    left: 0 !important;
-    width: 100% !important;
-    padding: 50px 20px !important;
+    top: 60px !important; 
+    left: 35px !important; 
+    width: auto !important;
+    padding: 0 !important;
     display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
   }
 
+  /* FIX GEPENG: Kunci max-width dan biarkan height auto */
   .sidebar-logo-desktop img {
     width: 260px !important; 
+    height: auto !important;
     filter: brightness(0) invert(1) !important; 
   }
 
-  /* PROFIL TENGAH */
+  /* PROFIL TENGAH KARYAWAN */
   .logo-center-area { margin-bottom: 10px !important; }
   .img-circle-content {
     width: 130px !important;
     height: 130px !important;
     border: 5px solid rgba(255, 255, 255, 0.3) !important;
+    background: white;
+    object-fit: cover;
   }
 
-  .title-form { font-size: 24px !important; font-weight: 800 !important; text-align: center; }
-  .subtitle-form { font-size: 15px !important; margin-top: 5px; text-align: center; opacity: 0.9; }
+  .title-form { font-size: 24px !important; font-weight: 800 !important; text-align: center; color: white !important; margin: 0 !important;}
+  .subtitle-form { font-size: 15px !important; margin-top: 5px !important; text-align: center; opacity: 0.9; color: white !important;}
 
-  /* TOMBOL LOG OUT (POJOK BAWAH) */
+  /* ==========================================
+     TOMBOL LOG OUT - SEJAJAR & TIDAK MEPET 
+     ========================================== */
   .btn-logout-desktop {
     position: absolute !important;
-    bottom: 40px !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: 240px !important;
-    padding: 16px !important;
-    background: rgba(255, 255, 255, 0.12) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    border-radius: 12px !important;
-    color: white !important;
+    bottom: 40px !important; 
+    left: 30px !important; 
+    width: calc(100% - 60px) !important; 
+    padding: 12px 0 !important;
+    background: transparent !important; 
+    border: 1px solid rgba(255, 255, 255, 0.8) !important; 
+    border-radius: 50px !important;
+    color: #fff !important; 
     font-weight: 700 !important;
-    font-size: 16px !important;
+    font-size: 18px !important; 
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
     cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    transform: none !important;
   }
 
-  /* KONTEN AREA KANAN */
+  /* Garis tipis di atas Logout */
+  .btn-logout-desktop::before {
+    content: "";
+    position: absolute;
+    top: -25px; 
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.3); 
+  }
+
+  .btn-logout-desktop:hover {
+    background-color: #ffffff !important; 
+    color: #2fb800 !important; 
+    border-color: #ffffff !important; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; 
+  }
+
+  /* KONTEN AREA KANAN (FLOATING) */
   .dashboard-content {
-    padding: 40px 60px;
-    padding-top: 40px;
-    height: 100vh;
-    overflow-y: auto;
+    flex: 1; 
+    background-color: #fdfdfd; 
+    margin: 30px 40px 30px 20px !important; /* Ruang napas agar tidak mepet sidebar */
+    border-radius: 40px !important;
+    padding: 40px !important;
+    overflow-y: auto; 
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
+    height: calc(100vh - 60px); 
   }
 
+  /* KARTU INFO TANGGAL/WAKTU */
   .info-card {
     margin: 0 0 30px 0 !important;
     flex-direction: row;
     justify-content: space-around;
-    padding: 40px;
-    border-radius: 30px;
+    padding: 30px !important; 
+    border-radius: 20px !important; 
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05) !important; 
+    border: 1px solid #f5f5f5 !important;
+    background: white;
   }
 
   .datetime-row { justify-content: space-around; width: 100%; }
@@ -360,7 +378,7 @@
   .time-big { font-size: 32px !important; }
   .divider-vertical { height: 80px !important; }
 
-  /* RESET LAYOUT MENU MOBILE KE DESKTOP */
+  /* KARTU MENU (WARNA BIRU) */
   .menu-card {
     margin: 0 !important;
     display: grid !important;
@@ -379,10 +397,10 @@
     height: 300px;
     justify-content: center;
     text-align: center;
-    border-radius: 35px;
-    border: 1px solid #eee;
-    transition: all 0.3s ease;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    border-radius: 16px !important;
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease !important;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05); 
   }
 
   .menu-btn-item .white-icon {
@@ -390,19 +408,20 @@
     width: 80px;
     height: 80px;
     margin-bottom: 15px;
+    transition: all 0.3s ease;
   }
 
   .text-content { text-align: center; }
-  .btn-title { font-size: 26px !important; color: #0029FF; text-align: center; }
-  .btn-subtitle { font-size: 14px !important; color: #777; text-align: center; margin-top: 8px;}
+  .btn-title { font-size: 26px !important; color: #0029FF !important; text-align: center; transition: all 0.3s ease; }
+  .btn-subtitle { font-size: 14px !important; color: #777; text-align: center; margin-top: 8px; transition: all 0.3s ease;}
 
   .menu-btn-item:hover {
-    background: #0029FF !important;
-    transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(0, 41, 255, 0.2);
+    background: linear-gradient(135deg, #0029FF 0%, #001FBD 100%) !important; 
+    transform: translateY(-5px) !important;
+    box-shadow: 0 8px 20px rgba(0, 41, 255, 0.3) !important; 
   }
 
-  .menu-btn-item:hover .white-icon { filter: brightness(0) invert(1); }
+  .menu-btn-item:hover .white-icon { filter: brightness(0) invert(1) !important; }
   .menu-btn-item:hover .btn-title,
   .menu-btn-item:hover .btn-subtitle { color: white !important; }
 }

@@ -7,9 +7,6 @@
   padding: 0;
 }
 
-/* ===============================
-   1. BASE & MOBILE LAYOUT
-================================ */
 .rw-wrapper {
   background-color: #e5e5e5;
   min-height: 100vh;
@@ -41,7 +38,7 @@
   height: 38vh;
   min-height: 300px;
   background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
-  border-radius: 0; /* Lurus persis seperti halaman Absensi */
+  border-radius: 0; 
   z-index: 1;
 }
 
@@ -67,7 +64,6 @@ button.mobile-only {
   top: 0;
   z-index: 50;
 
-  /* TRIK SEAMLESS: Menggunakan gradasi yang SAMA PERSIS dengan bg di belakangnya */
   background-image: linear-gradient(
     180deg,
     #4cff00 0%,
@@ -75,15 +71,11 @@ button.mobile-only {
     #1f8f3d 100%
   );
 
-  /* Memaksa gradasi di header ini punya panjang yang sama dengan rw-mobile-bg */
   background-size: 100% max(38vh, 300px);
   background-position: top center;
   background-repeat: no-repeat;
-
-  /* Menghilangkan shadow agar tidak ada garis potong gelap */
   box-shadow: none;
   border-radius: 0;
-
   padding: 35px 20px 15px 20px;
   color: white;
   width: 100%;
@@ -153,7 +145,6 @@ button.mobile-only {
   padding: 20px;
   display: flex;
   gap: 15px;
-  /* Shadow pada kartu sudah cukup memberikan kedalaman saat di-scroll */
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   transition: 0.2s ease;
@@ -430,65 +421,50 @@ button.mobile-only {
 }
 
 /* ============================================================
-   2. DESKTOP SIDEBAR & CONTENT
+   2. DESKTOP SIDEBAR & CONTENT (IDENTIK DENGAN ABSENSI & LAINNYA)
 ============================================================ */
 @media (min-width: 1024px) {
   .desktop-none {
     display: none !important;
   }
   .rw-wrapper {
-    background-color: #f0f2f5;
-    overflow: visible;
+    /* Background Full Gradasi Hijau */
+    background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
+    height: 100vh;
+    padding: 0;
+    overflow: hidden; 
   }
 
   .rw-container {
     max-width: 100% !important;
     width: 100%;
-    min-height: 100vh;
-    display: grid !important;
-    grid-template-columns: 310px 1fr;
-    grid-template-rows: 1fr;
-    background: transparent;
+    height: 100vh;
+    display: flex !important; /* Flex Row */
+    flex-direction: row;
+    background-color: transparent !important;
   }
 
   /* Visibility Control Desktop */
-  .desktop-only {
-    display: block !important;
-  }
-  button.desktop-only {
-    display: flex !important;
-  }
-  div.desktop-only {
-    display: flex !important;
-  }
-  .mobile-only {
-    display: none !important;
-  }
+  .desktop-only { display: block !important; }
+  button.desktop-only { display: flex !important; }
+  div.desktop-only { display: flex !important; }
+  .mobile-only { display: none !important; }
 
-  /* SIDEBAR SECTION DESKTOP (RESET DARI MOBILE) */
+  /* SIDEBAR SECTION DESKTOP (300px lebar tetap) */
   .rw-header-section {
-    grid-column: 1 / 2;
+    position: relative;
+    width: 300px;
+    flex-shrink: 0;
     height: 100vh !important;
-
-    /* Reset background trick desktop agar normal kembali */
-    background-image: linear-gradient(
-      180deg,
-      #4cff00 0%,
-      #2fb800 55%,
-      #1f8f3d 100%
-    ) !important;
-    background-size: cover !important;
-    background-position: center !important;
-
     border-radius: 0;
-    padding: 0 !important;
+    padding: 25px !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
     align-items: center !important;
-    position: sticky;
-    top: 0;
+    background: transparent !important; 
     box-shadow: none !important;
+    z-index: 100;
   }
 
   .rw-header-section > .rw-logo-center-area,
@@ -498,16 +474,18 @@ button.mobile-only {
     top: -40px;
   }
 
-  /* LOGO AMAGA CORP (POJOK ATAS) */
+  /* ==========================================
+     LOGO AMAGA CORP - RATA KIRI, 260px
+     ========================================== */
   .rw-sidebar-logo-desktop {
     position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    padding: 50px 20px !important;
+    top: 60px !important; 
+    left: 35px !important; 
+    width: auto !important;
+    padding: 0 !important;
     display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
     border-bottom: none !important;
   }
 
@@ -520,7 +498,7 @@ button.mobile-only {
 
   /* PROFIL LINGKARAN DESKTOP */
   .rw-logo-center-area {
-    margin: 0 0 20px 0 !important;
+    margin: 0 0 10px 0 !important;
     display: flex !important;
     justify-content: center !important;
     width: 100% !important;
@@ -533,7 +511,7 @@ button.mobile-only {
     background: white !important;
     border-radius: 50% !important;
     border: 5px solid rgba(255, 255, 255, 0.3) !important;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: none !important; 
     padding: 0 !important;
     object-fit: cover !important;
   }
@@ -549,53 +527,68 @@ button.mobile-only {
   .rw-subtitle-text {
     font-size: 15px !important;
     color: white !important;
-    opacity: 0.85 !important;
+    opacity: 0.9 !important;
     text-align: center;
     margin-top: 5px !important;
-    padding: 0 20px;
+    padding: 0 !important;
   }
 
-  /* TOMBOL LOG OUT DESKTOP (POJOK BAWAH) */
+  /* ==========================================
+     TOMBOL LOG OUT DESKTOP (OVAL & SEJAJAR)
+     ========================================== */
   .rw-btn-logout-desktop {
     position: absolute !important;
     bottom: 40px !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: 240px !important;
-    padding: 16px !important;
-    background: rgba(255, 255, 255, 0.12) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    border-radius: 12px !important;
+    left: 30px !important; 
+    width: calc(100% - 60px) !important; 
+    transform: none !important;
+    padding: 12px 0 !important;
+    background: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.8) !important;
+    border-radius: 50px !important;
     color: white !important;
     font-weight: 700 !important;
-    font-size: 16px !important;
+    font-size: 18px !important;
     cursor: pointer !important;
-    transition: all 0.3s !important;
+    transition: all 0.3s ease !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
-    text-align: center !important;
+  }
+
+  .rw-btn-logout-desktop::before {
+    content: "";
+    position: absolute;
+    top: -25px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.3);
   }
 
   .rw-btn-logout-desktop:hover {
-    background: rgba(255, 255, 255, 0.2) !important;
+    background-color: #ffffff !important;
+    color: #2fb800 !important;
+    border-color: #ffffff !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
   }
 
-  /* AREA KANAN (KERTAS PUTIH) - SCROLLABLE INTERNAL */
+  /* =========================================
+     AREA KANAN (KERTAS PUTIH) - FLOATING
+     ========================================= */
   .rw-content-list-wrapper {
-    grid-column: 2 / 3;
-    margin: 40px auto !important;
-    padding: 50px 80px !important;
-    border-radius: 30px;
-    background: white;
-    max-width: 1100px !important;
-    width: 92% !important;
-
-    height: 85vh !important;
-    max-height: 850px;
+    flex: 1;
+    background-color: #fdfdfd;
+    margin: 30px 40px 30px 20px !important; 
+    padding: 50px 60px !important; 
+    border-radius: 40px !important;
+    max-width: none !important;
+    
+    height: calc(100vh - 60px) !important;
+    max-height: none !important;
     overflow-y: auto !important;
 
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   }
 
   /* Memperhalus scrollbar desktop */
@@ -606,7 +599,7 @@ button.mobile-only {
   .rw-content-list-wrapper::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 10px;
-    margin: 20px 0;
+    margin: 40px 0; /* Jarak agar tidak mentok atas-bawah */
   }
   .rw-content-list-wrapper::-webkit-scrollbar-thumb {
     background: #ccc;
@@ -657,16 +650,17 @@ button.mobile-only {
     gap: 25px;
   }
 
+  /* CARD RIWAYAT DESKTOP */
   .rw-card-item {
-    border-radius: 25px;
-    padding: 30px 45px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    border-radius: 20px !important; 
+    padding: 30px 40px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
     border: 1px solid #f0f0f0;
   }
 
   .rw-card-item:hover {
     transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
     border-color: #4cff00;
   }
 
@@ -680,8 +674,8 @@ button.mobile-only {
     font-size: 14px;
   }
   .rw-icon-main {
-    width: 65px;
-    height: 65px;
+    width: 60px;
+    height: 60px;
   }
   .rw-badge {
     font-size: 13px;

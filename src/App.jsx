@@ -20,8 +20,6 @@ import DashboardManagerCabang from "./pages/managerCabang/dashboard";
 import DataKaryawanManager from "./pages/managerCabang/datakaryawan";
 import DetailKaryawanManager from "./pages/managerCabang/detailkaryawan";
 import PerizinanManager from "./pages/managerCabang/perizinan";
-
-// SEKARANG SUDAH AKTIF:
 import LaporanManager from "./pages/managerCabang/laporan";
 
 function App() {
@@ -37,7 +35,11 @@ function App() {
             <Route path="/hrd/dashboard" element={<DashboardHRD />} />
             <Route path="/hrd/kelolacabang" element={<KelolaCabang />} />
             <Route path="/hrd/datakaryawan" element={<DataKaryawan />} />
+            
+            {/* Mengizinkan akses detail dengan atau tanpa ID */}
             <Route path="/hrd/detail-karyawan" element={<DetailKaryawan />} />
+            <Route path="/hrd/detail-karyawan/:id" element={<DetailKaryawan />} />
+            
             <Route path="/hrd/absenmanual" element={<AbsenManual />} />
             <Route path="/hrd/laporan" element={<Laporan />} />
           </Route>
@@ -54,13 +56,16 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={['managerCabang']} />}>
             <Route path="/managerCabang/dashboard" element={<DashboardManagerCabang />} />
             <Route path="/managerCabang/datakaryawan" element={<DataKaryawanManager />} />
-            <Route path="/managerCabang/detail-karyawan" element={<DetailKaryawanManager />} />
-            <Route path="/managerCabang/perizinan" element={<PerizinanManager />} />
             
-            {/* ROUTE LAPORAN SUDAH DIAKTIFKAN: */}
+            {/* FIX UTAMA: Mengizinkan akses detail dengan atau tanpa ID */}
+            <Route path="/managerCabang/detail-karyawan" element={<DetailKaryawanManager />} />
+            <Route path="/managerCabang/detail-karyawan/:id" element={<DetailKaryawanManager />} />
+            
+            <Route path="/managerCabang/perizinan" element={<PerizinanManager />} />
             <Route path="/managerCabang/laporan" element={<LaporanManager />} />
           </Route>
 
+          {/* Catch-all route: lempar ke login jika URL tidak ada di atas */}
           <Route path="*" element={<Navigate to="/auth/login" replace />} />
         </Routes>
       </Router>
