@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-// FIX: Mengambil CSS langsung dari folder hrd
+
 import "../hrd/datakaryawan.css";
 
 /* ================= ICON IMPORT ================= */
 import iconDashboard from "../../assets/dashboard.svg";
 import iconKaryawan from "../../assets/datakaryawan.svg";
-import iconPerizinan from "../../assets/perizinan.svg"; // Icon khusus Manager Cabang
+import iconPerizinan from "../../assets/perizinan.svg"; 
 import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
@@ -16,118 +16,82 @@ import iconEdit from "../../assets/edit.svg";
 const DataKaryawanManagerCabang = () => {
   const navigate = useNavigate();
 
+  const [userData, setUserData] = useState({
+    nama: "Loading...",
+    cabangUtama: "Memuat Data...",
+    subCabang: [] 
+  });
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUserData({
+          nama: parsedUser.nama || "Manager",
+          cabangUtama: parsedUser.cabangUtama || "Cabang Tidak Diketahui",
+          subCabang: Array.isArray(parsedUser.subCabang) ? parsedUser.subCabang : []
+        });
+      } catch (error) {
+        console.error("Gagal memparsing data user dari localStorage", error);
+      }
+    }
+  }, [navigate]);
+
+  // --- DROPDOWN DINAMIS MANAGER (Hanya cabang yang dikelola) ---
+  const opsiCabangManager = [userData.cabangUtama, ...userData.subCabang].filter(Boolean);
+
   /* ================= DATA DUMMY ================= */
   const [karyawanList] = useState([
     {
-      id: 1,
-      nama: "Syahrul",
-      jabatan: "CEO",
-      nik: "123456789",
-      password: "123",
-      tempatLahir: "Semarang",
-      tanggalLahir: "01 Januari 2026",
-      alamat: "Semarang",
-      divisi: "Operasional",
-      tanggalMasuk: "01/01/2023",
-      jenisKelamin: "Laki-laki",
-      cabang: "1",
+      id: 1, nama: "Syahrul", jabatan: "CEO", nik: "123456789", password: "123", tempatLahir: "Semarang", tanggalLahir: "01 Januari 2026", alamat: "Semarang", divisi: "Operasional", tanggalMasuk: "01/01/2023", jenisKelamin: "Laki-laki", 
+      cabang: "F&B Jakarta", 
       status: "Aktif" 
     },
     {
-      id: 2,
-      nama: "Budi",
-      jabatan: "Staff",
-      nik: "987654321",
-      password: "123",
-      tempatLahir: "Jakarta",
-      tanggalLahir: "12 Februari 1999",
-      alamat: "Jakarta Selatan",
-      divisi: "Marketing",
-      tanggalMasuk: "15/03/2023",
-      jenisKelamin: "Laki-laki",
-      cabang: "2",
+      id: 2, nama: "Budi", jabatan: "Staff", nik: "987654321", password: "123", tempatLahir: "Jakarta", tanggalLahir: "12 Februari 1999", alamat: "Jakarta Selatan", divisi: "Marketing", tanggalMasuk: "15/03/2023", jenisKelamin: "Laki-laki", 
+      cabang: "F&B Kemang (Sub)", 
       status: "Aktif"
-    },
-    {
-      id: 3,
-      nama: "Siti",
-      jabatan: "HRD",
-      nik: "1122334455",
-      password: "123",
-      tempatLahir: "Bandung",
-      tanggalLahir: "10 Maret 2000",
-      alamat: "Bandung Kota",
-      divisi: "HR",
-      tanggalMasuk: "20/05/2023",
-      jenisKelamin: "Perempuan",
-      cabang: "3",
-      status: "Resign" 
-    },
+    }
   ]);
 
-  const cabang4SubBranches = ["Cabang A", "Cabang B", "Cabang C"];
-
-  /* ================= STATE CONFIG ================= */
   const [showFilter, setShowFilter] = useState(false);
-  const [selectedCabang, setSelectedCabang] = useState("Filter");
-  
-  // STATE MODAL EDIT/ADD
+  const [selectedCabang, setSelectedCabang] = useState("Semua Sub-Cabang"); 
+
+  const hasSubCabang = userData.subCabang.length > 0;
+  const isStackedMode = hasSubCabang && selectedCabang === "Semua Sub-Cabang";
+
   const [showModal, setShowModal] = useState(false); 
   const [isEditMode, setIsEditMode] = useState(false); 
   const [selectedEmployee, setSelectedEmployee] = useState(null); 
 
-  /* ================= HANDLERS ================= */
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     navigate("/auth/login");
   };
 
-  const toggleFilter = () => setShowFilter(!showFilter);
+  const toggleFilter = () => { if (hasSubCabang) setShowFilter(!showFilter); };
+  const handleSelectCabang = (cabang) => { setSelectedCabang(cabang); setShowFilter(false); };
+  
+  const handleOpenAdd = () => { setIsEditMode(false); setSelectedEmployee(null); setShowModal(true); };
+  const handleOpenEdit = (employee, e) => { e.stopPropagation(); setIsEditMode(true); setSelectedEmployee(employee); setShowModal(true); };
+  const handleCloseModal = () => { setShowModal(false); setSelectedEmployee(null); };
 
-  const handleSelectCabang = (cabang) => {
-    setSelectedCabang(cabang);
-    setShowFilter(false);
-  };
-
-  // --- LOGIC MODAL ADD/EDIT ---
-  const handleOpenAdd = () => {
-    setIsEditMode(false);       
-    setSelectedEmployee(null);  
-    setShowModal(true);         
-  };
-
-  const handleOpenEdit = (employee, e) => {
-    e.stopPropagation(); 
-    setIsEditMode(true);        
-    setSelectedEmployee(employee); 
-    setShowModal(true);         
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setSelectedEmployee(null);
-  };
-
-  // --- LOGIC PINDAH KE HALAMAN DETAIL ---
   const handleRowClick = (employee) => {
-    // FIX UTAMA: Path disamakan dengan App.jsx (tambah tanda strip)
     navigate("/managerCabang/detail-karyawan", { state: { employee: employee } });
   };
 
-  /* ================= COMPONENTS ================= */
   const FilterDropdown = () => (
     <div className="filter-wrapper">
-      <button className="btn-filter" onClick={toggleFilter}>
-        {selectedCabang}
-        <img src={iconBawah} alt="" className={`filter-arrow ${showFilter ? "rotate" : ""}`} />
+      <button className="btn-filter" onClick={toggleFilter} style={{ cursor: hasSubCabang ? 'pointer' : 'default' }}>
+        {!hasSubCabang ? userData.cabangUtama : selectedCabang}
+        {hasSubCabang && (<img src={iconBawah} alt="v" className={`filter-arrow ${showFilter ? "rotate" : ""}`} />)}
       </button>
-      {showFilter && (
+      {showFilter && hasSubCabang && (
         <div className="filter-dropdown">
-          {["Cabang 1", "Cabang 2", "Cabang 3", "Cabang 4", "Semua Cabang"].map((cabang, index) => (
-            <div key={index} className="dropdown-item" onClick={() => handleSelectCabang(cabang === "Semua Cabang" ? "Filter" : cabang)}>
-              {cabang}
-            </div>
+          {["Semua Sub-Cabang", ...userData.subCabang].map((cabang, index) => (
+            <div key={index} className="dropdown-item" onClick={() => handleSelectCabang(cabang)}>{cabang}</div>
           ))}
         </div>
       )}
@@ -151,11 +115,7 @@ const DataKaryawanManagerCabang = () => {
       </thead>
       <tbody>
         {karyawanList.map((item) => (
-          <tr 
-            key={item.id} 
-            className="clickable-row" 
-            onClick={() => handleRowClick(item)} 
-          >
+          <tr key={item.id} className="clickable-row" onClick={() => handleRowClick(item)}>
             <td className="clickable-name">{item.nama}</td>
             <td>{item.jabatan}</td>
             <td>{item.nik}</td>
@@ -163,21 +123,9 @@ const DataKaryawanManagerCabang = () => {
             <td>{item.tempatLahir}</td>
             <td>{item.tanggalLahir}</td>
             <td>{item.alamat}</td>
-            
+            <td className="text-center" onClick={(e) => e.stopPropagation()}><button className="btn-edit-clean" onClick={(e) => handleOpenEdit(item, e)}><img src={iconEdit} alt="Edit" className="img-edit-gray" /></button></td>
             <td className="text-center" onClick={(e) => e.stopPropagation()}>
-              <button className="btn-edit-clean" onClick={(e) => handleOpenEdit(item, e)}>
-                <img src={iconEdit} alt="Edit" className="img-edit-gray" />
-              </button>
-            </td>
-            
-            <td className="text-center" onClick={(e) => e.stopPropagation()}>
-              <div className="status-dots-spaced">
-                {item.status === 'Aktif' ? (
-                  <span className="dot dot-green" title="Aktif"></span>
-                ) : (
-                  <span className="dot dot-red" title="Resign"></span>
-                )}
-              </div>
+              <div className="status-dots-spaced">{item.status === 'Aktif' ? (<span className="dot dot-green" title="Aktif"></span>) : (<span className="dot dot-red" title="Resign"></span>)}</div>
             </td>
           </tr>
         ))}
@@ -187,88 +135,42 @@ const DataKaryawanManagerCabang = () => {
 
   return (
     <div className="hrd-container">
-      {/* SIDEBAR MANAGER CABANG */}
       <aside className="sidebar">
-        <div className="logo-area">
-          <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
-        </div>
-        
+        <div className="logo-area"><img src={logoPersegi} alt="AMAGACORP" className="logo-img" /></div>
         <nav className="menu-nav">
-          <div className="menu-item" onClick={() => navigate('/managerCabang/dashboard')}>
-            <div className="menu-left">
-                <img src={iconDashboard} alt="dash" className="menu-icon-main"/> 
-                <span className="menu-text-main">Dashboard</span>
-            </div>
-          </div>
-
-          <div className="menu-item active">
-            <div className="menu-left">
-                <img src={iconKaryawan} alt="karyawan" className="menu-icon-main"/> 
-                <span className="menu-text-main">Data Karyawan</span>
-            </div>
-          </div>
-
-          <div className="menu-item" onClick={() => navigate('/managerCabang/perizinan')}>
-            <div className="menu-left">
-                <img src={iconPerizinan} alt="perizinan" className="menu-icon-main"/> 
-                <span className="menu-text-main">Perizinan</span>
-            </div>
-          </div>
-
-          <div className="menu-item" onClick={() => navigate('/managerCabang/laporan')}>
-            <div className="menu-left">
-                <img src={iconLaporan} alt="lapor" className="menu-icon-main"/> 
-                <span className="menu-text-main">Laporan</span>
-            </div>
-          </div>
+          <div className="menu-item" onClick={() => navigate('/managerCabang/dashboard')}><div className="menu-left"><img src={iconDashboard} alt="dash" className="menu-icon-main"/> <span className="menu-text-main">Dashboard</span></div></div>
+          <div className="menu-item active"><div className="menu-left"><img src={iconKaryawan} alt="karyawan" className="menu-icon-main"/> <span className="menu-text-main">Data Karyawan</span></div></div>
+          <div className="menu-item" onClick={() => navigate('/managerCabang/perizinan')}><div className="menu-left"><img src={iconPerizinan} alt="perizinan" className="menu-icon-main"/> <span className="menu-text-main">Perizinan</span></div></div>
+          <div className="menu-item" onClick={() => navigate('/managerCabang/laporan')}><div className="menu-left"><img src={iconLaporan} alt="lapor" className="menu-icon-main"/> <span className="menu-text-main">Laporan</span></div></div>
         </nav>
-
-        <div className="sidebar-footer">
-          <button className="btn-logout" onClick={handleLogout}>Log Out</button>
-        </div>
+        <div className="sidebar-footer"><button className="btn-logout" onClick={handleLogout}>Log Out</button></div>
       </aside>
 
-      {/* MAIN CONTENT */}
       <main className="main-content">
         <div className="page-header">
-          <h1>Data Karyawan</h1>
+          <h1>Data Karyawan - {userData.cabangUtama}</h1>
           <p>Daftar pusat informasi dan detail administrasi karyawan</p>
         </div>
-
-        {selectedCabang !== "Cabang 4" && (
-          <div className="action-bar">
-            <FilterDropdown />
-            <button className="btn-tambah" onClick={handleOpenAdd}>
-              <img src={iconTambah} alt="" /> Tambah Karyawan
-            </button>
-          </div>
+        {!isStackedMode && (
+          <div className="action-bar"><FilterDropdown /><button className="btn-tambah" onClick={handleOpenAdd}><img src={iconTambah} alt="" /> Tambah Karyawan</button></div>
         )}
-
-        {selectedCabang === "Cabang 4" ? (
+        {isStackedMode ? (
           <div className="stacked-layout">
-            {cabang4SubBranches.map((subCabang, index) => (
+            {userData.subCabang.map((subCabang, index) => (
               <div key={index} className="stacked-card-wrapper">
                 <div className="sub-branch-header">
                   <h3 className="sub-branch-title">{subCabang}</h3>
                   <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
                     {index === 0 && <FilterDropdown />}
-                    <button className="btn-tambah" onClick={handleOpenAdd}>
-                      <img src={iconTambah} alt="" /> Tambah Karyawan
-                    </button>
+                    <button className="btn-tambah" onClick={handleOpenAdd}><img src={iconTambah} alt="" /> Tambah Karyawan</button>
                   </div>
                 </div>
-                <div className="approval-section">
-                  <div className="approval-header">Permintaan Menunggu Approval</div>
-                  {renderTable()}
-                </div>
+                <div className="approval-section"><div className="approval-header">Daftar Karyawan</div>{renderTable()}</div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="approval-section" style={{ marginTop: selectedCabang !== "Cabang 4" ? "0" : "20px" }}>
-            <div className="approval-header">Permintaan Menunggu Approval</div>
-            {renderTable()}
-          </div>
+          <div className="approval-section" style={{ marginTop: !isStackedMode ? "0" : "20px" }}><div className="approval-header">Daftar Karyawan</div>{renderTable()}</div>
         )}
       </main>
 
@@ -295,7 +197,15 @@ const DataKaryawanManagerCabang = () => {
                 <div className="form-group"><label>Tanggal Lahir</label><input type="date" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.tanggalLahir : ""} /></div>
                 <div className="form-group"><label>Jenis Kelamin</label><select className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.jenisKelamin : ""}><option value="">Pilih</option><option value="Laki-laki">Laki-laki</option><option value="Perempuan">Perempuan</option></select></div>
                 
-                <div className="form-group"><label>Cabang</label><select className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.cabang : ""}><option value="">Pilih Cabang</option><option value="1">Cabang 1</option><option value="2">Cabang 2</option><option value="3">Cabang 3</option><option value="4">Cabang 4</option></select></div>
+                <div className="form-group">
+                  <label>Cabang Penempatan</label>
+                  <select className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.cabang : ""}>
+                    <option value="">Pilih Cabang</option>
+                    {opsiCabangManager.map((cabangName, index) => (
+                      <option key={index} value={cabangName}>{cabangName}</option>
+                    ))}
+                  </select>
+                </div>
                 
                 <div className="form-group">
                   <label>Status Karyawan</label>
@@ -304,7 +214,6 @@ const DataKaryawanManagerCabang = () => {
                     <option value="Resign">Resign</option>
                   </select>
                 </div>
-
               </div>
               <div className="form-group" style={{marginBottom: '20px'}}><label>Alamat</label><input type="text" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.alamat : ""} /></div>
               

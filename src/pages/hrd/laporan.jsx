@@ -14,7 +14,6 @@ import logoPersegi from "../../assets/logopersegi.svg";
 const Laporan = () => {
   const navigate = useNavigate();
   const [showFilter, setShowFilter] = useState(false);
-  
   const [selectedFilter, setSelectedFilter] = useState("Filter Cabang");
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,26 +40,25 @@ const Laporan = () => {
     return `${yyyy}-${mm}-${dd}`;
   };
 
-  // FUNGSI UNTUK MENENTUKAN KELAS BARIS SECARA PENUH BERDASARKAN JUMLAH TERLAMBAT
   const getRowTerlambatClass = (jumlahTerlambat) => {
     const angka = parseInt(jumlahTerlambat, 10);
     if (isNaN(angka)) return ""; 
     
-    if (angka === 3) return "row-warn-yellow";        // 3x = Baris Kuning
-    if (angka >= 4 && angka <= 5) return "row-warn-orange";  // 4-5x = Baris Orange
-    if (angka >= 6) return "row-warn-red";            // >= 6x = Baris Merah
+    if (angka === 3) return "row-warn-yellow";       
+    if (angka >= 4 && angka <= 5) return "row-warn-orange"; 
+    if (angka >= 6) return "row-warn-red";            
     
-    return ""; // 0, 1, 2 = Tetap putih/abu bawaan
+    return ""; 
   };
 
   /* DATA DUMMY */
   const dataLaporan = [
     { id: 1, nama: "Syahrul", cabang: "Cabang 1", hadirApp: "10", hadirManual: "10", izin: "2", sakit: "3", cuti: "2", terlambat: "1", fimtk: "1 Jam", lembur: "1 Jam", alpha: "1" },
-    { id: 2, nama: "Budi Santoso", cabang: "Cabang 2", hadirApp: "12", hadirManual: "0", izin: "0", sakit: "0", cuti: "0", terlambat: "3", fimtk: "-", lembur: "2 Jam", alpha: "0" }, // 3x Terlambat (Kuning 1 baris)
-    { id: 3, nama: "Siti Aminah", cabang: "Cabang 3", hadirApp: "11", hadirManual: "1", izin: "1", sakit: "0", cuti: "1", terlambat: "5", fimtk: "-", lembur: "-", alpha: "0" }, // 5x Terlambat (Orange 1 baris)
-    { id: 4, nama: "Joko Anwar", cabang: "Cabang A", hadirApp: "15", hadirManual: "0", izin: "0", sakit: "0", cuti: "0", terlambat: "6", fimtk: "-", lembur: "-", alpha: "0" }, // 6x Terlambat (Merah 1 baris)
+    { id: 2, nama: "Budi Santoso", cabang: "Cabang 2", hadirApp: "12", hadirManual: "0", izin: "0", sakit: "0", cuti: "0", terlambat: "3", fimtk: "-", lembur: "2 Jam", alpha: "0" }, 
+    { id: 3, nama: "Siti Aminah", cabang: "Cabang 3", hadirApp: "11", hadirManual: "1", izin: "1", sakit: "0", cuti: "1", terlambat: "5", fimtk: "-", lembur: "-", alpha: "0" }, 
+    { id: 4, nama: "Joko Anwar", cabang: "Cabang A", hadirApp: "15", hadirManual: "0", izin: "0", sakit: "0", cuti: "0", terlambat: "6", fimtk: "-", lembur: "-", alpha: "0" }, 
     { id: 5, nama: "Rina Kartika", cabang: "Cabang B", hadirApp: "14", hadirManual: "0", izin: "0", sakit: "1", cuti: "0", terlambat: "0", fimtk: "-", lembur: "-", alpha: "0" }, 
-    { id: 6, nama: "Agus Supriyanto", cabang: "Cabang 1", hadirApp: "10", hadirManual: "0", izin: "0", sakit: "0", cuti: "0", terlambat: "2", fimtk: "-", lembur: "-", alpha: "0" } // 2x Terlambat (Normal)
+    { id: 6, nama: "Agus Supriyanto", cabang: "Cabang 1", hadirApp: "10", hadirManual: "0", izin: "0", sakit: "0", cuti: "0", terlambat: "2", fimtk: "-", lembur: "-", alpha: "0" } 
   ];
 
   /* FILTER GANDA (NAMA + CABANG) */
@@ -99,11 +97,9 @@ const Laporan = () => {
           <tbody>
             {tableData.length > 0 ? (
               tableData.map((item) => {
-                // Menentukan class baris untuk warna keterlambatan
                 const rowClass = getRowTerlambatClass(item.terlambat);
 
                 return (
-                  // KELAS WARNA DIMASUKKAN KE TR (SATU BARIS PENUH)
                   <tr key={item.id} className={rowClass}>
                     <td className="neo-td-name">{item.nama}</td>
                     
@@ -119,7 +115,6 @@ const Laporan = () => {
                     <td className="text-center"><span className="neo-badge">{item.cuti}</span></td>
                     
                     <td className="text-center">
-                        {/* Jika baris diwarnai, berikan class 'warn-badge' agar kotak angkanya lebih kontras */}
                         <span className={`neo-badge ${rowClass ? 'warn-badge' : ''}`}>
                             {item.terlambat}
                         </span>
@@ -154,39 +149,24 @@ const Laporan = () => {
         
         <nav className="menu-nav">
           <div className="menu-item" onClick={() => navigate('/hrd/dashboard')}>
-            <div className="menu-left">
-                <img src={iconDashboard} alt="dash" className="menu-icon-main" />
-                <span className="menu-text-main">Dashboard</span>
-            </div>
+            <div className="menu-left"><img src={iconDashboard} alt="dash" className="menu-icon-main" /><span className="menu-text-main">Dashboard</span></div>
           </div>
           
           <div className="menu-item" onClick={() => navigate('/hrd/kelolacabang')}>
-            <div className="menu-left">
-                <img src={iconKelola} alt="kelola" className="menu-icon-main" />
-                <span className="menu-text-main">Kelola Cabang</span>
-            </div>
+            <div className="menu-left"><img src={iconKelola} alt="kelola" className="menu-icon-main" /><span className="menu-text-main">Kelola Cabang</span></div>
           </div>
           
           <div className="menu-item" onClick={() => navigate('/hrd/datakaryawan')}>
-            <div className="menu-left">
-                <img src={iconKaryawan} alt="karyawan" className="menu-icon-main" />
-                <span className="menu-text-main">Data Karyawan</span>
-            </div>
+            <div className="menu-left"><img src={iconKaryawan} alt="karyawan" className="menu-icon-main" /><span className="menu-text-main">Data Karyawan</span></div>
           </div>
           
           <div className="menu-item has-arrow" onClick={() => navigate('/hrd/absenmanual')}>
-            <div className="menu-left">
-                <img src={iconKehadiran} alt="hadir" className="menu-icon-main" />
-                <span className="menu-text-main">Kehadiran</span>
-            </div>
+            <div className="menu-left"><img src={iconKehadiran} alt="hadir" className="menu-icon-main" /><span className="menu-text-main">Kehadiran</span></div>
             <img src={iconBawah} alt="down" className="arrow-icon-main" />
           </div>
           
           <div className="menu-item active" onClick={() => navigate('/hrd/laporan')}>
-            <div className="menu-left">
-                <img src={iconLaporan} alt="lapor" className="menu-icon-main" />
-                <span className="menu-text-main">Laporan</span>
-            </div>
+            <div className="menu-left"><img src={iconLaporan} alt="lapor" className="menu-icon-main" /><span className="menu-text-main">Laporan</span></div>
           </div>
         </nav>
 
@@ -275,19 +255,19 @@ const Laporan = () => {
             </div>
         </div>
 
-        {/* LOGIKA CONDITIONAL RENDERING CABANG */}
+        {/* LOGIKA CONDITIONAL RENDERING CABANG HRD */}
         {selectedFilter === "Cabang 4" ? (
           <div className="multi-cabang-wrapper">
-            <div className="cabang-section" style={{ marginBottom: "24px" }}>
-              <h3 style={{ marginBottom: "12px", fontSize: "16px", color: "#333" }}>Cabang A</h3>
+            <div className="cabang-section">
+              <h3>Cabang A</h3>
               {renderTable("Data Kehadiran Karyawan", filteredData.filter(d => d.cabang === "Cabang A"))}
             </div>
-            <div className="cabang-section" style={{ marginBottom: "24px" }}>
-              <h3 style={{ marginBottom: "12px", fontSize: "16px", color: "#333" }}>Cabang B</h3>
+            <div className="cabang-section">
+              <h3>Cabang B</h3>
               {renderTable("Data Kehadiran Karyawan", filteredData.filter(d => d.cabang === "Cabang B"))}
             </div>
             <div className="cabang-section">
-              <h3 style={{ marginBottom: "12px", fontSize: "16px", color: "#333" }}>Cabang C</h3>
+              <h3>Cabang C</h3>
               {renderTable("Data Kehadiran Karyawan", filteredData.filter(d => d.cabang === "Cabang C"))}
             </div>
           </div>

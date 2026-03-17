@@ -16,6 +16,11 @@ const DetailKaryawan = () => {
   const location = useLocation();
   const employee = location.state?.employee;
 
+  // DETEKSI ROLE UNTUK MENGARAHKAN SIDEBAR YANG BENAR
+  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const isManager = storedUser.role === "manager";
+  const basePath = isManager ? "/managerCabang" : "/hrd";
+
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
@@ -31,15 +36,8 @@ const DetailKaryawan = () => {
     );
   }
 
-  // DATA DOKUMEN LENGKAP (7 ITEM)
   const dokumenList = [
-    "Foto Diri", 
-    "Foto KTP", 
-    "KK (Kartu Keluarga)", 
-    "SKCK", 
-    "SIM", 
-    "Sertifikat Pendukung", 
-    "Dokumen Tambahan"
+    "Foto Diri", "Foto KTP", "KK (Kartu Keluarga)", "SKCK", "SIM", "Sertifikat Pendukung", "Dokumen Tambahan"
   ];
 
   return (
@@ -47,24 +45,31 @@ const DetailKaryawan = () => {
       {/* SIDEBAR */}
       <aside className="sidebar">
         <div className="logo-area">
-          <h2 className="logo-title">SISTEM ABSENSI</h2>
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
         <nav className="menu-nav">
-          <div className="menu-item" onClick={() => navigate("/hrd/dashboard")}>
+          <div className="menu-item" onClick={() => navigate(`${basePath}/dashboard`)}>
             <div className="menu-left"><img src={iconDashboard} alt="" className="menu-icon-main" /><span className="menu-text-main">Dashboard</span></div>
           </div>
-          <div className="menu-item" onClick={() => navigate("/hrd/kelolacabang")}>
-            <div className="menu-left"><img src={iconKelola} alt="" className="menu-icon-main" /><span className="menu-text-main">Kelola Cabang</span></div>
-          </div>
-          <div className="menu-item active" onClick={() => navigate("/hrd/datakaryawan")}>
+          
+          {!isManager && (
+            <div className="menu-item" onClick={() => navigate(`${basePath}/kelolacabang`)}>
+              <div className="menu-left"><img src={iconKelola} alt="" className="menu-icon-main" /><span className="menu-text-main">Kelola Cabang</span></div>
+            </div>
+          )}
+
+          <div className="menu-item active" onClick={() => navigate(`${basePath}/datakaryawan`)}>
             <div className="menu-left"><img src={iconKaryawan} alt="" className="menu-icon-main" /><span className="menu-text-main">Data Karyawan</span></div>
           </div>
-          <div className="menu-item has-arrow" onClick={() => navigate("/hrd/absenmanual")}>
-            <div className="menu-left"><img src={iconKehadiran} alt="" className="menu-icon-main" /><span className="menu-text-main">Kehadiran</span></div>
-            <img src={iconBawah} alt="" className="arrow-icon-main" />
-          </div>
-          <div className="menu-item" onClick={() => navigate("/hrd/laporan")}>
+
+          {!isManager && (
+             <div className="menu-item has-arrow" onClick={() => navigate(`${basePath}/absenmanual`)}>
+               <div className="menu-left"><img src={iconKehadiran} alt="" className="menu-icon-main" /><span className="menu-text-main">Kehadiran</span></div>
+               <img src={iconBawah} alt="" className="arrow-icon-main" />
+             </div>
+          )}
+
+          <div className="menu-item" onClick={() => navigate(`${basePath}/laporan`)}>
             <div className="menu-left"><img src={iconLaporan} alt="" className="menu-icon-main" /><span className="menu-text-main">Laporan</span></div>
           </div>
         </nav>
@@ -80,10 +85,7 @@ const DetailKaryawan = () => {
           <p>Informasi detail data diri karyawan</p>
         </div>
 
-        {/* CARD PUTIH (SCROLLABLE) - Class diganti jadi 'detail-card' */}
         <div className="detail-card">
-          
-          {/* GRID 3 KOLOM */}
           <div className="form-grid-3">
             <div className="form-group"><label>Nama</label><input type="text" className="input-white" readOnly value={employee.nama} /></div>
             <div className="form-group"><label>Tanggal Masuk</label><input type="text" className="input-white" readOnly value={employee.tanggalMasuk || "-"} /></div>
@@ -94,24 +96,20 @@ const DetailKaryawan = () => {
             <div className="form-group"><label>Tempat Lahir</label><input type="text" className="input-white" readOnly value={employee.tempatLahir} /></div>
             <div className="form-group"><label>Tanggal Lahir</label><input type="text" className="input-white" readOnly value={employee.tanggalLahir} /></div>
             <div className="form-group"><label>Jenis Kelamin</label><input type="text" className="input-white" readOnly value={employee.jenisKelamin || "-"} /></div>
-            <div className="form-group"><label>Cabang</label><input type="text" className="input-white" readOnly value={`Cabang ${employee.cabang}` || "-"} /></div>
-            <div className="form-group" style={{ gridColumn: "span 2" }}><label>Alamat</label><input type="text" className="input-white" readOnly value={employee.alamat} /></div>
+            
+            <div className="form-group"><label>Cabang Penempatan</label><input type="text" className="input-white" readOnly value={employee.cabang || "-"} /></div>
+            <div className="form-group"><label>Status Karyawan</label><input type="text" className="input-white" readOnly value={employee.status || "Aktif"} style={{ color: employee.status === "Resign" ? "red" : "green", fontWeight: "bold" }} /></div>
+            <div className="form-group" style={{ gridColumn: "span 3" }}><label>Alamat</label><input type="text" className="input-white" readOnly value={employee.alamat} /></div>
           </div>
 
-          {/* DOKUMEN PENDUKUNG */}
           <div className="docs-section">
             <h4 className="docs-title" style={{ marginTop: '20px' }}>Dokumen Pendukung</h4>
             <hr className="modal-divider" />
-            
             <div className="upload-grid-3">
               {dokumenList.map((label, idx) => (
                 <div key={idx} className="upload-box">
                   <p className="upload-label">{label}</p>
-                  <div 
-                    className="upload-content-white" 
-                    onClick={() => alert(`Membuka dokumen: ${label}`)}
-                    style={{ cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center" }}
-                  >
+                  <div className="upload-content-white" onClick={() => alert(`Membuka dokumen: ${label}`)} style={{ cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center" }}>
                     <span style={{ fontSize: "12px", color: "#8dae12", fontWeight: "bold" }}>Lihat / Unduh</span>
                   </div>
                 </div>
@@ -119,13 +117,12 @@ const DetailKaryawan = () => {
             </div>
           </div>
 
-          {/* TOMBOL KEMBALI DI BAWAH KANAN */}
-          <div style={{ marginTop: '40px', display: 'flex', justifyContent: 'flex-end' }}>
+          {/* PERBAIKAN: Padding bawah agar jika discroll pol, tombol tidak mentok dinding */}
+          <div style={{ marginTop: '40px', display: 'flex', justifyContent: 'flex-end', paddingBottom: '15px' }}>
              <button className="btn-batal" onClick={() => navigate(-1)} style={{ width: '150px' }}>
                 Kembali
              </button>
           </div>
-
         </div>
       </main>
     </div>

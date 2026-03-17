@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-// FIX: Mengambil CSS langsung dari folder hrd
+// Mengambil CSS langsung dari folder hrd
 import "../hrd/kehadiran.css"; 
 
 // --- IMPORT ICONS ---
@@ -14,9 +14,37 @@ import logoPersegi from "../../assets/logopersegi.svg";
 const PerizinanManagerCabang = () => {
   const navigate = useNavigate();
   
+  // ==========================================
+  // 1. STATE USER DATA (Dari localStorage)
+  // ==========================================
+  const [userData, setUserData] = useState({
+    nama: "Loading...",
+    cabangUtama: "Memuat Data...",
+    subCabang: [] 
+  });
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUserData({
+          nama: parsedUser.nama || "Manager",
+          cabangUtama: parsedUser.cabangUtama || "Cabang Tidak Diketahui",
+          subCabang: Array.isArray(parsedUser.subCabang) ? parsedUser.subCabang : []
+        });
+      } catch (error) {
+        console.error("Gagal memparsing data user dari localStorage", error);
+      }
+    }
+  }, [navigate]);
+
+  // --- CEK APAKAH PUNYA SUB CABANG ---
+  const hasSubCabang = userData.subCabang.length > 0;
+  
   // State untuk Filter Dropdown
   const [showFilter, setShowFilter] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState("Filter");
+  const [selectedFilter, setSelectedFilter] = useState("Semua Sub-Cabang");
 
   // Handler Logout
   const handleLogout = () => {
@@ -27,7 +55,9 @@ const PerizinanManagerCabang = () => {
 
   // Handler Filter
   const toggleFilter = () => {
-    setShowFilter(!showFilter);
+    if (hasSubCabang) {
+      setShowFilter(!showFilter);
+    }
   };
   
   const handleSelectFilter = (val) => { 
@@ -56,7 +86,7 @@ const PerizinanManagerCabang = () => {
   };
 
   // =========================================================
-  // DATA STATE (INTERAKTIF & TERISI PENUH)
+  // DATA STATE DUMMY
   // =========================================================
   
   // Tabel 1: Izin Harian 
@@ -79,7 +109,7 @@ const PerizinanManagerCabang = () => {
     { id: 2, nama: "Budi Santoso", cabang: "Cabang 1", jabatan: "Direktur Ops", divisi: "Operasional", noTelp: "08987654321", tipeIzin: "Cuti Khusus", tglMulai: "12/03/2026", tglSelesai: "14/03/2026", keterangan: "Pernikahan Saudara", status: "Disetujui" },
   ]);
 
-  // --- FUNGSI SORTING (Pending Selalu di Atas) ---
+  // --- FUNGSI SORTING ---
   const sortData = (dataArray) => {
     if (!dataArray) return []; 
     return [...dataArray].sort((a, b) => {
@@ -172,19 +202,30 @@ const PerizinanManagerCabang = () => {
       {/* ================================================= */}
       <main className="main-content">
         <div className="header-titles">
-            <h1>Perizinan</h1>
+            <h1>Perizinan - {userData.cabangUtama}</h1>
             <p>Kelola seluruh permohonan izin dan cuti karyawan</p>
         </div>
         
+        {/* ACTION ROW PERIZINAN (FILTER DINAMIS) */}
         <div className="action-row-perizinan">
             <div className="filter-wrapper">
-                <button className="btn-filter-green" onClick={toggleFilter}>
-                    {selectedFilter} <img src={iconBawah} alt="v" className={`filter-arrow ${showFilter ? 'rotate' : ''}`} />
+                <button 
+                  className="btn-filter-green" 
+                  onClick={toggleFilter}
+                  style={{ cursor: hasSubCabang ? 'pointer' : 'default' }}
+                >
+                    {!hasSubCabang ? userData.cabangUtama : selectedFilter} 
+                    {hasSubCabang && (
+                      <img src={iconBawah} alt="v" className={`filter-arrow ${showFilter ? 'rotate' : ''}`} />
+                    )}
                 </button>
-                {showFilter && (
+                {showFilter && hasSubCabang && (
                     <div className="filter-dropdown">
-                        {["Cabang 1", "Cabang 2", "Semua"].map(c => (
-                            <div key={c} className="dropdown-item" onClick={() => handleSelectFilter(c)}>{c}</div>
+                        {/* Menampilkan opsi "Semua Sub-Cabang" ditambah daftar subCabang */}
+                        {["Semua Sub-Cabang", ...userData.subCabang].map((c, index) => (
+                            <div key={index} className="dropdown-item" onClick={() => handleSelectFilter(c)}>
+                              {c}
+                            </div>
                         ))}
                     </div>
                 )}

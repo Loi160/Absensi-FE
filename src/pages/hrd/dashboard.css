@@ -1,55 +1,61 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* ================= GOOGLE FONT ================= */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
+/* ================= GLOBAL RESET ================= */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
+/* ================= LAYOUT UTAMA ================= */
 .hrd-container {
   display: flex;
   width: 100vw;
   height: 100vh;
   background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
-  overflow: hidden; 
+  overflow: hidden;
+  /* KUNCI UTAMA: position relative agar konten di dalamnya bisa diatur absolut */
+  position: relative;
 }
 
 /* ================= SIDEBAR ================= */
 .sidebar {
   width: 300px;
-  padding: 25px 25px; 
+  padding: 25px 25px;
   color: white;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  height: 100vh;
 }
 
 .logo-area {
-  margin-top: 38px; 
+  margin-top: 38px;
   margin-bottom: 26px !important;
   padding-left: 10px;
 }
 
 .logo-img {
   width: 100%;
-  max-width: 250px; 
+  max-width: 250px;
   height: auto;
   display: block;
   filter: grayscale(100%) brightness(0) invert(1) contrast(1000%) !important;
 }
 
-/* --- UPDATE UKURAN MENU --- */
+/* --- MENU NAV --- */
 .menu-nav {
   display: flex;
   flex-direction: column;
-  gap: 18px; 
+  gap: 18px;
 }
 
 .menu-item {
   display: flex;
   align-items: center;
-  justify-content: space-between; 
+  justify-content: space-between;
   padding: 12px 20px;
   border-radius: 10px;
   cursor: pointer;
@@ -84,24 +90,21 @@
   transition: all 0.3s ease;
 }
 
-/* =========================================
-   MENU ITEM ACTIVE (PUTIH & TEKS HIJAU)
-   ========================================= */
+/* ================= MENU ITEM ACTIVE ================= */
 .menu-item.active {
-  background-color: #ffffff !important; 
-  color: #2fb800 !important; 
+  background-color: #ffffff !important;
+  color: #2fb800 !important;
   border: 1px solid #ffffff;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Mengubah warna Ikon saat Active */
 .menu-item.active .menu-icon-main,
 .menu-item.active .arrow-icon-main {
-  filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg) brightness(95%) contrast(105%) !important;
+  filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg)
+    brightness(95%) contrast(105%) !important;
   opacity: 1;
 }
 
-/* Mengubah warna Teks saat Active */
 .menu-item.active .menu-text-main {
   color: #2fb800 !important;
 }
@@ -110,32 +113,54 @@
   background-color: rgba(255, 255, 255, 0.15);
 }
 
-/* ================= MAIN CONTENT ================= */
+/* ================= MAIN CONTENT (SOLUSI SCROLL LAPTOP) ================= */
 .main-content {
-  flex: 1; 
-  background-color: #fdfdfd; 
-  margin: 25px 35px 30px 0; 
-  border-radius: 40px; 
+  /* Diubah ke Absolute agar tinggi menyesuaikan layar dan tidak tembus batas */
+  position: absolute;
+  top: 25px;
+  bottom: 25px; /* Wajib agar berhenti sebelum dasar layar */
+  left: 310px; /* Jarak dari kiri (300px sidebar + 10px margin) */
+  right: 35px;
+
+  background-color: #fdfdfd;
+  border-radius: 40px;
   padding: 40px;
-  overflow-y: auto; 
+  overflow-y: auto !important; /* MENGAKTIFKAN SCROLL VERTIKAL DI DALAM KOTAK PUTIH */
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   gap: 30px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 }
 
-/* Cari bagian ini di dashboard.css */
+/* KUSTOMISASI SCROLLBAR AGAR ESTETIK */
+.main-content::-webkit-scrollbar {
+  width: 8px;
+}
+.main-content::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 30px 0;
+}
+.main-content::-webkit-scrollbar-thumb {
+  background-color: #d1d1d1;
+  border-radius: 10px;
+}
+.main-content::-webkit-scrollbar-thumb:hover {
+  background-color: #8dae12;
+}
+
+/* ================= CONTENT HEADER ================= */
 .content-header {
   display: flex;
-  flex-direction: column; /* Mengubah arah dari samping ke bawah */
-  align-items: flex-end;  /* Menarik semua isi header ke arah kanan */
-  gap: 40px;             /* Mengatur jarak antara teks judul dan tombol filter */
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 20px;
   margin-bottom: -18px !important;
+  flex-shrink: 0; /* Mencegah header menyusut saat di-scroll */
 }
 
-/* Tambahkan ini agar teks judul tetap di kiri */
 .header-text {
-  align-self: flex-start; /* Memaksa judul dan subjudul tetap di kiri */
+  align-self: flex-start;
   width: 100%;
 }
 
@@ -152,9 +177,10 @@
   font-size: 16px;
 }
 
-/* FILTER DROPDOWN STYLE */
+/* ================= FILTER DROPDOWN STYLE ================= */
 .filter-wrapper {
   position: relative;
+  z-index: 100; /* Memastikan dropdown tidak tertutup chart */
 }
 
 .btn-filter-green {
@@ -189,7 +215,7 @@
   border-radius: 12px;
   padding: 5px;
   z-index: 1000;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
   border: 1px solid #eee;
   min-width: 140px;
   display: flex;
@@ -212,24 +238,27 @@
   color: #ffffff !important;
 }
 
-/* CHART & STATS */
+/* ================= CHART & STATS ================= */
 .chart-section.shadow-box {
   background: white;
   padding: 25px;
   border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   border: 1px solid #f5f5f5;
+  flex-shrink: 0; /* Mencegah grafik terpotong/gepeng */
 }
 
 .chart-container-inner {
-  height: 380px; 
+  height: 380px;
   width: 100%;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); 
+  grid-template-columns: repeat(4, 1fr);
   gap: 25px;
+  flex-shrink: 0; /* Mencegah kotak statistik gepeng */
+  padding-bottom: 20px; /* Jarak nafas di ujung paling bawah scroll */
 }
 
 .stat-card {
@@ -239,13 +268,16 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    filter 0.3s ease;
   border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .stat-card:hover {
   transform: translateY(-5px);
-  filter: brightness(1.1); 
+  filter: brightness(1.1);
 }
 
 .stat-value {
@@ -264,20 +296,20 @@
 
 /* ================= SIDEBAR FOOTER (LOG OUT) ================= */
 .sidebar-footer {
-  margin-top: auto; 
-  padding-top: 25px; 
-  border-top: 1px solid rgba(255, 255, 255, 0.2); 
+  margin-top: auto;
+  padding-top: 25px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
   text-align: center;
   padding-bottom: 15px;
 }
 
 .btn-logout {
-  background: transparent; 
-  border: 1px solid rgba(255, 255, 255, 0.7); 
-  color: #fff; 
-  font-family: 'Inter', sans-serif;
-  font-size: 20px; 
-  font-weight: 700; 
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  color: #fff;
+  font-family: "Inter", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
   padding: 12px 0;
@@ -286,27 +318,59 @@
 }
 
 .btn-logout:hover {
-    background-color: #ffffff !important; 
-    color: #2fb800 !important; 
-    border-color: #ffffff !important; 
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; 
+  background-color: #ffffff !important;
+  color: #2fb800 !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* RESPONSIVE */
+/* ================= RESPONSIVE ================= */
 @media (max-width: 1200px) {
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
-  .hrd-container { flex-direction: column; height: auto; overflow: auto; }
-  .sidebar { width: 100%; padding: 20px; }
-  .logo-img { max-width: 200px; }
-  .main-content { margin: 0; border-radius: 25px 25px 0 0; padding: 25px; }
-  
-  .content-header { flex-direction: column; align-items: flex-start; gap: 15px;}
-  .filter-wrapper { align-self: flex-start; }
+  .hrd-container {
+    flex-direction: column;
+    height: auto;
+    overflow: auto;
+    position: static;
+  }
+  .sidebar {
+    width: 100%;
+    padding: 20px;
+    height: auto;
+  }
+  .logo-img {
+    max-width: 200px;
+  }
+  .main-content {
+    position: static;
+    margin: 0;
+    border-radius: 25px 25px 0 0;
+    padding: 25px;
+    height: auto;
+    overflow: visible;
+  }
 
-  .chart-container-inner { height: 300px; }
-  .stats-grid { grid-template-columns: 1fr; }
-  .sidebar-footer { margin-top: 30px; }
+  .content-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  .filter-wrapper {
+    align-self: flex-start;
+  }
+
+  .chart-container-inner {
+    height: 300px;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .sidebar-footer {
+    margin-top: 30px;
+  }
 }

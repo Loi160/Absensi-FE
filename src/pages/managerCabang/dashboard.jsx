@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; 
 
-// FIX 1: Path CSS diarahkan ke folder HRD agar tidak error
+// Path CSS diarahkan ke folder HRD agar desain tetap selaras
 import "../hrd/dashboard.css"; 
 
 import {
@@ -36,9 +36,46 @@ ChartJS.register(
 const DashboardManagerCabang = () => {
   const navigate = useNavigate();
 
+  // ==========================================
+  // 1. STATE USER DATA (Default Kosong)
+  // ==========================================
+  const [userData, setUserData] = useState({
+    nama: "Loading...",
+    cabangUtama: "Memuat Data...",
+    subCabang: [] // Default array kosong
+  });
+
+  // ==========================================
+  // 2. AMBIL DATA DARI SISTEM LOGIN (localStorage)
+  // ==========================================
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        
+        // Memastikan subCabang selalu berupa array meskipun dari API tidak dikirim
+        setUserData({
+          nama: parsedUser.nama || "Manager",
+          cabangUtama: parsedUser.cabangUtama || "Cabang Tidak Diketahui",
+          subCabang: Array.isArray(parsedUser.subCabang) ? parsedUser.subCabang : []
+        });
+      } catch (error) {
+        console.error("Gagal memparsing data user dari localStorage", error);
+      }
+    } else {
+      // Jika tidak ada data user sama sekali, tendang kembali ke halaman login
+      // navigate("/auth/login"); // <-- UNCOMMENT INI JIKA ROUTE LOGIN SUDAH SIAP
+    }
+  }, [navigate]);
+
   // STATE FILTER
   const [showFilter, setShowFilter] = useState(false);
-  const [selectedCabang, setSelectedCabang] = useState("Semua Cabang");
+  const [selectedCabang, setSelectedCabang] = useState("Semua Sub-Cabang");
+
+  // Cek apakah manager ini mengelola lebih dari 1 cabang (punya sub-cabang)
+  const hasSubCabang = userData.subCabang.length > 0;
 
   const handleLogout = () => {
     localStorage.removeItem("user"); 
@@ -46,7 +83,12 @@ const DashboardManagerCabang = () => {
     navigate("/auth/login");
   };
 
-  const toggleFilter = () => setShowFilter(!showFilter);
+  const toggleFilter = () => {
+    // Hanya buka dropdown jika punya sub-cabang
+    if (hasSubCabang) {
+      setShowFilter(!showFilter);
+    }
+  };
   
   const handleSelectFilter = (val) => {
     setSelectedCabang(val);
@@ -54,32 +96,30 @@ const DashboardManagerCabang = () => {
   };
 
   // --- SIMULASI DATA DINAMIS BERDASARKAN FILTER ---
+  // (Nantinya data chart ini juga harus di-fetch dari API berdasarkan cabang/sub-cabang)
   const getSimulatedData = (baseValue) => {
-    if (selectedCabang === "Semua Cabang") return baseValue;
-    if (selectedCabang === "Cabang 1") return Math.floor(baseValue * 0.4);
-    if (selectedCabang === "Cabang 2") return Math.floor(baseValue * 0.3);
-    if (selectedCabang === "Cabang 3") return Math.floor(baseValue * 0.2);
-    if (selectedCabang === "Cabang 4") return Math.floor(baseValue * 0.1);
-    return baseValue;
+    if (!hasSubCabang) return baseValue; 
+    if (selectedCabang === "Semua Sub-Cabang") return baseValue;
+    return Math.floor(baseValue * 0.4); 
   };
 
   const statsCards = [
     { label: "Hadir", value: getSimulatedData(270), gradient: "linear-gradient(135deg, #2fb800 0%, #1f8f3d 100%)", shadow: "rgba(47, 184, 0, 0.3)" },
-    { label: "Sakit", value: getSimulatedData(270), gradient: "linear-gradient(135deg, #f1c40f 0%, #d4ac0d 100%)", shadow: "rgba(241, 196, 15, 0.3)" }, 
-    { label: "Izin", value: getSimulatedData(270), gradient: "linear-gradient(135deg, #2980b9 0%, #094b75 100%)", shadow: "rgba(41, 128, 185, 0.3)" },
-    { label: "Terlambat", value: getSimulatedData(270), gradient: "linear-gradient(135deg, #9b59b6 0%, #71368a 100%)", shadow: "rgba(155, 89, 182, 0.3)" },
-    { label: "Alpha", value: getSimulatedData(270), gradient: "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)", shadow: "rgba(231, 76, 60, 0.3)" },
-    { label: "Cuti", value: getSimulatedData(270), gradient: "linear-gradient(135deg, #1abc9c 0%, #16a085 100%)", shadow: "rgba(26, 188, 156, 0.3)" },
+    { label: "Sakit", value: getSimulatedData(15), gradient: "linear-gradient(135deg, #f1c40f 0%, #d4ac0d 100%)", shadow: "rgba(241, 196, 15, 0.3)" }, 
+    { label: "Izin", value: getSimulatedData(10), gradient: "linear-gradient(135deg, #2980b9 0%, #094b75 100%)", shadow: "rgba(41, 128, 185, 0.3)" },
+    { label: "Terlambat", value: getSimulatedData(25), gradient: "linear-gradient(135deg, #9b59b6 0%, #71368a 100%)", shadow: "rgba(155, 89, 182, 0.3)" },
+    { label: "Alpha", value: getSimulatedData(5), gradient: "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)", shadow: "rgba(231, 76, 60, 0.3)" },
+    { label: "Cuti", value: getSimulatedData(12), gradient: "linear-gradient(135deg, #1abc9c 0%, #16a085 100%)", shadow: "rgba(26, 188, 156, 0.3)" },
   ];
 
   const dataGrafik = {
      labels: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"],
      datasets: [
-        { label: "Hadir", data: [100, 20, 35, 10, 30, 60].map(getSimulatedData), borderColor: "#2fb800", backgroundColor: "#2fb800", tension: 0.3, pointRadius: 4 },
-        { label: "Sakit", data: [25, 30, 15, 40, 50, 60].map(getSimulatedData), borderColor: "#f1c40f", backgroundColor: "#f1c40f", tension: 0.3, pointRadius: 4 },
-        { label: "Izin", data: [15, 18, 22, 25, 23, 20].map(getSimulatedData), borderColor: "#2980b9", backgroundColor: "#2980b9", tension: 0.3, pointRadius: 4 },
-        { label: "Terlambat", data: [30, 35, 40, 35, 35, 30].map(getSimulatedData), borderColor: "#9b59b6", backgroundColor: "#9b59b6", tension: 0.3, pointRadius: 4 },
-        { label: "Alpha", data: [10, 15, 30, 55, 38, 70].map(getSimulatedData), borderColor: "#e74c3c", backgroundColor: "#e74c3c", tension: 0.3, pointRadius: 4 },
+        { label: "Hadir", data: [100, 120, 135, 110, 130, 160].map(getSimulatedData), borderColor: "#2fb800", backgroundColor: "#2fb800", tension: 0.3, pointRadius: 4 },
+        { label: "Sakit", data: [5, 10, 8, 15, 7, 12].map(getSimulatedData), borderColor: "#f1c40f", backgroundColor: "#f1c40f", tension: 0.3, pointRadius: 4 },
+        { label: "Izin", data: [3, 5, 2, 8, 4, 6].map(getSimulatedData), borderColor: "#2980b9", backgroundColor: "#2980b9", tension: 0.3, pointRadius: 4 },
+        { label: "Terlambat", data: [10, 15, 12, 18, 10, 8].map(getSimulatedData), borderColor: "#9b59b6", backgroundColor: "#9b59b6", tension: 0.3, pointRadius: 4 },
+        { label: "Alpha", data: [2, 4, 1, 5, 3, 2].map(getSimulatedData), borderColor: "#e74c3c", backgroundColor: "#e74c3c", tension: 0.3, pointRadius: 4 },
      ]
   };
 
@@ -102,7 +142,6 @@ const DashboardManagerCabang = () => {
     <div className="hrd-container">
       <aside className="sidebar">
         
-        {/* FIX 2: H2 Dihapus agar logo tidak numpuk/dobel */}
         <div className="logo-area">
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
@@ -147,18 +186,26 @@ const DashboardManagerCabang = () => {
       <main className="main-content">
         <header className="content-header">
           <div className="header-text">
-             <h1>Dashboard Operasional</h1>
+             <h1>Dashboard Operasional - {userData.cabangUtama}</h1>
              <p>Manajemen data kehadiran dan statistik karyawan</p>
           </div>
           
           <div className="filter-wrapper">
-             <button className="btn-filter-green" onClick={toggleFilter}>
-                 {selectedCabang === "Semua Cabang" ? "Filter Cabang" : selectedCabang} 
-                 <img src={iconBawah} alt="v" className={`filter-arrow ${showFilter ? 'rotate' : ''}`} />
+             <button 
+                 className="btn-filter-green" 
+                 onClick={toggleFilter}
+                 style={{ cursor: hasSubCabang ? 'pointer' : 'default' }} 
+             >
+                 {!hasSubCabang ? userData.cabangUtama : selectedCabang} 
+                 
+                 {hasSubCabang && (
+                    <img src={iconBawah} alt="v" className={`filter-arrow ${showFilter ? 'rotate' : ''}`} />
+                 )}
              </button>
-             {showFilter && (
+             
+             {showFilter && hasSubCabang && (
                  <div className="filter-dropdown">
-                     {["Semua Cabang", "Cabang 1", "Cabang 2", "Cabang 3", "Cabang 4"].map((c) => (
+                     {["Semua Sub-Cabang", ...userData.subCabang].map((c) => (
                          <div key={c} className="dropdown-item" onClick={() => handleSelectFilter(c)}>
                              {c}
                          </div>

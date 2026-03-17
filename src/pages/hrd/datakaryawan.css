@@ -5,7 +5,13 @@
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
 /* LAYOUT UTAMA */
-.hrd-container { display: flex; width: 100vw; height: 100vh; overflow: hidden; background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%); }
+.hrd-container { 
+  display: flex; 
+  width: 100vw; 
+  height: 100vh; 
+  overflow: hidden; 
+  background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%); 
+}
 
 /* ================================================= */
 /* ==================== SIDEBAR ==================== */
@@ -34,15 +40,34 @@
 .btn-logout:hover { background-color: #ffffff !important; color: #2fb800 !important; border-color: #ffffff !important; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; }
 
 /* ================= MAIN CONTENT ================== */
-.main-content { flex: 1; margin: 25px 35px 30px 0; padding: 40px; display: flex; flex-direction: column; overflow-y: auto; border-radius: 40px; background-color: #fdfdfd; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1); position: relative; }
+.main-content { 
+  flex: 1; 
+  margin: 25px 35px 30px 0; 
+  padding: 30px 40px; 
+  display: flex; 
+  flex-direction: column; 
+  overflow-y: auto; 
+  border-radius: 40px; 
+  background-color: #fdfdfd; 
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1); 
+  position: relative; 
+  min-height: 0; 
+  height: calc(100vh - 55px); 
+}
+
+/* KUSTOMISASI SCROLLBAR AGAR RAPI DI WINDOWS */
+.main-content::-webkit-scrollbar { width: 8px; }
+.main-content::-webkit-scrollbar-track { background: transparent; margin: 30px 0; }
+.main-content::-webkit-scrollbar-thumb { background-color: #d1d1d1; border-radius: 10px; }
+.main-content::-webkit-scrollbar-thumb:hover { background-color: #8dae12; }
 
 /* HEADER */
-.page-header { margin-top: 0; margin-bottom: 30px; }
+.page-header { margin-top: 0; margin-bottom: 30px; flex-shrink: 0; }
 .page-header h1 { font-size: 32px; font-weight: 700; color: #111; margin-bottom: 5px; letter-spacing: -0.5px; line-height: 1.2; }
 .page-header p { color: #666; font-size: 16px; margin: 0; }
 
 /* ACTION BAR */
-.action-bar { display: flex; justify-content: flex-end; align-items: center; gap: 15px; margin-top: -30px !important; margin-bottom: -18px !important; }
+.action-bar { display: flex; justify-content: flex-end; align-items: center; gap: 15px; margin-top: -30px !important; margin-bottom: -18px !important; flex-shrink: 0; }
 .filter-wrapper { position: relative; }
 .btn-filter, .btn-tambah { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 20px; font-size: 14px; font-weight: 600; border-radius: 25px; border: none; background-color: #8dae12; color: white; cursor: pointer; transition: 0.2s; }
 .btn-filter:hover, .btn-tambah:hover { background-color: #7a9610; }
@@ -55,21 +80,34 @@
 
 /* ================= LAYOUT SPESIFIK ================= */
 /* DETAIL CARD */
-.detail-card { background-color: white; padding: 30px; border-radius: 16px; border: 1px solid #ddd; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.detail-card { 
+  background-color: white; 
+  padding: 30px; 
+  border-radius: 16px; 
+  border: 1px solid #ddd; 
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+  flex-shrink: 0; 
+  margin-bottom: 20px; 
+}
 
 /* CABANG 4 (STACKED) */
-.stacked-layout { display: flex; flex-direction: column; gap: 35px; margin-top: 10px; padding-bottom: 20px; }
+.stacked-layout { display: flex; flex-direction: column; gap: 35px; margin-top: 10px; padding-bottom: 20px; flex-shrink: 0; }
 .stacked-card-wrapper { display: flex; flex-direction: column; }
 .sub-branch-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 5px; }
 .sub-branch-title { font-size: 18px; font-weight: 700; color: #222; }
 
 /* ================= TABLE ================= */
-.approval-section { width: 100%; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); background-color: white; }
+.approval-section { width: 100%; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); background-color: white; flex-shrink: 0;}
 .approval-header { padding: 12px 20px; font-weight: 600; color: white; background-color: #8dae12; font-size: 14px; }
 .custom-table { width: 100%; border-collapse: collapse; }
-.custom-table th { padding: 12px 15px; text-align: left; font-size: 13px; font-weight: 700; background-color: #f9f9f9; border-bottom: 2px solid #ddd; color: #333; }
+.custom-table th { padding: 12px 15px; text-align: left; font-size: 13px; font-weight: 700; background-color: #f9f9f9; border-bottom: 2px solid #ddd; color: #333; position: sticky; top: 0; z-index: 10; }
 .custom-table td { padding: 12px 15px; font-size: 13px; color: #444; border-bottom: 1px solid #eee; }
 .text-center { text-align: center !important; }
+
+/* Mencegah baris terakhir menutupi lengkungan border-radius kotak tabel */
+.custom-table tbody tr:last-child td { border-bottom: none; }
+.custom-table tbody tr:last-child td:first-child { border-bottom-left-radius: 8px; }
+.custom-table tbody tr:last-child td:last-child { border-bottom-right-radius: 8px; }
 
 /* STATUS DOTS */
 .status-dots-spaced { display: flex; justify-content: center; align-items: center; gap: 15px; }
@@ -77,37 +115,12 @@
 .dot-green { background-color: #00c853; box-shadow: 0 0 5px rgba(0, 200, 83, 0.5); }
 .dot-red { background-color: #ff1744; box-shadow: 0 0 5px rgba(255, 23, 68, 0.5); }
 
-/* Tambahan: Efek hover pada baris yang bisa diklik */
-.clickable-row {
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-.clickable-row:hover {
-  background-color: #f1f8e9; /* Hijau sangat muda saat di-hover */
-}
-/* Menghapus garis bawah pada nama, cukup ditebalkan saja */
-.clickable-name {
-  color: #222;
-  font-weight: 700;
-}
+/* EFEK HOVER TABLE */
+.clickable-row { cursor: pointer; transition: background-color 0.2s ease; }
+.clickable-row:hover { background-color: #f1f8e9; }
+.clickable-name { color: #222; font-weight: 700; }
 
-/* Menghilangkan background button edit bawaan agar bersih */
-.btn-edit-clean {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 5px;
-}
-.img-edit-gray {
-  width: 18px;
-  filter: brightness(0) invert(0.5);
-  transition: 0.2s;
-}
-.btn-edit-clean:hover .img-edit-gray {
-  filter: brightness(0); /* Menjadi hitam saat di-hover */
-}
-
-/* FIX TOMBOL EDIT (Background Transparan, Icon Abu-abu) */
+/* FIX TOMBOL EDIT */
 .btn-edit-clean { background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
 .img-edit-gray { width: 20px; height: auto; filter: invert(60%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(90%) contrast(90%); transition: filter 0.2s ease; }
 .btn-edit-clean:hover .img-edit-gray { filter: invert(30%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(80%) contrast(100%); }
@@ -116,6 +129,9 @@
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.4); display: flex; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
 .modal-content { background: white; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; border-radius: 16px; padding: 30px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; }
 .modal-content.modal-large { max-width: 900px; }
+/* Kustomisasi scrollbar dalam modal */
+.modal-content::-webkit-scrollbar { width: 6px; }
+.modal-content::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 10px; }
 
 @keyframes modalPop { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
@@ -157,7 +173,16 @@
 .btn-simpan { flex-grow: 1; padding: 12px; background-color: #E0E0E0; color: #666; border: none; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.3s ease; }
 .btn-simpan:hover { background-color: #8dae12; color: white; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(141, 174, 18, 0.4); }
 
+@media (max-width: 1366px) {
+  .main-content { padding: 30px 30px; }
+  .detail-card { padding: 25px; }
+  .form-grid-3, .upload-grid-3 { gap: 15px; }
+}
+
 @media (max-width: 768px) {
+  .hrd-container { flex-direction: column; height: auto; overflow: auto; }
+  .sidebar { width: 100%; padding: 20px; }
+  .main-content { height: auto; border-radius: 30px 30px 0 0; margin: 0; padding: 25px; }
   .form-grid, .form-grid-3, .upload-grid, .upload-grid-3 { grid-template-columns: 1fr; }
   .modal-content.modal-large { max-width: 95%; }
 }

@@ -9,6 +9,7 @@
     height: 100vh; 
     background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%); 
     overflow: hidden; 
+    position: relative; /* KUNCI: Menjadi jangkar posisi konten utama */
 }
 
 /* ================= SIDEBAR ================= */
@@ -133,14 +134,19 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; 
 }
 
+/* ================= MAIN CONTENT (FIX SCROLL TERKUNCI) ================== */
 .main-content { 
-    flex: 1; 
+    /* Mengubah ke Absolute agar bebas scroll tanpa menjebol layar */
+    position: absolute;
+    top: 25px; 
+    bottom: 25px; 
+    left: 300px;
+    right: 35px;
+    
     background-color: #fdfdfd; 
-    margin: 25px 35px 30px 0; 
     border-radius: 40px; 
     padding: 40px; 
-    /* Mematikan scroll utama agar bisa di-scroll di dalam tabel saja */
-    overflow-y: hidden; 
+    overflow-y: hidden; /* Mencegah body scroll, scroll hanya di tabel atau wrapper */
     display: flex;
     flex-direction: column;
     box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
@@ -151,12 +157,10 @@
   justify-content: space-between;
   align-items: flex-end; 
   margin-bottom: 30px;
-  flex-shrink: 0; /* Mencegah header menyusut */
+  flex-shrink: 0; 
 }
 
-.header-text {
-  align-self: flex-start; 
-}
+.header-text { align-self: flex-start; }
 
 .header-text h1 {
   font-size: 32px;
@@ -178,8 +182,8 @@
     align-items: flex-end; 
     width: 100%; 
     margin-top: 20px; 
-    margin-bottom: 30px; 
-    flex-shrink: 0; /* Mencegah area filter menyusut */
+    margin-bottom: -14px; 
+    flex-shrink: 0; 
 }
 
 .input-group-neo { display: flex; gap: 20px; }
@@ -222,8 +226,6 @@
 }
 
 .btn-neo-print-top:hover { background-color: #7a9610; }
-
-.dropdown-neo-bottom-wrapper { position: relative; display: inline-block; }
 
 /* ================= DROPDOWN SUPER SLIM ================= */
 .dropdown-neo-bottom-wrapper { position: relative; display: inline-block; }
@@ -274,12 +276,10 @@
     filter: invert(56%) sepia(88%) saturate(354%) hue-rotate(34deg) brightness(94%) contrast(87%);
     transition: transform 0.2s;
 }
-.btn-neo-filter-bottom img { width: 8px; filter: invert(56%) sepia(88%) saturate(354%) hue-rotate(34deg) brightness(94%) contrast(87%); transition: transform 0.2s; }
 .btn-neo-filter-bottom img.rotate { transform: rotate(180deg); }
 
 /* ================= TABLE AREA DENGAN SCROLL ================= */
 
-/* Wrapper Kartu agar memakan sisa tinggi layar */
 .neo-table-card { 
     background: white; 
     border-radius: 20px; 
@@ -287,12 +287,9 @@
     border: 1px solid #f0f0f0; 
     display: flex;
     flex-direction: column;
-    flex: 1; /* Penting: Mengambil sisa ruang di main-content */
+    flex: 1; /* Mengambil sisa ruang di main-content */
 }
-.neo-drop-item { padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; color: #444; transition: 0.2s; }
-.neo-drop-item:hover { background: #8dae12; color: white; }
 
-/* Judul Tabel tetap diam di atas */
 .neo-table-header { 
     background: #8dae12; 
     color: white; 
@@ -302,15 +299,14 @@
     flex-shrink: 0; 
 }
 
-/* Area khusus yang bisa di-scroll (isi tabelnya) */
+/* AREA KHUSUS YANG BISA DI-SCROLL */
 .neo-table-wrapper {
     flex: 1; 
-    overflow-y: auto; /* Mengaktifkan scroll vertikal di sini */
+    overflow-y: auto; 
 }
 
 .neo-table { width: 100%; border-collapse: collapse; }
 
-/* Membuat Nama Kolom (Header Tabel) tetap diam saat di-scroll */
 .neo-table th { 
     text-align: center; 
     padding: 15px 10px; 
@@ -320,7 +316,7 @@
     font-size: 11px; 
     letter-spacing: 1px;
     text-transform: uppercase;
-    position: sticky; /* Membuatnya nempel di atas */
+    position: sticky; /* Header nempel di atas */
     top: 0; 
     z-index: 10; 
 }
@@ -372,14 +368,13 @@ tr.row-warn-red .neo-badge.warn-badge { background-color: #e03131; color: white;
 
 .empty-state { text-align: center; padding: 30px; color: #888; font-style: italic; font-size: 14px; }
 
-/* ================= MULTI CABANG (CABANG 4) SCROLL ================= */
-/* Jika menampilkan banyak tabel, biarkan main-content yang scroll khusus untuk mode ini */
+/* ================= MULTI CABANG SCROLL ================= */
 .multi-cabang-wrapper {
     display: flex;
     flex-direction: column;
     gap: 35px; 
     margin-top: 10px;
-    overflow-y: auto; /* Scroll diaktifkan untuk pembungkus multi-cabang */
+    overflow-y: auto; /* Aktifkan Scroll di mode tumpuk */
     flex: 1;
     padding-right: 10px;
 }
@@ -391,9 +386,9 @@ tr.row-warn-red .neo-badge.warn-badge { background-color: #e03131; color: white;
     flex-shrink: 0;
 }
 
-/* Membatasi tinggi tabel di dalam multi-cabang agar tidak terlalu panjang */
+/* Membatasi tinggi tabel di dalam multi-cabang */
 .cabang-section .neo-table-card {
-    max-height: 400px; 
+    max-height: 350px; 
 }
 
 .cabang-section h3 {
@@ -403,14 +398,27 @@ tr.row-warn-red .neo-badge.warn-badge { background-color: #e03131; color: white;
     margin-left: 5px; 
 }
 
-/* Kustomisasi Tampilan Scrollbar agar lebih rapi */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #ccc; }
+/* Kustomisasi Scrollbar Khusus untuk Wrapper Table & Multi-Cabang */
+.neo-table-wrapper::-webkit-scrollbar,
+.multi-cabang-wrapper::-webkit-scrollbar { width: 8px; height: 8px; }
+.neo-table-wrapper::-webkit-scrollbar-track,
+.multi-cabang-wrapper::-webkit-scrollbar-track { background: transparent; }
+.neo-table-wrapper::-webkit-scrollbar-thumb,
+.multi-cabang-wrapper::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+.neo-table-wrapper::-webkit-scrollbar-thumb:hover,
+.multi-cabang-wrapper::-webkit-scrollbar-thumb:hover { background: #8dae12; }
 
 @media print { 
     .no-print { display: none !important; } 
-    .main-content { overflow: visible !important; height: auto; }
+    .main-content { overflow: visible !important; height: auto; position: static !important; }
     .neo-table-wrapper { overflow: visible !important; height: auto; }
+}
+
+@media (max-width: 768px) {
+  .hrd-container { flex-direction: column; height: auto; overflow: auto; position: static; }
+  .sidebar { width: 100%; padding: 20px; }
+  .main-content { position: static; height: auto; border-radius: 30px 30px 0 0; margin: 0; padding: 25px; }
+  .input-group-neo { flex-direction: column; width: 100%; }
+  .neo-input { width: 100%; }
+  .neo-filter-zone { flex-direction: column; gap: 20px; align-items: flex-start; }
 }

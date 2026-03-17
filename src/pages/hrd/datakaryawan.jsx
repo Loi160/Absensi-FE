@@ -16,63 +16,38 @@ import iconEdit from "../../assets/edit.svg";
 const DataKaryawan = () => {
   const navigate = useNavigate();
 
+  // --- DATA SELURUH CABANG AMAGA CORP ---
+  const semuaCabangAmaga = [
+    "F&B Jakarta",
+    "F&B Sudirman (Sub)",
+    "F&B Kemang (Sub)",
+    "Jam Tangan Jkt",
+    "Pakaian Jkt",
+    "Sepatu Jkt"
+  ];
+
   /* ================= DATA DUMMY ================= */
-  // Menambahkan field `status` (Aktif / Resign)
   const [karyawanList] = useState([
     {
-      id: 1,
-      nama: "Syahrul",
-      jabatan: "CEO",
-      nik: "123456789",
-      password: "123",
-      tempatLahir: "Semarang",
-      tanggalLahir: "01 Januari 2026",
-      alamat: "Semarang",
-      divisi: "Operasional",
-      tanggalMasuk: "01/01/2023",
-      jenisKelamin: "Laki-laki",
-      cabang: "1",
-      status: "Aktif" // Menandakan Karyawan masih aktif
+      id: 1, nama: "Syahrul", jabatan: "CEO", nik: "123456789", password: "123", tempatLahir: "Semarang", tanggalLahir: "01 Januari 2026", alamat: "Semarang", divisi: "Operasional", tanggalMasuk: "01/01/2023", jenisKelamin: "Laki-laki", 
+      cabang: "F&B Jakarta", 
+      status: "Aktif" 
     },
     {
-      id: 2,
-      nama: "Budi",
-      jabatan: "Staff",
-      nik: "987654321",
-      password: "123",
-      tempatLahir: "Jakarta",
-      tanggalLahir: "12 Februari 1999",
-      alamat: "Jakarta Selatan",
-      divisi: "Marketing",
-      tanggalMasuk: "15/03/2023",
-      jenisKelamin: "Laki-laki",
-      cabang: "2",
+      id: 2, nama: "Budi", jabatan: "Staff", nik: "987654321", password: "123", tempatLahir: "Jakarta", tanggalLahir: "12 Februari 1999", alamat: "Jakarta Selatan", divisi: "Marketing", tanggalMasuk: "15/03/2023", jenisKelamin: "Laki-laki", 
+      cabang: "F&B Kemang (Sub)", 
       status: "Aktif"
     },
     {
-      id: 3,
-      nama: "Siti",
-      jabatan: "HRD",
-      nik: "1122334455",
-      password: "123",
-      tempatLahir: "Bandung",
-      tanggalLahir: "10 Maret 2000",
-      alamat: "Bandung Kota",
-      divisi: "HR",
-      tanggalMasuk: "20/05/2023",
-      jenisKelamin: "Perempuan",
-      cabang: "3",
-      status: "Resign" // Contoh Karyawan yang sudah resign
+      id: 3, nama: "Siti", jabatan: "HRD", nik: "1122334455", password: "123", tempatLahir: "Bandung", tanggalLahir: "10 Maret 2000", alamat: "Bandung Kota", divisi: "HR", tanggalMasuk: "20/05/2023", jenisKelamin: "Perempuan", 
+      cabang: "Jam Tangan Jkt", 
+      status: "Resign" 
     },
   ]);
 
-  const cabang4SubBranches = ["Cabang A", "Cabang B", "Cabang C"];
-
-  /* ================= STATE CONFIG ================= */
   const [showFilter, setShowFilter] = useState(false);
-  const [selectedCabang, setSelectedCabang] = useState("Filter");
+  const [selectedCabang, setSelectedCabang] = useState("Semua Cabang");
   
-  // STATE MODAL EDIT/ADD
   const [showModal, setShowModal] = useState(false); 
   const [isEditMode, setIsEditMode] = useState(false); 
   const [selectedEmployee, setSelectedEmployee] = useState(null); 
@@ -91,7 +66,6 @@ const DataKaryawan = () => {
     setShowFilter(false);
   };
 
-  // --- LOGIC MODAL ADD/EDIT ---
   const handleOpenAdd = () => {
     setIsEditMode(false);       
     setSelectedEmployee(null);  
@@ -99,7 +73,7 @@ const DataKaryawan = () => {
   };
 
   const handleOpenEdit = (employee, e) => {
-    e.stopPropagation(); // Mencegah klik menyebar ke baris tabel (supaya tidak pindah halaman)
+    e.stopPropagation(); 
     setIsEditMode(true);        
     setSelectedEmployee(employee); 
     setShowModal(true);         
@@ -110,7 +84,6 @@ const DataKaryawan = () => {
     setSelectedEmployee(null);
   };
 
-  // --- LOGIC PINDAH KE HALAMAN DETAIL ---
   const handleRowClick = (employee) => {
     navigate("/hrd/detail-karyawan", { state: { employee: employee } });
   };
@@ -124,8 +97,8 @@ const DataKaryawan = () => {
       </button>
       {showFilter && (
         <div className="filter-dropdown">
-          {["Cabang 1", "Cabang 2", "Cabang 3", "Cabang 4", "Semua Cabang"].map((cabang, index) => (
-            <div key={index} className="dropdown-item" onClick={() => handleSelectCabang(cabang === "Semua Cabang" ? "Filter" : cabang)}>
+          {["Semua Cabang", ...semuaCabangAmaga].map((cabang, index) => (
+            <div key={index} className="dropdown-item" onClick={() => handleSelectCabang(cabang)}>
               {cabang}
             </div>
           ))}
@@ -151,11 +124,7 @@ const DataKaryawan = () => {
       </thead>
       <tbody>
         {karyawanList.map((item) => (
-          <tr 
-            key={item.id} 
-            className="clickable-row" 
-            onClick={() => handleRowClick(item)} // Satu baris bisa diklik
-          >
+          <tr key={item.id} className="clickable-row" onClick={() => handleRowClick(item)}>
             <td className="clickable-name">{item.nama}</td>
             <td>{item.jabatan}</td>
             <td>{item.nik}</td>
@@ -163,15 +132,11 @@ const DataKaryawan = () => {
             <td>{item.tempatLahir}</td>
             <td>{item.tanggalLahir}</td>
             <td>{item.alamat}</td>
-            
-            {/* Cegah pindah halaman saat klik tombol Edit */}
             <td className="text-center" onClick={(e) => e.stopPropagation()}>
               <button className="btn-edit-clean" onClick={(e) => handleOpenEdit(item, e)}>
                 <img src={iconEdit} alt="Edit" className="img-edit-gray" />
               </button>
             </td>
-            
-            {/* LOGIKA STATUS: Muncul Hijau jika Aktif, Merah jika Resign */}
             <td className="text-center" onClick={(e) => e.stopPropagation()}>
               <div className="status-dots-spaced">
                 {item.status === 'Aktif' ? (
@@ -189,92 +154,33 @@ const DataKaryawan = () => {
 
   return (
     <div className="hrd-container">
-      {/* SIDEBAR */}
       <aside className="sidebar">
-        <div className="logo-area">
-          <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
-        </div>
+        <div className="logo-area"><img src={logoPersegi} alt="AMAGACORP" className="logo-img" /></div>
         <nav className="menu-nav">
-          <div className="menu-item" onClick={() => navigate("/hrd/dashboard")}>
-            <div className="menu-left">
-                <img src={iconDashboard} alt="" className="menu-icon-main" />
-                <span className="menu-text-main">Dashboard</span>
-            </div>
-          </div>
-          <div className="menu-item" onClick={() => navigate("/hrd/kelolacabang")}>
-            <div className="menu-left">
-                <img src={iconKelola} alt="" className="menu-icon-main" />
-                <span className="menu-text-main">Kelola Cabang</span>
-            </div>
-          </div>
-          {/* Menu Active: Data Karyawan */}
-          <div className="menu-item active">
-            <div className="menu-left">
-                <img src={iconKaryawan} alt="" className="menu-icon-main" />
-                <span className="menu-text-main">Data Karyawan</span>
-            </div>
-          </div>
-          <div className="menu-item has-arrow" onClick={() => navigate("/hrd/absenmanual")}>
-            <div className="menu-left">
-                <img src={iconKehadiran} alt="" className="menu-icon-main" />
-                <span className="menu-text-main">Kehadiran</span>
-            </div>
-            <img src={iconBawah} alt="" className="arrow-icon-main" />
-          </div>
-          <div className="menu-item" onClick={() => navigate("/hrd/laporan")}>
-            <div className="menu-left">
-                <img src={iconLaporan} alt="" className="menu-icon-main" />
-                <span className="menu-text-main">Laporan</span>
-            </div>
-          </div>
+          <div className="menu-item" onClick={() => navigate("/hrd/dashboard")}><div className="menu-left"><img src={iconDashboard} alt="" className="menu-icon-main" /><span className="menu-text-main">Dashboard</span></div></div>
+          <div className="menu-item" onClick={() => navigate("/hrd/kelolacabang")}><div className="menu-left"><img src={iconKelola} alt="" className="menu-icon-main" /><span className="menu-text-main">Kelola Cabang</span></div></div>
+          <div className="menu-item active"><div className="menu-left"><img src={iconKaryawan} alt="" className="menu-icon-main" /><span className="menu-text-main">Data Karyawan</span></div></div>
+          <div className="menu-item has-arrow" onClick={() => navigate("/hrd/absenmanual")}><div className="menu-left"><img src={iconKehadiran} alt="" className="menu-icon-main" /><span className="menu-text-main">Kehadiran</span></div><img src={iconBawah} alt="" className="arrow-icon-main" /></div>
+          <div className="menu-item" onClick={() => navigate("/hrd/laporan")}><div className="menu-left"><img src={iconLaporan} alt="" className="menu-icon-main" /><span className="menu-text-main">Laporan</span></div></div>
         </nav>
-        <div className="sidebar-footer">
-          <button className="btn-logout" onClick={handleLogout}>Log Out</button>
-        </div>
+        <div className="sidebar-footer"><button className="btn-logout" onClick={handleLogout}>Log Out</button></div>
       </aside>
 
-      {/* MAIN CONTENT */}
       <main className="main-content">
         <div className="page-header">
           <h1>Data Karyawan</h1>
           <p>Daftar pusat informasi dan detail administrasi karyawan</p>
         </div>
-
-        {selectedCabang !== "Cabang 4" && (
-          <div className="action-bar">
-            <FilterDropdown />
-            <button className="btn-tambah" onClick={handleOpenAdd}>
-              <img src={iconTambah} alt="" /> Tambah Karyawan
-            </button>
-          </div>
-        )}
-
-        {selectedCabang === "Cabang 4" ? (
-          <div className="stacked-layout">
-            {cabang4SubBranches.map((subCabang, index) => (
-              <div key={index} className="stacked-card-wrapper">
-                <div className="sub-branch-header">
-                  <h3 className="sub-branch-title">{subCabang}</h3>
-                  <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                    {index === 0 && <FilterDropdown />}
-                    <button className="btn-tambah" onClick={handleOpenAdd}>
-                      <img src={iconTambah} alt="" /> Tambah Karyawan
-                    </button>
-                  </div>
-                </div>
-                <div className="approval-section">
-                  <div className="approval-header">Permintaan Menunggu Approval</div>
-                  {renderTable()}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="approval-section" style={{ marginTop: selectedCabang !== "Cabang 4" ? "0" : "20px" }}>
-            <div className="approval-header">Permintaan Menunggu Approval</div>
-            {renderTable()}
-          </div>
-        )}
+        
+        <div className="action-bar">
+          <FilterDropdown />
+          <button className="btn-tambah" onClick={handleOpenAdd}><img src={iconTambah} alt="" /> Tambah Karyawan</button>
+        </div>
+        
+        <div className="approval-section" style={{ marginTop: "20px" }}>
+           <div className="approval-header">Daftar Karyawan</div>
+           {renderTable()}
+        </div>
       </main>
 
       {/* MODAL ADD / EDIT */}
@@ -300,9 +206,16 @@ const DataKaryawan = () => {
                 <div className="form-group"><label>Tanggal Lahir</label><input type="date" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.tanggalLahir : ""} /></div>
                 <div className="form-group"><label>Jenis Kelamin</label><select className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.jenisKelamin : ""}><option value="">Pilih</option><option value="Laki-laki">Laki-laki</option><option value="Perempuan">Perempuan</option></select></div>
                 
-                <div className="form-group"><label>Cabang</label><select className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.cabang : ""}><option value="">Pilih Cabang</option><option value="1">Cabang 1</option><option value="2">Cabang 2</option><option value="3">Cabang 3</option><option value="4">Cabang 4</option></select></div>
+                <div className="form-group">
+                  <label>Cabang Penempatan</label>
+                  <select className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.cabang : ""}>
+                    <option value="">Pilih Cabang</option>
+                    {semuaCabangAmaga.map((cabangName, index) => (
+                      <option key={index} value={cabangName}>{cabangName}</option>
+                    ))}
+                  </select>
+                </div>
                 
-                {/* Tambahan Field Status di Modal agar HRD bisa mengubahnya */}
                 <div className="form-group">
                   <label>Status Karyawan</label>
                   <select className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.status : "Aktif"}>
@@ -310,7 +223,6 @@ const DataKaryawan = () => {
                     <option value="Resign">Resign</option>
                   </select>
                 </div>
-
               </div>
               <div className="form-group" style={{marginBottom: '20px'}}><label>Alamat</label><input type="text" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.alamat : ""} /></div>
               

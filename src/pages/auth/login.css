@@ -7,12 +7,13 @@
   font-family: 'Inter', sans-serif;
 }
 
-/* Visibility Control */
+/* ===== VISIBILITY ===== */
 .desktop-only { display: none !important; }
-.mobile-only { display: block !important; }
+.mobile-only  { display: block !important; }
 
-/* ================= MOBILE LAYOUT (LAYOUT ASLI ABANG) ================= */
-
+/* ======================================================
+   MOBILE LAYOUT — FIXED & POLISHED
+   ====================================================== */
 .login-wrapper {
   background-color: #f0f2f5;
   min-height: 100vh;
@@ -30,175 +31,473 @@
   position: relative;
 }
 
+/* Mobile brand section - FIXED: Linear gradient added */
 .login-brand-section {
-  background: linear-gradient(
-    180deg,
-    #4cff00 0%,
-    #2fb800 55%,
-    #1f8f3d 100%
-  );
-  height: 48vh; /* Dikembalikan ke ukuran asli abang */
-  min-height: 350px;
-  padding-top: 70px; /* Dikembalikan ke ukuran asli abang */
+  background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
+  height: 48vh;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   text-align: center;
   color: white;
-  /* LENGKUNGAN DIHAPUS BIAR KEMBALI LURUS! */
   z-index: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle dot grid on mobile too */
+.login-brand-section .brand-dot-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .brand-content-centered {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 0 24px;
 }
 
+/* Mobile logo - FIXED: Making it a full white circle */
 .logo-mobile-wrapper {
   margin-bottom: 20px;
+  background-color: white; /* Ensure full white background */
+  width: 140px; /* Specific size for the circle */
+  height: 140px; /* Make it a square */
+  border-radius: 50%; /* Perfect circle */
+  display: flex; /* Center the logo inside */
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2); /* Keep the shadow for depth */
 }
+
 .login-logo-mobile {
-  width: 130px;
-  height: auto;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+  width: 85%; /* Fill the wrapper, but aspect ratio can be different */
+  height: 85%;
+  object-fit: contain;
 }
 
 .login-brand-title {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 800;
   margin-bottom: 8px;
+  letter-spacing: -0.4px;
 }
 .login-brand-subtitle {
-  font-size: 14px;
-  opacity: 0.9;
+  font-size: 13px;
+  opacity: 0.85;
+  font-weight: 400;
 }
 
+/* Mobile form section */
 .login-form-section {
-  padding: 0 25px;
+  padding: 0 20px 40px;
   z-index: 10;
 }
 
 .login-form-box {
   background: #ffffff;
-  margin-top: -80px; 
-  padding: 40px 30px;
-  border-radius: 30px;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  margin-top: -50px;
+  padding: 36px 28px 32px;
+  border-radius: 28px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.12);
 }
 
-.login-field-group { margin-bottom: 20px; }
-.login-field-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #333; }
-.login-input-wrapper { position: relative; display: flex; align-items: center; }
-.login-input-wrapper input { width: 100%; padding: 14px 14px 14px 48px; border: 1.5px solid #ddd; border-radius: 12px; font-size: 14px; outline: none; background-color: #fdfdfd; transition: border-color 0.3s; }
-.login-input-wrapper input:focus { border-color: #4cff00; }
-.login-field-icon { position: absolute; left: 16px; width: 22px; height: 22px; opacity: 0.5; filter: grayscale(100%); }
-.login-btn-green { width: 100%; padding: 16px; background: linear-gradient(to right, #44c000, #39a800); color: white; border: none; border-radius: 14px; font-weight: 700; font-size: 16px; margin-top: 20px; cursor: pointer; box-shadow: 0 8px 20px rgba(68, 192, 0, 0.2); transition: transform 0.2s, box-shadow 0.2s; }
-.login-btn-green:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(68, 192, 0, 0.3); }
-.login-help-text { text-align: center; font-size: 11px; color: #999; margin-top: 25px; }
+/* Mobile form header */
+.mobile-form-header {
+  margin-bottom: 28px;
+}
+.mobile-brand-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: #22a800;
+  letter-spacing: 0.2px;
+  margin-bottom: 4px;
+}
+.mobile-form-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.5px;
+  margin-bottom: 4px;
+}
+.mobile-form-subtitle {
+  font-size: 13px;
+  color: #aaa;
+  font-weight: 400;
+}
 
+.login-field-group                { margin-bottom: 18px; }
+.login-field-group label          { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px; color: #777; }
+.login-input-wrapper              { position: relative; display: flex; align-items: center; }
+.login-input-wrapper input        { width: 100%; padding: 13px 14px 13px 44px; border: 1.5px solid #ebebeb; border-radius: 12px; font-size: 14px; outline: none; background: #fafafa; color: #111; transition: border-color 0.25s, box-shadow 0.25s; }
+.login-input-wrapper input::placeholder { color: #ccc; }
+.login-input-wrapper input:focus { border-color: #2fb800; background: #fff; box-shadow: 0 0 0 4px rgba(47,184,0,0.09); }
+.login-field-icon                 { position: absolute; left: 14px; width: 18px; height: 18px; opacity: 0.35; filter: grayscale(100%); }
 
-/* ================= DESKTOP LAYOUT (SPLIT SCREEN RAPI) ================= */
+.login-btn-green {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #4cff00 0%, #1faa00 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 15px;
+  margin-top: 22px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(50,180,0,0.30);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.login-btn-green::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 55%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+.login-btn-green:hover  { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(50,180,0,0.38); }
+.login-btn-green:active { transform: translateY(0); }
+
+.login-help-text { text-align: center; font-size: 11px; color: #ccc; margin-top: 22px; }
+
+/* ======================================================
+   TABLET  641 – 1023px
+   ====================================================== */
+@media (min-width: 641px) and (max-width: 1023px) {
+  .login-wrapper {
+    align-items: center;
+    padding: 40px 24px;
+    background: #eef4eb;
+  }
+  .login-split-container {
+    max-width: 480px;
+    min-height: unset;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.13);
+  }
+  .login-brand-section {
+    height: 220px;
+    min-height: unset;
+  }
+  .login-logo-mobile   { width: 120px; }
+  .logo-mobile-wrapper { margin-bottom: 16px; }
+  .login-brand-title   { font-size: 24px; }
+  .login-form-section  { padding: 0 28px 32px; }
+  .login-form-box      { margin-top: -50px; padding: 32px 28px; border-radius: 22px; }
+}
+
+/* ======================================================
+   DESKTOP  ≥ 1024px
+   ====================================================== */
 @media (min-width: 1024px) {
-  
+
   .desktop-only { display: flex !important; }
-  .mobile-only { display: none !important; }
+  .mobile-only  { display: none  !important; }
 
   .login-wrapper {
-    background: white;
+    background: #f4f6f2;
     padding: 0;
     overflow: hidden;
+    align-items: stretch;
   }
 
   .login-split-container {
     max-width: 100%;
-    flex-direction: row-reverse !important; 
+    width: 100%;
     height: 100vh;
+    flex-direction: row !important;
   }
 
-  /* --- BAGIAN BRANDING (KANAN, Full Hijau) --- */
-  .login-brand-section {
-    flex: 1; 
-    height: 100vh; 
-    border-radius: 0; 
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative; 
-    overflow: hidden; 
-  }
-
-  .brand-content-centered {
-    position: relative;
-    z-index: 5; 
-  }
-
-  .login-logo-desktop {
-    width: 320px; 
-    height: auto;
-    margin-bottom: 0; 
-    filter: brightness(0) invert(1); 
-  }
-
-  /* === WATERMARK POJOKAN (UKURAN TETAP JUMBO, NAIK DIKIT & MAKIN MIRING) === */
-  .login-watermark-bg {
-    position: absolute;
-    top: auto;
-    left: auto;
-    bottom: -40px;
-    right: -100px;
-    width: 930px; 
-    height: auto;
-    transform: rotate(-25deg); 
-    opacity: 0.1; 
-    filter: brightness(0) invert(1); 
-    z-index: 1; 
-    pointer-events: none; 
-  }
-
-  /* --- BAGIAN FORM (KIRI, Full Putih) --- */
+  /* ══ LEFT — Form panel ══ */
   .login-form-section {
-    flex: 1; 
+    flex: none;
+    width: 44%;
+    max-width: 580px;
+    min-width: 420px;
     height: 100vh;
-    padding: 0;
-    display: flex;
+    padding: 0 6%;
+    display: flex !important;
+    flex-direction: column;
     justify-content: center;
-    align-items: center;
-    background: white;
+    align-items: flex-start;
+    background: #ffffff;
+    position: relative;
+    z-index: 10;
+    box-shadow: none;
+  }
+
+  .login-form-section::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 8%; bottom: 8%;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, #e8e8e8 25%, #e8e8e8 75%, transparent);
   }
 
   .login-form-box {
     width: 100%;
-    max-width: 450px; 
-    margin-top: 0; 
-    box-shadow: none; 
-    padding: 40px;
+    max-width: 400px;
+    margin: 0;
+    padding: 0;
     border-radius: 0;
+    box-shadow: none;
+    background: transparent;
   }
 
+  /* Desktop form header */
   .desktop-form-header {
-    margin-bottom: 35px;
-    text-align: left;
+    margin-bottom: 40px;
     display: flex !important;
-    flex-direction: column !important; 
+    flex-direction: column !important;
     align-items: flex-start !important;
+    gap: 0;
+  }
+
+  /* "Amaga Corporation" text badge */
+  .desktop-brand-name {
+    display: inline-block;
+    font-size: 20px;
+    font-weight: 800;
+    color: #22a800;
+    letter-spacing: 0.3px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
   }
 
   .desktop-form-header h2 {
-    font-size: 38px; 
-    font-weight: 800; 
-    color: #111; 
-    margin-bottom: 8px !important;
-    white-space: nowrap !important;
+    font-size: 38px;
+    font-weight: 800;
+    color: #0d0d0d;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    margin-bottom: 4px;
   }
 
   .desktop-form-header p {
-    font-size: 15px; 
-    color: #666;
-    margin: 0 !important;
+    font-size: 14px;
+    color: #201f1f;
+    font-weight: 800;
+    margin: 0;
   }
 
-  .login-field-group label { font-size: 14px; }
-  .login-input-wrapper input { padding: 16px 16px 16px 52px; font-size: 15px; }
-  .login-field-icon { width: 24px; height: 24px; left: 18px; }
-  .login-btn-green { padding: 18px; font-size: 18px; }
-  .login-help-text { text-align: left; font-size: 12px; }
+  .form-divider {
+    display: block;
+    width: 420px;
+    height: 4px;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #4cff00, #22a800);
+    margin-top: 18px;
+  }
+
+  /* Fields */
+  .login-field-group       { margin-bottom: 20px; }
+  .login-field-group label { font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #1c1b1b; margin-bottom: 6px; }
+
+  .login-input-wrapper input {
+    padding: 14px 16px 14px 48px;
+    font-size: 14px;
+    border: 1.5px solid #ebebeb;
+    border-radius: 12px;
+    background: #fafafa;
+    color: #111;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  }
+  .login-input-wrapper input::placeholder { color: #ccc; }
+  .login-input-wrapper input:focus {
+    border-color: #3ecb00;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(62,203,0,0.09);
+    outline: none;
+  }
+  .login-field-icon { width: 18px; height: 18px; left: 16px; opacity: 0.30; filter: grayscale(100%); }
+
+  .login-btn-green {
+    width: 100%;
+    padding: 15px 0;
+    margin-top: 28px;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    color: #fff;
+    cursor: pointer;
+    background: linear-gradient(135deg, #4cff00 0%, #1faa00 100%);
+    box-shadow: 0 8px 28px rgba(50,180,0,0.30);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .login-btn-green::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.16) 0%, transparent 55%);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  .login-btn-green:hover  { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(50,180,0,0.40); }
+  .login-btn-green:active { transform: translateY(0); }
+
+  .login-help-text { font-size: 14px; color: #252323; margin-top: 22px; text-align: left; }
+
+  /* ══ RIGHT — Brand panel ══ */
+  .login-brand-section {
+    flex: 1;
+    height: 100vh;
+    min-height: unset;
+    padding: 0;
+    border-radius: 0;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(150deg,
+      #60ff18 0%,
+      #36d400 25%,
+      #20aa00 55%,
+      #137530 100%
+    );
+  }
+
+  /* Blurred glow blobs */
+  .login-brand-section::before {
+    content: '';
+    position: absolute;
+    top: -140px; left: -140px;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.10);
+    filter: blur(70px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .login-brand-section::after {
+    content: '';
+    position: absolute;
+    bottom: -120px; right: -120px;
+    width: 420px; height: 420px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.14);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Dot grid */
+  .brand-dot-grid {
+    position: absolute !important;
+    display: block !important;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1.2px, transparent 1.2px);
+    background-size: 28px 28px;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+
+
+  /* Brand content stack */
+  .brand-content-centered {
+    position: relative;
+    z-index: 5;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center;
+    padding: 48px 40px;
+    gap: 0;
+  }
+
+  /* Logo panjang — white, NO card background */
+  .login-logo-desktop {
+    display: block !important;
+    width: 400px !important;
+    height: auto;
+    filter: brightness(0) invert(1);
+    margin-bottom: 32px;
+  }
+
+  /* Divider line under logo */
+  .brand-logo-divider {
+    display: block !important;
+    width: 500px;
+    height: 2px;
+    background: rgba(255,255,255,0.35);
+    border-radius: 99px;
+    margin-bottom: 18px;
+  }
+
+  /* Brand text */
+  .brand-text-desktop {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-text-desktop h2 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.4px;
+    margin: 0;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  .brand-text-desktop p {
+    font-size: 20px;
+    color: rgb(255, 255, 255);
+    font-weight: 600;
+    margin: 0;
+  }
+
+  /* Feature pills */
+  .brand-pills {
+    display: flex !important;
+    gap: 8px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .brand-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 10px 20px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.20);
+    border-radius: 999px;
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.90);
+    white-space: nowrap;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .brand-pill svg { width: 12px; height: 12px; flex-shrink: 0; }
+}
+
+/* ======================================================
+   LARGE DESKTOP  ≥ 1440px
+   ====================================================== */
+@media (min-width: 1440px) {
+  .login-form-section     { width: 40%; padding: 0 5%; }
+  .login-form-box         { max-width: 420px; }
+  .desktop-form-header h2 { font-size: 44px; }
+  .login-logo-desktop     { width: 300px; }
+  .brand-text-desktop h2  { font-size: 32px; }
 }
