@@ -16,7 +16,7 @@
   width: 100vw;
   height: 100vh;
   background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
-  overflow: hidden;
+  overflow: hidden; /* Mencegah layar hijau ikut tergulir */
 }
 
 /* ================================================= */
@@ -46,7 +46,6 @@
   filter: grayscale(100%) brightness(0) invert(1) contrast(1000%) !important;
 }
 
-/* --- UPDATE UKURAN MENU --- */
 .menu-nav {
   display: flex;
   flex-direction: column;
@@ -91,9 +90,6 @@
   transition: all 0.3s ease;
 }
 
-/* =========================================
-   MENU ITEM ACTIVE (PUTIH & TEKS HIJAU)
-   ========================================= */
 .menu-item.active {
   background-color: #ffffff !important; 
   color: #2fb800 !important; 
@@ -101,15 +97,12 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Mengubah warna Ikon saat Active */
 .menu-item.active .menu-icon-main,
 .menu-item.active .arrow-icon-main {
-  /* Filter ini mengubah putih menjadi hijau #2fb800 */
   filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg) brightness(95%) contrast(105%) !important;
   opacity: 1;
 }
 
-/* Mengubah warna Teks saat Active */
 .menu-item.active .menu-text-main {
   color: #2fb800 !important;
 }
@@ -118,7 +111,6 @@
   background-color: rgba(255, 255, 255, 0.15);
 }
 
-/* ================= SIDEBAR FOOTER (LOG OUT) ================= */
 .sidebar-footer {
   margin-top: auto; 
   padding-top: 25px; 
@@ -153,15 +145,24 @@
 /* ================================================= */
 
 .main-content {
-  flex: 1;
-  background-color: #fdfdfd;
-  margin: 25px 35px 30px 0;
-  border-radius: 40px;
+  flex: 1; 
+  background-color: #fdfdfd; 
+  margin: 25px 35px 30px 0; 
+  border-radius: 40px; 
   padding: 40px;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  overflow: hidden; 
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; margin: 30px 0; }
+::-webkit-scrollbar-thumb { background-color: #d1d1d1; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background-color: #8dae12; }
+
+.header-cabang-content {
+  flex-shrink: 0; 
 }
 
 .header-cabang-content h1 {
@@ -174,13 +175,15 @@
 .header-cabang-content p {
   color: #333;
   font-size: 16px;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
 
 .action-row-cabang {
   display: flex;
   justify-content: flex-end;
   margin-bottom: -18px;
+  position: relative;
+  z-index: 2;
 }
 
 .btn-tambah-cabang-baru {
@@ -211,8 +214,15 @@
   background: white;
   border: 1px solid #ddd;
   border-radius: 8px;
-  overflow: hidden;
+  overflow: hidden; 
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  margin-top: -2px; 
+  
+  display: flex;
+  flex-direction: column;
+  flex-grow: 0; 
+  flex-shrink: 1; 
+  min-height: 0; 
 }
 
 .table-cabang-header {
@@ -221,6 +231,11 @@
   padding: 15px 25px;
   font-weight: 700;
   font-size: 16px;
+  flex-shrink: 0; 
+}
+
+.table-cabang-body {
+  overflow-y: auto; 
 }
 
 .table-cabang-row {
@@ -230,6 +245,7 @@
   padding: 15px 25px;
   border-bottom: 1px solid #eee;
   transition: 0.2s;
+  cursor: pointer; 
 }
 
 .table-cabang-row:hover {
@@ -239,17 +255,9 @@
 .cabang-name {
   font-weight: 600;
   color: #333;
-}
-
-.btn-edit-cabang {
-  background-color: #e0e0e0;
-  border: none;
-  padding: 6px 15px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #555;
-  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .sub-rows-wrapper {
@@ -262,6 +270,74 @@
   border-bottom: 1px solid #f0f0f0 !important;
 }
 
+/* ================= TATA LETAK AKSI TABEL ================= */
+.table-cabang-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px; 
+}
+
+/* UPDATE 1: Tombol + Sub-Cabang Dibuat Outline */
+.btn-action-text {
+  background: transparent;
+  border: 1.5px solid #8dae12; /* Garis luar hijau */
+  border-radius: 20px; /* Bentuk kapsul oval */
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #8dae12;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-action-text:hover { 
+  background-color: #8dae12; 
+  color: #ffffff; 
+}
+
+/* Ikon Edit Pensil */
+.btn-icon-action {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+  padding: 4px;
+}
+.btn-icon-action:hover { color: #8dae12; transform: scale(1.1); }
+
+/* Ikon Titik Status */
+.btn-status-toggle {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  transition: 0.2s;
+}
+.btn-status-toggle:hover { transform: scale(1.15); }
+
+.status-dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.3s ease;
+}
+.status-dot.active { 
+  background-color: #00c853; 
+  box-shadow: 0 0 6px rgba(0, 200, 83, 0.4); 
+}
+.status-dot.inactive { 
+  background-color: #ff1744; 
+  box-shadow: 0 0 6px rgba(255, 23, 68, 0.4); 
+}
+
 /* ================================================= */
 /* ====================== MODAL ==================== */
 /* ================================================= */
@@ -270,18 +346,23 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.45);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 10000;
+  padding: 20px;
 }
 
 .modal-card-edit {
   background: white;
   width: 750px;
+  max-width: 95%;
+  max-height: 90vh; 
+  overflow-y: auto; 
+  
   padding: 40px;
   border-radius: 15px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
@@ -320,9 +401,33 @@
   padding: 14px;
   border-radius: 8px;
   outline: none;
+  width: 100%;
 }
 
-/* ===== Footer Button Area ===== */
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper .modal-input {
+  padding-right: 45px; 
+}
+
+.btn-eye {
+  position: absolute;
+  right: 15px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #777;
+  padding: 0;
+  transition: color 0.2s;
+}
+.btn-eye:hover { color: #333; }
 
 .modal-footer-actions {
   display: flex;
@@ -365,28 +470,73 @@
   box-shadow: 0 5px 15px rgba(141, 174, 18, 0.3);
 }
 
-/* ================================================= */
-/* ==================== ANIMATION ================== */
-/* ================================================= */
-
-@keyframes zoomIn {
-  from {
-    transform: scale(0.95);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+/* UPDATE 2: CSS KHUSUS MODAL KONFIRMASI STATUS */
+.modal-card-confirm {
+  background: white;
+  width: 400px;
+  max-width: 90%;
+  padding: 35px 30px 30px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+  animation: zoomIn 0.2s ease;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.modal-card-confirm h3 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #111;
+  margin-bottom: 12px;
+}
+
+.modal-card-confirm p {
+  font-size: 15px;
+  color: #555;
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+.confirm-btn-group {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.btn-konfirm-batal {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: white;
+  color: #444;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+  flex: 1;
+}
+
+.btn-konfirm-batal:hover {
+  background: #f5f5f5;
+}
+
+.btn-konfirm-yakin {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #8dae12;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+  flex: 1;
+}
+
+.btn-konfirm-yakin:hover {
+  background: #7a9610;
+}
+
+@keyframes zoomIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }

@@ -19,9 +19,19 @@ const Kehadiran = () => {
   // State untuk Tab
   const [activeTab, setActiveTab] = useState('perizinan'); 
   
+  // DAFTAR CABANG DINAMIS (Sesuai Kelola Cabang)
+  const semuaCabangAmaga = [
+    "F&B Jakarta",
+    "F&B Sudirman (Sub)",
+    "F&B Kemang (Sub)",
+    "Jam Tangan Jkt",
+    "Pakaian Jkt",
+    "Sepatu Jkt"
+  ];
+  
   // State untuk Filter Dropdown
   const [showFilter, setShowFilter] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState("Filter");
+  const [selectedFilter, setSelectedFilter] = useState("Semua Cabang");
 
   // Handler Logout
   const handleLogout = () => {
@@ -63,7 +73,15 @@ const Kehadiran = () => {
   const handleSimpanAbsenManual = (e) => {
     e.preventDefault(); 
     alert("Form Absensi Manual berhasil disubmit!");
+    e.target.reset(); // Mereset form setelah sukses disubmit
   };
+
+  // Tanggal Hari Ini untuk Form Absensi Manual
+  const tanggalHariIni = new Date().toLocaleDateString('id-ID', { 
+      day: '2-digit', 
+      month: 'long', 
+      year: 'numeric' 
+  });
 
   // =========================================================
   // DATA STATE (INTERAKTIF & TERISI PENUH)
@@ -71,22 +89,22 @@ const Kehadiran = () => {
   
   // Tabel 1: Izin Harian 
   const [dataIzinHarian, setDataIzinHarian] = useState([
-    { id: 1, nama: "Syahrul", cabang: "Cabang 1", tglMulai: "01/03/2026", tglSelesai: "02/03/2026", tipeIzin: "Sakit", keterangan: "Demam Tinggi", status: "Pending", foto: "Ada Bukti Surat Sakit" },
-    { id: 2, nama: "Budi Santoso", cabang: "Cabang Pusat", tglMulai: "05/03/2026", tglSelesai: "05/03/2026", tipeIzin: "Acara Pribadi", keterangan: "Urusan Bank", status: "Disetujui", foto: "Tidak Ada Foto" },
-    { id: 3, nama: "Siti Aminah", cabang: "Cabang 2", tglMulai: "10/03/2026", tglSelesai: "11/03/2026", tipeIzin: "Lainnya", keterangan: "Bencana Alam", status: "Pending", foto: "Ada Bukti Kondisi Rumah" },
+    { id: 1, nama: "Syahrul", cabang: "F&B Jakarta", tglMulai: "01/03/2026", tglSelesai: "02/03/2026", tipeIzin: "Sakit", keterangan: "Demam Tinggi", status: "Pending", foto: "Ada Bukti Surat Sakit" },
+    { id: 2, nama: "Budi Santoso", cabang: "F&B Sudirman (Sub)", tglMulai: "05/03/2026", tglSelesai: "05/03/2026", tipeIzin: "Acara Pribadi", keterangan: "Urusan Bank", status: "Disetujui", foto: "Tidak Ada Foto" },
+    { id: 3, nama: "Siti Aminah", cabang: "Jam Tangan Jkt", tglMulai: "10/03/2026", tglSelesai: "11/03/2026", tipeIzin: "Lainnya", keterangan: "Bencana Alam", status: "Pending", foto: "Ada Bukti Kondisi Rumah" },
   ]);
 
   // Tabel 2: FIMTK
   const [dataIzinFIMTK, setDataIzinFIMTK] = useState([
-    { id: 1, nama: "Ghilbran Alfaries", cabang: "Cabang Pusat", jabatan: "Staff IT", divisi: "Technology", tipeIzin: "Keluar Kantor", tanggal: "01/03/2026", jamMulai: "09.00", jamSelesai: "11.00", keperluan: "Kantor", kendaraan: "Kantor", keterangan: "Meeting Vendor", status: "Pending" },
-    { id: 2, nama: "Ahmad Dani", cabang: "Cabang 1", jabatan: "Direktur Ops", divisi: "Operasional", tipeIzin: "Pulang Cepat", tanggal: "02/03/2026", jamMulai: "13.00", jamSelesai: "15.00", keperluan: "Pribadi", kendaraan: "Pribadi", keterangan: "Sakit Mendadak", status: "Disetujui" },
-    { id: 3, nama: "Rina Kartika", cabang: "Cabang 2", jabatan: "HRD Staff", divisi: "Human Resource", tipeIzin: "Keluar Kantor", tanggal: "03/03/2026", jamMulai: "10.00", jamSelesai: "12.00", keperluan: "Pribadi", kendaraan: "Pribadi", keterangan: "Keperluan Medis", status: "Pending" },
+    { id: 1, nama: "Ghilbran Alfaries", cabang: "Pakaian Jkt", jabatan: "Staff IT", divisi: "Technology", tipeIzin: "Keluar Kantor", tanggal: "01/03/2026", jamMulai: "09.00", jamSelesai: "11.00", keperluan: "Kantor", kendaraan: "Kantor", keterangan: "Meeting Vendor", status: "Pending" },
+    { id: 2, nama: "Ahmad Dani", cabang: "F&B Jakarta", jabatan: "Direktur Ops", divisi: "Operasional", tipeIzin: "Pulang Cepat", tanggal: "02/03/2026", jamMulai: "13.00", jamSelesai: "15.00", keperluan: "Pribadi", kendaraan: "Pribadi", keterangan: "Sakit Mendadak", status: "Disetujui" },
+    { id: 3, nama: "Rina Kartika", cabang: "Sepatu Jkt", jabatan: "HRD Staff", divisi: "Human Resource", tipeIzin: "Keluar Kantor", tanggal: "03/03/2026", jamMulai: "10.00", jamSelesai: "12.00", keperluan: "Pribadi", kendaraan: "Pribadi", keterangan: "Keperluan Medis", status: "Pending" },
   ]);
 
   // Tabel 3: Cuti
   const [dataCuti, setDataCuti] = useState([
-    { id: 1, nama: "Syahrul", cabang: "Cabang Pusat", jabatan: "CEO", divisi: "Management", noTelp: "08123456789", tipeIzin: "Cuti Tahunan", tglMulai: "05/03/2026", tglSelesai: "10/03/2026", keterangan: "Liburan Keluarga", status: "Pending" },
-    { id: 2, nama: "Budi Santoso", cabang: "Cabang 1", jabatan: "Direktur Ops", divisi: "Operasional", noTelp: "08987654321", tipeIzin: "Cuti Khusus", tglMulai: "12/03/2026", tglSelesai: "14/03/2026", keterangan: "Pernikahan Saudara", status: "Disetujui" },
+    { id: 1, nama: "Syahrul", cabang: "F&B Jakarta", jabatan: "CEO", divisi: "Management", noTelp: "08123456789", tipeIzin: "Cuti Tahunan", tglMulai: "05/03/2026", tglSelesai: "10/03/2026", keterangan: "Liburan Keluarga", status: "Pending" },
+    { id: 2, nama: "Budi Santoso", cabang: "F&B Sudirman (Sub)", jabatan: "Direktur Ops", divisi: "Operasional", noTelp: "08987654321", tipeIzin: "Cuti Khusus", tglMulai: "12/03/2026", tglSelesai: "14/03/2026", keterangan: "Pernikahan Saudara", status: "Disetujui" },
   ]);
 
   // --- FUNGSI SORTING (Pending Selalu di Atas) ---
@@ -218,20 +236,43 @@ const Kehadiran = () => {
                 </div>
                 <div className="form-container-box">
                     <form className="absen-form-grid" onSubmit={handleSimpanAbsenManual}>
+                        
                         <div className="form-group"><label>Nama</label><input type="text" className="input-field" required /></div>
                         <div className="form-group"><label>NIK</label><input type="text" className="input-field" required /></div>
                         <div className="form-group"><label>Jabatan</label><input type="text" className="input-field" required /></div>
                         <div className="form-group"><label>Divisi</label><input type="text" className="input-field" required /></div>
-                        <div className="form-group"><label>Cabang</label>
-                            <select className="input-field" required><option value="">Pilih Cabang</option><option value="Cabang 1">Cabang 1</option><option value="Cabang 2">Cabang 2</option></select>
+                        
+                        {/* TANGGAL OTOMATIS (READ ONLY) MENGGANTIKAN POSISI CABANG */}
+                        <div className="form-group">
+                            <label>Tanggal Absensi Manual</label>
+                            <input 
+                                type="text" 
+                                className="input-field" 
+                                value={tanggalHariIni} 
+                                readOnly 
+                                style={{ backgroundColor: '#f0f0f0', color: '#666', cursor: 'not-allowed', outline: 'none' }}
+                            />
                         </div>
+                        
                         <div className="form-group"><label>Tipe Absen</label>
-                            <select className="input-field" required><option value="">Pilih Tipe</option><option value="Masuk">Masuk</option><option value="Pulang">Pulang</option></select>
+                            <select className="input-field" required>
+                                <option value="">Pilih Tipe</option>
+                                <option value="Masuk">Masuk</option>
+                                <option value="Pulang">Pulang</option>
+                            </select>
                         </div>
-                        <div className="form-group"><label>Shift</label>
-                            <select className="input-field" required><option value="">Pilih Shift</option><option value="Pagi">Pagi</option><option value="Siang">Siang</option></select>
+                        
+                        {/* CABANG DIPINDAH KE ATAS KETERANGAN (FULL WIDTH) */}
+                        <div className="form-group full-width"><label>Cabang Penempatan</label>
+                            <select className="input-field" required>
+                                <option value="">Pilih Cabang</option>
+                                {/* Pilihan Cabang Dinamis */}
+                                {semuaCabangAmaga.map((cbg, idx) => (
+                                    <option key={idx} value={cbg}>{cbg}</option>
+                                ))}
+                            </select>
                         </div>
-                        <div className="form-group"></div> 
+
                         <div className="form-group full-width"><label>Keterangan</label><textarea className="input-field textarea-field" required></textarea></div>
                         <div className="form-actions-bottom">
                             <button type="submit" className="btn-simpan-green">Simpan</button>
@@ -257,7 +298,8 @@ const Kehadiran = () => {
                         </button>
                         {showFilter && (
                             <div className="filter-dropdown">
-                                {["Cabang 1", "Cabang 2", "Semua"].map(c => (
+                                {/* Pilihan Filter Dinamis */}
+                                {["Semua Cabang", ...semuaCabangAmaga].map(c => (
                                     <div key={c} className="dropdown-item" onClick={() => handleSelectFilter(c)}>{c}</div>
                                 ))}
                             </div>

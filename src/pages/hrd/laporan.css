@@ -333,7 +333,7 @@
 /* DUAL BADGE CONTAINER */
 .neo-dual-badge-container { display: flex; justify-content: center; gap: 6px; }
 
-/* BADGE STATUS */
+/* BADGE STATUS & KLIK DETIL*/
 .neo-badge { 
     background: #eee; 
     padding: 5px 10px; 
@@ -344,6 +344,15 @@
     display: inline-block; 
     text-align: center;
     color: #444;
+}
+
+.clickable-badge {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.clickable-badge:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .neo-badge.manual { background: #e3f2fd; color: #1565c0; }
@@ -407,6 +416,34 @@ tr.row-warn-red .neo-badge.warn-badge { background-color: #e03131; color: white;
 .multi-cabang-wrapper::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
 .neo-table-wrapper::-webkit-scrollbar-thumb:hover,
 .multi-cabang-wrapper::-webkit-scrollbar-thumb:hover { background: #8dae12; }
+
+/* ================= MODAL DETAIL LAPORAN POP-UP ================= */
+.modal-overlay-lap {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center;
+    z-index: 10000;
+}
+.modal-content-lap {
+    background: white; width: 450px; max-width: 90%; border-radius: 16px;
+    padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+.modal-header-lap {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;
+}
+.modal-header-lap h2 { font-size: 20px; font-weight: 800; color: #111; margin:0;}
+.close-btn-lap { background: none; border: none; font-size: 26px; cursor: pointer; color: #888; transition: 0.2s; line-height: 1;}
+.close-btn-lap:hover { color: #111; }
+.modal-body-lap { padding-bottom: 10px; }
+
+/* UPDATE: Wrapper khusus untuk sub-info agar gap 15px tetap terjaga sempurna ke <ul> */
+.sub-info-wrapper { margin-bottom: 15px; }
+.modal-body-lap p.sub-info { font-size: 13px; color: #666; font-weight: 600; margin-bottom: 4px; }
+.modal-body-lap p.sub-info:last-child { margin-bottom: 0; }
+
+.modal-body-lap ul { list-style-type: none; padding: 0; max-height: 250px; overflow-y: auto; }
+.modal-body-lap li { padding: 12px 10px; border-bottom: 1px dashed #eee; font-size: 14px; color: #333; display: flex; align-items: flex-start; gap: 8px;}
+.modal-body-lap li::before { content: "• "; color: #8dae12; font-weight: bold; margin-right: 5px; }
 
 @media print { 
     .no-print { display: none !important; } 

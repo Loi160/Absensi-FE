@@ -11,12 +11,10 @@ import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 import iconTambah from "../../assets/tambah.svg";
-import iconEdit from "../../assets/edit.svg";
 
 const DataKaryawan = () => {
   const navigate = useNavigate();
 
-  // --- DATA SELURUH CABANG AMAGA CORP ---
   const semuaCabangAmaga = [
     "F&B Jakarta",
     "F&B Sudirman (Sub)",
@@ -27,19 +25,19 @@ const DataKaryawan = () => {
   ];
 
   /* ================= DATA DUMMY ================= */
-  const [karyawanList] = useState([
+  const [karyawanList, setKaryawanList] = useState([
     {
-      id: 1, nama: "Syahrul", jabatan: "CEO", nik: "123456789", password: "123", tempatLahir: "Semarang", tanggalLahir: "01 Januari 2026", alamat: "Semarang", divisi: "Operasional", tanggalMasuk: "01/01/2023", jenisKelamin: "Laki-laki", 
+      id: 1, nama: "Syahrul", jabatan: "CEO", nik: "123456789", password: "passwordrahasia1", tempatLahir: "Semarang", tanggalLahir: "2026-01-01", alamat: "Semarang", divisi: "Operasional", tanggalMasuk: "2023-01-01", jenisKelamin: "Laki-laki", 
       cabang: "F&B Jakarta", 
       status: "Aktif" 
     },
     {
-      id: 2, nama: "Budi", jabatan: "Staff", nik: "987654321", password: "123", tempatLahir: "Jakarta", tanggalLahir: "12 Februari 1999", alamat: "Jakarta Selatan", divisi: "Marketing", tanggalMasuk: "15/03/2023", jenisKelamin: "Laki-laki", 
+      id: 2, nama: "Budi", jabatan: "Staff", nik: "987654321", password: "passwordrahasia2", tempatLahir: "Jakarta", tanggalLahir: "1999-02-12", alamat: "Jakarta Selatan", divisi: "Marketing", tanggalMasuk: "2023-03-15", jenisKelamin: "Laki-laki", 
       cabang: "F&B Kemang (Sub)", 
       status: "Aktif"
     },
     {
-      id: 3, nama: "Siti", jabatan: "HRD", nik: "1122334455", password: "123", tempatLahir: "Bandung", tanggalLahir: "10 Maret 2000", alamat: "Bandung Kota", divisi: "HR", tanggalMasuk: "20/05/2023", jenisKelamin: "Perempuan", 
+      id: 3, nama: "Siti", jabatan: "HRD", nik: "1122334455", password: "passwordrahasia3", tempatLahir: "Bandung", tanggalLahir: "2000-03-10", alamat: "Bandung Kota", divisi: "HR", tanggalMasuk: "2023-05-20", jenisKelamin: "Perempuan", 
       cabang: "Jam Tangan Jkt", 
       status: "Resign" 
     },
@@ -48,9 +46,12 @@ const DataKaryawan = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [selectedCabang, setSelectedCabang] = useState("Semua Cabang");
   
-  const [showModal, setShowModal] = useState(false); 
-  const [isEditMode, setIsEditMode] = useState(false); 
-  const [selectedEmployee, setSelectedEmployee] = useState(null); 
+  // MODAL HANYA UNTUK TAMBAH KARYAWAN SEKARANG
+  const [showAddModal, setShowAddModal] = useState(false); 
+  const [showPasswordInModal, setShowPasswordInModal] = useState(false);
+
+  // State untuk Toggle Mata Password di Tabel
+  const [visiblePasswords, setVisiblePasswords] = useState({});
 
   /* ================= HANDLERS ================= */
   const handleLogout = () => {
@@ -67,25 +68,48 @@ const DataKaryawan = () => {
   };
 
   const handleOpenAdd = () => {
-    setIsEditMode(false);       
-    setSelectedEmployee(null);  
-    setShowModal(true);         
-  };
-
-  const handleOpenEdit = (employee, e) => {
-    e.stopPropagation(); 
-    setIsEditMode(true);        
-    setSelectedEmployee(employee); 
-    setShowModal(true);         
+    setShowPasswordInModal(false);
+    setShowAddModal(true);         
   };
 
   const handleCloseModal = () => {
-    setShowModal(false);
-    setSelectedEmployee(null);
+    setShowAddModal(false);
   };
 
   const handleRowClick = (employee) => {
+    // Navigasi ke halaman detail (di sana bisa view/edit)
     navigate("/hrd/detail-karyawan", { state: { employee: employee } });
+  };
+
+  const toggleTablePassword = (id, e) => {
+    e.stopPropagation(); // Mencegah baris tereksekusi klik (tidak pindah halaman)
+    setVisiblePasswords(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  const handleSaveData = (e) => {
+    e.preventDefault(); 
+    const formData = new FormData(e.target);
+    const newData = Object.fromEntries(formData.entries());
+
+    // Tambah karyawan baru
+    setKaryawanList(prevList => [
+      ...prevList, 
+      { id: Date.now(), ...newData }
+    ]);
+    
+    alert(`Data Karyawan Baru berhasil ditambahkan!`);
+    handleCloseModal();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.size > 2 * 1024 * 1024) { 
+      alert(`File "${file.name}" terlalu besar! Maksimal ukuran file adalah 2 MB.`);
+      e.target.value = ""; 
+    }
   };
 
   /* ================= COMPONENTS ================= */
@@ -108,48 +132,60 @@ const DataKaryawan = () => {
   );
 
   const renderTable = () => (
-    <table className="custom-table">
-      <thead>
-        <tr>
-          <th>Nama</th>
-          <th>Jabatan</th>
-          <th>NIK</th>
-          <th>Password</th>
-          <th>Tempat Lahir</th>
-          <th>Tanggal Lahir</th>
-          <th>Alamat</th>
-          <th className="text-center">Edit</th>
-          <th className="text-center">Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        {karyawanList.map((item) => (
-          <tr key={item.id} className="clickable-row" onClick={() => handleRowClick(item)}>
-            <td className="clickable-name">{item.nama}</td>
-            <td>{item.jabatan}</td>
-            <td>{item.nik}</td>
-            <td>{item.password}</td>
-            <td>{item.tempatLahir}</td>
-            <td>{item.tanggalLahir}</td>
-            <td>{item.alamat}</td>
-            <td className="text-center" onClick={(e) => e.stopPropagation()}>
-              <button className="btn-edit-clean" onClick={(e) => handleOpenEdit(item, e)}>
-                <img src={iconEdit} alt="Edit" className="img-edit-gray" />
-              </button>
-            </td>
-            <td className="text-center" onClick={(e) => e.stopPropagation()}>
-              <div className="status-dots-spaced">
-                {item.status === 'Aktif' ? (
-                  <span className="dot dot-green" title="Aktif"></span>
-                ) : (
-                  <span className="dot dot-red" title="Resign"></span>
-                )}
-              </div>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div className="approval-section-scrollable">
+        <table className="custom-table">
+        <thead>
+            <tr>
+            <th>Nama</th>
+            <th>Jabatan</th>
+            <th>NIK (Username)</th>
+            <th>Password</th>
+            <th>Tempat Lahir</th>
+            <th>Tanggal Lahir</th>
+            <th>Alamat</th>
+            <th className="text-center">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {karyawanList.map((item) => (
+            <tr key={item.id} className="clickable-row" onClick={() => handleRowClick(item)}>
+                <td className="clickable-name">{item.nama}</td>
+                <td>{item.jabatan}</td>
+                <td>{item.nik}</td>
+                
+                {/* KOLOM PASSWORD MEMANJANG DENGAN MATA */}
+                <td>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', minWidth: '120px' }}>
+                        <span>{visiblePasswords[item.id] ? item.password : "••••••••"}</span>
+                        <button onClick={(e) => toggleTablePassword(item.id, e)} className="btn-eye" style={{position: 'static', padding: '0 5px'}}>
+                            {visiblePasswords[item.id] ? (
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            ) : (
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                            )}
+                        </button>
+                    </div>
+                </td>
+
+                <td>{item.tempatLahir}</td>
+                <td>{item.tanggalLahir}</td>
+                <td>{item.alamat}</td>
+                
+                {/* STATUS */}
+                <td className="text-center" onClick={(e) => e.stopPropagation()}>
+                <div className="status-dots-spaced">
+                    {item.status === 'Aktif' ? (
+                    <span className="dot dot-green" title="Aktif"></span>
+                    ) : (
+                    <span className="dot dot-red" title="Resign"></span>
+                    )}
+                </div>
+                </td>
+            </tr>
+            ))}
+        </tbody>
+        </table>
+    </div>
   );
 
   return (
@@ -183,65 +219,84 @@ const DataKaryawan = () => {
         </div>
       </main>
 
-      {/* MODAL ADD / EDIT */}
-      {showModal && (
+      {/* MODAL HANYA UNTUK ADD */}
+      {showAddModal && (
         <div className="modal-overlay" onClick={handleCloseModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2 className="modal-title">{isEditMode ? "Edit Karyawan" : "Tambah Karyawan"}</h2>
-              <p className="modal-subtitle">{isEditMode ? "Ubah data pribadi karyawan" : "Silahkan lengkapi data karyawan baru"}</p>
+              <h2 className="modal-title">Tambah Karyawan</h2>
+              <p className="modal-subtitle">Silahkan lengkapi data karyawan baru</p>
               <hr className="modal-divider" style={{margin: '15px 0', border: 'none', borderBottom: '1px solid #ddd'}} />
             </div>
-            <div className="modal-form">
-              <div className="form-grid-3">
-                <div className="form-group"><label>Nama</label><input type="text" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.nama : ""} /></div>
-                <div className="form-group"><label>Tanggal Masuk</label><input type="date" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.tanggalMasuk : ""} /></div>
-                <div className="form-group"><label>Jabatan</label><input type="text" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.jabatan : ""} /></div>
-                
-                <div className="form-group"><label>Divisi</label><input type="text" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.divisi : ""} /></div>
-                <div className="form-group"><label>Nik (Username)</label><input type="text" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.nik : ""} /></div>
-                <div className="form-group"><label>Password</label><input type="text" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.password : ""} /></div>
-                
-                <div className="form-group"><label>Tempat Lahir</label><input type="text" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.tempatLahir : ""} /></div>
-                <div className="form-group"><label>Tanggal Lahir</label><input type="date" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.tanggalLahir : ""} /></div>
-                <div className="form-group"><label>Jenis Kelamin</label><select className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.jenisKelamin : ""}><option value="">Pilih</option><option value="Laki-laki">Laki-laki</option><option value="Perempuan">Perempuan</option></select></div>
-                
-                <div className="form-group">
-                  <label>Cabang Penempatan</label>
-                  <select className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.cabang : ""}>
-                    <option value="">Pilih Cabang</option>
-                    {semuaCabangAmaga.map((cabangName, index) => (
-                      <option key={index} value={cabangName}>{cabangName}</option>
-                    ))}
-                  </select>
-                </div>
-                
-                <div className="form-group">
-                  <label>Status Karyawan</label>
-                  <select className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.status : "Aktif"}>
-                    <option value="Aktif">Aktif</option>
-                    <option value="Resign">Resign</option>
-                  </select>
-                </div>
-              </div>
-              <div className="form-group" style={{marginBottom: '20px'}}><label>Alamat</label><input type="text" className="input-gray" defaultValue={isEditMode && selectedEmployee ? selectedEmployee.alamat : ""} /></div>
-              
-              <div className="docs-section">
-                <h4 style={{fontSize: '14px', marginBottom: '10px'}}>Dokumen Pendukung</h4>
+            
+            <form onSubmit={handleSaveData}>
+              <div className="modal-form">
                 <div className="form-grid-3">
-                  {["Foto Diri", "Foto KTP", "KK", "SKCK", "SIM", "Sertifikat"].map((label, idx) => (
-                    <div key={idx} className="form-group">
-                        <label>{label}</label>
-                        <input type="file" className="input-gray" style={{fontSize: '12px'}} />
+                  <div className="form-group"><label>Nama</label><input name="nama" type="text" className="input-gray" required /></div>
+                  <div className="form-group"><label>Tanggal Masuk</label><input name="tanggalMasuk" type="date" className="input-gray" required /></div>
+                  <div className="form-group"><label>Jabatan</label><input name="jabatan" type="text" className="input-gray" required /></div>
+                  
+                  <div className="form-group"><label>Divisi</label><input name="divisi" type="text" className="input-gray" required /></div>
+                  <div className="form-group"><label>NIK (Username)</label><input name="nik" type="text" className="input-gray" required /></div>
+                  
+                  {/* PASSWORD FIELD DENGAN EYE ICON */}
+                  <div className="form-group">
+                    <label>Password</label>
+                    <div className="password-wrapper">
+                        <input name="password" type={showPasswordInModal ? "text" : "password"} className="input-gray" required />
+                        <button type="button" className="btn-eye" onClick={() => setShowPasswordInModal(!showPasswordInModal)}>
+                          {showPasswordInModal ? (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                          ) : (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                          )}
+                        </button>
                     </div>
-                  ))}
+                  </div>
+                  
+                  <div className="form-group"><label>Tempat Lahir</label><input name="tempatLahir" type="text" className="input-gray" required /></div>
+                  <div className="form-group"><label>Tanggal Lahir</label><input name="tanggalLahir" type="date" className="input-gray" required /></div>
+                  <div className="form-group"><label>Jenis Kelamin</label><select name="jenisKelamin" className="input-gray" required><option value="">Pilih</option><option value="Laki-laki">Laki-laki</option><option value="Perempuan">Perempuan</option></select></div>
+                  
+                  <div className="form-group">
+                    <label>Cabang Penempatan</label>
+                    <select name="cabang" className="input-gray" required>
+                      <option value="">Pilih Cabang</option>
+                      {semuaCabangAmaga.map((cabangName, index) => (
+                        <option key={index} value={cabangName}>{cabangName}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Status Karyawan</label>
+                    <select name="status" className="input-gray" required>
+                      <option value="Aktif">Aktif</option>
+                      <option value="Resign">Resign</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="form-group" style={{marginBottom: '20px'}}><label>Alamat</label><input name="alamat" type="text" className="input-gray" required /></div>
+                
+                {/* DOKUMEN PENDUKUNG (OPSIONAL) */}
+                <div className="docs-section">
+                  <h4 style={{fontSize: '14px', marginBottom: '10px'}}>Dokumen Pendukung <span style={{fontSize: '11px', color: '#888', fontWeight: 'normal'}}>(Opsional, Maks 2MB)</span></h4>
+                  <div className="form-grid-3">
+                    {["Foto Diri", "Foto KTP", "KK", "SKCK", "SIM", "Sertifikat"].map((label, idx) => (
+                      <div key={idx} className="form-group">
+                          <label>{label}</label>
+                          <input type="file" className="input-gray" style={{fontSize: '12px'}} onChange={handleFileChange} accept="image/*,.pdf" />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="modal-footer">
-              <button className="btn-batal" onClick={handleCloseModal}>Batal</button>
-              <button className="btn-simpan">Simpan</button>
-            </div>
+              <div className="modal-footer">
+                <button type="button" className="btn-batal" onClick={handleCloseModal}>Batal</button>
+                <button type="submit" className="btn-simpan">Simpan Karyawan Baru</button>
+              </div>
+            </form>
+
           </div>
         </div>
       )}
