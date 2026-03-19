@@ -54,7 +54,7 @@ const Kehadiran = () => {
   // STATE MODAL (POP-UP)
   // =========================================================
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState(""); // 'harian', 'fimtk', atau 'cuti'
+  const [modalType, setModalType] = useState(""); 
   const [selectedData, setSelectedData] = useState(null);
 
   // Handler klik baris
@@ -242,7 +242,7 @@ const Kehadiran = () => {
                         <div className="form-group"><label>Jabatan</label><input type="text" className="input-field" required /></div>
                         <div className="form-group"><label>Divisi</label><input type="text" className="input-field" required /></div>
                         
-                        {/* TANGGAL OTOMATIS (READ ONLY) MENGGANTIKAN POSISI CABANG */}
+                        {/* UPDATE: TANGGAL BERSANDING DENGAN JAM ABSEN */}
                         <div className="form-group">
                             <label>Tanggal Absensi Manual</label>
                             <input 
@@ -253,23 +253,26 @@ const Kehadiran = () => {
                                 style={{ backgroundColor: '#f0f0f0', color: '#666', cursor: 'not-allowed', outline: 'none' }}
                             />
                         </div>
+                        <div className="form-group">
+                            <label>Jam Absen</label>
+                            <input type="time" className="input-field" required />
+                        </div>
                         
+                        {/* UPDATE: CABANG BERSANDING DENGAN TIPE ABSEN */}
+                        <div className="form-group">
+                            <label>Cabang Penempatan</label>
+                            <select className="input-field" required>
+                                <option value="">Pilih Cabang</option>
+                                {semuaCabangAmaga.map((cbg, idx) => (
+                                    <option key={idx} value={cbg}>{cbg}</option>
+                                ))}
+                            </select>
+                        </div>
                         <div className="form-group"><label>Tipe Absen</label>
                             <select className="input-field" required>
                                 <option value="">Pilih Tipe</option>
                                 <option value="Masuk">Masuk</option>
                                 <option value="Pulang">Pulang</option>
-                            </select>
-                        </div>
-                        
-                        {/* CABANG DIPINDAH KE ATAS KETERANGAN (FULL WIDTH) */}
-                        <div className="form-group full-width"><label>Cabang Penempatan</label>
-                            <select className="input-field" required>
-                                <option value="">Pilih Cabang</option>
-                                {/* Pilihan Cabang Dinamis */}
-                                {semuaCabangAmaga.map((cbg, idx) => (
-                                    <option key={idx} value={cbg}>{cbg}</option>
-                                ))}
                             </select>
                         </div>
 

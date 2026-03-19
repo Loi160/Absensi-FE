@@ -11,7 +11,6 @@ import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 
-// --- FUNGSI TANGGAL KEMARIN (BATAS MAX & DEFAULT END) ---
 const getYesterday = () => {
     const d = new Date();
     d.setDate(d.getDate() - 1);
@@ -31,7 +30,6 @@ const Laporan = () => {
   const [selectedFilter, setSelectedFilter] = useState("Filter Cabang");
   const [searchTerm, setSearchTerm] = useState("");
   
-  // ================= STATE TANGGAL DEFAULT (SIKLUS 26 - 25) =================
   const [startDate, setStartDate] = useState(() => {
       const d = getYesterday();
       let m = d.getMonth();
@@ -45,10 +43,9 @@ const Laporan = () => {
   
   const [endDate, setEndDate] = useState(() => formatDate(getYesterday()));
 
-  // ================= STATE MODAL DETAIL =================
   const [showDetailModal, setShowDetailModal] = useState(false);
-  // Tambah properti nik
-  const [modalInfo, setModalInfo] = useState({ title: '', nama: '', nik: '', data: [] });
+  const [modalInfo, setModalInfo] = useState({ title: '', nama: '', nik: '', jenisData: '', data: [] });
+  const [previewImage, setPreviewImage] = useState(null); 
 
   const handleLogout = () => {
     localStorage.removeItem("user"); 
@@ -71,8 +68,7 @@ const Laporan = () => {
     return ""; 
   };
 
-  // ================= LOGIKA PEMBUATAN DATA DUMMY DETAIL =================
-  // UPDATE: Membawa NIK dan Cabang untuk dirender di Log Detail
+  // ================= LOGIKA DATA MODAL =================
   const openDetail = (nama, nik, jenis, jumlah, cabang) => {
       if (jumlah === "0" || jumlah === "-") return; 
       
@@ -82,23 +78,110 @@ const Laporan = () => {
 
       for(let i=1; i <= (isNaN(jml) ? 1 : jml); i++) {
           const fakeDate = `1${i} Mar 2026`;
-          
-          if (jenis === "Hadir via App") {
-              title = "Log Absensi Mandiri (Karyawan)";
-              dummyData.push(`📍 ${fakeDate} | 07:5${i} WIB | Absen: Masuk | Cabang: ${cabang} | Bukti: Foto Terlampir`);
-          } else if (jenis === "Hadir Manual") {
-              title = "Log Rekapitulasi Manual (Admin HRD)";
-              dummyData.push(`✍️ ${fakeDate} | Input: 09:1${i} WIB | Absen: Masuk | Cabang: ${cabang} | Ket: Lupa absen HP mati (Input by Admin_Siti)`);
+
+          if (jenis === "Hadir via App" || jenis === "Hadir Manual") {
+              const isAppKlik = jenis === "Hadir via App";
+              const mixLogic = i % 2 === 0;
+              title = isAppKlik ? "Log Absensi Mandiri (Karyawan)" : "Log Rekapitulasi Manual (Admin HRD)";
+
+              dummyData.push({
+                  tanggal: fakeDate,
+                  cabang: cabang,
+                  masuk: {
+                      jam: isAppKlik ? `07:5${i} WIB` : `08:1${i} WIB`,
+                      isManual: !isAppKlik,
+                      foto: isAppKlik ? "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop" : null,
+                      keterangan: !isAppKlik ? "Lupa absen HP mati" : "",
+                      admin: !isAppKlik ? "Admin_Siti" : ""
+                  },
+                  pulang: {
+                      jam: `17:0${i} WIB`,
+                      isManual: isAppKlik ? mixLogic : !mixLogic,
+                      foto: (isAppKlik ? mixLogic : !mixLogic) ? null : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop",
+                      keterangan: (isAppKlik ? mixLogic : !mixLogic) ? "Dibantu inputkan karena error" : "",
+                      admin: (isAppKlik ? mixLogic : !mixLogic) ? "Admin_Budi" : ""
+                  },
+                  tipe: "absen"
+              });
+
+          } else if (jenis === "Izin" || jenis === "Sakit") {
+              title = `Log Perizinan (${jenis})`;
+              const fakeDateEnd = `1${i+2} Mar 2026`;
+              
+              dummyData.push({
+                  jenisIzin: jenis === "Sakit" ? "Sakit" : (i % 2 === 0 ? "Acara Pribadi" : "Lainnya"),
+                  tanggalMulai: fakeDate,
+                  tanggalAkhir: fakeDateEnd,
+                  keterangan: jenis === "Sakit" ? "Sakit demam tinggi, butuh istirahat." : "Ada keperluan keluarga mendesak di luar kota.",
+                  foto: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=400&h=400&fit=crop", 
+                  tipe: "izin_sakit"
+              });
+
+          } else if (jenis === "Cuti") {
+              title = `Log Perizinan (Cuti)`;
+              const fakeDateEnd = `1${i+4} Mar 2026`;
+              
+              dummyData.push({
+                  cabang: cabang,
+                  jabatan: "Staff", 
+                  divisi: "Operasional", 
+                  jenisCuti: i % 2 === 0 ? "Cuti Tahunan" : "Cuti Khusus",
+                  tanggalMulai: fakeDate,
+                  tanggalAkhir: fakeDateEnd,
+                  keterangan: i % 2 === 0 ? "Cuti liburan tahunan bersama keluarga" : "Pernikahan saudara kandung",
+                  noTelp: "08123456789" + i,
+                  tipe: "cuti"
+              });
+
+          } else if (jenis === "FIMTK") {
+              title = `Log Perizinan (FIMTK)`;
+              
+              dummyData.push({
+                  cabang: cabang,
+                  jabatan: "Staff IT", 
+                  divisi: "Technology", 
+                  izinMTK: i % 2 === 0 ? "Keluar Kantor" : "Pulang Cepat",
+                  tanggal: fakeDate,
+                  jamMulai: `10:0${i} WIB`,
+                  jamAkhir: `14:3${i} WIB`,
+                  keperluan: i % 2 === 0 ? "Kantor" : "Pribadi",
+                  kendaraan: i % 2 === 0 ? "Kantor" : "Pribadi",
+                  alasan: i % 2 === 0 ? "Ada meeting dadakan dengan klien di luar kota." : "Urusan keluarga mendesak di rumah.",
+                  tipe: "fimtk"
+              });
+
+          } else if (jenis === "Terlambat") {
+              title = `Log Keterlambatan Karyawan`;
+              const jadwalMasuk = "08:00 WIB";
+              const menitTelat = 10 + (i * 5); 
+              const jamAktual = `08:${menitTelat} WIB`;
+              const isManual = i % 3 === 0; 
+
+              dummyData.push({
+                  tanggal: fakeDate,
+                  cabang: cabang,
+                  jadwal: jadwalMasuk,
+                  aktual: jamAktual,
+                  durasi: `${menitTelat} Menit`,
+                  // UPDATE TEKS DI SINI
+                  status: isManual ? "Absensi Manual HRD" : "Absensi Karyawan",
+                  tipe: "terlambat"
+              });
+
           } else {
-              dummyData.push(`📅 ${fakeDate} - Rincian data ${jenis} ke-${i}`);
+              dummyData.push({
+                  tanggal: fakeDate,
+                  ket: `Rincian data ${jenis} ke-${i}`,
+                  tipe: "lainnya"
+              });
           }
       }
       
-      setModalInfo({ title: title, nama: nama, nik: nik, data: dummyData });
+      setModalInfo({ title: title, nama: nama, nik: nik, jenisData: jenis, data: dummyData });
       setShowDetailModal(true);
   };
 
-  /* DATA DUMMY (Sudah ditambah NIK) */
+  /* DATA DUMMY */
   const dataLaporan = [
     { id: 1, nama: "Syahrul", nik: "123456789", cabang: "Cabang 1", hadirApp: "10", hadirManual: "10", izin: "2", sakit: "3", cuti: "2", terlambat: "1", fimtk: "1", lembur: "1", alpha: "1" },
     { id: 2, nama: "Budi Santoso", nik: "987654321", cabang: "Cabang 2", hadirApp: "12", hadirManual: "0", izin: "0", sakit: "0", cuti: "0", terlambat: "3", fimtk: "-", lembur: "2", alpha: "0" }, 
@@ -234,7 +317,6 @@ const Laporan = () => {
         <div className="neo-filter-zone no-print">
             <div className="input-group-neo">
                 
-                {/* INPUT PENCARIAN NAMA */}
                 <div className="neo-field">
                     <label>Cari Nama</label>
                     <input 
@@ -246,7 +328,6 @@ const Laporan = () => {
                     />
                 </div>
 
-                {/* INPUT TANGGAL MULAI (MAX=KEMARIN) */}
                 <div className="neo-field">
                     <label>Tanggal Mulai</label>
                     <input 
@@ -263,7 +344,6 @@ const Laporan = () => {
                     />
                 </div>
 
-                {/* INPUT TANGGAL SELESAI (MAX=KEMARIN) */}
                 <div className="neo-field">
                     <label>Tanggal Selesai</label>
                     <input 
@@ -278,7 +358,6 @@ const Laporan = () => {
                 </div>
             </div>
 
-            {/* BUTTON GROUP */}
             <div className="button-group-vertical-right">
                 <button className="btn-neo-print-top" onClick={() => window.print()}>Print</button>
                 
@@ -300,7 +379,6 @@ const Laporan = () => {
             </div>
         </div>
 
-        {/* LOGIKA CONDITIONAL RENDERING CABANG HRD */}
         {selectedFilter === "Cabang 4" ? (
           <div className="multi-cabang-wrapper">
             <div className="cabang-section">
@@ -321,7 +399,7 @@ const Laporan = () => {
         )}
       </main>
 
-      {/* ================= MODAL DETAIL POP-UP (UPDATE NAMA & NIK) ================= */}
+      {/* ================= MODAL DETAIL POP-UP ================= */}
       {showDetailModal && (
         <div className="modal-overlay-lap" onClick={() => setShowDetailModal(false)}>
             <div className="modal-content-lap" onClick={(e) => e.stopPropagation()}>
@@ -329,19 +407,305 @@ const Laporan = () => {
                     <h2>{modalInfo.title}</h2>
                     <button className="close-btn-lap" onClick={() => setShowDetailModal(false)}>&times;</button>
                 </div>
+                
                 <div className="modal-body-lap">
-                    <div className="sub-info-wrapper">
-                        <p className="sub-info">Karyawan: <strong>{modalInfo.nama}</strong></p>
-                        <p className="sub-info">NIK: <strong>{modalInfo.nik}</strong></p>
+                    {/* INFO IDENTITAS */}
+                    <div className="lap-modal-row">
+                        <div className="lap-modal-group">
+                            <label className="lap-modal-label">Nama</label>
+                            <div className="lap-modal-input">{modalInfo.nama}</div>
+                        </div>
+                        <div className="lap-modal-group">
+                            <label className="lap-modal-label">NIK</label>
+                            <div className="lap-modal-input">{modalInfo.nik}</div>
+                        </div>
                     </div>
-                    <ul>
-                        {modalInfo.data.map((detail, idx) => (
-                            <li key={idx}>{detail}</li>
+                    
+                    <hr style={{border: 'none', borderBottom: '1px solid #eee', margin: '20px 0'}} />
+
+                    <div className="lap-modal-scroll-area">
+                        {modalInfo.data.map((item, idx) => (
+                            <div key={idx} className="lap-modal-record-card">
+                                
+                                {/* JIKA DATA ABSEN */}
+                                {item.tipe === "absen" && (
+                                    <>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Tanggal Absensi</label>
+                                                <div className="lap-modal-input">{item.tanggal}</div>
+                                            </div>
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Cabang</label>
+                                                <div className="lap-modal-input">{item.cabang}</div>
+                                            </div>
+                                        </div>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Jam Masuk</label>
+                                                <div className="lap-modal-input">{item.masuk.jam}</div>
+                                            </div>
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Jam Pulang</label>
+                                                <div className="lap-modal-input">{item.pulang.jam}</div>
+                                            </div>
+                                        </div>
+                                        
+                                        {(item.masuk.isManual || item.pulang.isManual) && (
+                                            <div className="lap-modal-row">
+                                                <div className="lap-modal-group" style={{flex: 1}}>
+                                                    <label className="lap-modal-label" style={{color: '#d9480f'}}>⚠️ Catatan Absensi Manual HRD</label>
+                                                    <div className="lap-modal-input" style={{background: '#fff9db', borderColor: '#fcc419', color: '#b06500', fontSize: '12px'}}>
+                                                        {item.masuk.isManual && `[Masuk] ${item.masuk.keterangan} (${item.masuk.admin}). `}
+                                                        {item.pulang.isManual && `[Pulang] ${item.pulang.keterangan} (${item.pulang.admin}).`}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="lap-foto-container">
+                                            <div className="lap-foto-box">
+                                                {item.masuk.isManual ? (
+                                                    <div className="lap-manual-placeholder">
+                                                        <span>📝 Absensi Manual</span>
+                                                        <small>No Photo Available</small>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <img src={item.masuk.foto} alt="Masuk" className="lap-foto-img" />
+                                                        <div className="lap-foto-overlay">Absen Masuk</div>
+                                                        <button className="lap-zoom-btn" onClick={() => setPreviewImage(item.masuk.foto)}>🔍</button>
+                                                    </>
+                                                )}
+                                            </div>
+                                            <div className="lap-foto-box">
+                                                {item.pulang.isManual ? (
+                                                    <div className="lap-manual-placeholder">
+                                                        <span>📝 Absensi Manual</span>
+                                                        <small>No Photo Available</small>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <img src={item.pulang.foto} alt="Pulang" className="lap-foto-img" />
+                                                        <div className="lap-foto-overlay">Absen Pulang</div>
+                                                        <button className="lap-zoom-btn" onClick={() => setPreviewImage(item.pulang.foto)}>🔍</button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* JIKA DATA IZIN ATAU SAKIT */}
+                                {item.tipe === "izin_sakit" && (
+                                    <>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Jenis Izin</label>
+                                                <div className="lap-modal-input">{item.jenisIzin}</div>
+                                            </div>
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Tanggal Mulai</label>
+                                                <div className="lap-modal-input">{item.tanggalMulai}</div>
+                                            </div>
+                                        </div>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Tanggal Akhir</label>
+                                                <div className="lap-modal-input">{item.tanggalAkhir}</div>
+                                            </div>
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Keterangan</label>
+                                                <div className="lap-modal-input">{item.keterangan}</div>
+                                            </div>
+                                        </div>
+                                        <div className="lap-foto-container">
+                                            <div className="lap-foto-box">
+                                                {item.foto ? (
+                                                    <>
+                                                        <img src={item.foto} alt="Bukti Surat/Foto" className="lap-foto-img" />
+                                                        <div className="lap-foto-overlay">Bukti Dokumen / Surat</div>
+                                                        <button className="lap-zoom-btn" onClick={() => setPreviewImage(item.foto)}>🔍</button>
+                                                    </>
+                                                ) : (
+                                                    <div className="lap-manual-placeholder">
+                                                        <span>📄 Tidak Ada Bukti</span>
+                                                        <small>Dikirim tanpa lampiran foto</small>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div style={{ flex: 1 }}></div>
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* JIKA DATA CUTI */}
+                                {item.tipe === "cuti" && (
+                                    <>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Cabang</label>
+                                                <div className="lap-modal-input">{item.cabang}</div>
+                                            </div>
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Jenis Cuti</label>
+                                                <div className="lap-modal-input">{item.jenisCuti}</div>
+                                            </div>
+                                        </div>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Jabatan</label>
+                                                <div className="lap-modal-input">{item.jabatan}</div>
+                                            </div>
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Divisi</label>
+                                                <div className="lap-modal-input">{item.divisi}</div>
+                                            </div>
+                                        </div>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Tanggal Mulai</label>
+                                                <div className="lap-modal-input">{item.tanggalMulai}</div>
+                                            </div>
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Tanggal Akhir</label>
+                                                <div className="lap-modal-input">{item.tanggalAkhir}</div>
+                                            </div>
+                                        </div>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group" style={{flex: 1}}>
+                                                <label className="lap-modal-label">Keterangan</label>
+                                                <div className="lap-modal-input" style={{minHeight: '40px', height: 'auto'}}>{item.keterangan}</div>
+                                            </div>
+                                        </div>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group" style={{flex: 1}}>
+                                                <label className="lap-modal-label">Nomor Telepon</label>
+                                                <div className="lap-modal-input">{item.noTelp}</div>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* JIKA DATA FIMTK */}
+                                {item.tipe === "fimtk" && (
+                                    <>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group" style={{flex: 1}}>
+                                                <label className="lap-modal-label">Cabang</label>
+                                                <div className="lap-modal-input">{item.cabang}</div>
+                                            </div>
+                                        </div>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Jabatan</label>
+                                                <div className="lap-modal-input">{item.jabatan}</div>
+                                            </div>
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Divisi</label>
+                                                <div className="lap-modal-input">{item.divisi}</div>
+                                            </div>
+                                        </div>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Izin MTK</label>
+                                                <div className="lap-modal-input">{item.izinMTK}</div>
+                                            </div>
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Tanggal</label>
+                                                <div className="lap-modal-input">{item.tanggal}</div>
+                                            </div>
+                                        </div>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Jam Mulai</label>
+                                                <div className="lap-modal-input">{item.jamMulai}</div>
+                                            </div>
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Jam Akhir</label>
+                                                <div className="lap-modal-input">{item.jamAkhir}</div>
+                                            </div>
+                                        </div>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Keperluan</label>
+                                                <div className="lap-modal-input">{item.keperluan}</div>
+                                            </div>
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Kendaraan</label>
+                                                <div className="lap-modal-input">{item.kendaraan}</div>
+                                            </div>
+                                        </div>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group" style={{flex: 1}}>
+                                                <label className="lap-modal-label">Alasan</label>
+                                                <div className="lap-modal-input" style={{minHeight: '40px', height: 'auto'}}>{item.alasan}</div>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* JIKA DATA TERLAMBAT (FORM BARU) */}
+                                {item.tipe === "terlambat" && (
+                                    <>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Tanggal</label>
+                                                <div className="lap-modal-input">{item.tanggal}</div>
+                                            </div>
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Cabang</label>
+                                                <div className="lap-modal-input">{item.cabang}</div>
+                                            </div>
+                                        </div>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Jam Masuk Seharusnya</label>
+                                                <div className="lap-modal-input">{item.jadwal}</div>
+                                            </div>
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Jam Absen Aktual</label>
+                                                <div className="lap-modal-input" style={{color: '#d9480f', fontWeight: '700'}}>{item.aktual}</div>
+                                            </div>
+                                        </div>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group" style={{flex: 1}}>
+                                                <label className="lap-modal-label">Durasi Keterlambatan & Status</label>
+                                                <div className="lap-modal-input">
+                                                    Terlambat {item.durasi} ({item.status})
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* JIKA LAINNYA */}
+                                {item.tipe === "lainnya" && (
+                                    <div className="lap-modal-row">
+                                        <div className="lap-modal-group" style={{flex: 0.4}}>
+                                            <label className="lap-modal-label">Tanggal</label>
+                                            <div className="lap-modal-input">{item.tanggal}</div>
+                                        </div>
+                                        <div className="lap-modal-group" style={{flex: 0.6}}>
+                                            <label className="lap-modal-label">Keterangan</label>
+                                            <div className="lap-modal-input">{item.ket}</div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         ))}
-                    </ul>
+                    </div>
                 </div>
             </div>
         </div>
+      )}
+
+      {/* ================= MODAL PREVIEW GAMBAR BESAR ================= */}
+      {previewImage && (
+          <div className="lap-preview-overlay" onClick={() => setPreviewImage(null)}>
+              <button className="lap-preview-close" onClick={() => setPreviewImage(null)}>&times;</button>
+              <img src={previewImage} alt="Preview" className="lap-preview-img" onClick={(e) => e.stopPropagation()} />
+          </div>
       )}
 
     </div>

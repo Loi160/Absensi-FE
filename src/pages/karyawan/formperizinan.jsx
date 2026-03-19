@@ -5,7 +5,7 @@ import { ChevronDown, ArrowLeft } from "lucide-react";
 
 // Import assets
 import logoAmaga from "../../assets/logoamaga.svg";
-import logoPersegi from "../../assets/logopersegi.svg"; // <-- IMPORT INI DIKEMBALIKAN
+import logoPersegi from "../../assets/logopersegi.svg"; 
 import profileImg from "../../assets/profile.svg";
 import cameraIcon from "../../assets/camera.svg"; 
 
@@ -53,7 +53,6 @@ const FormPerizinan = () => {
 
           {/* Logo Persegi Desktop (Pojok Atas) */}
           <div className="fp-sidebar-logo-desktop desktop-only">
-             {/* DI SINI PERBAIKANNYA: Menggunakan logoPersegi, bukan logoAmaga */}
              <img src={logoPersegi} alt="Amaga Corp" />
           </div>
           
@@ -128,8 +127,10 @@ const FormPerizinan = () => {
                   <div className="fp-select-wrapper">
                     <select className="fp-select" required>
                       <option value="">Pilih Izin</option>
+                      {/* UPDATE OPSI PERIZINAN */}
                       <option value="sakit">Sakit</option>
-                      <option value="acara">Acara Keluarga</option>
+                      <option value="acara_pribadi">Acara Pribadi</option>
+                      <option value="lainnya">Lainnya</option>
                     </select>
                     <ChevronDown className="fp-select-icon" size={16} />
                   </div>
@@ -317,4 +318,3 @@ const FormPerizinan = () => {
 };
 
 export default FormPerizinan;
-
