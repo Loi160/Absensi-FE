@@ -21,9 +21,12 @@ const KelolaCabang = () => {
   const [expandedRows, setExpandedRows] = useState({});
   const [showPassword, setShowPassword] = useState(false);
 
-  // UPDATE: State khusus Modal Konfirmasi Status
+  // State Modal Konfirmasi Status
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [confirmData, setConfirmData] = useState(null); // Menyimpan ID data yg mau diubah
+  const [confirmData, setConfirmData] = useState(null);
+
+  // STATE MOBILE SIDEBAR
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // DATA DUMMY
   const [dataCabang, setDataCabang] = useState([
@@ -67,6 +70,14 @@ const KelolaCabang = () => {
     },
   ]);
 
+  const openSidebar = () => setSidebarOpen(true);
+  const closeSidebar = () => setSidebarOpen(false);
+
+  const handleNav = (path) => {
+    closeSidebar();
+    navigate(path);
+  };
+
   const toggleRow = (id) => {
     setExpandedRows((prev) => ({ ...prev, [id]: !prev[id] }));
   };
@@ -92,25 +103,21 @@ const KelolaCabang = () => {
     setShowModal(true);
   };
 
-  // UPDATE: Membuka Pop-up Custom di tengah layar
   const handleToggleStatusClick = (e, targetId, isSub, parentId = null) => {
     e.stopPropagation(); 
-    setConfirmData({ targetId, isSub, parentId }); // Simpan data cabang yg diklik
-    setShowConfirmModal(true); // Munculkan pop-up modal
+    setConfirmData({ targetId, isSub, parentId });
+    setShowConfirmModal(true);
   };
 
-  // UPDATE: Fungsi ini jalan kalau tombol "Ya, Ubah" ditekan
   const executeToggleStatus = () => {
     if (!confirmData) return;
     const { targetId, isSub, parentId } = confirmData;
 
     setDataCabang(prevData => {
       return prevData.map(cabang => {
-        // Jika Cabang Utama
         if (!isSub && cabang.id === targetId) {
           return { ...cabang, isActive: !cabang.isActive };
         }
-        // Jika Sub-Cabang
         if (isSub && cabang.id === parentId) {
           const updatedSub = cabang.subCabang.map(sub => 
             sub.id === targetId ? { ...sub, isActive: !sub.isActive } : sub
@@ -121,7 +128,6 @@ const KelolaCabang = () => {
       });
     });
 
-    // Tutup pop-up
     setShowConfirmModal(false);
     setConfirmData(null);
   };
@@ -141,35 +147,57 @@ const KelolaCabang = () => {
 
   return (
     <div className="hrd-container">
+
+      {/* ===== MOBILE TOPBAR ===== */}
+      <div className="mobile-topbar">
+        <img src={logoPersegi} alt="AMAGACORP" className="mobile-topbar-logo" />
+        <button className="btn-hamburger" onClick={openSidebar} aria-label="Buka menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+
+      {/* ===== OVERLAY ===== */}
+      <div
+        className={`sidebar-overlay ${sidebarOpen ? "active" : ""}`}
+        onClick={closeSidebar}
+      />
+
       {/* ================= SIDEBAR ================= */}
-      <aside className="sidebar">
+      <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
+
+        <button className="btn-sidebar-close" onClick={closeSidebar} aria-label="Tutup menu">
+          ✕
+        </button>
+
         <div className="logo-area">
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
 
         <nav className="menu-nav">
-          <div className="menu-item" onClick={() => navigate('/hrd/dashboard')}>
+          <div className="menu-item" onClick={() => handleNav('/hrd/dashboard')}>
             <div className="menu-left">
                 <img src={iconDashboard} alt="dash" className="menu-icon-main"/> 
                 <span className="menu-text-main">Dashboard</span>
             </div>
           </div>
           
-          <div className="menu-item active" onClick={() => navigate('/hrd/kelolacabang')}> 
+          <div className="menu-item active" onClick={() => handleNav('/hrd/kelolacabang')}> 
             <div className="menu-left">
                 <img src={iconKelola} alt="kelola" className="menu-icon-main"/> 
                 <span className="menu-text-main">Kelola Cabang</span>
             </div>
           </div>
 
-          <div className="menu-item" onClick={() => navigate('/hrd/datakaryawan')}>
+          <div className="menu-item" onClick={() => handleNav('/hrd/datakaryawan')}>
             <div className="menu-left">
                 <img src={iconKaryawan} alt="karyawan" className="menu-icon-main"/> 
                 <span className="menu-text-main">Data Karyawan</span>
             </div>
           </div>
 
-          <div className="menu-item has-arrow" onClick={() => navigate('/hrd/absenmanual')}>
+          <div className="menu-item has-arrow" onClick={() => handleNav('/hrd/absenmanual')}>
             <div className="menu-left">
                 <img src={iconKehadiran} alt="hadir" className="menu-icon-main"/> 
                 <span className="menu-text-main">Kehadiran</span>
@@ -177,7 +205,7 @@ const KelolaCabang = () => {
             <img src={iconBawah} alt="down" className="arrow-icon-main" /> 
           </div>
 
-          <div className="menu-item" onClick={() => navigate('/hrd/laporan')}>
+          <div className="menu-item" onClick={() => handleNav('/hrd/laporan')}>
             <div className="menu-left">
                 <img src={iconLaporan} alt="lapor" className="menu-icon-main"/> 
                 <span className="menu-text-main">Laporan</span>
@@ -209,14 +237,12 @@ const KelolaCabang = () => {
             <div className="table-cabang-body">
                 {dataCabang.map((item) => (
                     <React.Fragment key={item.id}>
-                        {/* BARIS CABANG UTAMA */}
                         <div className="table-cabang-row" onClick={() => toggleRow(item.id)}>
                             <span className="cabang-name">
                               {item.nama} {item.subCabang && (expandedRows[item.id] ? '▲' : '▼')}
                             </span>
                             
                             <div className="table-cabang-actions">
-                                {/* Tombol Outline + Sub-Cabang */}
                                 <button className="btn-action-text" onClick={(e) => { e.stopPropagation(); handleOpenTambahSub(item); }}>
                                     + Sub-Cabang
                                 </button>
@@ -234,7 +260,6 @@ const KelolaCabang = () => {
                             </div>
                         </div>
 
-                        {/* AREA SUB-CABANG */}
                         {item.subCabang && expandedRows[item.id] && (
                             <div className="sub-rows-wrapper">
                                 {item.subCabang.map((sub) => (
@@ -335,12 +360,11 @@ const KelolaCabang = () => {
                       <button type="submit" className="btn-save-dynamic">Simpan</button>
                   </div>
                 </form>
-
             </div>
         </div>
       )}
 
-      {/* ================= MODAL KONFIRMASI UBAH STATUS (Custom Pop-up di Tengah Layar) ================= */}
+      {/* ================= MODAL KONFIRMASI STATUS ================= */}
       {showConfirmModal && (
         <div className="modal-overlay-clean">
             <div className="modal-card-confirm">

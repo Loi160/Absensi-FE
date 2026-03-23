@@ -18,6 +18,12 @@ const Kehadiran = () => {
   
   // State untuk Tab
   const [activeTab, setActiveTab] = useState('perizinan'); 
+
+  // ─── STATE SIDEBAR MOBILE ───────────────────────────────
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const openSidebar  = () => setSidebarOpen(true);
+  const closeSidebar = () => setSidebarOpen(false);
+  // ────────────────────────────────────────────────────────
   
   // DAFTAR CABANG DINAMIS (Sesuai Kelola Cabang)
   const semuaCabangAmaga = [
@@ -57,7 +63,6 @@ const Kehadiran = () => {
   const [modalType, setModalType] = useState(""); 
   const [selectedData, setSelectedData] = useState(null);
 
-  // Handler klik baris
   const handleRowClick = (item, type) => {
     setSelectedData(item);
     setModalType(type);
@@ -73,10 +78,9 @@ const Kehadiran = () => {
   const handleSimpanAbsenManual = (e) => {
     e.preventDefault(); 
     alert("Form Absensi Manual berhasil disubmit!");
-    e.target.reset(); // Mereset form setelah sukses disubmit
+    e.target.reset();
   };
 
-  // Tanggal Hari Ini untuk Form Absensi Manual
   const tanggalHariIni = new Date().toLocaleDateString('id-ID', { 
       day: '2-digit', 
       month: 'long', 
@@ -84,30 +88,26 @@ const Kehadiran = () => {
   });
 
   // =========================================================
-  // DATA STATE (INTERAKTIF & TERISI PENUH)
+  // DATA STATE
   // =========================================================
   
-  // Tabel 1: Izin Harian 
   const [dataIzinHarian, setDataIzinHarian] = useState([
     { id: 1, nama: "Syahrul", cabang: "F&B Jakarta", tglMulai: "01/03/2026", tglSelesai: "02/03/2026", tipeIzin: "Sakit", keterangan: "Demam Tinggi", status: "Pending", foto: "Ada Bukti Surat Sakit" },
     { id: 2, nama: "Budi Santoso", cabang: "F&B Sudirman (Sub)", tglMulai: "05/03/2026", tglSelesai: "05/03/2026", tipeIzin: "Acara Pribadi", keterangan: "Urusan Bank", status: "Disetujui", foto: "Tidak Ada Foto" },
     { id: 3, nama: "Siti Aminah", cabang: "Jam Tangan Jkt", tglMulai: "10/03/2026", tglSelesai: "11/03/2026", tipeIzin: "Lainnya", keterangan: "Bencana Alam", status: "Pending", foto: "Ada Bukti Kondisi Rumah" },
   ]);
 
-  // Tabel 2: FIMTK
   const [dataIzinFIMTK, setDataIzinFIMTK] = useState([
     { id: 1, nama: "Ghilbran Alfaries", cabang: "Pakaian Jkt", jabatan: "Staff IT", divisi: "Technology", tipeIzin: "Keluar Kantor", tanggal: "01/03/2026", jamMulai: "09.00", jamSelesai: "11.00", keperluan: "Kantor", kendaraan: "Kantor", keterangan: "Meeting Vendor", status: "Pending" },
     { id: 2, nama: "Ahmad Dani", cabang: "F&B Jakarta", jabatan: "Direktur Ops", divisi: "Operasional", tipeIzin: "Pulang Cepat", tanggal: "02/03/2026", jamMulai: "13.00", jamSelesai: "15.00", keperluan: "Pribadi", kendaraan: "Pribadi", keterangan: "Sakit Mendadak", status: "Disetujui" },
     { id: 3, nama: "Rina Kartika", cabang: "Sepatu Jkt", jabatan: "HRD Staff", divisi: "Human Resource", tipeIzin: "Keluar Kantor", tanggal: "03/03/2026", jamMulai: "10.00", jamSelesai: "12.00", keperluan: "Pribadi", kendaraan: "Pribadi", keterangan: "Keperluan Medis", status: "Pending" },
   ]);
 
-  // Tabel 3: Cuti
   const [dataCuti, setDataCuti] = useState([
     { id: 1, nama: "Syahrul", cabang: "F&B Jakarta", jabatan: "CEO", divisi: "Management", noTelp: "08123456789", tipeIzin: "Cuti Tahunan", tglMulai: "05/03/2026", tglSelesai: "10/03/2026", keterangan: "Liburan Keluarga", status: "Pending" },
     { id: 2, nama: "Budi Santoso", cabang: "F&B Sudirman (Sub)", jabatan: "Direktur Ops", divisi: "Operasional", noTelp: "08987654321", tipeIzin: "Cuti Khusus", tglMulai: "12/03/2026", tglSelesai: "14/03/2026", keterangan: "Pernikahan Saudara", status: "Disetujui" },
   ]);
 
-  // --- FUNGSI SORTING (Pending Selalu di Atas) ---
   const sortData = (dataArray) => {
     if (!dataArray) return []; 
     return [...dataArray].sort((a, b) => {
@@ -117,27 +117,15 @@ const Kehadiran = () => {
     });
   };
 
-  // --- FUNGSI UPDATE STATUS ---
   const handleUpdateStatus = (tabel, id, newStatus) => {
-    const updater = (prevData) => {
-        return prevData.map(item => {
-            if (item.id === id) {
-                return { ...item, status: newStatus };
-            }
-            return item;
-        });
-    };
-
-    if (tabel === 'harian') {
-        setDataIzinHarian(updater);
-    } else if (tabel === 'fimtk') {
-        setDataIzinFIMTK(updater);
-    } else if (tabel === 'cuti') {
-        setDataCuti(updater); 
-    }
+    const updater = (prevData) => prevData.map(item =>
+      item.id === id ? { ...item, status: newStatus } : item
+    );
+    if (tabel === 'harian') setDataIzinHarian(updater);
+    else if (tabel === 'fimtk') setDataIzinFIMTK(updater);
+    else if (tabel === 'cuti') setDataCuti(updater); 
   };
 
-  // --- FUNGSI WARNA BADGE ---
   const getBadgeClass = (tipe) => {
     if (tipe === 'Sakit') return 'sakit';
     if (tipe === 'Acara Pribadi') return 'pribadi';
@@ -149,32 +137,71 @@ const Kehadiran = () => {
     return 'lainnya';
   };
 
+  // Helper: tutup sidebar lalu navigasi
+  const handleNav = (path) => {
+    closeSidebar();
+    navigate(path);
+  };
+
+  // Helper: ganti tab & tutup sidebar (di mobile)
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    closeSidebar();
+  };
+
   return (
     <div className="hrd-container">
+
+      {/* ================================================= */}
+      {/* ========== MOBILE TOPBAR (hanya tampil di mobile) */}
+      {/* ================================================= */}
+      <div className="mobile-topbar">
+        <img src={logoPersegi} alt="AMAGACORP" className="mobile-topbar-logo" />
+        <button className="btn-hamburger" onClick={openSidebar} aria-label="Buka menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+
+      {/* ================================================= */}
+      {/* ========== OVERLAY (klik = tutup sidebar) ======= */}
+      {/* ================================================= */}
+      <div
+        className={`sidebar-overlay ${sidebarOpen ? 'active' : ''}`}
+        onClick={closeSidebar}
+      />
+
       {/* ================================================= */}
       {/* ==================== SIDEBAR ==================== */}
       {/* ================================================= */}
-      <aside className="sidebar">
+      <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+
+        {/* Tombol X — hanya tampil di mobile via CSS */}
+        <button className="btn-sidebar-close" onClick={closeSidebar} aria-label="Tutup menu">
+          &times;
+        </button>
+
         <div className="logo-area">
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
         
         <nav className="menu-nav">
-          <div className="menu-item" onClick={() => navigate('/hrd/dashboard')}>
+          <div className="menu-item" onClick={() => handleNav('/hrd/dashboard')}>
             <div className="menu-left">
                 <img src={iconDashboard} alt="dash" className="menu-icon-main" />
                 <span className="menu-text-main">Dashboard</span>
             </div>
           </div>
           
-          <div className="menu-item" onClick={() => navigate('/hrd/kelolacabang')}>
+          <div className="menu-item" onClick={() => handleNav('/hrd/kelolacabang')}>
             <div className="menu-left">
                 <img src={iconKelola} alt="kelola" className="menu-icon-main" />
                 <span className="menu-text-main">Kelola Cabang</span>
             </div>
           </div>
           
-          <div className="menu-item" onClick={() => navigate('/hrd/datakaryawan')}>
+          <div className="menu-item" onClick={() => handleNav('/hrd/datakaryawan')}>
             <div className="menu-left">
                 <img src={iconKaryawan} alt="karyawan" className="menu-icon-main" />
                 <span className="menu-text-main">Data Karyawan</span>
@@ -194,7 +221,7 @@ const Kehadiran = () => {
           <div className="submenu-container">
             <div 
                 className={`submenu-item ${activeTab === 'absenManual' ? 'active-sub' : ''}`} 
-                onClick={() => setActiveTab('absenManual')}
+                onClick={() => handleTabChange('absenManual')}
             >
                 <img src={iconAbsen} alt="-" className="submenu-icon" />
                 <span>Absen Manual</span>
@@ -202,14 +229,14 @@ const Kehadiran = () => {
             
             <div 
                 className={`submenu-item ${activeTab === 'perizinan' ? 'active-sub' : ''}`} 
-                onClick={() => setActiveTab('perizinan')}
+                onClick={() => handleTabChange('perizinan')}
             >
                 <img src={iconIzin} alt="-" className="submenu-icon" />
                 <span>Perizinan</span>
             </div>
           </div>
 
-          <div className="menu-item" onClick={() => navigate('/hrd/laporan')}>
+          <div className="menu-item" onClick={() => handleNav('/hrd/laporan')}>
             <div className="menu-left">
                 <img src={iconLaporan} alt="lapor" className="menu-icon-main" />
                 <span className="menu-text-main">Laporan</span>
@@ -242,7 +269,6 @@ const Kehadiran = () => {
                         <div className="form-group"><label>Jabatan</label><input type="text" className="input-field" required /></div>
                         <div className="form-group"><label>Divisi</label><input type="text" className="input-field" required /></div>
                         
-                        {/* UPDATE: TANGGAL BERSANDING DENGAN JAM ABSEN */}
                         <div className="form-group">
                             <label>Tanggal Absensi Manual</label>
                             <input 
@@ -258,7 +284,6 @@ const Kehadiran = () => {
                             <input type="time" className="input-field" required />
                         </div>
                         
-                        {/* UPDATE: CABANG BERSANDING DENGAN TIPE ABSEN */}
                         <div className="form-group">
                             <label>Cabang Penempatan</label>
                             <select className="input-field" required>
@@ -301,7 +326,6 @@ const Kehadiran = () => {
                         </button>
                         {showFilter && (
                             <div className="filter-dropdown">
-                                {/* Pilihan Filter Dinamis */}
                                 {["Semua Cabang", ...semuaCabangAmaga].map(c => (
                                     <div key={c} className="dropdown-item" onClick={() => handleSelectFilter(c)}>{c}</div>
                                 ))}
@@ -425,13 +449,12 @@ const Kehadiran = () => {
       </main>
 
       {/* ================================================= */}
-      {/* ================= MODAL POP-UP MODERN ============= */}
+      {/* ================= MODAL POP-UP ================== */}
       {/* ================================================= */}
       {showModal && selectedData && (
         <div className="modal-overlay" onClick={handleCloseModal}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 
-                {/* Header Modal Baru dengan X icon */}
                 <div className="modal-header-modern">
                     <h2>
                         {modalType === 'harian' && 'Detail Izin Harian'}
@@ -443,7 +466,6 @@ const Kehadiran = () => {
                 
                 <div className="modal-body-modern">
                     
-                    {/* BERSAMAAN: Row 1 (Nama & Cabang Bersebelahan) */}
                     <div className="modal-row-split">
                         <div className="modal-field-group">
                             <label className="modal-field-label">Nama</label>
@@ -460,7 +482,6 @@ const Kehadiran = () => {
                         <div className="modal-field-value">{selectedData.tipeIzin}</div>
                     </div>
 
-                    {/* SPESIFIK HARIAN & CUTI */}
                     {(modalType === 'harian' || modalType === 'cuti') && (
                         <div className="modal-row-split">
                             <div className="modal-field-group">
@@ -474,7 +495,6 @@ const Kehadiran = () => {
                         </div>
                     )}
 
-                    {/* SPESIFIK FIMTK */}
                     {modalType === 'fimtk' && (
                         <>
                             <div className="modal-row-split">
@@ -510,7 +530,6 @@ const Kehadiran = () => {
                         </>
                     )}
 
-                    {/* SPESIFIK CUTI TAMBAHAN */}
                     {modalType === 'cuti' && (
                         <div className="modal-row-split">
                             <div className="modal-field-group">
@@ -529,7 +548,6 @@ const Kehadiran = () => {
                         <div className="modal-field-value" style={{minHeight: '80px'}}>{selectedData.keterangan}</div>
                     </div>
                     
-                    {/* BUKTI FOTO HANYA UNTUK HARIAN */}
                     {modalType === 'harian' && (
                         <div className="modal-field-group">
                             <label className="modal-field-label">Bukti Foto</label>
@@ -540,7 +558,6 @@ const Kehadiran = () => {
                     )}
                 </div>
 
-                {/* Footer Modal dengan Tombol Baru */}
                 {selectedData.status === 'Pending' && (
                     <div className="modal-footer-modern">
                         <button className="btn-reject-modern" onClick={() => { handleUpdateStatus(modalType, selectedData.id, 'Ditolak'); handleCloseModal(); }}>

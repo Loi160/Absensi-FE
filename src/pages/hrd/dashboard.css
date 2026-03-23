@@ -16,7 +16,6 @@
   height: 100vh;
   background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
   overflow: hidden;
-  /* KUNCI UTAMA: position relative agar konten di dalamnya bisa diatur absolut */
   position: relative;
 }
 
@@ -113,19 +112,18 @@
   background-color: rgba(255, 255, 255, 0.15);
 }
 
-/* ================= MAIN CONTENT (SOLUSI SCROLL LAPTOP) ================= */
+/* ================= MAIN CONTENT ================= */
 .main-content {
-  /* Diubah ke Absolute agar tinggi menyesuaikan layar dan tidak tembus batas */
   position: absolute;
   top: 25px;
-  bottom: 25px; /* Wajib agar berhenti sebelum dasar layar */
-  left: 310px; /* Jarak dari kiri (300px sidebar + 10px margin) */
+  bottom: 25px;
+  left: 310px;
   right: 35px;
 
   background-color: #fdfdfd;
   border-radius: 40px;
   padding: 40px;
-  overflow-y: auto !important; /* MENGAKTIFKAN SCROLL VERTIKAL DI DALAM KOTAK PUTIH */
+  overflow-y: auto !important;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
@@ -133,7 +131,7 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 }
 
-/* KUSTOMISASI SCROLLBAR AGAR ESTETIK */
+/* KUSTOMISASI SCROLLBAR */
 .main-content::-webkit-scrollbar {
   width: 8px;
 }
@@ -156,7 +154,7 @@
   align-items: flex-end;
   gap: 20px;
   margin-bottom: -18px !important;
-  flex-shrink: 0; /* Mencegah header menyusut saat di-scroll */
+  flex-shrink: 0;
 }
 
 .header-text {
@@ -180,7 +178,7 @@
 /* ================= FILTER DROPDOWN STYLE ================= */
 .filter-wrapper {
   position: relative;
-  z-index: 100; /* Memastikan dropdown tidak tertutup chart */
+  z-index: 100;
 }
 
 .btn-filter-green {
@@ -245,7 +243,7 @@
   border-radius: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   border: 1px solid #f5f5f5;
-  flex-shrink: 0; /* Mencegah grafik terpotong/gepeng */
+  flex-shrink: 0;
 }
 
 .chart-container-inner {
@@ -257,8 +255,8 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 25px;
-  flex-shrink: 0; /* Mencegah kotak statistik gepeng */
-  padding-bottom: 20px; /* Jarak nafas di ujung paling bawah scroll */
+  flex-shrink: 0;
+  padding-bottom: 20px;
 }
 
 .stat-card {
@@ -324,6 +322,19 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
 }
 
+/* ================= MOBILE-ONLY ELEMENTS (DISEMBUNYIKAN DI DESKTOP) ================= */
+.mobile-topbar {
+  display: none;
+}
+
+.btn-sidebar-close {
+  display: none;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
 /* ================= RESPONSIVE ================= */
 @media (max-width: 1200px) {
   .stats-grid {
@@ -332,45 +343,241 @@
 }
 
 @media (max-width: 768px) {
+
   .hrd-container {
     flex-direction: column;
-    height: auto;
-    overflow: auto;
-    position: static;
-  }
-  .sidebar {
-    width: 100%;
-    padding: 20px;
-    height: auto;
-  }
-  .logo-img {
-    max-width: 200px;
-  }
-  .main-content {
-    position: static;
-    margin: 0;
-    border-radius: 25px 25px 0 0;
-    padding: 25px;
-    height: auto;
-    overflow: visible;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%);
   }
 
+  /* ======================================
+     MOBILE TOPBAR — FIX SEJAJAR
+     align-items: center memastikan logo
+     dan hamburger rata tengah secara vertikal
+  ====================================== */
+  .mobile-topbar {
+    display: flex;
+    align-items: center;          /* ← KUNCI: logo & hamburger sejajar vertikal */
+    justify-content: space-between;
+    padding: 16px 20px;           /* ← padding sedikit dinaikkan agar nafas topbar cukup */
+    background: transparent;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 200;
+  }
+
+  .mobile-topbar-logo {
+    width: 130px;
+    height: auto;
+    display: block;               /* ← pastikan tidak ada inline spacing */
+    filter: grayscale(100%) brightness(0) invert(1) contrast(1000%);
+    /* Hapus margin/padding atas agar tidak mendorong logo ke atas sendiri */
+    margin: 0;
+    padding: 0;
+  }
+
+  .btn-hamburger {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;          /* ← garis-garis hamburger rata tengah */
+    justify-content: center;
+    gap: 5px;
+    padding: 4px;
+    margin: 0;                    /* ← pastikan tidak ada margin yang menggeser */
+  }
+
+  .btn-hamburger span {
+    display: block;
+    width: 26px;
+    height: 3px;
+    background-color: #ffffff;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+  }
+
+  /* ======================================
+     OVERLAY GELAP
+  ====================================== */
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.45);
+    z-index: 300;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .sidebar-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* ======================================
+     SIDEBAR SLIDE-IN
+  ====================================== */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    z-index: 400;
+    padding: 25px 20px;
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .btn-sidebar-close {
+    display: flex;
+    align-self: flex-end;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: 300;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+    margin-bottom: 10px;
+    transition: opacity 0.2s ease;
+  }
+
+  .btn-sidebar-close:hover {
+    opacity: 0.7;
+  }
+
+  .logo-area {
+    margin-top: 10px;
+    margin-bottom: 20px !important;
+  }
+
+  .logo-img {
+    max-width: 180px;
+  }
+
+  /* ======================================
+     MENU ITEM — TIDAK AKTIF (transparan)
+  ====================================== */
+  .menu-item {
+    background-color: transparent;
+    color: #ffffff;
+    border: none;
+    box-shadow: none;
+  }
+
+  .menu-item .menu-icon-main {
+    filter: brightness(0) invert(1);
+  }
+
+  .menu-item .menu-text-main {
+    color: #ffffff;
+  }
+
+  .menu-item .arrow-icon-main {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+  }
+
+  .menu-item:hover:not(.active) {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  /* ======================================
+     MENU ITEM — AKTIF (hijau + putih)
+  ====================================== */
+  .menu-item.active {
+    background-color: #2fb800 !important;
+    color: #ffffff !important;
+    border: 1px solid #2fb800;
+    box-shadow: 0 4px 15px rgba(47, 184, 0, 0.35);
+  }
+
+  .menu-item.active .menu-icon-main,
+  .menu-item.active .arrow-icon-main {
+    filter: brightness(0) invert(1) !important;
+    opacity: 1;
+  }
+
+  .menu-item.active .menu-text-main {
+    color: #ffffff !important;
+  }
+
+  /* ======================================
+     MAIN CONTENT
+  ====================================== */
+  .main-content {
+    position: static;
+    flex: 1;
+    border-radius: 28px 28px 0 0;
+    padding: 25px 20px;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    margin: 0;
+    gap: 22px;
+    background-color: #fdfdfd;
+  }
+
+  /* ======================================
+     CONTENT HEADER
+  ====================================== */
   .content-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 15px;
+    gap: 12px;
+    margin-bottom: -10px !important;
   }
+
+  .header-text h1 {
+    font-size: 26px !important;
+    letter-spacing: -0.3px;
+  }
+
+  .header-text p {
+    font-size: 13px;
+  }
+
   .filter-wrapper {
     align-self: flex-start;
   }
 
+  /* ======================================
+     CHART
+  ====================================== */
   .chart-container-inner {
-    height: 300px;
+    height: 260px;
   }
+
+  /* ======================================
+     STATS GRID (2 kolom)
+  ====================================== */
   .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    padding-bottom: 25px;
   }
+
+  .stat-value {
+    font-size: 36px;
+  }
+
+  .stat-label {
+    font-size: 14px;
+  }
+
   .sidebar-footer {
-    margin-top: 30px;
+    margin-top: auto;
+    padding-bottom: 30px;
   }
 }

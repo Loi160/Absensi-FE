@@ -16,7 +16,7 @@
   width: 100vw;
   height: 100vh;
   background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
-  overflow: hidden; /* Mencegah layar hijau ikut tergulir */
+  overflow: hidden;
 }
 
 /* ================================================= */
@@ -277,11 +277,10 @@
   gap: 20px; 
 }
 
-/* UPDATE 1: Tombol + Sub-Cabang Dibuat Outline */
 .btn-action-text {
   background: transparent;
-  border: 1.5px solid #8dae12; /* Garis luar hijau */
-  border-radius: 20px; /* Bentuk kapsul oval */
+  border: 1.5px solid #8dae12;
+  border-radius: 20px;
   padding: 6px 14px;
   font-size: 12px;
   font-weight: 700;
@@ -295,7 +294,6 @@
   color: #ffffff; 
 }
 
-/* Ikon Edit Pensil */
 .btn-icon-action {
   background: transparent;
   border: none;
@@ -309,7 +307,6 @@
 }
 .btn-icon-action:hover { color: #8dae12; transform: scale(1.1); }
 
-/* Ikon Titik Status */
 .btn-status-toggle {
   background: transparent;
   border: none;
@@ -362,7 +359,6 @@
   max-width: 95%;
   max-height: 90vh; 
   overflow-y: auto; 
-  
   padding: 40px;
   border-radius: 15px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
@@ -470,7 +466,6 @@
   box-shadow: 0 5px 15px rgba(141, 174, 18, 0.3);
 }
 
-/* UPDATE 2: CSS KHUSUS MODAL KONFIRMASI STATUS */
 .modal-card-confirm {
   background: white;
   width: 400px;
@@ -539,4 +534,283 @@
 @keyframes zoomIn {
   from { transform: scale(0.95); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
+}
+
+/* ================================================= */
+/* ===== MOBILE-ONLY ELEMENTS (HIDDEN DI DESKTOP) == */
+/* ================================================= */
+
+.mobile-topbar {
+  display: none;
+}
+
+.btn-sidebar-close {
+  display: none;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+/* ================================================= */
+/* ================= RESPONSIVE ==================== */
+/* ================================================= */
+
+@media (max-width: 768px) {
+
+  /* ======================================
+     CONTAINER
+  ====================================== */
+  .hrd-container {
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%);
+  }
+
+  /* ======================================
+     MOBILE TOPBAR
+  ====================================== */
+  .mobile-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: transparent;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 200;
+  }
+
+  .mobile-topbar-logo {
+    width: 130px;
+    height: auto;
+    display: block;
+    filter: grayscale(100%) brightness(0) invert(1) contrast(1000%);
+    margin: 0;
+    padding: 0;
+  }
+
+  .btn-hamburger {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 4px;
+    margin: 0;
+  }
+
+  .btn-hamburger span {
+    display: block;
+    width: 26px;
+    height: 3px;
+    background-color: #ffffff;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+  }
+
+  /* ======================================
+     OVERLAY GELAP
+  ====================================== */
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.45);
+    z-index: 300;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .sidebar-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* ======================================
+     SIDEBAR SLIDE-IN
+  ====================================== */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    z-index: 400;
+    padding: 25px 20px;
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .btn-sidebar-close {
+    display: flex;
+    align-self: flex-end;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: 300;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+    margin-bottom: 10px;
+    transition: opacity 0.2s ease;
+  }
+
+  .btn-sidebar-close:hover {
+    opacity: 0.7;
+  }
+
+  .logo-area {
+    margin-top: 10px;
+    margin-bottom: 20px !important;
+  }
+
+  .logo-img {
+    max-width: 180px;
+  }
+
+  /* ======================================
+     MENU ITEM — TIDAK AKTIF (transparan)
+  ====================================== */
+  .menu-item {
+    background-color: transparent;
+    color: #ffffff;
+    border: none;
+    box-shadow: none;
+  }
+
+  .menu-item .menu-icon-main {
+    filter: brightness(0) invert(1);
+  }
+
+  .menu-item .menu-text-main {
+    color: #ffffff;
+  }
+
+  .menu-item .arrow-icon-main {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+  }
+
+  .menu-item:hover:not(.active) {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  /* ======================================
+     MENU ITEM — AKTIF (hijau + putih)
+  ====================================== */
+  .menu-item.active {
+    background-color: #2fb800 !important;
+    color: #ffffff !important;
+    border: 1px solid #2fb800;
+    box-shadow: 0 4px 15px rgba(47, 184, 0, 0.35);
+  }
+
+  .menu-item.active .menu-icon-main,
+  .menu-item.active .arrow-icon-main {
+    filter: brightness(0) invert(1) !important;
+    opacity: 1;
+  }
+
+  .menu-item.active .menu-text-main {
+    color: #ffffff !important;
+  }
+
+  /* ======================================
+     MAIN CONTENT
+  ====================================== */
+  .main-content {
+    position: static;
+    flex: 1;
+    margin: 0;
+    border-radius: 28px 28px 0 0;
+    padding: 25px 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    gap: 22px;
+    background-color: #fdfdfd;
+  }
+
+  /* ======================================
+     HEADER KONTEN DI MOBILE
+  ====================================== */
+  .header-cabang-content h1 {
+    font-size: 20px;
+  }
+
+  .header-cabang-content p {
+    font-size: 13px;
+    margin-bottom: 15px;
+  }
+
+  /* ======================================
+     TABEL DI MOBILE
+     Tombol + Sub-Cabang disembunyikan
+     agar tidak sesak, aksi disederhanakan
+  ====================================== */
+  .table-cabang-row {
+    padding: 12px 15px;
+  }
+
+  .sub-row {
+    padding-left: 35px !important;
+  }
+
+  .table-cabang-actions {
+    gap: 12px;
+  }
+
+  /* Sembunyikan tombol "+ Sub-Cabang" di mobile agar tidak sesak */
+  .btn-action-text {
+    display: none;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding-bottom: 30px;
+  }
+
+  /* ======================================
+     MODAL DI MOBILE
+  ====================================== */
+  .modal-card-edit {
+    padding: 25px 20px;
+    border-radius: 16px;
+  }
+
+  .modal-title {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
+  .modal-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .modal-card-confirm {
+    padding: 25px 20px 20px;
+  }
+
+  .modal-card-confirm h3 {
+    font-size: 17px;
+  }
+
+  .modal-card-confirm p {
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
 }

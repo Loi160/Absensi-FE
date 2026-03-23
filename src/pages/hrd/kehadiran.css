@@ -17,7 +17,7 @@
   height: 100vh;
   background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
   overflow: hidden;
-  position: relative; /* Menjadi jangkar utama untuk konten absolute */
+  position: relative;
 }
 
 /* ================================================= */
@@ -197,20 +197,19 @@
 /* ================================================= */
 
 .main-content {
-  /* KUNCI: Mode Absolute untuk Scroll Sempurna */
   position: absolute;
   top: 25px; 
   bottom: 25px; 
-  left: 310px; /* Dimulai setelah lebar sidebar + jarak sedikit */
+  left: 310px;
   right: 35px;
   
   background-color: #fdfdfd;
   border-radius: 40px;
   padding: 40px;
-  padding-bottom: 80px; /* Nafas di bagian bawah agar saat di-scroll mentok tabel tidak menyentuh lengkungan */
-  overflow-y: auto; /* Scroll bar internal aktif */
+  padding-bottom: 80px;
+  overflow-y: auto;
   overflow-x: hidden;
-  display: block; /* Hindari flex di parent utama agar scroll bekerja */
+  display: block;
   box-shadow: 0 10px 40px rgba(0,0,0,0.1);
 }
 
@@ -373,8 +372,8 @@
 .section-title {
   font-size: 18px;
   font-weight: 800;
-  margin-top: 40px; /* Diberi jarak yang pas ke atas */
-  margin-bottom: -14px !important; /* Dirapikan agar tidak minus menabrak tabel */
+  margin-top: 40px;
+  margin-bottom: -14px !important;
   color: #111;
 }
 
@@ -382,8 +381,8 @@
   background: white;
   border-radius: 12px;
   border: 1px solid #ddd;
-  margin-bottom: -20px; /* Jarak standar antar tabel */
-  min-height: 200px; /* MEMASTIKAN TABEL SELALU KELIHATAN PANJANG WALAUPUN KOSONG */
+  margin-bottom: -20px;
+  min-height: 200px;
   overflow-x: auto; 
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
   position: relative;
@@ -404,12 +403,10 @@
   table-layout: fixed; 
 }
 
-/* Animasi smooth saat sorting baris */
 .table-izin tbody tr {
   transition: background-color 0.2s ease, transform 0.3s ease;
 }
 
-/* Cursor hover untuk menandakan baris bisa diklik */
 .clickable-row {
   cursor: pointer;
 }
@@ -427,13 +424,13 @@
   color: #333;
   text-transform: uppercase; 
   letter-spacing: 0.5px;
-  position: sticky; /* Membuat Header Tabel menempel saat discroll */
+  position: sticky;
   top: 0;
   z-index: 10;
 }
 
 .table-izin td {
-  padding: 8px 10px; /* MEMPERBESAR PADDING AGAR BARIS TABEL LEBIH TINGGI */
+  padding: 8px 10px;
   border-bottom: 1px solid #f0f0f0;
   font-size: 13px;
   color: #444;
@@ -441,7 +438,6 @@
   word-wrap: break-word; 
 }
 
-/* Mencegah status/aksi terpotong */
 .text-center {
   text-align: center !important;
 }
@@ -458,7 +454,6 @@
   white-space: nowrap; 
 }
 
-/* Warna Tipe Izin (Disesuaikan) */
 .badge-jenis.sakit { color: #ff3d00; border-color: #ff3d00; }
 .badge-jenis.pribadi { color: #f39c12; border-color: #f39c12; }
 .badge-jenis.lainnya { color: #607d8b; border-color: #607d8b; }
@@ -530,7 +525,6 @@
   font-weight: 700;
 }
 
-/* Mencegah baris terakhir menutupi lengkungan border-radius kotak tabel */
 .table-izin tbody tr:last-child td { border-bottom: none; }
 .table-izin tbody tr:last-child td:first-child { border-bottom-left-radius: 12px; }
 .table-izin tbody tr:last-child td:last-child { border-bottom-right-radius: 12px; }
@@ -612,7 +606,6 @@
   color: #111;
 }
 
-/* Desain kotak abu-abu bergaya read-only input */
 .modal-field-value {
   padding: 12px 15px;
   background-color: #fdfdfd;
@@ -625,7 +618,6 @@
   align-items: center;
 }
 
-/* Style khusus untuk foto di dalam modal */
 .modal-foto-box {
   width: 100%;
   height: 150px;
@@ -647,7 +639,6 @@
   margin-top: 30px;
 }
 
-/* Button Modern untuk Modal */
 .btn-approve-modern {
   background: #00e676;
   color: white;
@@ -680,11 +671,391 @@
   transform: translateY(-2px);
 }
 
+/* ================================================= */
+/* ======= MOBILE-ONLY ELEMENTS (HIDDEN DI DESKTOP) ======= */
+/* ================================================= */
+.mobile-topbar {
+  display: none;
+}
+
+.btn-sidebar-close {
+  display: none;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+/* ================================================= */
+/* =================== RESPONSIVE ================== */
+/* ================================================= */
+
 @media (max-width: 768px) {
-  .hrd-container { flex-direction: column; height: auto; overflow: auto; position: static; }
-  .sidebar { width: 100%; padding: 20px; }
-  .main-content { position: static; height: auto; border-radius: 30px 30px 0 0; margin: 0; padding: 25px; display: flex; flex-direction: column; overflow-y: visible;}
-  .absen-form-grid, .modal-row-split { grid-template-columns: 1fr; flex-direction: column; gap: 15px; }
-  .full-width { grid-column: span 1; }
-  .form-actions-bottom { grid-column: span 1; flex-direction: column; }
+
+  /* ======================================
+     CONTAINER UTAMA
+  ====================================== */
+  .hrd-container {
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%);
+  }
+
+  /* ======================================
+     MOBILE TOPBAR
+  ====================================== */
+  .mobile-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: transparent;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 200;
+  }
+
+  .mobile-topbar-logo {
+    width: 130px;
+    height: auto;
+    display: block;
+    filter: grayscale(100%) brightness(0) invert(1) contrast(1000%);
+    margin: 0;
+    padding: 0;
+  }
+
+  .btn-hamburger {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 4px;
+    margin: 0;
+  }
+
+  .btn-hamburger span {
+    display: block;
+    width: 26px;
+    height: 3px;
+    background-color: #ffffff;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+  }
+
+  /* ======================================
+     OVERLAY GELAP
+  ====================================== */
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.45);
+    z-index: 300;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .sidebar-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* ======================================
+     SIDEBAR SLIDE-IN
+  ====================================== */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    z-index: 400;
+    padding: 25px 20px;
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .btn-sidebar-close {
+    display: flex;
+    align-self: flex-end;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: 300;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+    margin-bottom: 10px;
+    transition: opacity 0.2s ease;
+  }
+
+  .btn-sidebar-close:hover {
+    opacity: 0.7;
+  }
+
+  .logo-area {
+    margin-top: 10px;
+    margin-bottom: 20px !important;
+  }
+
+  .logo-img {
+    max-width: 180px;
+  }
+
+  /* ======================================
+     MENU ITEM — TIDAK AKTIF
+  ====================================== */
+  .menu-item {
+    background-color: transparent;
+    color: #ffffff;
+    border: none;
+    box-shadow: none;
+  }
+
+  .menu-item .menu-icon-main {
+    filter: brightness(0) invert(1);
+  }
+
+  .menu-item .menu-text-main {
+    color: #ffffff;
+  }
+
+  .menu-item .arrow-icon-main {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+  }
+
+  .menu-item:hover:not(.active) {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  /* ======================================
+     MENU ITEM — AKTIF (hijau solid + putih)
+  ====================================== */
+  .menu-item.active {
+    background-color: #2fb800 !important;
+    color: #ffffff !important;
+    border: 1px solid #2fb800;
+    box-shadow: 0 4px 15px rgba(47, 184, 0, 0.35);
+  }
+
+  .menu-item.active .menu-icon-main,
+  .menu-item.active .arrow-icon-main {
+    filter: brightness(0) invert(1) !important;
+    opacity: 1;
+  }
+
+  .menu-item.active .menu-text-main {
+    color: #ffffff !important;
+  }
+
+  /* ======================================
+     SUBMENU MOBILE
+  ====================================== */
+  .submenu-container {
+    margin-top: -8px;
+    padding-left: 15px;
+    gap: 8px;
+  }
+
+  .submenu-item {
+    background-color: transparent;
+    color: #ffffff;
+    font-size: 15px;
+  }
+
+  .submenu-item .submenu-icon {
+    filter: brightness(0) invert(1);
+  }
+
+  .submenu-item.active-sub {
+    background-color: #2fb800 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 15px rgba(47, 184, 0, 0.35);
+  }
+
+  .submenu-item.active-sub .submenu-icon {
+    filter: brightness(0) invert(1) !important;
+  }
+
+  .submenu-item:hover:not(.active-sub) {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  /* ======================================
+     SIDEBAR FOOTER
+  ====================================== */
+  .sidebar-footer {
+    margin-top: auto;
+    padding-bottom: 30px;
+  }
+
+  /* ======================================
+     MAIN CONTENT
+  ====================================== */
+  .main-content {
+    position: static;
+    flex: 1;
+    border-radius: 28px 28px 0 0;
+    padding: 25px 20px;
+    padding-bottom: 40px;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    margin: 0;
+    background-color: #fdfdfd;
+    /* display kembali ke block agar scroll internal bekerja */
+    display: block;
+  }
+
+  /* ======================================
+     HEADER TYPOGRAPHY
+  ====================================== */
+  .page-header h1,
+  .header-titles h1 {
+    font-size: 26px !important;
+    letter-spacing: -0.3px;
+  }
+
+  .page-header p,
+  .header-titles p {
+    font-size: 13px !important;
+  }
+
+  /* ======================================
+     ACTION ROW PERIZINAN (FILTER)
+     — Pada mobile margin-bottom negatif besar
+       diganti agar tidak tumpang tindih
+  ====================================== */
+  .action-row-perizinan {
+    margin-bottom: 10px;
+    justify-content: flex-start;
+  }
+
+  /* ======================================
+     SECTION TITLE — sesuaikan margin
+  ====================================== */
+  .section-title {
+    margin-top: 24px;
+    margin-bottom: 10px !important;
+    font-size: 16px;
+  }
+
+  /* ======================================
+     PERIZINAN CARD — tabel horizontal scroll
+  ====================================== */
+  .perizinan-card {
+    margin-bottom: 8px;
+    min-height: unset;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .card-header-green {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  /* Tabel tetap pakai layout fixed tapi
+     min-width agar bisa scroll horizontal */
+  .table-izin {
+    table-layout: auto;
+    min-width: 560px;
+  }
+
+  .table-izin th {
+    padding: 10px 8px;
+    font-size: 11px;
+  }
+
+  .table-izin td {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .badge-jenis {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+
+  .badge-status {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+
+  .btn-approve,
+  .btn-reject {
+    padding: 5px 8px;
+    font-size: 10px;
+  }
+
+  /* ======================================
+     FORM ABSENSI MANUAL — 1 kolom
+  ====================================== */
+  .absen-form-grid {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+    row-gap: 16px;
+  }
+
+  .full-width {
+    grid-column: span 1;
+  }
+
+  .form-actions-bottom {
+    grid-column: span 1;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .btn-simpan-green,
+  .btn-batal-red {
+    width: 100%;
+    padding: 12px 20px;
+  }
+
+  /* ======================================
+     MODAL — full width di mobile
+  ====================================== */
+  .modal-content {
+    padding: 25px 20px;
+    border-radius: 16px;
+    max-width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-header-modern h2 {
+    font-size: 17px;
+  }
+
+  .modal-row-split {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .modal-footer-modern {
+    flex-direction: column-reverse;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .btn-approve-modern,
+  .btn-reject-modern {
+    width: 100%;
+    text-align: center;
+  }
 }
