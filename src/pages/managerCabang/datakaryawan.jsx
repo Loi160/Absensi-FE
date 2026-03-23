@@ -186,26 +186,42 @@ const DataKaryawanManagerCabang = () => {
           <h1>Data Karyawan - {userData.cabangUtama}</h1>
           <p>Daftar pusat informasi dan detail administrasi karyawan</p>
         </div>
+        
         {!isStackedMode && (
-          <div className="action-bar"><FilterDropdown /><button className="btn-tambah" onClick={handleOpenAdd}><img src={iconTambah} alt="" /> Tambah Karyawan</button></div>
+          <div className="action-bar">
+            <FilterDropdown />
+            <button className="btn-tambah" onClick={handleOpenAdd}><img src={iconTambah} alt="" /> Tambah Karyawan</button>
+          </div>
         )}
+
         {isStackedMode ? (
           <div className="stacked-layout">
             {userData.subCabang.map((subCabang, index) => (
-              <div key={index} className="stacked-card-wrapper">
-                <div className="sub-branch-header">
-                  <h3 className="sub-branch-title">{subCabang}</h3>
-                  <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+              <div key={index} className="stacked-card-wrapper" style={{ marginTop: index > 0 ? "40px" : "0" }}>
+                
+                {/* Judul Cabang dan Action Bar dibuat sejajar */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '10px' }}>
+                  <h3 className="sub-branch-title" style={{ fontSize: '18px', fontWeight: '800', color: '#111', margin: 0 }}>{subCabang}</h3>
+                  <div className="action-bar" style={{ marginTop: '0', marginBottom: '-40px' }}>
                     {index === 0 && <FilterDropdown />}
                     <button className="btn-tambah" onClick={handleOpenAdd}><img src={iconTambah} alt="" /> Tambah Karyawan</button>
                   </div>
                 </div>
-                <div className="approval-section"><div className="approval-header">Daftar Karyawan</div>{renderTable()}</div>
+
+                {/* Margin Top 20px ditambahkan sama seperti HRD */}
+                <div className="approval-section" style={{ marginTop: "20px" }}>
+                  <div className="approval-header">Daftar Karyawan</div>
+                  {renderTable()}
+                </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="approval-section" style={{ marginTop: !isStackedMode ? "0" : "20px" }}><div className="approval-header">Daftar Karyawan</div>{renderTable()}</div>
+          // FIX UTAMA: Kondisi margin 0 dihapus, selalu berikan gap 20px
+          <div className="approval-section" style={{ marginTop: "20px" }}>
+            <div className="approval-header">Daftar Karyawan</div>
+            {renderTable()}
+          </div>
         )}
       </main>
 

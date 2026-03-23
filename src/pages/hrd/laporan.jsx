@@ -163,9 +163,35 @@ const Laporan = () => {
                   jadwal: jadwalMasuk,
                   aktual: jamAktual,
                   durasi: `${menitTelat} Menit`,
-                  // UPDATE TEKS DI SINI
                   status: isManual ? "Absensi Manual HRD" : "Absensi Karyawan",
                   tipe: "terlambat"
+              });
+
+          } else if (jenis === "Lembur") {
+              // LOGIKA BARU UNTUK LEMBUR (KOMPENSASI ISTIRAHAT)
+              title = `Log Kalkulasi Lembur`;
+              
+              dummyData.push({
+                  tanggal: fakeDate,
+                  cabang: cabang,
+                  jamMasuk: `07:5${i} WIB`,
+                  jamPulang: `17:0${i} WIB`,
+                  statusIstirahat: "Tidak Diambil / Dilewati",
+                  durasiLembur: "3 Jam",
+                  keteranganLembur: "Kompensasi waktu istirahat yang tidak digunakan.",
+                  tipe: "lembur"
+              });
+
+          } else if (jenis === "Alpha") {
+              title = `Log Ketidakhadiran (Alpha)`;
+              
+              dummyData.push({
+                  tanggal: fakeDate,
+                  cabang: cabang,
+                  jadwal: "08:00 WIB - 17:00 WIB",
+                  status: "Tanpa Keterangan",
+                  keterangan: "Sistem tidak mendeteksi adanya data absensi masuk/pulang maupun permohonan izin/cuti pada tanggal tersebut.",
+                  tipe: "alpha"
               });
 
           } else {
@@ -183,8 +209,8 @@ const Laporan = () => {
 
   /* DATA DUMMY */
   const dataLaporan = [
-    { id: 1, nama: "Syahrul", nik: "123456789", cabang: "Cabang 1", hadirApp: "10", hadirManual: "10", izin: "2", sakit: "3", cuti: "2", terlambat: "1", fimtk: "1", lembur: "1", alpha: "1" },
-    { id: 2, nama: "Budi Santoso", nik: "987654321", cabang: "Cabang 2", hadirApp: "12", hadirManual: "0", izin: "0", sakit: "0", cuti: "0", terlambat: "3", fimtk: "-", lembur: "2", alpha: "0" }, 
+    { id: 1, nama: "Syahrul", nik: "123456789", cabang: "Cabang 1", hadirApp: "10", hadirManual: "10", izin: "2", sakit: "3", cuti: "2", terlambat: "1", fimtk: "1", lembur: "3", alpha: "1" },
+    { id: 2, nama: "Budi Santoso", nik: "987654321", cabang: "Cabang 2", hadirApp: "12", hadirManual: "0", izin: "0", sakit: "0", cuti: "0", terlambat: "3", fimtk: "-", lembur: "2", alpha: "2" }, 
     { id: 3, nama: "Siti Aminah", nik: "112233445", cabang: "Cabang 3", hadirApp: "11", hadirManual: "1", izin: "1", sakit: "0", cuti: "1", terlambat: "5", fimtk: "-", lembur: "-", alpha: "0" }, 
     { id: 4, nama: "Joko Anwar", nik: "554433221", cabang: "Cabang A", hadirApp: "15", hadirManual: "0", izin: "0", sakit: "0", cuti: "0", terlambat: "6", fimtk: "-", lembur: "-", alpha: "0" }, 
     { id: 5, nama: "Rina Kartika", nik: "998877665", cabang: "Cabang B", hadirApp: "14", hadirManual: "0", izin: "0", sakit: "1", cuti: "0", terlambat: "0", fimtk: "-", lembur: "-", alpha: "0" }, 
@@ -249,7 +275,10 @@ const Laporan = () => {
                     </td>
 
                     <td className="text-center"><span className={`neo-badge info ${item.fimtk !== '0' && item.fimtk !== '-' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item.nama, item.nik, "FIMTK", item.fimtk, item.cabang)}>{item.fimtk}</span></td>
+                    
+                    {/* KLIK LEMBUR */}
                     <td className="text-center"><span className={`neo-badge info ${item.lembur !== '0' && item.lembur !== '-' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item.nama, item.nik, "Lembur", item.lembur, item.cabang)}>{item.lembur}</span></td>
+                    
                     <td className="text-center"><span className={`neo-badge alert ${item.alpha !== '0' && item.alpha !== '-' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item.nama, item.nik, "Alpha", item.alpha, item.cabang)}>{item.alpha}</span></td>
                   </tr>
                 );
@@ -269,7 +298,6 @@ const Laporan = () => {
 
   return (
     <div className="hrd-container">
-      {/* SIDEBAR */}
       <aside className="sidebar no-print">
         <div className="logo-area">
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
@@ -303,7 +331,6 @@ const Laporan = () => {
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
       <main className="main-content">
         
         <header className="content-header">
@@ -313,7 +340,6 @@ const Laporan = () => {
             </div>
         </header>
 
-        {/* ZONE FILTER & BUTTONS */}
         <div className="neo-filter-zone no-print">
             <div className="input-group-neo">
                 
@@ -409,7 +435,6 @@ const Laporan = () => {
                 </div>
                 
                 <div className="modal-body-lap">
-                    {/* INFO IDENTITAS */}
                     <div className="lap-modal-row">
                         <div className="lap-modal-group">
                             <label className="lap-modal-label">Nama</label>
@@ -645,7 +670,7 @@ const Laporan = () => {
                                     </>
                                 )}
 
-                                {/* JIKA DATA TERLAMBAT (FORM BARU) */}
+                                {/* JIKA DATA TERLAMBAT */}
                                 {item.tipe === "terlambat" && (
                                     <>
                                         <div className="lap-modal-row">
@@ -679,19 +704,84 @@ const Laporan = () => {
                                     </>
                                 )}
 
-                                {/* JIKA LAINNYA */}
-                                {item.tipe === "lainnya" && (
-                                    <div className="lap-modal-row">
-                                        <div className="lap-modal-group" style={{flex: 0.4}}>
-                                            <label className="lap-modal-label">Tanggal</label>
-                                            <div className="lap-modal-input">{item.tanggal}</div>
+                                {/* JIKA DATA LEMBUR (FORM BARU) */}
+                                {item.tipe === "lembur" && (
+                                    <>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Tanggal</label>
+                                                <div className="lap-modal-input">{item.tanggal}</div>
+                                            </div>
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Cabang</label>
+                                                <div className="lap-modal-input">{item.cabang}</div>
+                                            </div>
                                         </div>
-                                        <div className="lap-modal-group" style={{flex: 0.6}}>
-                                            <label className="lap-modal-label">Keterangan</label>
-                                            <div className="lap-modal-input">{item.ket}</div>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Jam Masuk</label>
+                                                <div className="lap-modal-input">{item.jamMasuk}</div>
+                                            </div>
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Jam Pulang</label>
+                                                <div className="lap-modal-input">{item.jamPulang}</div>
+                                            </div>
                                         </div>
-                                    </div>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Status Waktu Istirahat</label>
+                                                <div className="lap-modal-input" style={{color: '#e03131', fontWeight: '600'}}>{item.statusIstirahat}</div>
+                                            </div>
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Total Durasi Lembur</label>
+                                                <div className="lap-modal-input" style={{color: '#2fb800', fontWeight: '700'}}>{item.durasiLembur}</div>
+                                            </div>
+                                        </div>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group" style={{flex: 1}}>
+                                                <label className="lap-modal-label">Keterangan Sistem</label>
+                                                <div className="lap-modal-input" style={{background: '#f0fdf4', borderColor: '#b2f2bb', color: '#2b8a3e', fontSize: '13px'}}>
+                                                    {item.keteranganLembur}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </>
                                 )}
+
+                                {/* JIKA DATA ALPHA */}
+                                {item.tipe === "alpha" && (
+                                    <>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Tanggal</label>
+                                                <div className="lap-modal-input">{item.tanggal}</div>
+                                            </div>
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Cabang</label>
+                                                <div className="lap-modal-input">{item.cabang}</div>
+                                            </div>
+                                        </div>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Jadwal Kerja Seharusnya</label>
+                                                <div className="lap-modal-input">{item.jadwal}</div>
+                                            </div>
+                                            <div className="lap-modal-group">
+                                                <label className="lap-modal-label">Status</label>
+                                                <div className="lap-modal-input" style={{color: '#e03131', fontWeight: '700'}}>{item.status}</div>
+                                            </div>
+                                        </div>
+                                        <div className="lap-modal-row">
+                                            <div className="lap-modal-group" style={{flex: 1}}>
+                                                <label className="lap-modal-label">Keterangan / Catatan Sistem</label>
+                                                <div className="lap-modal-input" style={{background: '#fff5f5', borderColor: '#ffc9c9', color: '#c92a2a', fontSize: '13px'}}>
+                                                    {item.keterangan}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
                             </div>
                         ))}
                     </div>

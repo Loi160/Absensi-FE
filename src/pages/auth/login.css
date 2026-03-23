@@ -66,29 +66,27 @@
   padding: 0 24px;
 }
 
-/* Mobile logo - FIXED: Making it a full white circle */
+/* Mobile logo - UPDATED: Removed white circle, centers logo */
 .logo-mobile-wrapper {
-  margin-bottom: 20px;
-  background-color: white; /* Ensure full white background */
-  width: 140px; /* Specific size for the circle */
-  height: 140px; /* Make it a square */
-  border-radius: 50%; /* Perfect circle */
-  display: flex; /* Center the logo inside */
+  margin-bottom: 0px; /* Keep gap */
+  display: flex; 
   justify-content: center;
   align-items: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2); /* Keep the shadow for depth */
+  /* Removed fixed width, height, background-color, border-radius, box-shadow, overflow */
 }
 
+/* Mobile logo image - UPDATED: Simple size and centered */
 .login-logo-mobile {
-  width: 85%; /* Fill the wrapper, but aspect ratio can be different */
-  height: 85%;
-  object-fit: contain;
+  width: 210px; /* Adjust size as needed, e.g., slightly larger than before to be visible on new background */
+  height: auto;
+  object-fit: contain; /* Ensure full logo is visible, no cropping */
+  /* Removed position: absolute, 115% width/height, and transform */
 }
 
 .login-brand-title {
   font-size: 26px;
   font-weight: 800;
-  margin-bottom: 8px;
+  margin-bottom: 0px;
   letter-spacing: -0.4px;
 }
 .login-brand-subtitle {
@@ -105,7 +103,7 @@
 
 .login-form-box {
   background: #ffffff;
-  margin-top: -50px;
+  margin-top: -40px;
   padding: 36px 28px 32px;
   border-radius: 28px;
   box-shadow: 0 20px 50px rgba(0,0,0,0.12);
@@ -192,8 +190,22 @@
     height: 220px;
     min-height: unset;
   }
-  .login-logo-mobile   { width: 120px; }
-  .logo-mobile-wrapper { margin-bottom: 16px; }
+  
+  /* Update logo behavior for tablet too, consistent with mobile change */
+  .logo-mobile-wrapper {
+    margin-bottom: 16px; /* Keep gap */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Removed fixed width, overflow, position */
+  }
+  .login-logo-mobile {
+    width: 110px; /* Slightly smaller for tablet layout might be good, or same as mobile. Let's make it slightly smaller to be proportional. The original conflicting CSS had 120px. */
+    height: auto;
+    object-fit: contain;
+    /* Removed all old position, width: 115% width/height, object-fit: cover, and transform redefinitions. Conflicting CSS redefinition is removed. */
+  }
+  
   .login-brand-title   { font-size: 24px; }
   .login-form-section  { padding: 0 28px 32px; }
   .login-form-box      { margin-top: -50px; padding: 32px 28px; border-radius: 22px; }
@@ -409,8 +421,6 @@
     z-index: 1;
     pointer-events: none;
   }
-
-
 
   /* Brand content stack */
   .brand-content-centered {
