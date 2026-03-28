@@ -57,7 +57,7 @@ const DetailKaryawan = () => {
     );
   }
 
-  const dokumenList = ["Foto Diri", "Foto KTP", "KK (Kartu Keluarga)", "SKCK", "SIM", "Sertifikat Pendukung", "Dokumen Tambahan"];
+  const dokumenList = ["Foto Karyawan", "Kartu Tanda Penduduk", "Kartu Keluarga", "Surat Keterangan Catatan Kepolisian", "Surat Izin Mengemudi", "Sertifikat Pendukung", "Dokumen Tambahan"];
 
   return (
     <div className="hrd-container">
@@ -158,8 +158,12 @@ const DetailKaryawan = () => {
               <div className="form-group" style={{ gridColumn: "span 3" }}><label>Alamat</label><input name="alamat" type="text" className={isEditing ? "input-gray" : "input-white"} readOnly={!isEditing} value={formData.alamat} onChange={handleInputChange} required /></div>
             </div>
 
+            {/* --- UPDATE: Teks Dokumen Pendukung dibuat 2 baris --- */}
             <div className="docs-section">
-              <h4 className="docs-title" style={{ marginTop: '20px' }}>Dokumen Pendukung {isEditing && <span style={{ fontSize: '11px', color: '#888', fontWeight: 'normal' }}>(Opsional, Maks 2MB)</span>}</h4>
+              <div style={{ marginBottom: '15px' }}>
+                <h4 className="docs-title">Dokumen Pendukung</h4>
+                {isEditing && <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>(Opsional, Maks 2MB)</p>}
+              </div>
               <hr className="modal-divider" />
               <div className="upload-grid-3">
                 {dokumenList.map((label, idx) => (

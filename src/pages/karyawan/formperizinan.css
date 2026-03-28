@@ -48,7 +48,7 @@ button.mobile-only { display: flex; }
   top: 30px;
   left: 25px;
   background: transparent;
-  border: 1.5px solid black; 
+  border: 1.5px solid white; /* UPDATE: Border diubah menjadi putih */
   border-radius: 50%;
   width: 35px;
   height: 35px;

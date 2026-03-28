@@ -62,7 +62,8 @@ const Absensi = () => {
         <div className="header-section">
           {/* Tombol Back (HANYA MUNCUL DI MOBILE) */}
           <button className="btn-back mobile-only" onClick={() => navigate("/karyawan/dashboard")}>
-            <ArrowLeft size={20} color="black" strokeWidth={2.5} />
+            {/* UPDATE: Mengubah size menjadi 24 dan color menjadi white agar persis seperti menu Riwayat */}
+            <ArrowLeft size={24} color="white" />
           </button>
 
           {/* Logo Persegi (HANYA MUNCUL DI DESKTOP - POJOK ATAS) */}

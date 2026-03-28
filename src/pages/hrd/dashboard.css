@@ -535,7 +535,7 @@
   .content-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 18px !important;
     margin-bottom: -10px !important;
   }
 
@@ -548,8 +548,16 @@
     font-size: 13px;
   }
 
+  /* UPDATE: Membuat Filter Cabang Rata Kanan di Mobile */
   .filter-wrapper {
-    align-self: flex-start;
+    align-self: flex-end; /* Diubah dari flex-start ke flex-end agar rata kanan */
+    width: auto; /* Memastikan lebarnya sesuai dengan isi konten, tidak full width */
+  }
+
+  /* Pastikan dropdown tetap terbuka ke kiri agar tidak terpotong tepi kanan layar */
+  .filter-dropdown {
+      right: 0;
+      left: auto;
   }
 
   /* ======================================

@@ -253,14 +253,20 @@ const DataKaryawanManagerCabang = () => {
                   <div className="form-group"><label>Status Karyawan</label><select name="status" className="input-gray" required><option value="Aktif">Aktif</option><option value="Resign">Resign</option></select></div>
                 </div>
                 <div className="form-group" style={{ marginBottom: '20px' }}><label>Alamat</label><input name="alamat" type="text" className="input-gray" required /></div>
+                
+                {/* --- UPDATE: Teks Dokumen Pendukung dibuat 2 baris --- */}
                 <div className="docs-section">
-                  <h4 style={{ fontSize: '14px', marginBottom: '10px' }}>Dokumen Pendukung <span style={{ fontSize: '11px', color: '#888', fontWeight: 'normal' }}>(Opsional, Maks 2MB)</span></h4>
+                  <div style={{ marginBottom: '10px' }}>
+                    <h4 className="docs-title">Dokumen Pendukung</h4>
+                    <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>(Opsional, Maks 2MB)</p>
+                  </div>
                   <div className="form-grid-3">
-                    {["Foto Diri", "Foto KTP", "KK", "SKCK", "SIM", "Sertifikat"].map((label, idx) => (
+                    {["Foto Karyawan", "Kartu Tanda Penduduk", "Kartu Keluarga", "Surat Keterangan Catatan Kepolisian", "Surat Izin Mengemudi", "Sertifikat Pendukung", "Dokumen Tambahan"].map((label, idx) => (
                       <div key={idx} className="form-group"><label>{label}</label><input type="file" className="input-gray" style={{ fontSize: '12px' }} onChange={handleFileChange} accept="image/*,.pdf" /></div>
                     ))}
                   </div>
                 </div>
+
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn-batal" onClick={handleCloseModal}>Batal</button>

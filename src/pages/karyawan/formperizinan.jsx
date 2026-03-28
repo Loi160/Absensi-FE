@@ -23,7 +23,7 @@ const FormPerizinan = () => {
   const getSubtitle = () => {
     if (activeTab === "Izin") return "Silahkan Melakukan Perizinan";
     if (activeTab === "Cuti") return "Silahkan Melakukan Perizinan Cuti";
-    if (activeTab === "FIMTK") return "Silahkan Melakukan Perizinan FIMTK";
+    if (activeTab === "FIMTK") return "Silahkan Melakukan Perizinan Meninggalkan Tempat Kerja";
   };
 
   const getTodayDate = () => {
@@ -48,7 +48,8 @@ const FormPerizinan = () => {
         <div className="fp-header">
           {/* Tombol Back Mobile */}
           <button className="fp-btn-back mobile-only" type="button" onClick={() => navigate("/karyawan/dashboard")}>
-            <ArrowLeft size={20} color="black" strokeWidth={2.5} />
+            {/* UPDATE: Mengubah warna icon menjadi putih dan size 24 */}
+            <ArrowLeft size={24} color="white" />
           </button>
 
           {/* Logo Persegi Desktop (Pojok Atas) */}

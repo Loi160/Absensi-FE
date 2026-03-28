@@ -92,6 +92,8 @@ const PerizinanManagerCabang = () => {
     { id: 1, nama: "Syahrul", cabang: "Cabang 1", tglMulai: "01/03/2026", tglSelesai: "02/03/2026", tipeIzin: "Sakit", keterangan: "Demam Tinggi", status: "Pending", foto: "Ada Bukti Surat Sakit" },
     { id: 2, nama: "Budi Santoso", cabang: "Cabang Pusat", tglMulai: "05/03/2026", tglSelesai: "05/03/2026", tipeIzin: "Acara Pribadi", keterangan: "Urusan Bank", status: "Disetujui", foto: "Tidak Ada Foto" },
     { id: 3, nama: "Siti Aminah", cabang: "Cabang 2", tglMulai: "10/03/2026", tglSelesai: "11/03/2026", tipeIzin: "Lainnya", keterangan: "Bencana Alam", status: "Pending", foto: "Ada Bukti Kondisi Rumah" },
+    // UPDATE: Menambahkan karyawan ke-4
+    { id: 4, nama: "Dewi Lestari", cabang: "Cabang 1", tglMulai: "15/03/2026", tglSelesai: "16/03/2026", tipeIzin: "Sakit", keterangan: "Gejala Tipes", status: "Pending", foto: "Ada Bukti Surat Klinik" }
   ]);
 
   const [dataIzinFIMTK, setDataIzinFIMTK] = useState([

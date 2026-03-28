@@ -932,16 +932,21 @@
   .page-header p,
   .header-titles p {
     font-size: 13px !important;
+    margin-bottom: 12px;
+  }
+  
+  /* UPDATE 4: Mengurangi gap antara Header dan Tombol Filter */
+  .header-titles {
+    margin-bottom: -15px; /* Tarik tombol filter sedikit lebih dekat ke judul */
   }
 
   /* ======================================
      ACTION ROW PERIZINAN (FILTER)
-     — Pada mobile margin-bottom negatif besar
-       diganti agar tidak tumpang tindih
+     — Pada mobile dirubah agar rata kanan
   ====================================== */
   .action-row-perizinan {
-    margin-bottom: 10px;
-    justify-content: flex-start;
+    margin-bottom: -30px; /* UPDATE 4: Tarik tabel lebih dekat ke tombol filter */
+    justify-content: flex-end; /* UPDATE 1: Rata kanan */
   }
 
   /* ======================================
@@ -949,7 +954,7 @@
   ====================================== */
   .section-title {
     margin-top: 24px;
-    margin-bottom: 10px !important;
+    margin-bottom: -14px !important; /* UPDATE 2: Dikecilkan dari 10px ke 4px */
     font-size: 16px;
   }
 
@@ -957,8 +962,8 @@
      PERIZINAN CARD — tabel horizontal scroll
   ====================================== */
   .perizinan-card {
-    margin-bottom: 8px;
-    min-height: unset;
+    margin-bottom: -14px;
+    min-height: 200px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
