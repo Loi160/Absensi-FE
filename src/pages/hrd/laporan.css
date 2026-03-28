@@ -9,7 +9,7 @@
     height: 100vh; 
     background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%); 
     overflow: hidden; 
-    position: relative; /* KUNCI: Menjadi jangkar posisi konten utama */
+    position: relative;
 }
 
 /* ================= SIDEBAR ================= */
@@ -104,7 +104,7 @@
     background-color: rgba(255, 255, 255, 0.15);
 }
 
-/* SIDEBAR FOOTER (LOG OUT) */
+/* SIDEBAR FOOTER */
 .sidebar-footer {
     margin-top: auto; 
     padding-top: 25px; 
@@ -134,14 +134,13 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; 
 }
 
-/* ================= MAIN CONTENT (FIX SCROLL TERKUNCI) ================== */
+/* ================= MAIN CONTENT ================= */
 .main-content { 
     position: absolute;
     top: 25px; 
     bottom: 25px; 
     left: 300px;
     right: 35px;
-    
     background-color: #fdfdfd; 
     border-radius: 40px; 
     padding: 40px; 
@@ -277,8 +276,7 @@
 }
 .btn-neo-filter-bottom img.rotate { transform: rotate(180deg); }
 
-/* ================= TABLE AREA DENGAN SCROLL ================= */
-
+/* ================= TABLE AREA ================= */
 .neo-table-card { 
     background: white; 
     border-radius: 20px; 
@@ -421,6 +419,8 @@ tr.row-warn-red .neo-badge.warn-badge { background-color: #e03131; color: white;
     border-radius: 16px;
     padding: 30px; 
     box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    max-height: 90vh;
+    overflow-y: auto;
 }
 .modal-header-lap {
     display: flex; justify-content: space-between; align-items: center;
@@ -488,7 +488,7 @@ tr.row-warn-red .neo-badge.warn-badge { background-color: #e03131; color: white;
 .lap-modal-scroll-area::-webkit-scrollbar { width: 6px; }
 .lap-modal-scroll-area::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
 
-/* ================= KUSTOMISASI FOTO ABSENSI GANDA ================= */
+/* ================= FOTO ABSENSI ================= */
 .lap-foto-container {
     display: flex;
     gap: 20px;
@@ -566,20 +566,314 @@ tr.row-warn-red .neo-badge.warn-badge { background-color: #e03131; color: white;
 }
 .lap-preview-close:hover { transform: scale(1.2); }
 
+/* ================= MOBILE-ONLY ELEMENTS ================= */
+.mobile-topbar {
+    display: none;
+}
+
+.btn-sidebar-close {
+    display: none;
+}
+
+.sidebar-overlay {
+    display: none;
+}
+
+/* ================= PRINT ================= */
 @media print { 
     .no-print { display: none !important; } 
     .main-content { overflow: visible !important; height: auto; position: static !important; }
     .neo-table-wrapper { overflow: visible !important; height: auto; }
 }
 
+/* ================= RESPONSIVE ================= */
 @media (max-width: 768px) {
-  .hrd-container { flex-direction: column; height: auto; overflow: auto; position: static; }
-  .sidebar { width: 100%; padding: 20px; }
-  .main-content { position: static; height: auto; border-radius: 30px 30px 0 0; margin: 0; padding: 25px; }
-  .input-group-neo { flex-direction: column; width: 100%; }
+
+  /* CONTAINER */
+  .hrd-container {
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%);
+  }
+
+  /* MOBILE TOPBAR */
+  .mobile-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: transparent;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 200;
+  }
+
+  .mobile-topbar-logo {
+    width: 130px;
+    height: auto;
+    display: block;
+    filter: grayscale(100%) brightness(0) invert(1) contrast(1000%);
+    margin: 0;
+    padding: 0;
+  }
+
+  .btn-hamburger {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 4px;
+    margin: 0;
+  }
+
+  .btn-hamburger span {
+    display: block;
+    width: 26px;
+    height: 3px;
+    background-color: #ffffff;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+  }
+
+  /* OVERLAY GELAP */
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.45);
+    z-index: 300;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .sidebar-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* SIDEBAR SLIDE-IN */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    z-index: 400;
+    padding: 25px 20px;
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .btn-sidebar-close {
+    display: flex;
+    align-self: flex-end;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: 300;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+    margin-bottom: 10px;
+    transition: opacity 0.2s ease;
+  }
+
+  .btn-sidebar-close:hover { opacity: 0.7; }
+
+  .logo-area {
+    margin-top: 10px;
+    margin-bottom: 20px !important;
+  }
+
+  .logo-img { max-width: 180px; }
+
+  .menu-item {
+    background-color: transparent;
+    color: #ffffff;
+    border: none;
+    box-shadow: none;
+  }
+
+  .menu-item .menu-icon-main { filter: brightness(0) invert(1); }
+  .menu-item .menu-text-main { color: #ffffff; }
+  .menu-item .arrow-icon-main { filter: brightness(0) invert(1); opacity: 0.8; }
+  .menu-item:hover:not(.active) { background-color: rgba(255, 255, 255, 0.15); }
+
+  .menu-item.active {
+    background-color: #2fb800 !important;
+    color: #ffffff !important;
+    border: 1px solid #2fb800;
+    box-shadow: 0 4px 15px rgba(47, 184, 0, 0.35);
+  }
+
+  .menu-item.active .menu-icon-main,
+  .menu-item.active .arrow-icon-main {
+    filter: brightness(0) invert(1) !important;
+    opacity: 1;
+  }
+
+  .menu-item.active .menu-text-main { color: #ffffff !important; }
+
+  /* MAIN CONTENT */
+  .main-content {
+    position: static;
+    flex: 1;
+    height: auto;
+    border-radius: 28px 28px 0 0;
+    margin: 0;
+    padding: 25px 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* HEADER DI MOBILE */
+  .content-header {
+    margin-bottom: 15px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .header-text h1 {
+    font-size: 18px;
+    letter-spacing: -0.3px;
+  }
+
+  .header-text p { font-size: 13px; }
+
+  /* =========================================
+     MAGIC FLEXBOX: MEMINDAHKAN TOMBOL KE ATAS
+     ========================================= */
+  .neo-filter-zone {
+    flex-direction: column-reverse; /* Melempar .button-group-vertical-right ke atas */
+    gap: 16px;
+    align-items: flex-end; /* Memastikan rata kanan keseluruhan */
+    margin-bottom: 0;
+  }
+
+  /* TOMBOL PRINT & FILTER SEJAJAR RATA KANAN */
+  .button-group-vertical-right {
+    flex-direction: row; /* Berubah jadi menyamping */
+    justify-content: flex-end; /* Rata kanan */
+    align-items: center;
+    width: 100%;
+    gap: 12px;
+    flex-wrap: wrap; /* Mencegah keluar layar jika teks panjang */
+  }
+
+  /* Sesuaikan ukuran tombol print di mobile */
+  .btn-neo-print-top {
+    padding: 8px 20px;
+    font-size: 13px;
+    margin: 0; /* Reset margin */
+  }
+
+  /* Pastikan dropdown jatuh ke kiri agar tidak terpotong layar hp */
+  .neo-dropdown-list-right {
+    right: 0; 
+    left: auto;
+  }
+
+  /* =========================================
+     LOGIKA 1 BARIS NAMA, 2 BARIS TANGGAL
+     ========================================= */
+  .input-group-neo {
+    flex-direction: row; 
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 12px; /* Gap murni tetap tidak diubah */
+  }
+
+  .input-group-neo .neo-field:nth-child(1) {
+      width: 100%; /* Cari Nama Full */
+  }
+
+  .input-group-neo .neo-field:nth-child(2),
+  .input-group-neo .neo-field:nth-child(3) {
+      width: calc(50% - 6px); /* Tanggal bagi dua dikurangi setengah gap */
+  }
+
   .neo-input { width: 100%; }
-  .neo-filter-zone { flex-direction: column; gap: 20px; align-items: flex-start; }
-  .lap-modal-row { flex-direction: column; gap: 15px; }
-  .lap-foto-container { flex-direction: column; height: auto; }
+
+  /* TABEL DI MOBILE */
+  .neo-table-card {
+    overflow-x: auto;
+    flex: none;
+  }
+
+  .neo-table-wrapper {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 55vh;
+  }
+
+  .neo-table {
+    min-width: 650px;
+  }
+
+  .neo-table th,
+  .neo-table td {
+    padding: 10px 8px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .neo-table th:first-child { padding-left: 15px; }
+  .neo-td-name { padding-left: 15px !important; }
+
+  /* Multi cabang di mobile */
+  .multi-cabang-wrapper {
+    gap: 25px;
+    padding-right: 0;
+    overflow-y: visible;
+    flex: none;
+  }
+
+  .cabang-section .neo-table-card {
+    max-height: none;
+  }
+
+  /* MODAL DI MOBILE */
+  .modal-content-lap {
+    padding: 20px 15px;
+    border-radius: 14px;
+    max-height: 85vh;
+  }
+
+  .modal-header-lap h2 { font-size: 16px; }
+
+  .lap-modal-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .lap-foto-container {
+    flex-direction: column;
+    height: auto;
+    gap: 12px;
+  }
+
   .lap-foto-box { height: 200px; }
+
+  .lap-modal-scroll-area {
+    max-height: 50vh;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding-bottom: 30px;
+  }
 }
