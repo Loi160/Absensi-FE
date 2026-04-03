@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import "./riwayat.css";
 import { ArrowLeft, Trash2, X, ZoomIn, Clock } from "lucide-react";
 
@@ -7,114 +8,159 @@ import { ArrowLeft, Trash2, X, ZoomIn, Clock } from "lucide-react";
 import perizinanIcon from "../../assets/perizinan.svg";
 import lokasiIcon from "../../assets/lokasi.svg";
 import kalenderIcon from "../../assets/kalender.svg";
-import logoAmaga from "../../assets/logoamaga.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 import profileImg from "../../assets/profile.svg";
 
 const Riwayat = () => {
   const navigate = useNavigate();
+  const { user } = useAuth(); 
   const [selectedItem, setSelectedItem] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [historyList, setHistoryList] = useState([]);
+  
+  // STATE BARU UNTUK MENAMPILKAN ERROR DI LAYAR
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const [historyList, setHistoryList] = useState([
-    {
-      id: 1,
-      type: "Absensi",
-      status: "HADIR",
-      name: "Syahrul",
-      nik: "202401001",
-      branch: "Cabang 1",
-      date: "30 Jan 2026",
-      timeUpdate: "21:50",
-      note: "Foto Absen Terlampir",
-      isPartial: false,
-      detail: {
-        clockIn: "08:00",
-        clockOut: "17:00",
-        photoIn: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
-        photoOut: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400",
-      },
-    },
-    {
-      id: 2,
-      type: "Perizinan",
-      status: "SAKIT",
-      name: "Syahrul",
-      nik: "202401001",
-      branch: "Cabang 1",
-      date: "29 Jan 2026",
-      timeUpdate: "10:15",
-      note: "Pengajuan Izin Sakit",
-      isSpecial: true,
-      detail: {
-        keterangan: "Demam tinggi dan flu",
-        tglMulai: "2026-12-01",
-        tglAkhir: "2026-12-02",
-        tipeIzin: "Sakit",
-      },
-    },
-    {
-      id: 3,
-      type: "Absensi",
-      status: "HADIR",
-      name: "Syahrul",
-      nik: "202401001",
-      branch: "Cabang 1",
-      date: "28 Jan 2026",
-      timeUpdate: "17:05",
-      note: "Belum Absen Pulang",
-      isPartial: true,
-      detail: {
-        clockIn: "07:55",
-        clockOut: "--:--",
-        photoIn: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400",
-        photoOut: null,
-      },
-    },
-    {
-      id: 4,
-      type: "Absensi",
-      status: "HADIR",
-      name: "Syahrul",
-      nik: "202401001",
-      branch: "Cabang 1",
-      date: "27 Jan 2026",
-      timeUpdate: "17:10",
-      note: "Foto Absen Terlampir",
-      isPartial: false,
-      detail: {
-        clockIn: "08:05",
-        clockOut: "17:10",
-        photoIn: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
-        photoOut: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400",
-      },
-    },
-  ]);
-
-  const handleItemClick = (item) => {
-    setSelectedItem(item);
+  const formatDateIndo = (dateString) => {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    if (isNaN(date)) return dateString; 
+    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
-  const handleDelete = (e, id) => {
+  const getJam = (waktu) => {
+    if (!waktu) return "--:--";
+    return String(waktu).substring(0, 5);
+  };
+
+  const fetchRiwayat = async () => {
+    if (!user || !user.id) {
+      setErrorMessage("Sesi login tidak valid. Silakan login ulang.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setErrorMessage(""); // Reset error
+      
+      const res = await fetch(`http://localhost:3000/api/riwayat/${user.id}`);
+      
+      // Jika Backend Error (Misal: Belum direstart atau URL tidak ada)
+      if (!res.ok) {
+        throw new Error(`Server Error: ${res.status} - Pastikan Backend sudah direstart.`);
+      }
+
+      const data = await res.json();
+
+      const absensiData = data.absensi || [];
+      const perizinanData = data.perizinan || [];
+
+      // Format Data Absensi
+      const formatAbsensi = absensiData.map(a => {
+        const rawTS = a.tanggal ? new Date(a.tanggal).getTime() : 0;
+        return {
+          id: `abs_${a.id}`,
+          realId: a.id,
+          type: "Absensi",
+          status: a.status_kehadiran ? a.status_kehadiran.toUpperCase() : "HADIR",
+          name: user.nama || "Karyawan",
+          nik: user.nik || "-",
+          branch: user.cabang || "-",
+          date: formatDateIndo(a.tanggal),
+          rawDate: rawTS, 
+          timeUpdate: getJam(a.waktu_pulang) !== "--:--" ? getJam(a.waktu_pulang) : getJam(a.waktu_masuk),
+          note: a.waktu_pulang ? "Absen Selesai" : "Belum Absen Pulang",
+          isPartial: !a.waktu_pulang,
+          detail: {
+            clockIn: getJam(a.waktu_masuk),
+            clockOut: getJam(a.waktu_pulang),
+            photoIn: a.foto_masuk || null,
+            photoOut: a.foto_pulang || null,
+          }
+        };
+      });
+
+      // Format Data Perizinan
+      const formatPerizinan = perizinanData.map(p => {
+        const tglAcuan = p.created_at || p.tanggal_mulai || new Date();
+        const rawTS = new Date(tglAcuan).getTime();
+        return {
+          id: `izin_${p.id}`,
+          realId: p.id,
+          type: "Perizinan",
+          status: p.jenis_izin ? p.jenis_izin.toUpperCase() : (p.kategori ? p.kategori.toUpperCase() : "IZIN"),
+          name: user.nama || "Karyawan",
+          nik: user.nik || "-",
+          branch: user.cabang || "-",
+          date: formatDateIndo(tglAcuan),
+          rawDate: rawTS,
+          timeUpdate: "--:--",
+          note: p.keterangan || `Pengajuan ${p.kategori || 'Perizinan'}`,
+          isSpecial: true,
+          detail: {
+            tipeIzin: p.jenis_izin || p.kategori || "-",
+            keterangan: p.keterangan || p.keperluan || "-",
+            tglMulai: formatDateIndo(p.tanggal_mulai || p.tanggal),
+            tglAkhir: formatDateIndo(p.tanggal_selesai || p.tanggal)
+          }
+        };
+      });
+
+      const combined = [...formatAbsensi, ...formatPerizinan].sort((a, b) => {
+        const dateA = a.rawDate || 0;
+        const dateB = b.rawDate || 0;
+        return dateB - dateA; 
+      });
+
+      setHistoryList(combined);
+      
+    } catch (err) {
+      console.error("Gagal fetch riwayat:", err);
+      setErrorMessage(`Gagal memuat data: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRiwayat();
+  }, [user]);
+
+  const handleItemClick = (item) => { setSelectedItem(item); };
+
+  const handleDelete = async (e, id, realId) => {
     e.stopPropagation();
     if (window.confirm("Apakah Anda yakin ingin menghapus data perizinan ini?")) {
-      const updatedList = historyList.filter((item) => item.id !== id);
-      setHistoryList(updatedList);
-      alert("Data berhasil dihapus.");
+      try {
+        const res = await fetch(`http://localhost:3000/api/perizinan/${realId}`, { method: 'DELETE' });
+        if (res.ok) {
+          setHistoryList(prev => prev.filter((item) => item.id !== id));
+          alert("Data berhasil dihapus.");
+        } else {
+          alert("Gagal menghapus data.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Terjadi kesalahan jaringan.");
+      }
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    navigate("/auth/login");
   };
 
   return (
     <div className="rw-wrapper">
       <div className="rw-container">
-        
-        {/* BACKGROUND GRADIENT FIXED (HANYA MOBILE) */}
         <div className="rw-mobile-bg desktop-none"></div>
 
-        {/* ================= HEADER / SIDEBAR ================= */}
-        {/* UI/UX Update: Header dibuat sticky agar selalu terlihat */}
+        {/* HEADER / SIDEBAR */}
         <div className="rw-header-section">
-          
           <div className="rw-header-mobile-content mobile-only">
              <button className="rw-btn-back" onClick={() => navigate("/karyawan/dashboard")}>
                <ArrowLeft size={24} color="white" />
@@ -125,30 +171,24 @@ const Riwayat = () => {
              </div>
           </div>
           
-          {/* Logo Persegi Desktop (Pojok Atas) */}
           <div className="rw-sidebar-logo-desktop desktop-only">
              <img src={logoPersegi} alt="Amaga Corp" />
           </div>
 
           <div className="rw-logo-center-area desktop-only">
-            {/* Tampilan Desktop Sidebar: Foto Profil */}
             <img src={profileImg} alt="Profile User" className="rw-img-circle-content" />
           </div>
 
           <h2 className="rw-title-text desktop-only">Riwayat</h2>
           <p className="rw-subtitle-text desktop-only">Riwayat absensi dan perizinan Anda</p>
 
-          {/* Tombol Logout Desktop */}
-          <button className="rw-btn-logout-desktop desktop-only" onClick={() => navigate("/")}>
+          <button className="rw-btn-logout-desktop desktop-only" onClick={handleLogout}>
              Log Out
           </button>
         </div>
 
-        {/* ================= KONTEN KANAN / LIST CARD ================= */}
-        {/* UI/UX Update: Area konten yang bisa discroll */}
+        {/* KONTEN KANAN / LIST CARD */}
         <div className="rw-content-list-wrapper">
-          
-          {/* Header Form Desktop (Sejajar dengan Back Button) */}
           <div className="rw-form-header-wrapper desktop-only">
             <button className="rw-btn-back-desktop" onClick={() => navigate("/karyawan/dashboard")}>
               <ArrowLeft size={24} color="#333" strokeWidth={2.5} />
@@ -157,74 +197,65 @@ const Riwayat = () => {
           </div>
 
           <div className="rw-content-list">
-            {historyList.map((item) => (
-              <div
-                key={item.id}
-                className="rw-card-item"
-                onClick={() => handleItemClick(item)}
-              >
-                {/* ICON */}
-                <div className="rw-icon-wrapper">
-                  <img src={perizinanIcon} alt="Icon" className="rw-icon-main" />
-                </div>
-
-                {/* INFO BOX */}
-                <div className="rw-info-box">
-                  {/* TOP ROW */}
-                  <div className="rw-row-top">
-                    <span className="rw-type-text">{item.type}</span>
-                    <span
-                      className={`rw-badge ${
-                        item.status === "SAKIT"
-                          ? "badge-sakit"
-                          : item.isPartial
-                          ? "badge-hadir-partial"
-                          : "badge-hadir-full"
-                      }`}
-                    >
-                      {item.status}
-                    </span>
-                  </div>
-
-                  {/* NAME */}
-                  <p className="rw-name">{item.name}</p>
-
-                  {/* META */}
-                  <div className="rw-meta-row">
-                    <div className="rw-meta-item">
-                      <img src={lokasiIcon} alt="Lokasi" className="rw-mini-icon" />
-                      <span>{item.branch}</span>
-                    </div>
-                    <div className="rw-meta-item">
-                      <img src={kalenderIcon} alt="Tanggal" className="rw-mini-icon" />
-                      <span>{item.date}</span>
-                    </div>
-                    <div className="rw-meta-item">
-                      <Clock size={14} />
-                      <span>{item.timeUpdate}</span>
-                    </div>
-                  </div>
-
-                  {/* NOTE */}
-                  <p className="rw-note">{item.note}</p>
-                </div>
-
-                {/* DELETE BUTTON ONLY FOR PERIZINAN */}
-                {item.type === "Perizinan" && (
-                  <button
-                    className="rw-btn-delete"
-                    onClick={(e) => handleDelete(e, item.id)}
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                )}
+            
+            {/* TAMPILKAN ERROR JIKA ADA MASALAH */}
+            {errorMessage && (
+              <div style={{ textAlign: "center", padding: "20px", color: "red", fontWeight: "bold", background: "#fee2e2", borderRadius: "10px" }}>
+                ⚠️ {errorMessage}
               </div>
-            ))}
+            )}
+
+            {loading ? (
+              <div style={{ textAlign: "center", padding: "20px", color: "#666" }}>Memuat riwayat...</div>
+            ) : !errorMessage && historyList.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "20px", color: "#666" }}>Belum ada riwayat absensi atau perizinan.</div>
+            ) : (
+              historyList.map((item) => (
+                <div key={item.id} className="rw-card-item" onClick={() => handleItemClick(item)}>
+                  <div className="rw-icon-wrapper">
+                    <img src={perizinanIcon} alt="Icon" className="rw-icon-main" />
+                  </div>
+
+                  <div className="rw-info-box">
+                    <div className="rw-row-top">
+                      <span className="rw-type-text">{item.type}</span>
+                      <span className={`rw-badge ${item.status === "SAKIT" ? "badge-sakit" : item.isPartial ? "badge-hadir-partial" : "badge-hadir-full"}`}>
+                        {item.status}
+                      </span>
+                    </div>
+
+                    <p className="rw-name">{item.name}</p>
+
+                    <div className="rw-meta-row">
+                      <div className="rw-meta-item">
+                        <img src={lokasiIcon} alt="Lokasi" className="rw-mini-icon" />
+                        <span>{item.branch}</span>
+                      </div>
+                      <div className="rw-meta-item">
+                        <img src={kalenderIcon} alt="Tanggal" className="rw-mini-icon" />
+                        <span>{item.date}</span>
+                      </div>
+                      <div className="rw-meta-item">
+                        <Clock size={14} />
+                        <span>{item.timeUpdate}</span>
+                      </div>
+                    </div>
+                    <p className="rw-note">{item.note}</p>
+                  </div>
+
+                  {item.type === "Perizinan" && (
+                    <button className="rw-btn-delete" onClick={(e) => handleDelete(e, item.id, item.realId)}>
+                      <Trash2 size={18} />
+                    </button>
+                  )}
+                </div>
+              ))
+            )}
             <div className="rw-spacer"></div>
           </div>
         </div>
 
-        {/* ================= MODAL DETAIL ================= */}
+        {/* MODAL DETAIL */}
         {selectedItem && (
           <div className="rw-modal-overlay" onClick={() => setSelectedItem(null)}>
             <div className="rw-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -233,62 +264,25 @@ const Riwayat = () => {
               </button>
 
               <h3 className="rw-modal-title">Detail {selectedItem.type}</h3>
+              <div className="rw-form-group"><label>Nama</label><input type="text" className="rw-input" value={selectedItem.name} disabled /></div>
+              <div className="rw-form-group"><label>NIK</label><input type="text" className="rw-input" value={selectedItem.nik} disabled /></div>
+              <div className="rw-form-group"><label>Cabang</label><input type="text" className="rw-input" value={selectedItem.branch} disabled /></div>
 
-              <div className="rw-form-group">
-                <label>Nama</label>
-                <input type="text" className="rw-input" value={selectedItem.name} disabled />
-              </div>
-
-              <div className="rw-form-group">
-                <label>NIK</label>
-                <input type="text" className="rw-input" value={selectedItem.nik} disabled />
-              </div>
-
-              <div className="rw-form-group">
-                <label>Cabang</label>
-                <input type="text" className="rw-input" value={selectedItem.branch} disabled />
-              </div>
-
-              {/* ===== ABSENSI DETAIL ===== */}
               {selectedItem.type === "Absensi" && (
                 <>
                   <div className="rw-row-2">
-                    <div className="rw-col">
-                      <label>Jam Masuk</label>
-                      <input type="text" className="rw-input text-center" value={selectedItem.detail.clockIn} disabled />
-                    </div>
-                    <div className="rw-col">
-                      <label>Jam Pulang</label>
-                      <input type="text" className="rw-input text-center" value={selectedItem.detail.clockOut} disabled />
-                    </div>
+                    <div className="rw-col"><label>Jam Masuk</label><input type="text" className="rw-input text-center" value={selectedItem.detail.clockIn} disabled /></div>
+                    <div className="rw-col"><label>Jam Pulang</label><input type="text" className="rw-input text-center" value={selectedItem.detail.clockOut} disabled /></div>
                   </div>
-
                   <div className="rw-form-group">
                     <label>Bukti Foto Absensi</label>
                     <div className="rw-photo-grid">
-                      {/* PHOTO IN */}
                       <div className="rw-photo-item" onClick={() => selectedItem.detail.photoIn && setPreviewImage(selectedItem.detail.photoIn)}>
-                        {selectedItem.detail.photoIn ? (
-                          <>
-                            <img src={selectedItem.detail.photoIn} alt="Masuk" />
-                            <div className="rw-zoom-overlay"><ZoomIn size={16} /></div>
-                          </>
-                        ) : (
-                          <div className="no-photo">Belum Ada Foto</div>
-                        )}
+                        {selectedItem.detail.photoIn ? (<><img src={selectedItem.detail.photoIn} alt="Masuk" /><div className="rw-zoom-overlay"><ZoomIn size={16} /></div></>) : (<div className="no-photo">Belum Ada Foto</div>)}
                         <div className="rw-photo-label">Absen Masuk</div>
                       </div>
-
-                      {/* PHOTO OUT */}
                       <div className="rw-photo-item" onClick={() => selectedItem.detail.photoOut && setPreviewImage(selectedItem.detail.photoOut)}>
-                        {selectedItem.detail.photoOut ? (
-                          <>
-                            <img src={selectedItem.detail.photoOut} alt="Pulang" />
-                            <div className="rw-zoom-overlay"><ZoomIn size={16} /></div>
-                          </>
-                        ) : (
-                          <div className="no-photo">Belum Ada Foto</div>
-                        )}
+                        {selectedItem.detail.photoOut ? (<><img src={selectedItem.detail.photoOut} alt="Pulang" /><div className="rw-zoom-overlay"><ZoomIn size={16} /></div></>) : (<div className="no-photo">Belum Ada Foto</div>)}
                         <div className="rw-photo-label">Absen Pulang</div>
                       </div>
                     </div>
@@ -296,28 +290,13 @@ const Riwayat = () => {
                 </>
               )}
 
-              {/* ===== PERIZINAN DETAIL ===== */}
               {selectedItem.type === "Perizinan" && (
                 <>
-                  <div className="rw-form-group">
-                    <label>Jenis Izin</label>
-                    <input type="text" className="rw-input" value={selectedItem.detail.tipeIzin} disabled />
-                  </div>
-
-                  <div className="rw-form-group">
-                    <label>Keterangan</label>
-                    <textarea className="rw-input rw-textarea" value={selectedItem.detail.keterangan} disabled />
-                  </div>
-
+                  <div className="rw-form-group"><label>Jenis Izin</label><input type="text" className="rw-input" value={selectedItem.detail.tipeIzin} disabled /></div>
+                  <div className="rw-form-group"><label>Keterangan</label><textarea className="rw-input rw-textarea" value={selectedItem.detail.keterangan} disabled /></div>
                   <div className="rw-row-2">
-                    <div className="rw-col">
-                      <label>Mulai</label>
-                      <input type="text" className="rw-input text-center" value={selectedItem.detail.tglMulai} disabled />
-                    </div>
-                    <div className="rw-col">
-                      <label>Akhir</label>
-                      <input type="text" className="rw-input text-center" value={selectedItem.detail.tglAkhir} disabled />
-                    </div>
+                    <div className="rw-col"><label>Mulai</label><input type="text" className="rw-input text-center" value={selectedItem.detail.tglMulai} disabled /></div>
+                    <div className="rw-col"><label>Akhir</label><input type="text" className="rw-input text-center" value={selectedItem.detail.tglAkhir} disabled /></div>
                   </div>
                 </>
               )}
@@ -325,13 +304,11 @@ const Riwayat = () => {
           </div>
         )}
 
-        {/* IMAGE PREVIEW MODAL */}
+        {/* PREVIEW IMAGE */}
         {previewImage && (
           <div className="rw-preview-overlay" onClick={() => setPreviewImage(null)}>
             <div className="rw-preview-container">
-              <button className="rw-preview-close" onClick={() => setPreviewImage(null)}>
-                <X size={35} color="white" />
-              </button>
+              <button className="rw-preview-close" onClick={() => setPreviewImage(null)}><X size={35} color="white" /></button>
               <img src={previewImage} alt="Preview" className="rw-full-image" />
             </div>
           </div>

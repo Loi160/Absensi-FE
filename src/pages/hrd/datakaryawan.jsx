@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./datakaryawan.css";
 
@@ -14,28 +14,46 @@ import iconTambah from "../../assets/tambah.svg";
 const DataKaryawan = () => {
   const navigate = useNavigate();
 
-  // STATE MOBILE SIDEBAR
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const openSidebar = () => setSidebarOpen(true);
   const closeSidebar = () => setSidebarOpen(false);
   const handleNav = (path) => { closeSidebar(); navigate(path); };
 
-  const semuaCabangAmaga = [
-    "F&B Jakarta", "F&B Sudirman (Sub)", "F&B Kemang (Sub)",
-    "Jam Tangan Jkt", "Pakaian Jkt", "Sepatu Jkt"
-  ];
-
-  const [karyawanList, setKaryawanList] = useState([
-    { id: 1, nama: "Syahrul", jabatan: "CEO", nik: "123456789", password: "passwordrahasia1", tempatLahir: "Semarang", tanggalLahir: "2026-01-01", alamat: "Semarang", divisi: "Operasional", tanggalMasuk: "2023-01-01", jenisKelamin: "Laki-laki", cabang: "F&B Jakarta", status: "Aktif" },
-    { id: 2, nama: "Budi", jabatan: "Staff", nik: "987654321", password: "passwordrahasia2", tempatLahir: "Jakarta", tanggalLahir: "1999-02-12", alamat: "Jakarta Selatan", divisi: "Marketing", tanggalMasuk: "2023-03-15", jenisKelamin: "Laki-laki", cabang: "F&B Kemang (Sub)", status: "Aktif" },
-    { id: 3, nama: "Siti", jabatan: "HRD", nik: "1122334455", password: "passwordrahasia3", tempatLahir: "Bandung", tanggalLahir: "2000-03-10", alamat: "Bandung Kota", divisi: "HR", tanggalMasuk: "2023-05-20", jenisKelamin: "Perempuan", cabang: "Jam Tangan Jkt", status: "Resign" },
-  ]);
+  // STATE UNTUK DATA REAL DARI DATABASE
+  const [karyawanList, setKaryawanList] = useState([]);
+  const [cabangList, setCabangList] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [showFilter, setShowFilter] = useState(false);
   const [selectedCabang, setSelectedCabang] = useState("Semua Cabang");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showPasswordInModal, setShowPasswordInModal] = useState(false);
   const [visiblePasswords, setVisiblePasswords] = useState({});
+
+  // FUNGSI MENGAMBIL DATA KARYAWAN & CABANG
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      // Ambil Karyawan
+      const resKaryawan = await fetch("http://localhost:3000/api/karyawan");
+      const dataKaryawan = await resKaryawan.json();
+      setKaryawanList(dataKaryawan);
+
+      // Ambil Cabang (untuk Dropdown Filter & Form Tambah)
+      const resCabang = await fetch("http://localhost:3000/api/cabang");
+      const dataCabang = await resCabang.json();
+      setCabangList(dataCabang);
+
+    } catch (error) {
+      console.error("Gagal menarik data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -57,13 +75,48 @@ const DataKaryawan = () => {
     setVisiblePasswords(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const handleSaveData = (e) => {
+  // FUNGSI SIMPAN KARYAWAN BARU KE DATABASE
+  const handleSaveData = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const newData = Object.fromEntries(formData.entries());
-    setKaryawanList(prev => [...prev, { id: Date.now(), ...newData }]);
-    alert(`Data Karyawan Baru berhasil ditambahkan!`);
-    handleCloseModal();
+    const data = Object.fromEntries(formData.entries());
+
+    // Sesuaikan nama field dengan tabel users di database SQL
+    const payload = {
+      nama: data.nama,
+      tanggal_masuk: data.tanggal_masuk,
+      jabatan: data.jabatan,
+      divisi: data.divisi,
+      nik: data.nik,
+      password: data.password,
+      tempat_lahir: data.tempat_lahir,
+      tanggal_lahir: data.tanggal_lahir,
+      jenis_kelamin: data.jenis_kelamin,
+      cabang_id: data.cabang_id ? parseInt(data.cabang_id) : null,
+      status: data.status,
+      alamat: data.alamat,
+      role: data.role // Akan bernilai 'hrd', 'managerCabang', atau 'karyawan'
+    };
+
+    try {
+      const response = await fetch("http://localhost:3000/api/karyawan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        alert("Karyawan Baru berhasil ditambahkan!");
+        handleCloseModal();
+        fetchData(); // Refresh tabel setelah data berhasil masuk
+      } else {
+        const errData = await response.json();
+        alert(`Gagal: ${errData.message || "Periksa kembali data Anda."}`);
+      }
+    } catch (error) {
+      console.error("Error saving:", error);
+      alert("Terjadi kesalahan jaringan.");
+    }
   };
 
   const handleFileChange = (e) => {
@@ -74,6 +127,12 @@ const DataKaryawan = () => {
     }
   };
 
+  // Filter Data untuk Tabel
+  const filteredKaryawan = karyawanList.filter((k) => {
+    if (selectedCabang === "Semua Cabang") return true;
+    return k.cabang?.nama === selectedCabang;
+  });
+
   const FilterDropdown = () => (
     <div className="filter-wrapper">
       <button className="btn-filter" onClick={toggleFilter}>
@@ -82,8 +141,9 @@ const DataKaryawan = () => {
       </button>
       {showFilter && (
         <div className="filter-dropdown">
-          {["Semua Cabang", ...semuaCabangAmaga].map((cabang, index) => (
-            <div key={index} className="dropdown-item" onClick={() => handleSelectCabang(cabang)}>{cabang}</div>
+          <div className="dropdown-item" onClick={() => handleSelectCabang("Semua Cabang")}>Semua Cabang</div>
+          {cabangList.map((c) => (
+            <div key={c.id} className="dropdown-item" onClick={() => handleSelectCabang(c.nama)}>{c.nama}</div>
           ))}
         </div>
       )}
@@ -99,40 +159,44 @@ const DataKaryawan = () => {
             <th>Jabatan</th>
             <th>NIK (Username)</th>
             <th>Password</th>
-            <th>Tempat Lahir</th>
-            <th>Tanggal Lahir</th>
-            <th>Alamat</th>
+            <th>Cabang</th>
+            <th>Role</th>
             <th className="text-center">Status</th>
           </tr>
         </thead>
         <tbody>
-          {karyawanList.map((item) => (
-            <tr key={item.id} className="clickable-row" onClick={() => handleRowClick(item)}>
-              <td className="clickable-name">{item.nama}</td>
-              <td>{item.jabatan}</td>
-              <td>{item.nik}</td>
-              <td>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', minWidth: '120px' }}>
-                  <span>{visiblePasswords[item.id] ? item.password : "••••••••"}</span>
-                  <button onClick={(e) => toggleTablePassword(item.id, e)} className="btn-eye" style={{ position: 'static', padding: '0 5px' }}>
-                    {visiblePasswords[item.id] ? (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    ) : (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
-                    )}
-                  </button>
-                </div>
-              </td>
-              <td>{item.tempatLahir}</td>
-              <td>{item.tanggalLahir}</td>
-              <td>{item.alamat}</td>
-              <td className="text-center" onClick={(e) => e.stopPropagation()}>
-                <div className="status-dots-spaced">
-                  {item.status === 'Aktif' ? <span className="dot dot-green" title="Aktif"></span> : <span className="dot dot-red" title="Resign"></span>}
-                </div>
-              </td>
-            </tr>
-          ))}
+          {loading ? (
+            <tr><td colSpan="7" className="text-center">Memuat data...</td></tr>
+          ) : filteredKaryawan.length === 0 ? (
+            <tr><td colSpan="7" className="text-center">Belum ada data karyawan.</td></tr>
+          ) : (
+            filteredKaryawan.map((item) => (
+              <tr key={item.id} className="clickable-row" onClick={() => handleRowClick(item)}>
+                <td className="clickable-name">{item.nama}</td>
+                <td>{item.jabatan}</td>
+                <td>{item.nik}</td>
+                <td>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', minWidth: '120px' }}>
+                    <span>{visiblePasswords[item.id] ? item.password : "••••••••"}</span>
+                    <button onClick={(e) => toggleTablePassword(item.id, e)} className="btn-eye" style={{ position: 'static', padding: '0 5px' }}>
+                      {visiblePasswords[item.id] ? (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                      ) : (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                      )}
+                    </button>
+                  </div>
+                </td>
+                <td>{item.cabang?.nama || '-'}</td>
+                <td>{item.role}</td>
+                <td className="text-center" onClick={(e) => e.stopPropagation()}>
+                  <div className="status-dots-spaced">
+                    {item.status === 'Aktif' ? <span className="dot dot-green" title="Aktif"></span> : <span className="dot dot-red" title="Resign"></span>}
+                  </div>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>
@@ -141,20 +205,16 @@ const DataKaryawan = () => {
   return (
     <div className="hrd-container">
 
-      {/* ===== MOBILE TOPBAR ===== */}
+      {/* MOBILE & OVERLAY */}
       <div className="mobile-topbar">
         <img src={logoPersegi} alt="AMAGACORP" className="mobile-topbar-logo" />
-        <button className="btn-hamburger" onClick={openSidebar} aria-label="Buka menu">
-          <span></span><span></span><span></span>
-        </button>
+        <button className="btn-hamburger" onClick={openSidebar}><span></span><span></span><span></span></button>
       </div>
-
-      {/* ===== OVERLAY ===== */}
       <div className={`sidebar-overlay ${sidebarOpen ? "active" : ""}`} onClick={closeSidebar} />
 
-      {/* ===== SIDEBAR ===== */}
+      {/* SIDEBAR */}
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
-        <button className="btn-sidebar-close" onClick={closeSidebar} aria-label="Tutup menu">✕</button>
+        <button className="btn-sidebar-close" onClick={closeSidebar}>✕</button>
         <div className="logo-area"><img src={logoPersegi} alt="AMAGACORP" className="logo-img" /></div>
         <nav className="menu-nav">
           <div className="menu-item" onClick={() => handleNav("/hrd/dashboard")}><div className="menu-left"><img src={iconDashboard} alt="" className="menu-icon-main" /><span className="menu-text-main">Dashboard</span></div></div>
@@ -166,7 +226,7 @@ const DataKaryawan = () => {
         <div className="sidebar-footer"><button className="btn-logout" onClick={handleLogout}>Log Out</button></div>
       </aside>
 
-      {/* ===== MAIN CONTENT ===== */}
+      {/* MAIN CONTENT */}
       <main className="main-content">
         <div className="page-header">
           <h1>Data Karyawan</h1>
@@ -185,56 +245,84 @@ const DataKaryawan = () => {
       {/* ===== MODAL TAMBAH ===== */}
       {showAddModal && (
         <div className="modal-overlay" onClick={handleCloseModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content modal-large" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2 className="modal-title">Tambah Karyawan</h2>
               <p className="modal-subtitle">Silahkan lengkapi data karyawan baru</p>
-              <hr className="modal-divider" style={{ margin: '15px 0', border: 'none', borderBottom: '1px solid #ddd' }} />
+              <hr className="modal-divider" />
             </div>
             <form onSubmit={handleSaveData}>
               <div className="modal-form">
                 <div className="form-grid-3">
                   <div className="form-group"><label>Nama</label><input name="nama" type="text" className="input-gray" required /></div>
-                  <div className="form-group"><label>Tanggal Masuk</label><input name="tanggalMasuk" type="date" className="input-gray" required /></div>
+                  <div className="form-group"><label>Tanggal Masuk</label><input name="tanggal_masuk" type="date" className="input-gray" required /></div>
                   <div className="form-group"><label>Jabatan</label><input name="jabatan" type="text" className="input-gray" required /></div>
+                  
                   <div className="form-group"><label>Divisi</label><input name="divisi" type="text" className="input-gray" required /></div>
                   <div className="form-group"><label>NIK (Username)</label><input name="nik" type="text" className="input-gray" required /></div>
+                  
                   <div className="form-group">
                     <label>Password</label>
                     <div className="password-wrapper">
                       <input name="password" type={showPasswordInModal ? "text" : "password"} className="input-gray" required />
                       <button type="button" className="btn-eye" onClick={() => setShowPasswordInModal(!showPasswordInModal)}>
+                        {/* UPDATE ICON MATA DI SINI MENGGUNAKAN SVG STANDAR */}
                         {showPasswordInModal ? (
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                         ) : (
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
                         )}
                       </button>
                     </div>
                   </div>
-                  <div className="form-group"><label>Tempat Lahir</label><input name="tempatLahir" type="text" className="input-gray" required /></div>
-                  <div className="form-group"><label>Tanggal Lahir</label><input name="tanggalLahir" type="date" className="input-gray" required /></div>
-                  <div className="form-group"><label>Jenis Kelamin</label><select name="jenisKelamin" className="input-gray" required><option value="">Pilih</option><option value="Laki-laki">Laki-laki</option><option value="Perempuan">Perempuan</option></select></div>
-                  <div className="form-group">
-                    <label>Cabang Penempatan</label>
-                    <select name="cabang" className="input-gray" required>
-                      <option value="">Pilih Cabang</option>
-                      {semuaCabangAmaga.map((c, i) => <option key={i} value={c}>{c}</option>)}
+
+                  <div className="form-group"><label>Tempat Lahir</label><input name="tempat_lahir" type="text" className="input-gray" required /></div>
+                  <div className="form-group"><label>Tanggal Lahir</label><input name="tanggal_lahir" type="date" className="input-gray" required /></div>
+                  <div className="form-group"><label>Jenis Kelamin</label>
+                    <select name="jenis_kelamin" className="input-gray" required>
+                      <option value="">Pilih</option>
+                      <option value="Laki-laki">Laki-laki</option>
+                      <option value="Perempuan">Perempuan</option>
                     </select>
                   </div>
-                  <div className="form-group"><label>Status Karyawan</label><select name="status" className="input-gray" required><option value="Aktif">Aktif</option><option value="Resign">Resign</option></select></div>
+
+                  <div className="form-group">
+                    <label>Cabang Penempatan</label>
+                    <select name="cabang_id" className="input-gray" required>
+                      <option value="">Pilih Cabang</option>
+                      {/* Pilihan cabang diambil langsung dari Database */}
+                      {cabangList.map((c) => <option key={c.id} value={c.id}>{c.nama}</option>)}
+                    </select>
+                  </div>
+
+                  <div className="form-group"><label>Status Karyawan</label>
+                    <select name="status" className="input-gray" required>
+                      <option value="Aktif">Aktif</option>
+                      <option value="Resign">Resign</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group"><label>Hak Akses (Role)</label>
+                    <select name="role" className="input-gray" required>
+                      {/* PASTIKAN VALUE SESUAI DENGAN TABEL (hrd, managerCabang, karyawan) */}
+                      <option value="karyawan">Karyawan</option>
+                      <option value="managerCabang">Manager Cabang</option>
+                      <option value="hrd">HRD</option>
+                    </select>
+                  </div>
+
                 </div>
-                <div className="form-group" style={{ marginBottom: '20px' }}><label>Alamat</label><input name="alamat" type="text" className="input-gray" required /></div>
+                <div className="form-group" style={{ marginBottom: '20px' }}><label>Alamat Lengkap</label><input name="alamat" type="text" className="input-gray" required /></div>
                 
-                {/* --- UPDATE: Teks Dokumen Pendukung dibuat 2 baris --- */}
+                {/* DOKUMEN PENDUKUNG (Sekadar placeholder UI dulu sesuai rencana kita) */}
                 <div className="docs-section">
                   <div style={{ marginBottom: '10px' }}>
                     <h4 className="docs-title">Dokumen Pendukung</h4>
-                    <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>(Opsional, Maks 2MB)</p>
+                    <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>(Opsional, Fitur Upload menyusul)</p>
                   </div>
                   <div className="form-grid-3">
-                    {["Foto Karyawan", "Kartu Tanda Penduduk", "Kartu Keluarga", "Surat Keterangan Catatan Kepolisian", "Surat Izin Mengemudi", "Sertifikat Pendukung", "Dokumen Tambahan"].map((label, idx) => (
-                      <div key={idx} className="form-group"><label>{label}</label><input type="file" className="input-gray" style={{ fontSize: '12px' }} onChange={handleFileChange} accept="image/*,.pdf" /></div>
+                    {["Foto Karyawan", "KTP", "Kartu Keluarga", "SKCK", "SIM", "Sertifikat", "Lainnya"].map((label, idx) => (
+                      <div key={idx} className="form-group"><label>{label}</label><input type="file" className="input-gray" style={{ fontSize: '12px' }} onChange={handleFileChange} accept="image/*,.pdf" disabled title="Upload sementara dimatikan" /></div>
                     ))}
                   </div>
                 </div>

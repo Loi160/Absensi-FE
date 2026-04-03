@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext"; // Import context
 import "./dashboard.css";
 
 // --- IMPORT ASSETS ---
@@ -14,6 +15,7 @@ import logoutIcon from "../../assets/kembalidashbord.svg";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth(); // Ambil data user yang login
   const [dateTime, setDateTime] = useState(new Date());
 
   useEffect(() => {
@@ -35,6 +37,15 @@ const Dashboard = () => {
     return `${hours} : ${minutes} : ${seconds}`;
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    navigate("/auth/login");
+  };
+
+  // Ambil nama user atau gunakan "Karyawan" jika belum load
+  const namaPanggilan = user?.nama || "Karyawan";
+
   return (
     <div className="main-wrapper">
       <div className="card-container">
@@ -42,21 +53,21 @@ const Dashboard = () => {
         {/* ================= HEADER / SIDEBAR ================= */}
         <div className="header-section">
 
-          {/* HEADER MOBILE: Profil Kiri, Sapaan Tengah, Logout Kanan (TIDAK BERUBAH) */}
+          {/* HEADER MOBILE */}
           <div className="header-top-mobile mobile-only">
              <div className="header-user-info">
                <img src={profileImg} alt="Profile" className="mobile-profile-img" />
                <div className="mobile-greeting">
-                 <h2>Halo, Syahrul</h2>
+                 <h2>Halo, {namaPanggilan}</h2>
                  <p>Selamat bekerja!</p>
                </div>
              </div>
-             <button className="mobile-header-logout" onClick={() => navigate("/")}>
+             <button className="mobile-header-logout" onClick={handleLogout}>
                <img src={logoutIcon} alt="Logout" />
              </button>
           </div>
 
-          {/* STRUKTUR DESKTOP BARU: Disamakan dengan Absensi (Tanpa wrapper tambahan) */}
+          {/* HEADER DESKTOP */}
           <div className="sidebar-logo-desktop desktop-only">
              <img src={logoPersegi} alt="Amaga Corp" />
           </div>
@@ -66,9 +77,9 @@ const Dashboard = () => {
           </div>
 
           <h2 className="title-form desktop-only">Dashboard</h2>
-          <p className="subtitle-form desktop-only">Halo, Syahrul. Selamat Bekerja!</p>
+          <p className="subtitle-form desktop-only">Halo, {namaPanggilan}. Selamat Bekerja!</p>
 
-          <button className="btn-logout-desktop desktop-only" onClick={() => navigate("/")}>
+          <button className="btn-logout-desktop desktop-only" onClick={handleLogout}>
              Log Out
           </button>
         </div>
@@ -76,40 +87,29 @@ const Dashboard = () => {
         {/* ================= CONTENT AREA ================= */}
         <div className="dashboard-content">
 
-          {/* --- 1. CARD ATAS (INFO TANGGAL & WAKTU) --- */}
+          {/* --- CARD INFO TANGGAL & WAKTU --- */}
           <div className="info-card">
-            {/* Logo Amaga Persegi (Mobile Only) */}
             <img src={logoPersegi} alt="AMAGACORP" className="company-logo mobile-only" />
-
             <div className="datetime-row">
-              {/* BAGIAN TANGGAL */}
               <div className="date-box">
                 <div className="dt-label">
                   <img src={kalenderIcon} alt="Kalender" className="mini-icon black-icon" />
                   Tanggal
                 </div>
-                <div className="dt-value">
-                  {formatDateIndo(dateTime)}
-                </div>
+                <div className="dt-value">{formatDateIndo(dateTime)}</div>
               </div>
-
-              {/* GARIS PEMBATAS */}
               <div className="divider-vertical"></div>
-
-              {/* BAGIAN WAKTU */}
               <div className="time-box">
                 <div className="dt-label">
                   <img src={jamIcon} alt="Jam" className="mini-icon black-icon" />
                   Waktu
                 </div>
-                <div className="time-big">
-                  {formatTimeIndo(dateTime)}
-                </div>
+                <div className="time-big">{formatTimeIndo(dateTime)}</div>
               </div>
             </div>
           </div>
 
-          {/* --- 2. CARD BAWAH (MENU NAVIGASI) --- */}
+          {/* --- CARD MENU NAVIGASI --- */}
           <div className="menu-card">
             <button className="menu-btn-item" onClick={() => navigate("/karyawan/absensi")}>
               <div className="icon-box">

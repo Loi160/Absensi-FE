@@ -1,19 +1,24 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// 1. Bikin wadah datanya
 const AuthContext = createContext(null);
 
-// 2. Bikin Provider (Penyedia data untuk seluruh aplikasi)
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // Awalnya null (belum login)
+  // Mengambil data dari localStorage saat aplikasi pertama kali dimuat
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
   const login = (userData) => {
-    setUser(userData); // Simpan data user
-    // Nanti bisa tambah simpan ke localStorage disini
+    setUser(userData); 
+    // Simpan data user ke localStorage agar tidak hilang saat refresh
+    localStorage.setItem('user', JSON.stringify(userData));
   };
 
   const logout = () => {
-    setUser(null); // Hapus data user
+    setUser(null); 
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
   };
 
   return (
@@ -23,5 +28,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// 3. Bikin hook biar gampang dipanggil di file lain
 export const useAuth = () => useContext(AuthContext);

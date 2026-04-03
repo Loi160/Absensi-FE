@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import "./absensi.css"; 
 import { ChevronDown, ArrowLeft } from "lucide-react";
 
@@ -10,9 +11,11 @@ import profileImg from "../../assets/profile.svg";
 import cameraIcon from "../../assets/camera.svg";
 
 const Absensi = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("Masuk");
   const [currentTime, setCurrentTime] = useState(new Date());
   const [breakStartTime, setBreakStartTime] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -27,13 +30,13 @@ const Absensi = () => {
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, "0");
     const minutes = String(now.getMinutes()).padStart(2, "0");
-    return `${hours}:${minutes}`;
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+    return `${hours}:${minutes}:${seconds}`;
   };
 
   const handleStartTimeChange = (e) => {
     const selectedTime = e.target.value;
-    const nowStr = getCurrentTimeStr();
-
+    const nowStr = getCurrentTimeStr().substring(0, 5); // ambil HH:MM
     if (selectedTime < nowStr) {
       alert("Waktu sudah terlewat! Silakan pilih jam sekarang atau kedepan.");
       setBreakStartTime(nowStr);
@@ -50,28 +53,63 @@ const Absensi = () => {
     return `${String(endHh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
   };
 
-  const handleAbsen = () => {
-    navigate("/karyawan/dashboard");
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    navigate("/auth/login");
+  };
+
+  // FUNGSI SIMPAN ABSENSI KE DATABASE
+  const handleAbsen = async () => {
+    if (!user) {
+      alert("Sesi anda telah habis. Silahkan login kembali.");
+      return navigate("/auth/login");
+    }
+
+    setLoading(true);
+    try {
+      const payload = {
+        user_id: user.id,
+        tipe_absen: activeTab, // "Masuk", "Istirahat", "Pulang"
+        waktu: getCurrentTimeStr()
+      };
+
+      const response = await fetch("http://localhost:3000/api/absensi", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(data.message);
+        navigate("/karyawan/dashboard");
+      } else {
+        alert(`Gagal: ${data.message}`);
+      }
+    } catch (error) {
+      console.error("Error absensi:", error);
+      alert("Gagal terhubung ke server backend.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="main-wrapper">
       <div className="card-container">
         
-        {/* ================= HEADER / SIDEBAR ================= */}
+        {/* HEADER / SIDEBAR */}
         <div className="header-section">
-          {/* Tombol Back (HANYA MUNCUL DI MOBILE) */}
           <button className="btn-back mobile-only" onClick={() => navigate("/karyawan/dashboard")}>
-            {/* UPDATE: Mengubah size menjadi 24 dan color menjadi white agar persis seperti menu Riwayat */}
             <ArrowLeft size={24} color="white" />
           </button>
 
-          {/* Logo Persegi (HANYA MUNCUL DI DESKTOP - POJOK ATAS) */}
           <div className="sidebar-logo-desktop desktop-only">
              <img src={logoPersegi} alt="Amaga Corp" />
           </div>
           
-          {/* Area Lingkaran Profil */}
           <div className="logo-center-area">
             <img src={logoAmaga} alt="Logo Amaga" className="img-circle-content mobile-only" />
             <img src={profileImg} alt="Profile User" className="img-circle-content desktop-only" />
@@ -80,18 +118,14 @@ const Absensi = () => {
           <h2 className="title-form">Absensi</h2>
           <p className="subtitle-form">Silahkan Melakukan Absensi</p>
 
-          {/* Tombol Logout (HANYA MUNCUL DI DESKTOP - POJOK BAWAH) */}
-          <button className="btn-logout-desktop desktop-only" onClick={() => navigate("/")}>
+          <button className="btn-logout-desktop desktop-only" onClick={handleLogout}>
              Log Out
           </button>
         </div>
 
-        {/* ================= FORM CONTENT ================= */}
+        {/* FORM CONTENT */}
         <div className="form-section">
-          
-          {/* Wrapper Judul agar Tombol Back Desktop sejajar dengan Teks */}
           <div className="form-header-wrapper">
-            {/* Tombol Back (HANYA MUNCUL DI DESKTOP) */}
             <button className="btn-back-desktop desktop-only" onClick={() => navigate("/karyawan/dashboard")}>
               <ArrowLeft size={24} color="#333" strokeWidth={2.5} />
             </button>
@@ -116,9 +150,8 @@ const Absensi = () => {
           <div className="input-group">
             <label>Cabang</label>
             <div className="select-wrapper">
-              <select className="custom-select">
-                <option value="">Pilih cabang</option>
-                <option value="pusat">Cabang Pusat</option>
+              <select className="custom-select" disabled>
+                <option value="">{user?.cabang || "Pilih cabang"}</option>
               </select>
               <ChevronDown className="select-icon" size={18} />
             </div>
@@ -133,7 +166,7 @@ const Absensi = () => {
                   className="time-display"
                   value={breakStartTime}
                   onChange={handleStartTimeChange}
-                  min={getCurrentTimeStr()}
+                  min={getCurrentTimeStr().substring(0,5)}
                   style={{ cursor: "pointer", fontFamily: "Inter" }}
                 />
               </div>
@@ -152,11 +185,10 @@ const Absensi = () => {
             </div>
           )}
 
-          <button className="btn-submit-primary" onClick={handleAbsen}>
-            {activeTab} Absensi
+          <button className="btn-submit-primary" onClick={handleAbsen} disabled={loading}>
+            {loading ? "Menyimpan..." : `${activeTab} Absensi`}
           </button>
         </div>
-
         <div className="bottom-gap"></div>
       </div>
     </div>
