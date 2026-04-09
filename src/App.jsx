@@ -8,7 +8,7 @@ import DashboardHRD from "./pages/hrd/dashboard";
 import KelolaCabang from "./pages/hrd/kelolacabang"; 
 import DataKaryawan from "./pages/hrd/datakaryawan"; 
 import DetailKaryawan from "./pages/hrd/detailkaryawan"; 
-import AbsenManual from "./pages/hrd/kehadiran"; 
+import AbsenManual from "./pages/hrd/kehadiran"; // Ini sebenarnya adalah file kehadiran.jsx
 import Laporan from "./pages/hrd/laporan"; 
 
 import DashboardKaryawan from "./pages/karyawan/dashboard"; 
@@ -36,11 +36,11 @@ function App() {
             <Route path="/hrd/kelolacabang" element={<KelolaCabang />} />
             <Route path="/hrd/datakaryawan" element={<DataKaryawan />} />
             
-            {/* Mengizinkan akses detail dengan atau tanpa ID */}
-            <Route path="/hrd/detail-karyawan" element={<DetailKaryawan />} />
-            <Route path="/hrd/detail-karyawan/:id" element={<DetailKaryawan />} />
+            <Route path="/hrd/detailkaryawan" element={<DetailKaryawan />} />
+            <Route path="/hrd/detailkaryawan/:id" element={<DetailKaryawan />} />
             
-            <Route path="/hrd/absenmanual" element={<AbsenManual />} />
+            {/* PERBAIKAN: Ubah path dari /hrd/absenmanual menjadi /hrd/kehadiran agar sesuai Sidebar */}
+            <Route path="/hrd/kehadiran" element={<AbsenManual />} />
             <Route path="/hrd/laporan" element={<Laporan />} />
           </Route>
 
@@ -57,9 +57,8 @@ function App() {
             <Route path="/managerCabang/dashboard" element={<DashboardManagerCabang />} />
             <Route path="/managerCabang/datakaryawan" element={<DataKaryawanManager />} />
             
-            {/* FIX UTAMA: Mengizinkan akses detail dengan atau tanpa ID */}
-            <Route path="/managerCabang/detail-karyawan" element={<DetailKaryawanManager />} />
-            <Route path="/managerCabang/detail-karyawan/:id" element={<DetailKaryawanManager />} />
+            <Route path="/managerCabang/detailkaryawan" element={<DetailKaryawanManager />} />
+            <Route path="/managerCabang/detailkaryawan/:id" element={<DetailKaryawanManager />} />
             
             <Route path="/managerCabang/perizinan" element={<PerizinanManager />} />
             <Route path="/managerCabang/laporan" element={<LaporanManager />} />

@@ -1,17 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "./dashboard.css";
+import { useAuth } from "../../context/AuthContext";
+import "./dashboard.css"; 
 
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
 import { Line } from "react-chartjs-2";
 
 import iconDashboard from "../../assets/dashboard.svg";
@@ -22,74 +14,73 @@ import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const DashboardHRD = () => {
   const navigate = useNavigate();
-
-  // STATE FILTER
-  const [showFilter, setShowFilter] = useState(false);
-  const [selectedCabang, setSelectedCabang] = useState("Semua Cabang");
-
-  // STATE MOBILE SIDEBAR
+  const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    navigate("/auth/login");
-  };
-
-  const toggleFilter = () => setShowFilter(!showFilter);
-
-  const handleSelectFilter = (val) => {
-    setSelectedCabang(val);
-    setShowFilter(false);
-  };
 
   const openSidebar = () => setSidebarOpen(true);
   const closeSidebar = () => setSidebarOpen(false);
 
-  // Navigasi dari sidebar mobile: tutup sidebar dulu, baru navigate
-  const handleNav = (path) => {
-    closeSidebar();
-    navigate(path);
+  const [showFilter, setShowFilter] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState("Filter Cabang");
+  const [cabangList, setCabangList] = useState([]);
+
+  // STATE STATISTIK & GRAFIK DARI DATABASE
+  const [stats, setStats] = useState({ hadir: 0, sakit: 0, izin: 0, cuti: 0, terlambat: 0, alpha: 0 });
+  const [chartData, setChartData] = useState({ hadir: [], sakit: [], izin: [], terlambat: [], alpha: [] });
+
+  useEffect(() => {
+    if (user) {
+      const fetchCabang = async () => {
+        try {
+          const res = await fetch("http://localhost:3000/api/cabang");
+          const data = await res.json();
+          setCabangList(data.map(c => c.nama));
+        } catch (err) { console.error(err); }
+      };
+      
+      const fetchStats = async () => {
+        try {
+          const res = await fetch(`http://localhost:3000/api/dashboard/stats?role=hrd`);
+          const data = await res.json();
+          if(data.totals) setStats(data.totals);
+          if(data.chart) setChartData(data.chart);
+        } catch (err) { console.error("Gagal menarik statistik", err); }
+      };
+
+      fetchCabang();
+      fetchStats();
+    }
+  }, [user]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user"); 
+    localStorage.removeItem("token");
+    navigate("/auth/login");
   };
 
-  const getSimulatedData = (baseValue) => {
-    if (selectedCabang === "Semua Cabang") return baseValue;
-    if (selectedCabang === "Cabang 1") return Math.floor(baseValue * 0.4);
-    if (selectedCabang === "Cabang 2") return Math.floor(baseValue * 0.3);
-    if (selectedCabang === "Cabang 3") return Math.floor(baseValue * 0.2);
-    if (selectedCabang === "Cabang 4") return Math.floor(baseValue * 0.1);
-    return baseValue;
-  };
+  const handleNav = (path) => { setSidebarOpen(false); navigate(path); };
 
   const statsCards = [
-    { label: "Hadir", value: getSimulatedData(270), gradient: "linear-gradient(135deg, #2fb800 0%, #1f8f3d 100%)", shadow: "rgba(47, 184, 0, 0.3)" },
-    { label: "Sakit", value: getSimulatedData(270), gradient: "linear-gradient(135deg, #f1c40f 0%, #d4ac0d 100%)", shadow: "rgba(241, 196, 15, 0.3)" },
-    { label: "Izin", value: getSimulatedData(270), gradient: "linear-gradient(135deg, #2980b9 0%, #094b75 100%)", shadow: "rgba(41, 128, 185, 0.3)" },
-    { label: "Terlambat", value: getSimulatedData(270), gradient: "linear-gradient(135deg, #9b59b6 0%, #71368a 100%)", shadow: "rgba(155, 89, 182, 0.3)" },
-    { label: "Alpha", value: getSimulatedData(270), gradient: "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)", shadow: "rgba(231, 76, 60, 0.3)" },
-    { label: "Cuti", value: getSimulatedData(270), gradient: "linear-gradient(135deg, #1abc9c 0%, #16a085 100%)", shadow: "rgba(26, 188, 156, 0.3)" },
+    { label: "Hadir", value: stats.hadir, gradient: "linear-gradient(135deg, #2fb800 0%, #1f8f3d 100%)", shadow: "rgba(47, 184, 0, 0.3)" },
+    { label: "Sakit", value: stats.sakit, gradient: "linear-gradient(135deg, #f1c40f 0%, #d4ac0d 100%)", shadow: "rgba(241, 196, 15, 0.3)" },
+    { label: "Izin", value: stats.izin, gradient: "linear-gradient(135deg, #2980b9 0%, #094b75 100%)", shadow: "rgba(41, 128, 185, 0.3)" },
+    { label: "Terlambat", value: stats.terlambat, gradient: "linear-gradient(135deg, #9b59b6 0%, #71368a 100%)", shadow: "rgba(155, 89, 182, 0.3)" },
+    { label: "Alpha", value: stats.alpha, gradient: "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)", shadow: "rgba(231, 76, 60, 0.3)" },
+    { label: "Cuti", value: stats.cuti, gradient: "linear-gradient(135deg, #1abc9c 0%, #16a085 100%)", shadow: "rgba(26, 188, 156, 0.3)" },
   ];
 
   const dataGrafik = {
     labels: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"],
     datasets: [
-      { label: "Hadir", data: [100, 20, 35, 10, 30, 60].map(getSimulatedData), borderColor: "#2fb800", backgroundColor: "#2fb800", tension: 0.3, pointRadius: 4 },
-      { label: "Sakit", data: [25, 30, 15, 40, 50, 60].map(getSimulatedData), borderColor: "#f1c40f", backgroundColor: "#f1c40f", tension: 0.3, pointRadius: 4 },
-      { label: "Izin", data: [15, 18, 22, 25, 23, 20].map(getSimulatedData), borderColor: "#2980b9", backgroundColor: "#2980b9", tension: 0.3, pointRadius: 4 },
-      { label: "Terlambat", data: [30, 35, 40, 35, 35, 30].map(getSimulatedData), borderColor: "#9b59b6", backgroundColor: "#9b59b6", tension: 0.3, pointRadius: 4 },
-      { label: "Alpha", data: [10, 15, 30, 55, 38, 70].map(getSimulatedData), borderColor: "#e74c3c", backgroundColor: "#e74c3c", tension: 0.3, pointRadius: 4 },
+      { label: "Hadir", data: chartData.hadir, borderColor: "#2fb800", backgroundColor: "#2fb800", tension: 0.4, pointRadius: 4 },
+      { label: "Sakit", data: chartData.sakit, borderColor: "#f1c40f", backgroundColor: "#f1c40f", tension: 0.4, pointRadius: 4 },
+      { label: "Izin", data: chartData.izin, borderColor: "#2980b9", backgroundColor: "#2980b9", tension: 0.4, pointRadius: 4 },
+      { label: "Terlambat", data: chartData.terlambat, borderColor: "#9b59b6", backgroundColor: "#9b59b6", tension: 0.4, pointRadius: 4 },
+      { label: "Alpha", data: chartData.alpha, borderColor: "#e74c3c", backgroundColor: "#e74c3c", tension: 0.4, pointRadius: 4 },
     ],
   };
 
@@ -97,119 +88,59 @@ const DashboardHRD = () => {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: {
-        position: "bottom",
-        labels: { usePointStyle: true, boxWidth: 8, padding: 20, font: { family: "'Inter', sans-serif", size: 12 }, color: "#333" },
-      },
+      legend: { position: "bottom", labels: { usePointStyle: true, boxWidth: 8, font: { size: 12, family: "'Inter', sans-serif" }, color: "#555" } },
     },
     scales: {
-      y: { beginAtZero: true, grid: { color: "#f0f0f0" }, ticks: { stepSize: 20, font: { family: "'Inter', sans-serif", size: 11 }, color: "#666" } },
-      x: { grid: { display: false }, ticks: { font: { family: "'Inter', sans-serif", size: 11 }, color: "#666" } },
+      y: { beginAtZero: true, suggestedMax: 10, ticks: { stepSize: 5, color: "#999", font: { size: 11 } }, grid: { color: "#f0f0f0" } },
+      x: { ticks: { color: "#999", font: { size: 11 } }, grid: { display: false } },
     },
   };
 
   return (
     <div className="hrd-container">
-
-      {/* ===== MOBILE TOPBAR (hanya tampil di ≤768px via CSS) ===== */}
       <div className="mobile-topbar">
         <img src={logoPersegi} alt="AMAGACORP" className="mobile-topbar-logo" />
-        <button className="btn-hamburger" onClick={openSidebar} aria-label="Buka menu">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
+        <button className="btn-hamburger" onClick={openSidebar}><span></span><span></span><span></span></button>
       </div>
+      <div className={`sidebar-overlay ${sidebarOpen ? "active" : ""}`} onClick={closeSidebar} />
 
-      {/* ===== OVERLAY (klik untuk tutup sidebar) ===== */}
-      <div
-        className={`sidebar-overlay ${sidebarOpen ? "active" : ""}`}
-        onClick={closeSidebar}
-      />
-
-      {/* ===== SIDEBAR ===== */}
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
-
-        {/* Tombol close hanya relevan di mobile, di desktop tidak terlihat */}
-        <button className="btn-sidebar-close" onClick={closeSidebar} aria-label="Tutup menu">
-          ✕
-        </button>
-
-        <div className="logo-area">
-          <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
-        </div>
-
+        <button className="btn-sidebar-close" onClick={closeSidebar}>✕</button>
+        <div className="logo-area"><img src={logoPersegi} alt="AMAGACORP" className="logo-img" /></div>
         <nav className="menu-nav">
-          <div className="menu-item active" onClick={() => handleNav("/hrd/dashboard")}>
-            <div className="menu-left">
-              <img src={iconDashboard} alt="dash" className="menu-icon-main" />
-              <span className="menu-text-main">Dashboard</span>
-            </div>
-          </div>
-
-          <div className="menu-item" onClick={() => handleNav("/hrd/kelolacabang")}>
-            <div className="menu-left">
-              <img src={iconKelola} alt="kelola" className="menu-icon-main" />
-              <span className="menu-text-main">Kelola Cabang</span>
-            </div>
-          </div>
-
-          <div className="menu-item" onClick={() => handleNav("/hrd/datakaryawan")}>
-            <div className="menu-left">
-              <img src={iconKaryawan} alt="karyawan" className="menu-icon-main" />
-              <span className="menu-text-main">Data Karyawan</span>
-            </div>
-          </div>
-
-          <div className="menu-item has-arrow" onClick={() => handleNav("/hrd/absenmanual")}>
-            <div className="menu-left">
-              <img src={iconKehadiran} alt="hadir" className="menu-icon-main" />
-              <span className="menu-text-main">Kehadiran</span>
-            </div>
-            <img src={iconBawah} alt="down" className="arrow-icon-main" />
-          </div>
-
-          <div className="menu-item" onClick={() => handleNav("/hrd/laporan")}>
-            <div className="menu-left">
-              <img src={iconLaporan} alt="lapor" className="menu-icon-main" />
-              <span className="menu-text-main">Laporan</span>
-            </div>
-          </div>
+          <div className="menu-item active" onClick={() => handleNav("/hrd/dashboard")}><div className="menu-left"><img src={iconDashboard} alt="" className="menu-icon-main" /><span className="menu-text-main">Dashboard</span></div></div>
+          <div className="menu-item" onClick={() => handleNav("/hrd/kelolacabang")}><div className="menu-left"><img src={iconKelola} alt="" className="menu-icon-main" /><span className="menu-text-main">Kelola Cabang</span></div></div>
+          <div className="menu-item" onClick={() => handleNav("/hrd/datakaryawan")}><div className="menu-left"><img src={iconKaryawan} alt="" className="menu-icon-main" /><span className="menu-text-main">Data Karyawan</span></div></div>
+          <div className="menu-item has-arrow" onClick={() => handleNav("/hrd/kehadiran")}><div className="menu-left"><img src={iconKehadiran} alt="" className="menu-icon-main" /><span className="menu-text-main">Kehadiran</span></div><img src={iconBawah} alt="" className="arrow-icon-main" /></div>
+          <div className="menu-item" onClick={() => handleNav("/hrd/laporan")}><div className="menu-left"><img src={iconLaporan} alt="" className="menu-icon-main" /><span className="menu-text-main">Laporan</span></div></div>
         </nav>
-
-        <div className="sidebar-footer">
-          <button className="btn-logout" onClick={handleLogout}>
-            Log Out
-          </button>
-        </div>
+        <div className="sidebar-footer"><button className="btn-logout" onClick={handleLogout}>Log Out</button></div>
       </aside>
 
-      {/* ===== MAIN CONTENT ===== */}
       <main className="main-content">
-        <header className="content-header">
-          <div className="header-text">
-            <h1>Dashboard Operasional</h1>
-            <p>Manajemen data kehadiran dan statistik karyawan</p>
-          </div>
+        
+        <header className="dashboard-header-area">
+          <h1 className="dashboard-title">Dashboard Operasional</h1>
+          <p className="dashboard-subtitle">Manajemen data kehadiran dan statistik karyawan</p>
+        </header>
 
+        <div className="dashboard-filter-row">
           <div className="filter-wrapper">
-            <button className="btn-filter-green" onClick={toggleFilter}>
-              {selectedCabang === "Semua Cabang" ? "Filter Cabang" : selectedCabang}
-              <img src={iconBawah} alt="v" className={`filter-arrow ${showFilter ? "rotate" : ""}`} />
+            <button className="btn-filter-green" onClick={() => setShowFilter(!showFilter)}>
+              {selectedFilter} <img src={iconBawah} alt="v" className={showFilter ? "filter-arrow rotate" : "filter-arrow"} />
             </button>
             {showFilter && (
               <div className="filter-dropdown">
-                {["Semua Cabang", "Cabang 1", "Cabang 2", "Cabang 3", "Cabang 4"].map((c) => (
-                  <div key={c} className="dropdown-item" onClick={() => handleSelectFilter(c)}>
-                    {c}
-                  </div>
+                <div className="dropdown-item" onClick={() => {setSelectedFilter("Semua Cabang"); setShowFilter(false);}}>Semua Cabang</div>
+                {cabangList.map(c => (
+                  <div key={c} className="dropdown-item" onClick={() => {setSelectedFilter(c); setShowFilter(false);}}>{c}</div>
                 ))}
               </div>
             )}
           </div>
-        </header>
+        </div>
 
-        <div className="chart-section shadow-box">
+        <div className="dashboard-chart-box">
           <div className="chart-container-inner">
             <Line data={dataGrafik} options={optionsGrafik} />
           </div>
@@ -217,19 +148,13 @@ const DashboardHRD = () => {
 
         <div className="stats-grid">
           {statsCards.map((item, index) => (
-            <div
-              className="stat-card"
-              key={index}
-              style={{
-                background: item.gradient,
-                boxShadow: `0 8px 20px ${item.shadow}`,
-              }}
-            >
+            <div className="stat-card" key={index} style={{ background: item.gradient, boxShadow: `0 8px 20px ${item.shadow}` }}>
               <h1 className="stat-value">{item.value}</h1>
               <p className="stat-label">{item.label}</p>
             </div>
           ))}
         </div>
+
       </main>
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "../hrd/laporan.css";
+import { useAuth } from "../../context/AuthContext";
+import "../hrd/laporan.css"; // Menggunakan CSS HRD 
 
 import iconDashboard from "../../assets/dashboard.svg";
 import iconKaryawan from "../../assets/datakaryawan.svg";
@@ -24,36 +25,24 @@ const formatDate = (dateObj) => {
 
 const LaporanManagerCabang = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  // STATE MOBILE SIDEBAR
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const openSidebar = () => setSidebarOpen(true);
   const closeSidebar = () => setSidebarOpen(false);
   const handleNav = (path) => { closeSidebar(); navigate(path); };
 
-  const [userData, setUserData] = useState({ nama: "Loading...", cabangUtama: "Memuat Data...", subCabang: [] });
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUserData({
-          nama: parsedUser.nama || "Manager",
-          cabangUtama: parsedUser.cabangUtama || "Cabang Tidak Diketahui",
-          subCabang: Array.isArray(parsedUser.subCabang) ? parsedUser.subCabang : []
-        });
-      } catch (error) {
-        console.error("Gagal memparsing data user dari localStorage", error);
-      }
-    }
-  }, [navigate]);
-
-  const hasSubCabang = userData.subCabang.length > 0;
-
   const [showFilter, setShowFilter] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false); 
   const [selectedFilter, setSelectedFilter] = useState("Semua Sub-Cabang");
   const [searchTerm, setSearchTerm] = useState("");
+
+  const [dataLaporan, setDataLaporan] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const hasSubCabang = user?.subCabang && user.subCabang.length > 0;
+  const subCabangList = user?.subCabang || [];
+  const namaCabangUtama = user?.cabangUtama || "Cabang";
 
   const [startDate, setStartDate] = useState(() => {
       const d = getYesterday();
@@ -67,6 +56,23 @@ const LaporanManagerCabang = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [modalInfo, setModalInfo] = useState({ title: '', nama: '', nik: '', jenisData: '', data: [] });
   const [previewImage, setPreviewImage] = useState(null);
+
+  useEffect(() => {
+    const fetchLaporan = async () => {
+      if (!user?.cabang_id) return;
+      try {
+        setLoading(true);
+        const res = await fetch(`http://localhost:3000/api/laporan?role=managerCabang&cabang_id=${user.cabang_id}`);
+        const data = await res.json();
+        setDataLaporan(data);
+      } catch (err) {
+        console.error("Gagal mengambil data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLaporan();
+  }, [user]);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -86,66 +92,125 @@ const LaporanManagerCabang = () => {
     return "";
   };
 
-  const openDetail = (nama, nik, jenis, jumlah, cabang) => {
+  // LOGIKA BARU: MENGGUNAKAN DATA ASLI (rawAbsensi & rawPerizinan) DARI SUPABASE
+  const openDetail = (item, jenis, jumlah) => {
       if (jumlah === "0" || jumlah === "-") return;
-      let dummyData = [];
-      const jml = parseInt(jumlah);
+      
+      const { nama, nik, cabang, rawAbsensi = [], rawPerizinan = [] } = item;
+      let realData = [];
       let title = `Rincian ${jenis}`;
 
-      for(let i=1; i <= (isNaN(jml) ? 1 : jml); i++) {
-          const fakeDate = `1${i} Mar 2026`;
-
-          if (jenis === "Hadir via App" || jenis === "Hadir Manual") {
-              const isAppKlik = jenis === "Hadir via App";
-              const mixLogic = i % 2 === 0;
-              title = isAppKlik ? "Log Absensi Mandiri (Karyawan)" : "Log Rekapitulasi Manual (Admin HRD)";
-              dummyData.push({
-                  tanggal: fakeDate, cabang: cabang,
-                  masuk: { jam: isAppKlik ? `07:5${i} WIB` : `08:1${i} WIB`, isManual: !isAppKlik, foto: isAppKlik ? "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop" : null, keterangan: !isAppKlik ? "Lupa absen HP mati" : "", admin: !isAppKlik ? "Admin_Siti" : "" },
-                  pulang: { jam: `17:0${i} WIB`, isManual: isAppKlik ? mixLogic : !mixLogic, foto: (isAppKlik ? mixLogic : !mixLogic) ? null : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop", keterangan: (isAppKlik ? mixLogic : !mixLogic) ? "Dibantu inputkan karena error" : "", admin: (isAppKlik ? mixLogic : !mixLogic) ? "Admin_Budi" : "" },
-                  tipe: "absen"
-              });
-          } else if (jenis === "Izin" || jenis === "Sakit") {
-              title = `Log Perizinan (${jenis})`;
-              dummyData.push({ jenisIzin: jenis === "Sakit" ? "Sakit" : (i % 2 === 0 ? "Acara Pribadi" : "Lainnya"), tanggalMulai: fakeDate, tanggalAkhir: `1${i+2} Mar 2026`, keterangan: jenis === "Sakit" ? "Sakit demam tinggi, butuh istirahat." : "Ada keperluan keluarga mendesak di luar kota.", foto: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=400&h=400&fit=crop", tipe: "izin_sakit" });
-          } else if (jenis === "Cuti") {
-              title = `Log Perizinan (Cuti)`;
-              dummyData.push({ cabang: cabang, jabatan: "Staff", divisi: "Operasional", jenisCuti: i % 2 === 0 ? "Cuti Tahunan" : "Cuti Khusus", tanggalMulai: fakeDate, tanggalAkhir: `1${i+4} Mar 2026`, keterangan: i % 2 === 0 ? "Cuti liburan tahunan bersama keluarga" : "Pernikahan saudara kandung", noTelp: "08123456789" + i, tipe: "cuti" });
-          } else if (jenis === "FIMTK") {
-              title = `Log Perizinan (FIMTK)`;
-              dummyData.push({ cabang: cabang, jabatan: "Staff IT", divisi: "Technology", izinMTK: i % 2 === 0 ? "Keluar Kantor" : "Pulang Cepat", tanggal: fakeDate, jamMulai: `10:0${i} WIB`, jamAkhir: `14:3${i} WIB`, keperluan: i % 2 === 0 ? "Kantor" : "Pribadi", kendaraan: i % 2 === 0 ? "Kantor" : "Pribadi", alasan: i % 2 === 0 ? "Ada meeting dadakan dengan klien di luar kota." : "Urusan keluarga mendesak di rumah.", tipe: "fimtk" });
-          } else if (jenis === "Terlambat") {
-              title = `Log Keterlambatan Karyawan`;
-              const menitTelat = 10 + (i * 5);
-              dummyData.push({ tanggal: fakeDate, cabang: cabang, jadwal: "08:00 WIB", aktual: `08:${menitTelat} WIB`, durasi: `${menitTelat} Menit`, status: i % 3 === 0 ? "Absensi Manual HRD" : "Absensi Karyawan", tipe: "terlambat" });
-          } else if (jenis === "Lembur") {
-              title = `Log Kalkulasi Lembur`;
-              dummyData.push({ tanggal: fakeDate, cabang: cabang, jamMasuk: `07:5${i} WIB`, jamPulang: `17:0${i} WIB`, statusIstirahat: "Tidak Diambil / Dilewati", durasiLembur: "3 Jam", keteranganLembur: "Kompensasi waktu istirahat yang tidak digunakan.", tipe: "lembur" });
-          } else if (jenis === "Alpha") {
-              title = `Log Ketidakhadiran (Alpha)`;
-              dummyData.push({ tanggal: fakeDate, cabang: cabang, jadwal: "08:00 WIB - 17:00 WIB", status: "Tanpa Keterangan", keterangan: "Sistem tidak mendeteksi adanya data absensi masuk/pulang maupun permohonan izin/cuti pada tanggal tersebut.", tipe: "alpha" });
-          } else {
-              dummyData.push({ tanggal: fakeDate, ket: `Rincian data ${jenis} ke-${i}`, tipe: "lainnya" });
-          }
+      if (jenis === "Hadir via App") {
+          title = "Log Absensi Mandiri (Karyawan)";
+          const dataApp = rawAbsensi.filter(a => !a.is_manual_masuk);
+          realData = dataApp.map(a => ({
+              tipe: "absen", tanggal: a.tanggal, cabang: cabang,
+              masuk: { jam: a.waktu_masuk || "-", isManual: false, foto: a.foto_masuk || null, keterangan: "", admin: "" },
+              pulang: { jam: a.waktu_pulang || "-", isManual: false, foto: a.foto_pulang || null, keterangan: "", admin: "" }
+          }));
+      } else if (jenis === "Hadir Manual") {
+          title = "Log Rekapitulasi Manual (Admin HRD)";
+          const dataManual = rawAbsensi.filter(a => a.is_manual_masuk);
+          realData = dataManual.map(a => ({
+              tipe: "absen", tanggal: a.tanggal, cabang: cabang,
+              masuk: { jam: a.waktu_masuk || "-", isManual: true, foto: null, keterangan: a.keterangan || "Absen Manual", admin: "HRD" },
+              pulang: { jam: a.waktu_pulang || "-", isManual: true, foto: null, keterangan: a.keterangan || "Absen Manual", admin: "HRD" }
+          }));
+      } else if (jenis === "Sakit") {
+          title = `Log Perizinan (Sakit)`;
+          const dataSakit = rawPerizinan.filter(p => p.kategori === 'Izin' && p.jenis_izin === 'Sakit');
+          realData = dataSakit.map(p => ({
+              tipe: "izin_sakit", jenisIzin: "Sakit", tanggalMulai: p.tanggal_mulai, tanggalAkhir: p.tanggal_selesai,
+              keterangan: p.keterangan || "-", foto: p.bukti_foto || null
+          }));
+      } else if (jenis === "Izin") {
+          title = `Log Perizinan (Izin)`;
+          const dataIzin = rawPerizinan.filter(p => p.kategori === 'Izin' && p.jenis_izin !== 'Sakit');
+          realData = dataIzin.map(p => ({
+              tipe: "izin_sakit", jenisIzin: p.jenis_izin || "Lainnya", tanggalMulai: p.tanggal_mulai, tanggalAkhir: p.tanggal_selesai,
+              keterangan: p.keterangan || p.keperluan || "-", foto: p.bukti_foto || null
+          }));
+      } else if (jenis === "Cuti") {
+          title = `Log Perizinan (Cuti)`;
+          const dataCuti = rawPerizinan.filter(p => p.kategori === 'Cuti');
+          realData = dataCuti.map(p => ({
+              tipe: "cuti", cabang: cabang, jabatan: item.jabatan || "-", divisi: item.divisi || "-",
+              jenisCuti: p.jenis_izin || "Cuti Tahunan", tanggalMulai: p.tanggal_mulai, tanggalAkhir: p.tanggal_selesai,
+              keterangan: p.keterangan || p.keperluan || "-", noTelp: item.noTelp || "-"
+          }));
+      } else if (jenis === "FIMTK") {
+          title = `Log Perizinan (FIMTK)`;
+          const dataFimtk = rawPerizinan.filter(p => p.kategori === 'FIMTK');
+          realData = dataFimtk.map(p => ({
+              tipe: "fimtk", cabang: cabang, jabatan: item.jabatan || "-", divisi: item.divisi || "-",
+              izinMTK: p.jenis_izin || "FIMTK", tanggal: p.tanggal_mulai, jamMulai: p.jam_mulai || "-", jamAkhir: p.jam_selesai || "-",
+              keperluan: p.keperluan || "-", kendaraan: p.kendaraan || "-", alasan: p.keterangan || "-"
+          }));
       }
-      setModalInfo({ title, nama, nik, jenisData: jenis, data: dummyData });
+
+      setModalInfo({ title, nama, nik, jenisData: jenis, data: realData });
       setShowDetailModal(true);
   };
-
-  const dataLaporan = [
-    { id: 1, nama: "Syahrul", nik: "123456789", cabang: "F&B Sudirman", hadirApp: "10", hadirManual: "10", izin: "2", sakit: "3", cuti: "2", terlambat: "1", fimtk: "1", lembur: "1", alpha: "1" },
-    { id: 2, nama: "Budi Santoso", nik: "987654321", cabang: "F&B Kemang", hadirApp: "12", hadirManual: "0", izin: "0", sakit: "0", cuti: "0", terlambat: "3", fimtk: "-", lembur: "2", alpha: "2" },
-    { id: 3, nama: "Siti Aminah", nik: "112233445", cabang: "F&B Sudirman", hadirApp: "11", hadirManual: "1", izin: "1", sakit: "0", cuti: "1", terlambat: "5", fimtk: "-", lembur: "-", alpha: "0" },
-    { id: 4, nama: "Joko Anwar", nik: "554433221", cabang: "F&B Senayan", hadirApp: "15", hadirManual: "0", izin: "0", sakit: "0", cuti: "0", terlambat: "6", fimtk: "-", lembur: "-", alpha: "0" },
-    { id: 5, nama: "Rina Kartika", nik: "998877665", cabang: "Amaga Watch Jkt", hadirApp: "14", hadirManual: "0", izin: "0", sakit: "1", cuti: "0", terlambat: "0", fimtk: "-", lembur: "-", alpha: "0" },
-  ];
 
   const filteredData = dataLaporan.filter(item => {
     const matchName = item.nama.toLowerCase().includes(searchTerm.toLowerCase());
     let matchBranch = true;
-    if (hasSubCabang && selectedFilter !== "Semua Sub-Cabang") { matchBranch = item.cabang === selectedFilter; }
+    if (hasSubCabang && selectedFilter !== "Semua Sub-Cabang") { 
+      matchBranch = item.cabang === selectedFilter; 
+    }
     return matchName && matchBranch;
   });
+
+  const getTotals = (dataArray) => {
+    let t = { hadirApp: 0, hadirManual: 0, terlambat: 0, fimtk: 0, sakit: 0, izin: 0, cuti: 0, alpha: 0, lembur: 0 };
+    dataArray.forEach(item => {
+        t.hadirApp += parseInt(item.hadirApp) || 0;
+        t.hadirManual += parseInt(item.hadirManual) || 0;
+        t.terlambat += parseInt(item.terlambat) || 0;
+        t.fimtk += parseInt(item.fimtk) || 0;
+        t.sakit += parseInt(item.sakit) || 0;
+        t.izin += parseInt(item.izin) || 0;
+        t.cuti += parseInt(item.cuti) || 0;
+        t.alpha += parseInt(item.alpha) || 0;
+        t.lembur += parseInt(item.lembur) || 0;
+    });
+    return t;
+  };
+
+  const handleExportExcel = () => {
+      const headers = ["Nama Karyawan", "NIK", "Cabang", "Hadir via App", "Hadir Manual", "Terlambat", "FIMTK", "Sakit", "Izin", "Cuti", "Alpha", "Lembur"];
+      const csvRows = [headers.join(";")];
+      
+      const dataToExport = filteredData; 
+      
+      dataToExport.forEach(item => {
+          const row = [
+              `"${item.nama}"`, `"${item.nik}"`, `"${item.cabang}"`,
+              item.hadirApp, item.hadirManual, item.terlambat, item.fimtk,
+              item.sakit, item.izin, item.cuti, item.alpha, item.lembur
+          ];
+          csvRows.push(row.join(";"));
+      });
+
+      const totals = getTotals(dataToExport);
+      const totalRow = [
+          `"TOTAL KESELURUHAN"`, `"-"`, `"-"`,
+          totals.hadirApp, totals.hadirManual, totals.terlambat, totals.fimtk,
+          totals.sakit, totals.izin, totals.cuti, totals.alpha, totals.lembur
+      ];
+      csvRows.push(totalRow.join(";"));
+
+      const csvString = csvRows.join("\n");
+      const blob = new Blob(["\uFEFF" + csvString], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Rekap_Kehadiran_Cabang_${startDate}_sd_${endDate}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  };
 
   const renderModalBody = (item, idx) => (
     <div key={idx} className="lap-modal-record-card">
@@ -155,8 +220,8 @@ const LaporanManagerCabang = () => {
           <div className="lap-modal-row"><div className="lap-modal-group"><label className="lap-modal-label">Jam Masuk</label><div className="lap-modal-input">{item.masuk.jam}</div></div><div className="lap-modal-group"><label className="lap-modal-label">Jam Pulang</label><div className="lap-modal-input">{item.pulang.jam}</div></div></div>
           {(item.masuk.isManual || item.pulang.isManual) && (<div className="lap-modal-row"><div className="lap-modal-group" style={{flex:1}}><label className="lap-modal-label" style={{color:'#d9480f'}}>⚠️ Catatan Absensi Manual HRD</label><div className="lap-modal-input" style={{background:'#fff9db',borderColor:'#fcc419',color:'#b06500',fontSize:'12px'}}>{item.masuk.isManual && `[Masuk] ${item.masuk.keterangan} (${item.masuk.admin}). `}{item.pulang.isManual && `[Pulang] ${item.pulang.keterangan} (${item.pulang.admin}).`}</div></div></div>)}
           <div className="lap-foto-container">
-            <div className="lap-foto-box">{item.masuk.isManual ? (<div className="lap-manual-placeholder"><span>📝 Absensi Manual</span><small>No Photo Available</small></div>) : (<><img src={item.masuk.foto} alt="Masuk" className="lap-foto-img" /><div className="lap-foto-overlay">Absen Masuk</div><button className="lap-zoom-btn" onClick={() => setPreviewImage(item.masuk.foto)}>🔍</button></>)}</div>
-            <div className="lap-foto-box">{item.pulang.isManual ? (<div className="lap-manual-placeholder"><span>📝 Absensi Manual</span><small>No Photo Available</small></div>) : (<><img src={item.pulang.foto} alt="Pulang" className="lap-foto-img" /><div className="lap-foto-overlay">Absen Pulang</div><button className="lap-zoom-btn" onClick={() => setPreviewImage(item.pulang.foto)}>🔍</button></>)}</div>
+            <div className="lap-foto-box">{item.masuk.isManual || !item.masuk.foto ? (<div className="lap-manual-placeholder"><span>{item.masuk.isManual ? "📝 Absensi Manual" : "📄 Tidak Ada Foto"}</span><small>No Photo Available</small></div>) : (<><img src={item.masuk.foto} alt="Masuk" className="lap-foto-img" /><div className="lap-foto-overlay">Absen Masuk</div><button className="lap-zoom-btn" onClick={() => setPreviewImage(item.masuk.foto)}>🔍</button></>)}</div>
+            <div className="lap-foto-box">{item.pulang.isManual || !item.pulang.foto ? (<div className="lap-manual-placeholder"><span>{item.pulang.isManual ? "📝 Absensi Manual" : "📄 Tidak Ada Foto"}</span><small>No Photo Available</small></div>) : (<><img src={item.pulang.foto} alt="Pulang" className="lap-foto-img" /><div className="lap-foto-overlay">Absen Pulang</div><button className="lap-zoom-btn" onClick={() => setPreviewImage(item.pulang.foto)}>🔍</button></>)}</div>
           </div>
         </>
       )}
@@ -211,62 +276,78 @@ const LaporanManagerCabang = () => {
     </div>
   );
 
-  const renderTable = (headerText, tableData) => (
-    <div className="neo-table-card">
-      <div className="neo-table-header">{headerText}</div>
-      <div className="neo-table-wrapper">
-        <table className="neo-table">
-          <thead>
-            {/* URUTAN OPSI 1: HADIR | TERLAMBAT | FIMTK | SAKIT | IZIN | CUTI | ALPHA | LEMBUR */}
-            <tr>
-              <th>Nama Karyawan</th>
-              <th className="text-center">Hadir</th>
-              <th className="text-center">Terlambat</th>
-              <th className="text-center">FIMTK</th>
-              <th className="text-center">Sakit</th>
-              <th className="text-center">Izin</th>
-              <th className="text-center">Cuti</th>
-              <th className="text-center">Alpha</th>
-              <th className="text-center">Lembur</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tableData.length > 0 ? tableData.map((item) => {
-              const rowClass = getRowTerlambatClass(item.terlambat);
-              return (
-                <tr key={item.id} className={rowClass}>
-                  <td className="neo-td-name">{item.nama}</td>
-                  {/* Hadir */}
-                  <td className="text-center"><div className="neo-dual-badge-container"><span className={`neo-badge ${item.hadirApp !== '0' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item.nama, item.nik, "Hadir via App", item.hadirApp, item.cabang)}>{item.hadirApp}</span><span className={`neo-badge manual ${item.hadirManual !== '0' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item.nama, item.nik, "Hadir Manual", item.hadirManual, item.cabang)}>{item.hadirManual}</span></div></td>
-                  {/* Terlambat */}
-                  <td className="text-center"><span className={`neo-badge ${rowClass ? 'warn-badge' : ''} ${item.terlambat !== '0' && item.terlambat !== '-' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item.nama, item.nik, "Terlambat", item.terlambat, item.cabang)}>{item.terlambat}</span></td>
-                  {/* FIMTK */}
-                  <td className="text-center"><span className={`neo-badge info ${item.fimtk !== '0' && item.fimtk !== '-' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item.nama, item.nik, "FIMTK", item.fimtk, item.cabang)}>{item.fimtk}</span></td>
-                  {/* Sakit */}
-                  <td className="text-center"><span className={`neo-badge ${item.sakit !== '0' && item.sakit !== '-' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item.nama, item.nik, "Sakit", item.sakit, item.cabang)}>{item.sakit}</span></td>
-                  {/* Izin */}
-                  <td className="text-center"><span className={`neo-badge ${item.izin !== '0' && item.izin !== '-' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item.nama, item.nik, "Izin", item.izin, item.cabang)}>{item.izin}</span></td>
-                  {/* Cuti */}
-                  <td className="text-center"><span className={`neo-badge ${item.cuti !== '0' && item.cuti !== '-' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item.nama, item.nik, "Cuti", item.cuti, item.cabang)}>{item.cuti}</span></td>
-                  {/* Alpha */}
-                  <td className="text-center"><span className={`neo-badge alert ${item.alpha !== '0' && item.alpha !== '-' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item.nama, item.nik, "Alpha", item.alpha, item.cabang)}>{item.alpha}</span></td>
-                  {/* Lembur */}
-                  <td className="text-center"><span className={`neo-badge info ${item.lembur !== '0' && item.lembur !== '-' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item.nama, item.nik, "Lembur", item.lembur, item.cabang)}>{item.lembur}</span></td>
-                </tr>
-              );
-            }) : (
-              <tr><td colSpan="9" className="empty-state">Data karyawan {searchTerm ? `dengan nama "${searchTerm}" ` : ""}tidak ditemukan.</td></tr>
+  const renderTable = (headerText, tableData) => {
+    const totals = getTotals(tableData);
+    
+    return (
+      <div className="neo-table-card" style={{ marginBottom: '25px' }}>
+        <div className="neo-table-header">{headerText}</div>
+        <div className="neo-table-wrapper">
+          <table className="neo-table">
+            <thead>
+              <tr>
+                <th>Nama Karyawan</th>
+                <th className="text-center">Hadir</th>
+                <th className="text-center">Terlambat</th>
+                <th className="text-center">FIMTK</th>
+                <th className="text-center">Sakit</th>
+                <th className="text-center">Izin</th>
+                <th className="text-center">Cuti</th>
+                <th className="text-center">Alpha</th>
+                <th className="text-center">Lembur</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (<tr><td colSpan="9" className="empty-state">Memuat data...</td></tr>) : 
+               tableData.length > 0 ? tableData.map((item) => {
+                const rowClass = getRowTerlambatClass(item.terlambat);
+                return (
+                  <tr key={item.id} className={rowClass}>
+                    <td className="neo-td-name">{item.nama}</td>
+                    <td className="text-center"><div className="neo-dual-badge-container"><span className={`neo-badge ${item.hadirApp !== '0' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item, "Hadir via App", item.hadirApp)}>{item.hadirApp}</span><span className={`neo-badge manual ${item.hadirManual !== '0' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item, "Hadir Manual", item.hadirManual)}>{item.hadirManual}</span></div></td>
+                    <td className="text-center"><span className={`neo-badge ${rowClass ? 'warn-badge' : ''} ${item.terlambat !== '0' && item.terlambat !== '-' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item, "Terlambat", item.terlambat)}>{item.terlambat}</span></td>
+                    <td className="text-center"><span className={`neo-badge info ${item.fimtk !== '0' && item.fimtk !== '-' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item, "FIMTK", item.fimtk)}>{item.fimtk}</span></td>
+                    <td className="text-center"><span className={`neo-badge ${item.sakit !== '0' && item.sakit !== '-' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item, "Sakit", item.sakit)}>{item.sakit}</span></td>
+                    <td className="text-center"><span className={`neo-badge ${item.izin !== '0' && item.izin !== '-' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item, "Izin", item.izin)}>{item.izin}</span></td>
+                    <td className="text-center"><span className={`neo-badge ${item.cuti !== '0' && item.cuti !== '-' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item, "Cuti", item.cuti)}>{item.cuti}</span></td>
+                    <td className="text-center"><span className={`neo-badge alert ${item.alpha !== '0' && item.alpha !== '-' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item, "Alpha", item.alpha)}>{item.alpha}</span></td>
+                    <td className="text-center"><span className={`neo-badge info ${item.lembur !== '0' && item.lembur !== '-' ? 'clickable-badge' : ''}`} onClick={() => openDetail(item, "Lembur", item.lembur)}>{item.lembur}</span></td>
+                  </tr>
+                );
+              }) : (
+                <tr><td colSpan="9" className="empty-state">Data karyawan {searchTerm ? `dengan nama "${searchTerm}" ` : ""}tidak ditemukan di cabang ini.</td></tr>
+              )}
+            </tbody>
+            {tableData.length > 0 && !loading && (
+              <tfoot>
+                  <tr>
+                      <td className="neo-td-name" style={{ textAlign: 'right', paddingRight: '20px' }}>TOTAL KESELURUHAN</td>
+                      <td className="text-center">
+                          <div className="neo-dual-badge-container">
+                              <span className="neo-badge">{totals.hadirApp}</span>
+                              <span className="neo-badge manual">{totals.hadirManual}</span>
+                          </div>
+                      </td>
+                      <td className="text-center"><span className="neo-badge">{totals.terlambat}</span></td>
+                      <td className="text-center"><span className="neo-badge info">{totals.fimtk}</span></td>
+                      <td className="text-center"><span className="neo-badge">{totals.sakit}</span></td>
+                      <td className="text-center"><span className="neo-badge">{totals.izin}</span></td>
+                      <td className="text-center"><span className="neo-badge">{totals.cuti}</span></td>
+                      <td className="text-center"><span className="neo-badge alert">{totals.alpha}</span></td>
+                      <td className="text-center"><span className="neo-badge info">{totals.lembur}</span></td>
+                  </tr>
+              </tfoot>
             )}
-          </tbody>
-        </table>
+          </table>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  const isStackedMode = hasSubCabang && selectedFilter === "Semua Sub-Cabang";
 
   return (
     <div className="hrd-container">
-
-      {/* ===== MOBILE TOPBAR ===== */}
       <div className="mobile-topbar">
         <img src={logoPersegi} alt="AMAGACORP" className="mobile-topbar-logo" />
         <button className="btn-hamburger" onClick={openSidebar} aria-label="Buka menu">
@@ -274,10 +355,8 @@ const LaporanManagerCabang = () => {
         </button>
       </div>
 
-      {/* ===== OVERLAY ===== */}
       <div className={`sidebar-overlay ${sidebarOpen ? "active" : ""}`} onClick={closeSidebar} />
 
-      {/* ===== SIDEBAR ===== */}
       <aside className={`sidebar no-print ${sidebarOpen ? "open" : ""}`}>
         <button className="btn-sidebar-close" onClick={closeSidebar} aria-label="Tutup menu">✕</button>
         <div className="logo-area"><img src={logoPersegi} alt="AMAGACORP" className="logo-img" /></div>
@@ -290,17 +369,15 @@ const LaporanManagerCabang = () => {
         <div className="sidebar-footer"><button className="btn-logout" onClick={handleLogout}>Log Out</button></div>
       </aside>
 
-      {/* ===== MAIN CONTENT ===== */}
       <main className="main-content">
         <header className="content-header">
           <div className="header-text">
-            <h1>Laporan Kehadiran - {userData.cabangUtama}</h1>
+            <h1>Laporan Kehadiran - {namaCabangUtama}</h1>
             <p>Data rekapitulasi absensi karyawan di wilayah kerja Anda</p>
           </div>
         </header>
 
         <div className="neo-filter-zone no-print">
-          
           <div className="input-group-neo">
             <div className="neo-field">
               <label>Cari Nama</label>
@@ -317,29 +394,45 @@ const LaporanManagerCabang = () => {
           </div>
 
           <div className="button-group-vertical-right">
-            <button className="btn-neo-print-top no-print" onClick={() => window.print()}>Print</button>
+            
+            <div className="dropdown-neo-bottom-wrapper">
+              <button className="btn-neo-print-top no-print" onClick={() => setShowExportMenu(!showExportMenu)}>
+                Print
+              </button>
+              {showExportMenu && (
+                <div className="neo-dropdown-list-right" style={{top: '115%'}}>
+                  <div className="neo-drop-item" onClick={() => { window.print(); setShowExportMenu(false); }}>Unduh PDF</div>
+                  <div className="neo-drop-item" onClick={() => { handleExportExcel(); setShowExportMenu(false); }}>Unduh Excel</div>
+                </div>
+              )}
+            </div>
+
             <div className="dropdown-neo-bottom-wrapper">
               <button className="btn-neo-filter-bottom" onClick={toggleFilter} style={{ cursor: hasSubCabang ? 'pointer' : 'default', border: hasSubCabang ? '' : '1px solid #ccc', color: hasSubCabang ? '' : '#666' }}>
-                {!hasSubCabang ? userData.cabangUtama : selectedFilter}
+                {!hasSubCabang ? namaCabangUtama : selectedFilter}
                 {hasSubCabang && <img src={iconBawah} alt="v" className={showFilter ? 'rotate' : ''} />}
               </button>
               {showFilter && hasSubCabang && (
                 <div className="neo-dropdown-list-right">
-                  {["Semua Sub-Cabang", ...userData.subCabang].map((c, idx) => (
+                  <div className="neo-drop-item" onClick={() => handleSelectFilter("Semua Sub-Cabang")}>Semua Sub-Cabang</div>
+                  {subCabangList.map((c, idx) => (
                     <div key={idx} className="neo-drop-item" onClick={() => handleSelectFilter(c)}>{c}</div>
                   ))}
                 </div>
               )}
             </div>
           </div>
-
         </div>
 
-        {hasSubCabang && selectedFilter === "Semua Sub-Cabang" ? (
-          <div className="multi-cabang-wrapper">
-            {userData.subCabang.map((sub, index) => (
+        {isStackedMode ? (
+          <div className="multi-cabang-wrapper" style={{ overflowY: 'auto' }}>
+            <div className="cabang-section">
+                <h3 style={{fontSize:'18px', fontWeight:'800', marginBottom:'10px', color:'#111'}}>{namaCabangUtama}</h3>
+                {renderTable(`Data Kehadiran - ${namaCabangUtama}`, filteredData.filter(d => d.cabang === namaCabangUtama))}
+            </div>
+            {subCabangList.map((sub, index) => (
               <div key={index} className="cabang-section">
-                <h3>{sub}</h3>
+                <h3 style={{fontSize:'18px', fontWeight:'800', marginBottom:'10px', color:'#111'}}>{sub}</h3>
                 {renderTable(`Data Kehadiran - ${sub}`, filteredData.filter(d => d.cabang === sub))}
               </div>
             ))}
@@ -349,7 +442,6 @@ const LaporanManagerCabang = () => {
         )}
       </main>
 
-      {/* ===== MODAL DETAIL ===== */}
       {showDetailModal && (
         <div className="modal-overlay-lap" onClick={() => setShowDetailModal(false)}>
           <div className="modal-content-lap" onClick={(e) => e.stopPropagation()}>
@@ -364,14 +456,17 @@ const LaporanManagerCabang = () => {
               </div>
               <hr style={{border:'none',borderBottom:'1px solid #eee',margin:'20px 0'}} />
               <div className="lap-modal-scroll-area">
-                {modalInfo.data.map((item, idx) => renderModalBody(item, idx))}
+                {modalInfo.data.length > 0 ? (
+                  modalInfo.data.map((item, idx) => renderModalBody(item, idx))
+                ) : (
+                  <p style={{textAlign: 'center', color: '#888', marginTop: '20px'}}>Belum ada riwayat detail yang tercatat.</p>
+                )}
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* ===== MODAL PREVIEW GAMBAR ===== */}
       {previewImage && (
         <div className="lap-preview-overlay" onClick={() => setPreviewImage(null)}>
           <button className="lap-preview-close" onClick={() => setPreviewImage(null)}>&times;</button>

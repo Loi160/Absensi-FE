@@ -11,14 +11,32 @@ import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg"; 
 import iconTambah from "../../assets/tambah.svg"; 
 
+// Icon Mata SVG (Sederhana)
+const EyeIcon = ({ show }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    {show ? (
+      <>
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </>
+    ) : (
+      <>
+        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+        <line x1="1" y1="1" x2="23" y2="23"></line>
+      </>
+    )}
+  </svg>
+);
+
 const KelolaCabang = () => {
   const navigate = useNavigate();
   
   const [showModal, setShowModal] = useState(false);
   const [modalTitle, setModalTitle] = useState(""); 
   const [editData, setEditData] = useState(null); 
-  const [parentId, setParentId] = useState(null); // Menyimpan ID parent jika tambah sub-cabang
+  const [parentId, setParentId] = useState(null); 
   const [expandedRows, setExpandedRows] = useState({});
+  const [showPassword, setShowPassword] = useState(false); 
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmData, setConfirmData] = useState(null);
@@ -27,7 +45,6 @@ const KelolaCabang = () => {
   const [dataCabang, setDataCabang] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // MENGAMBIL DATA CABANG
   const fetchCabang = async () => {
     try {
       setLoading(true);
@@ -62,18 +79,19 @@ const KelolaCabang = () => {
     setExpandedRows((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  // HANDLER BUKA MODAL
   const handleOpenEdit = (item) => {
     setModalTitle("Edit Cabang");
     setEditData(item);
     setParentId(null);
+    setShowPassword(false);
     setShowModal(true);
   };
 
   const handleOpenTambahSub = (parentItem) => {
     setModalTitle(`Tambah Sub-Cabang untuk ${parentItem.nama}`);
     setEditData(null); 
-    setParentId(parentItem.id); // Simpan ID Cabang Utama
+    setParentId(parentItem.id);
+    setShowPassword(false);
     setShowModal(true);
   };
 
@@ -81,27 +99,24 @@ const KelolaCabang = () => {
     setModalTitle("Tambah Cabang Baru");
     setEditData(null); 
     setParentId(null);
+    setShowPassword(false);
     setShowModal(true);
   };
 
-  // HANDLER SIMPAN DATA (POST & PUT)
   const handleSaveData = async (e) => {
     e.preventDefault(); 
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
 
-    // Kalau ini tambah sub-cabang, masukkan parent_id
-    if (parentId) {
-      data.parent_id = parentId;
-    }
+    if (parentId) data.parent_id = parentId;
 
     try {
       let url = "http://localhost:3000/api/cabang";
-      let method = "POST"; // Default Tambah Data
+      let method = "POST"; 
 
       if (editData) {
         url = `http://localhost:3000/api/cabang/${editData.id}`;
-        method = "PUT"; // Jika edit, ubah method jadi PUT
+        method = "PUT"; 
       }
 
       const response = await fetch(url, {
@@ -113,7 +128,7 @@ const KelolaCabang = () => {
       if (response.ok) {
         alert(`${modalTitle} berhasil disimpan!`);
         setShowModal(false);
-        fetchCabang(); // Refresh data di layar
+        fetchCabang(); 
       } else {
         alert("Gagal menyimpan data.");
       }
@@ -123,7 +138,6 @@ const KelolaCabang = () => {
     }
   };
 
-  // HANDLER UBAH STATUS AKTIF/INAKTIF
   const handleToggleStatusClick = (e, item) => {
     e.stopPropagation(); 
     setConfirmData(item);
@@ -143,7 +157,7 @@ const KelolaCabang = () => {
       if (response.ok) {
         setShowConfirmModal(false);
         setConfirmData(null);
-        fetchCabang(); // Refresh tabel setelah status diubah
+        fetchCabang(); 
       }
     } catch (error) {
       console.error("Error update status:", error);
@@ -159,12 +173,14 @@ const KelolaCabang = () => {
 
   return (
     <div className="hrd-container">
-      {/* MOBILE TOPBAR & SIDEBAR... (TIDAK BERUBAH) */}
+      {/* MOBILE TOPBAR */}
       <div className="mobile-topbar">
         <img src={logoPersegi} alt="AMAGACORP" className="mobile-topbar-logo" />
         <button className="btn-hamburger" onClick={openSidebar}><span></span><span></span><span></span></button>
       </div>
       <div className={`sidebar-overlay ${sidebarOpen ? "active" : ""}`} onClick={closeSidebar} />
+      
+      {/* SIDEBAR */}
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
         <button className="btn-sidebar-close" onClick={closeSidebar}>✕</button>
         <div className="logo-area"><img src={logoPersegi} alt="AMAGACORP" className="logo-img" /></div>
@@ -180,23 +196,28 @@ const KelolaCabang = () => {
 
       {/* MAIN CONTENT */}
       <main className="main-content">
-        <div className="header-cabang-content">
-            <h1>Kelola Cabang</h1>
-            <p>Manajemen lokasi dan unit operasional</p>
-            <div className="action-row-cabang">
-                <button className="btn-tambah-cabang-baru" onClick={handleOpenTambah}>
-                    <img src={iconTambah} alt="add" /> Tambah Cabang Baru
-                </button>
-            </div>
+        
+        {/* 1. HEADER (Turun ke bawah / Vertikal) */}
+        <header className="header-cabang-area">
+            <h1 className="cabang-title">Kelola Cabang</h1>
+            <p className="cabang-subtitle">Manajemen lokasi dan unit operasional</p>
+        </header>
+
+        {/* 2. TOMBOL TAMBAH CABANG (Rata Kanan) */}
+        <div className="action-row-cabang">
+            <button className="btn-tambah-cabang-baru" onClick={handleOpenTambah}>
+                <img src={iconTambah} alt="add" /> Tambah Cabang Baru
+            </button>
         </div>
 
+        {/* 3. TABEL AREA */}
         <div className="table-cabang-container">
             <div className="table-cabang-header">Nama Cabang</div>
             <div className="table-cabang-body">
                 {loading ? (
-                    <div style={{ padding: "20px", textAlign: "center", color: "#666" }}>Memuat data dari server...</div>
+                    <div className="table-empty-state">Memuat data dari server...</div>
                 ) : dataCabang.length === 0 ? (
-                    <div style={{ padding: "20px", textAlign: "center", color: "#666" }}>Belum ada data cabang.</div>
+                    <div className="table-empty-state">Belum ada data cabang.</div>
                 ) : (
                     dataCabang.map((item) => (
                         <React.Fragment key={item.id}>
@@ -242,10 +263,12 @@ const KelolaCabang = () => {
 
       {/* ================= MODAL FORM TAMBAH/EDIT ================= */}
       {showModal && (
-        <div className="modal-overlay-clean">
-            <div className="modal-card-edit large-card">
+        <div className="modal-overlay-clean" onClick={() => setShowModal(false)}>
+            <div className="modal-card-edit" onClick={(e) => e.stopPropagation()}>
                 <h2 className="modal-title">{modalTitle}</h2>
                 <form onSubmit={handleSaveData}>
+                  
+                  {/* GRID 2 KOLOM */}
                   <div className="modal-grid">
                       <div className="input-block">
                         <label>Nama</label>
@@ -255,14 +278,36 @@ const KelolaCabang = () => {
                         <label>Alamat</label>
                         <input type="text" name="alamat" defaultValue={editData?.alamat} className="modal-input" required />
                       </div>
+                      
+                      <div className="input-block">
+                        <label>Username</label>
+                        <input type="text" name="username" defaultValue={editData?.username} className="modal-input" required />
+                      </div>
+                      <div className="input-block">
+                        <label>Password</label>
+                        <div className="password-wrapper">
+                          <input 
+                            type={showPassword ? "text" : "password"} 
+                            name="password" 
+                            defaultValue={editData?.password} 
+                            className="modal-input" 
+                            required 
+                          />
+                          <button type="button" className="btn-eye" onClick={() => setShowPassword(!showPassword)}>
+                            <EyeIcon show={showPassword} />
+                          </button>
+                        </div>
+                      </div>
+
                       <div className="input-block">
                         <label>Titik Koordinat</label>
-                        <input type="text" name="titik_koordinat" defaultValue={editData?.titik_koordinat} placeholder="Contoh: -6.200000, 106.816666" className="modal-input" required />
+                        <input type="text" name="titik_koordinat" defaultValue={editData?.titik_koordinat} placeholder="-6.200000, 106.816666" className="modal-input" required />
                       </div>
                       <div className="input-block">
                         <label>Jam Masuk</label>
                         <input type="time" name="jam_masuk" defaultValue={editData?.jam_masuk} className="modal-input" required />
                       </div>
+
                       <div className="input-block">
                         <label>Jam Keluar</label>
                         <input type="time" name="jam_keluar" defaultValue={editData?.jam_keluar} className="modal-input" required />
@@ -272,10 +317,12 @@ const KelolaCabang = () => {
                         <input type="number" name="keterlambatan" defaultValue={editData?.keterlambatan} placeholder="Misal: 15" className="modal-input" required />
                       </div>
                   </div>
+
                   <div className="modal-footer-actions">
                       <button type="button" className="btn-cancel-mini" onClick={() => setShowModal(false)}>Batal</button>
                       <button type="submit" className="btn-save-dynamic">Simpan</button>
                   </div>
+
                 </form>
             </div>
         </div>
@@ -283,10 +330,10 @@ const KelolaCabang = () => {
 
       {/* ================= MODAL KONFIRMASI STATUS ================= */}
       {showConfirmModal && (
-        <div className="modal-overlay-clean">
-            <div className="modal-card-confirm">
+        <div className="modal-overlay-clean" onClick={() => setShowConfirmModal(false)}>
+            <div className="modal-card-confirm" onClick={(e) => e.stopPropagation()}>
                 <h3>Konfirmasi Perubahan</h3>
-                <p>Apakah Anda yakin ingin mengubah status cabang <b>{confirmData?.nama}</b> menjadi {confirmData?.is_active ? "Tidak Aktif" : "Aktif"}?</p>
+                <p>Apakah Anda yakin ingin mengubah status cabang ini?</p>
                 <div className="confirm-btn-group">
                     <button className="btn-konfirm-batal" onClick={() => { setShowConfirmModal(false); setConfirmData(null); }}>Batal</button>
                     <button className="btn-konfirm-yakin" onClick={executeToggleStatus}>Ya, Ubah</button>

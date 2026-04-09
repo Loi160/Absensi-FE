@@ -29,35 +29,46 @@ const Kehadiran = () => {
   const [dataCuti, setDataCuti] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // STATE UNTUK ABSEN MANUAL
+  const [karyawanList, setKaryawanList] = useState([]);
+  const [loadingAbsen, setLoadingAbsen] = useState(false);
+  const [selectedKaryawanId, setSelectedKaryawanId] = useState("");
+  const [karyawanDetail, setKaryawanDetail] = useState(null);
+
+  const [tanggalAbsen, setTanggalAbsen] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
+
+  const [searchKaryawan, setSearchKaryawan] = useState("");
+  const [showKaryawanDropdown, setShowKaryawanDropdown] = useState(false);
+
   // STATE MODAL DETAIL
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState(""); 
   const [selectedData, setSelectedData] = useState(null);
 
-  // FORMAT TANGGAL
   const formatDateIndo = (dateString) => {
     if (!dateString) return "-";
     const date = new Date(dateString);
     return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
   };
 
-  // MENGAMBIL DATA DARI BACKEND
   const fetchData = async () => {
     try {
       setLoading(true);
-      // Ambil daftar cabang untuk filter
       const resCabang = await fetch("http://localhost:3000/api/cabang");
       const listCabang = await resCabang.json();
       setCabangList(listCabang.map(c => c.nama));
 
-      // Ambil semua perizinan
+      const resKaryawan = await fetch("http://localhost:3000/api/karyawan");
+      const listKaryawan = await resKaryawan.json();
+      setKaryawanList(listKaryawan);
+
       const resPerizinan = await fetch("http://localhost:3000/api/perizinan/all");
       const allPerizinan = await resPerizinan.json();
 
-      // Memecah data berdasarkan kategori
-      const harian = [];
-      const fimtk = [];
-      const cuti = [];
+      const harian = []; const fimtk = []; const cuti = [];
 
       allPerizinan.forEach(p => {
         const mappedData = {
@@ -71,14 +82,14 @@ const Kehadiran = () => {
           keterangan: p.keterangan || p.keperluan,
           tglMulai: formatDateIndo(p.tanggal_mulai),
           tglSelesai: formatDateIndo(p.tanggal_selesai),
-          tanggal: formatDateIndo(p.tanggal_mulai), // Untuk FIMTK
+          tanggal: formatDateIndo(p.tanggal_mulai), 
           jamMulai: p.jam_mulai,
           jamSelesai: p.jam_selesai,
           keperluan: p.keperluan,
           kendaraan: p.kendaraan,
           alasan: p.keterangan,
           status: p.status_approval,
-          foto: p.bukti_foto || "Tidak Ada Bukti",
+          foto: p.bukti_foto,
           rawDate: new Date(p.created_at).getTime()
         };
 
@@ -87,20 +98,32 @@ const Kehadiran = () => {
         else if (p.kategori === 'Cuti') cuti.push(mappedData);
       });
 
-      setDataIzinHarian(harian);
-      setDataIzinFIMTK(fimtk);
-      setDataCuti(cuti);
-
+      setDataIzinHarian(harian); setDataIzinFIMTK(fimtk); setDataCuti(cuti);
     } catch (error) {
-      console.error("Gagal mengambil data perizinan:", error);
+      console.error("Gagal mengambil data:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => { fetchData(); }, []);
+
+  // AUTO-FILL DATA KARYAWAN
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (selectedKaryawanId) {
+      const found = karyawanList.find(k => String(k.id) === String(selectedKaryawanId));
+      setKaryawanDetail(found);
+    } else {
+      setKaryawanDetail(null);
+    }
+  }, [selectedKaryawanId, karyawanList]);
+
+  // LOGIKA FILTER PENCARIAN KARYAWAN
+  const filteredKaryawanList = karyawanList.filter(k => 
+    (k.nama.toLowerCase().includes(searchKaryawan.toLowerCase()) || 
+    k.nik.includes(searchKaryawan)) && 
+    (k.status === 'Aktif' || !k.status)
+  );
 
   const handleLogout = () => {
     localStorage.removeItem("user"); 
@@ -109,39 +132,58 @@ const Kehadiran = () => {
   };
 
   const handleRowClick = (item, type) => {
-    setSelectedData(item);
-    setModalType(type);
-    setShowModal(true);
+    setSelectedData(item); setModalType(type); setShowModal(true);
   };
-
   const handleCloseModal = () => {
-    setShowModal(false);
-    setSelectedData(null);
-    setModalType("");
+    setShowModal(false); setSelectedData(null); setModalType("");
   };
 
-  // UPDATE STATUS APPROVAL KE DATABASE
   const handleUpdateStatus = async (id, newStatus) => {
     try {
       const res = await fetch(`http://localhost:3000/api/perizinan/${id}/status`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        method: "PUT", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status_approval: newStatus })
       });
-      
-      if (res.ok) {
-        alert(`Berhasil di-${newStatus}`);
-        fetchData(); // Refresh UI setelah update
-        handleCloseModal();
-      } else {
-        alert("Gagal mengupdate status.");
-      }
-    } catch (err) {
-      alert("Terjadi kesalahan jaringan.");
-    }
+      if (res.ok) { alert(`Berhasil di-${newStatus}`); fetchData(); handleCloseModal(); } 
+      else { alert("Gagal mengupdate status."); }
+    } catch (err) { alert("Terjadi kesalahan jaringan."); }
   };
 
-  // Sorting: Pending di atas, lalu urut tanggal terbaru
+  const handleAbsenManualSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedKaryawanId) {
+        alert("Silahkan cari dan pilih karyawan dari dropdown terlebih dahulu!");
+        return;
+    }
+
+    setLoadingAbsen(true);
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+
+    const payload = {
+        user_id: selectedKaryawanId,
+        tanggal: tanggalAbsen,
+        waktu_masuk: data.tipe_absen === 'Masuk' ? data.jam_absen : null,
+        waktu_pulang: data.tipe_absen === 'Pulang' ? data.jam_absen : null,
+        keterangan: data.keterangan
+    };
+
+    try {
+      const res = await fetch("http://localhost:3000/api/absensi/manual", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const result = await res.json();
+      if (res.ok) {
+        alert(result.message);
+        e.target.reset(); 
+        setSelectedKaryawanId("");
+        setSearchKaryawan(""); 
+        setTanggalAbsen(new Date().toISOString().split('T')[0]); 
+      } else { alert(`Gagal: ${result.message}`); }
+    } catch (err) { alert("Terjadi kesalahan jaringan."); } finally { setLoadingAbsen(false); }
+  };
+
   const sortData = (dataArray) => {
     return [...dataArray].sort((a, b) => {
         if (a.status === 'Pending' && b.status !== 'Pending') return -1;
@@ -195,12 +237,17 @@ const Kehadiran = () => {
             <div className={`submenu-item ${activeTab === 'absenManual' ? 'active-sub' : ''}`} onClick={() => handleTabChange('absenManual')}><img src={iconAbsen} alt="-" className="submenu-icon" /><span>Absen Manual</span></div>
             <div className={`submenu-item ${activeTab === 'perizinan' ? 'active-sub' : ''}`} onClick={() => handleTabChange('perizinan')}><img src={iconIzin} alt="-" className="submenu-icon" /><span>Perizinan</span></div>
           </div>
+          
           <div className="menu-item" onClick={() => handleNav('/hrd/laporan')}><div className="menu-left"><img src={iconLaporan} alt="lapor" className="menu-icon-main" /><span className="menu-text-main">Laporan</span></div></div>
         </nav>
         <div className="sidebar-footer"><button className="btn-logout" onClick={handleLogout}>Log Out</button></div>
       </aside>
 
       <main className="main-content">
+        
+        {/* ========================================================== */}
+        {/* TAB 1: PERIZINAN */}
+        {/* ========================================================== */}
         {activeTab === 'perizinan' && (
             <>
                 <div className="header-titles">
@@ -215,7 +262,7 @@ const Kehadiran = () => {
                         </button>
                         {showFilter && (
                             <div className="filter-dropdown">
-                                <div className="dropdown-item" onClick={() => handleSelectFilter("Semua Cabang")}>Semua Cabang</div>
+                                <div className="dropdown-item" onClick={() => {setSelectedFilter("Semua Cabang"); setShowFilter(false);}}>Semua Cabang</div>
                                 {cabangList.map(c => (
                                     <div key={c} className="dropdown-item" onClick={() => {setSelectedFilter(c); setShowFilter(false);}}>{c}</div>
                                 ))}
@@ -228,19 +275,18 @@ const Kehadiran = () => {
                     <div style={{textAlign: "center", marginTop: "50px", color: "#666"}}>Memuat data perizinan...</div>
                 ) : (
                   <>
-                    {/* TABEL 1: IZIN HARIAN */}
                     <h3 className="section-title">Permohonan Izin Harian</h3>
                     <div className="perizinan-card">
                         <div className="card-header-green">Permintaan Menunggu Approval</div>
                         <table className="table-izin">
                             <thead>
                                 <tr>
-                                    <th style={{width: '20%'}}>Nama</th>
-                                    <th style={{width: '15%'}}>Mulai</th>
-                                    <th style={{width: '15%'}}>Selesai</th>
-                                    <th style={{width: '15%'}}>Tipe Izin</th>
-                                    <th style={{width: '10%'}} className="text-center">Status</th>
-                                    <th style={{width: '25%'}} className="text-center">Aksi</th>
+                                    <th style={{width: '20%'}}>NAMA</th>
+                                    <th style={{width: '15%'}}>MULAI</th>
+                                    <th style={{width: '15%'}}>SELESAI</th>
+                                    <th style={{width: '15%'}}>TIPE IZIN</th>
+                                    <th style={{width: '10%'}} className="text-center">STATUS</th>
+                                    <th style={{width: '25%'}} className="text-center">AKSI</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -265,19 +311,18 @@ const Kehadiran = () => {
                         </table>
                     </div>
 
-                    {/* TABEL 2: FIMTK */}
                     <h3 className="section-title">Permohonan Izin Meninggalkan Tempat Kerja</h3>
                     <div className="perizinan-card">
                         <div className="card-header-green">Permintaan Menunggu Approval</div>
                         <table className="table-izin">
                             <thead>
                                 <tr>
-                                    <th style={{width: '20%'}}>Nama</th>
-                                    <th style={{width: '15%'}}>Jabatan</th>
-                                    <th style={{width: '15%'}}>Tipe Izin</th>
-                                    <th style={{width: '15%'}}>Tanggal</th>
-                                    <th style={{width: '10%'}} className="text-center">Status</th>
-                                    <th style={{width: '25%'}} className="text-center">Aksi</th>
+                                    <th style={{width: '20%'}}>NAMA</th>
+                                    <th style={{width: '15%'}}>JABATAN</th>
+                                    <th style={{width: '15%'}}>TIPE IZIN</th>
+                                    <th style={{width: '15%'}}>TANGGAL</th>
+                                    <th style={{width: '10%'}} className="text-center">STATUS</th>
+                                    <th style={{width: '25%'}} className="text-center">AKSI</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -302,19 +347,18 @@ const Kehadiran = () => {
                         </table>
                     </div>
 
-                    {/* TABEL 3: CUTI */}
                     <h3 className="section-title">Permohonan Izin Cuti Karyawan</h3>
                     <div className="perizinan-card">
                         <div className="card-header-green">Permintaan Menunggu Approval</div>
                         <table className="table-izin">
                             <thead>
                                 <tr>
-                                    <th style={{width: '20%'}}>Nama</th>
-                                    <th style={{width: '15%'}}>Jabatan</th>
-                                    <th style={{width: '15%'}}>Tipe Izin</th>
-                                    <th style={{width: '15%'}}>Mulai Cuti</th>
-                                    <th style={{width: '10%'}} className="text-center">Status</th>
-                                    <th style={{width: '25%'}} className="text-center">Aksi</th>
+                                    <th style={{width: '20%'}}>NAMA</th>
+                                    <th style={{width: '15%'}}>JABATAN</th>
+                                    <th style={{width: '15%'}}>TIPE IZIN</th>
+                                    <th style={{width: '15%'}}>MULAI CUTI</th>
+                                    <th style={{width: '10%'}} className="text-center">STATUS</th>
+                                    <th style={{width: '25%'}} className="text-center">AKSI</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -342,9 +386,152 @@ const Kehadiran = () => {
                 )}
             </>
         )}
+
+        {/* ========================================================== */}
+        {/* TAB 2: ABSEN MANUAL */}
+        {/* ========================================================== */}
+        {activeTab === 'absenManual' && (
+            <div className="absen-form-wrapper">
+                <div className="header-titles">
+                    <h1>Absensi Manual</h1>
+                    <p>Formulir penginputan data absensi karyawan secara manual</p>
+                </div>
+
+                <form onSubmit={handleAbsenManualSubmit} className="absen-form-grid" style={{ marginTop: '20px' }}>
+                    
+                    {/* FIELD NAMA (SEARCHABLE COMBOBOX) */}
+                    <div className="form-group" style={{ position: 'relative' }}>
+                        <label>Nama</label>
+                        <div style={{ position: 'relative' }}>
+                            <input 
+                                type="text" 
+                                className="input-field" 
+                                style={{ width: '100%', paddingRight: '35px', cursor: 'text' }}
+                                placeholder="Ketik atau pilih Karyawan..." 
+                                value={searchKaryawan}
+                                onChange={(e) => {
+                                    setSearchKaryawan(e.target.value);
+                                    setShowKaryawanDropdown(true);
+                                    if (e.target.value === "") { setSelectedKaryawanId(""); }
+                                }}
+                                onFocus={() => setShowKaryawanDropdown(true)}
+                                onBlur={() => setTimeout(() => setShowKaryawanDropdown(false), 200)}
+                                required={!selectedKaryawanId}
+                            />
+                            <svg style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </div>
+                        
+                        {/* CUSTOM DROPDOWN LIST */}
+                        {showKaryawanDropdown && (
+                            <div style={{
+                                position: 'absolute', top: '100%', left: 0, right: 0,
+                                backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '8px',
+                                marginTop: '4px', maxHeight: '220px', overflowY: 'auto', zIndex: 50,
+                                boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                            }}>
+                                {filteredKaryawanList.length > 0 ? (
+                                    filteredKaryawanList.map(k => (
+                                        <div 
+                                            key={k.id}
+                                            style={{ padding: '10px 15px', cursor: 'pointer', borderBottom: '1px solid #eee' }}
+                                            onMouseDown={(e) => {
+                                                e.preventDefault(); 
+                                                setSelectedKaryawanId(k.id);
+                                                setSearchKaryawan(k.nama);
+                                                setShowKaryawanDropdown(false);
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.backgroundColor = '#f9f9f9'}
+                                            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                                        >
+                                            <div style={{ fontWeight: '600', fontSize: '14px', color: '#333' }}>{k.nama}</div>
+                                            <div style={{ fontSize: '11px', color: '#888' }}>{k.nik} - {k.cabang?.nama}</div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div style={{ padding: '15px', color: '#888', fontSize: '13px', textAlign: 'center' }}>
+                                        Karyawan tidak ditemukan
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* FIELD AUTO-FILL */}
+                    <div className="form-group">
+                        <label>NIK</label>
+                        <input type="text" className="input-field" value={karyawanDetail?.nik || ""} readOnly style={{backgroundColor:'#f5f5f5', color:'#666'}} />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Jabatan</label>
+                        <input type="text" className="input-field" value={karyawanDetail?.jabatan || ""} readOnly style={{backgroundColor:'#f5f5f5', color:'#666'}} />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Divisi</label>
+                        <input type="text" className="input-field" value={karyawanDetail?.divisi || ""} readOnly style={{backgroundColor:'#f5f5f5', color:'#666'}} />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Tanggal Absensi Manual</label>
+                        <input 
+                            type="date" 
+                            name="tanggal" 
+                            className="input-field" 
+                            value={tanggalAbsen}
+                            onChange={(e) => setTanggalAbsen(e.target.value)}
+                            required 
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Jam Absen</label>
+                        <input type="time" name="jam_absen" className="input-field" required />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Cabang Penempatan</label>
+                        <input type="text" className="input-field" value={karyawanDetail?.cabang?.nama || ""} readOnly style={{backgroundColor:'#f5f5f5', color:'#666'}} />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Tipe Absen</label>
+                        <select name="tipe_absen" className="input-field" required>
+                            <option value="">Pilih Tipe</option>
+                            <option value="Masuk">Masuk</option>
+                            <option value="Pulang">Pulang</option>
+                        </select>
+                    </div>
+
+                    <div className="form-group full-width">
+                        <label>Keterangan</label>
+                        <textarea name="keterangan" className="input-field" rows="3" placeholder="Alasan absen manual..."></textarea>
+                    </div>
+
+                    <div className="form-actions-bottom">
+                        <button type="button" className="btn-batal-red" onClick={() => {
+                            setSelectedKaryawanId("");
+                            setSearchKaryawan("");
+                            setTanggalAbsen(new Date().toISOString().split('T')[0]);
+                            document.querySelector('.absen-form-grid').reset();
+                        }}>
+                            Batal
+                        </button>
+                        <button type="submit" className="btn-simpan-green" disabled={loadingAbsen}>
+                            {loadingAbsen ? "Menyimpan..." : "Simpan Data"}
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        )}
       </main>
 
-      {/* MODAL DETAIL (Sama seperti sebelumnya) */}
+      {/* ========================================================== */}
+      {/* MODAL DETAIL PERIZINAN */}
+      {/* ========================================================== */}
       {showModal && selectedData && (
         <div className="modal-overlay" onClick={handleCloseModal}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -358,21 +545,37 @@ const Kehadiran = () => {
                 </div>
                 
                 <div className="modal-body-modern">
-                    <div className="modal-row-split">
-                        <div className="modal-field-group"><label className="modal-field-label">Nama</label><div className="modal-field-value">{selectedData.nama}</div></div>
-                        <div className="modal-field-group"><label className="modal-field-label">Cabang</label><div className="modal-field-value">{selectedData.cabang}</div></div>
-                    </div>
-                    <div className="modal-field-group"><label className="modal-field-label">Tipe Izin</label><div className="modal-field-value">{selectedData.tipeIzin}</div></div>
-
-                    {(modalType === 'harian' || modalType === 'cuti') && (
-                        <div className="modal-row-split">
-                            <div className="modal-field-group"><label className="modal-field-label">Tanggal Mulai</label><div className="modal-field-value">{selectedData.tglMulai}</div></div>
-                            <div className="modal-field-group"><label className="modal-field-label">Tanggal Selesai</label><div className="modal-field-value">{selectedData.tglSelesai}</div></div>
-                        </div>
+                    {modalType === 'harian' && (
+                        <>
+                            <div className="modal-row-split">
+                                <div className="modal-field-group"><label className="modal-field-label">Nama</label><div className="modal-field-value">{selectedData.nama}</div></div>
+                                <div className="modal-field-group"><label className="modal-field-label">Cabang</label><div className="modal-field-value">{selectedData.cabang}</div></div>
+                            </div>
+                            <div className="modal-field-group"><label className="modal-field-label">Tipe Izin</label><div className="modal-field-value">{selectedData.tipeIzin}</div></div>
+                            <div className="modal-row-split">
+                                <div className="modal-field-group"><label className="modal-field-label">Tanggal Mulai</label><div className="modal-field-value">{selectedData.tglMulai}</div></div>
+                                <div className="modal-field-group"><label className="modal-field-label">Tanggal Selesai</label><div className="modal-field-value">{selectedData.tglSelesai}</div></div>
+                            </div>
+                            <div className="modal-field-group">
+                                <label className="modal-field-label">Keterangan / Alasan</label>
+                                <div className="modal-field-value" style={{minHeight: '60px'}}>{selectedData.keterangan}</div>
+                            </div>
+                            <div className="modal-field-group">
+                                <label className="modal-field-label">Bukti Foto</label>
+                                <div className="modal-foto-box">
+                                    {selectedData.foto ? <img src={selectedData.foto} alt="Bukti" style={{maxWidth:'100%', maxHeight:'100%'}}/> : "Gambar: Belum ada bukti terlampir"}
+                                </div>
+                            </div>
+                        </>
                     )}
 
                     {modalType === 'fimtk' && (
                         <>
+                            <div className="modal-row-split">
+                                <div className="modal-field-group"><label className="modal-field-label">Nama</label><div className="modal-field-value">{selectedData.nama}</div></div>
+                                <div className="modal-field-group"><label className="modal-field-label">Cabang</label><div className="modal-field-value">{selectedData.cabang}</div></div>
+                            </div>
+                            <div className="modal-field-group"><label className="modal-field-label">Tipe Izin</label><div className="modal-field-value">{selectedData.tipeIzin}</div></div>
                             <div className="modal-row-split">
                                 <div className="modal-field-group"><label className="modal-field-label">Jabatan</label><div className="modal-field-value">{selectedData.jabatan}</div></div>
                                 <div className="modal-field-group"><label className="modal-field-label">Divisi</label><div className="modal-field-value">{selectedData.divisi}</div></div>
@@ -385,20 +588,34 @@ const Kehadiran = () => {
                                 <div className="modal-field-group"><label className="modal-field-label">Keperluan</label><div className="modal-field-value">{selectedData.keperluan}</div></div>
                                 <div className="modal-field-group"><label className="modal-field-label">Kendaraan</label><div className="modal-field-value">{selectedData.kendaraan}</div></div>
                             </div>
+                            <div className="modal-field-group">
+                                <label className="modal-field-label">Keterangan / Alasan</label>
+                                <div className="modal-field-value" style={{minHeight: '60px'}}>{selectedData.keterangan}</div>
+                            </div>
                         </>
                     )}
 
                     {modalType === 'cuti' && (
-                        <div className="modal-row-split">
-                            <div className="modal-field-group"><label className="modal-field-label">Jabatan & Divisi</label><div className="modal-field-value">{selectedData.jabatan} - {selectedData.divisi}</div></div>
-                            <div className="modal-field-group"><label className="modal-field-label">No. Telepon</label><div className="modal-field-value">{selectedData.noTelp}</div></div>
-                        </div>
+                        <>
+                            <div className="modal-row-split">
+                                <div className="modal-field-group"><label className="modal-field-label">Nama</label><div className="modal-field-value">{selectedData.nama}</div></div>
+                                <div className="modal-field-group"><label className="modal-field-label">Cabang</label><div className="modal-field-value">{selectedData.cabang}</div></div>
+                            </div>
+                            <div className="modal-field-group"><label className="modal-field-label">Tipe Izin</label><div className="modal-field-value">{selectedData.tipeIzin}</div></div>
+                            <div className="modal-row-split">
+                                <div className="modal-field-group"><label className="modal-field-label">Tanggal Mulai</label><div className="modal-field-value">{selectedData.tglMulai}</div></div>
+                                <div className="modal-field-group"><label className="modal-field-label">Tanggal Selesai</label><div className="modal-field-value">{selectedData.tglSelesai}</div></div>
+                            </div>
+                            <div className="modal-row-split">
+                                <div className="modal-field-group"><label className="modal-field-label">Jabatan & Divisi</label><div className="modal-field-value">{selectedData.jabatan} - {selectedData.divisi}</div></div>
+                                <div className="modal-field-group"><label className="modal-field-label">No. Telepon</label><div className="modal-field-value">{selectedData.noTelp}</div></div>
+                            </div>
+                            <div className="modal-field-group">
+                                <label className="modal-field-label">Keterangan / Alasan</label>
+                                <div className="modal-field-value" style={{minHeight: '60px'}}>{selectedData.keterangan}</div>
+                            </div>
+                        </>
                     )}
-
-                    <div className="modal-field-group">
-                        <label className="modal-field-label">Keterangan / Alasan</label>
-                        <div className="modal-field-value" style={{minHeight: '80px'}}>{selectedData.keterangan}</div>
-                    </div>
                 </div>
 
                 {selectedData.status === 'Pending' && (
