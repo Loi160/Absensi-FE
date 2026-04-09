@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import "../hrd/datakaryawan.css"; // Menggunakan CSS utama dari HRD
+import "../hrd/datakaryawan.css"; 
 
 import iconDashboard from "../../assets/dashboard.svg";
 import iconKaryawan from "../../assets/datakaryawan.svg";
@@ -11,7 +11,6 @@ import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 import iconTambah from "../../assets/tambah.svg";
 
-// Icon Mata SVG (Sederhana)
 const EyeOffIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
@@ -29,6 +28,7 @@ const DataKaryawanManagerCabang = () => {
 
   const [userData, setUserData] = useState({ nama: "Manager", cabangUtama: "Memuat...", subCabang: [] });
   const [karyawanList, setKaryawanList] = useState([]);
+  const [cabangObjects, setCabangObjects] = useState([]); // Menyimpan data ID & Nama cabang
   const [loading, setLoading] = useState(true);
 
   const [showFilter, setShowFilter] = useState(false);
@@ -48,17 +48,22 @@ const DataKaryawanManagerCabang = () => {
         subCabang: user.subCabang || [],
       });
 
-      const fetchKaryawan = async () => {
+      const fetchAllData = async () => {
         try {
           setLoading(true);
+          // 1. Fetch Cabang untuk Option ID
+          const resCbg = await fetch("http://localhost:3000/api/cabang");
+          const dataCbg = await resCbg.json();
+          const allMyBranches = [user.cabangUtama, ...(user.subCabang || [])];
+          const filteredBranches = dataCbg.filter(c => allMyBranches.includes(c.nama));
+          setCabangObjects(filteredBranches);
+
+          // 2. Fetch Karyawan
           const res = await fetch("http://localhost:3000/api/karyawan");
           const data = await res.json();
-          
-          // Filter hanya karyawan yang ada di cabang utama atau sub-cabangnya
-          const allMyBranches = [user.cabangUtama, ...(user.subCabang || [])];
           const filteredByBranch = data.filter(k => allMyBranches.includes(k.cabang?.nama));
-          
           setKaryawanList(filteredByBranch);
+
         } catch (err) {
           console.error("Error fetching data:", err);
         } finally {
@@ -66,12 +71,11 @@ const DataKaryawanManagerCabang = () => {
         }
       };
       
-      fetchKaryawan();
+      fetchAllData();
     }
   }, [user]);
 
   const hasSubCabang = userData.subCabang.length > 0;
-  const opsiCabangManager = [userData.cabangUtama, ...userData.subCabang].filter(Boolean);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -89,26 +93,23 @@ const DataKaryawanManagerCabang = () => {
     e.preventDefault();
     if (!formData.cabang_id) return alert("Pilih cabang terlebih dahulu!");
 
-    // Menyesuaikan penempatan cabang dari Teks(nama) ke ID cabang. 
-    // *Catatan: Di tahap produksi, dropdown cabang sebaiknya menarik data ID dari Supabase.
-    // Di contoh ini kita berasumsi endpoint menerima nama cabang jika tidak ada ID khusus.
-    const payloadData = { ...formData };
-
     try {
       const res = await fetch("http://localhost:3000/api/karyawan", {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payloadData)
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(formData)
       });
       if (res.ok) {
         alert("Karyawan berhasil ditambahkan!");
         setShowModal(false);
-        window.location.reload(); // Refresh data
-      } else { alert("Gagal menyimpan data."); }
+        window.location.reload(); 
+      } else { 
+        const errorData = await res.json();
+        alert(`Gagal menyimpan data: ${errorData.detail || errorData.message}`); 
+      }
     } catch (err) { alert("Kesalahan jaringan."); }
   };
 
-  // Filter data berdasarkan dropdown cabang yang dipilih
   const filteredData = karyawanList.filter((k) => {
-    if (!hasSubCabang) return true; // Jika tidak punya sub cabang, tampilkan semua
+    if (!hasSubCabang) return true; 
     if (selectedCabang === "Semua Sub-Cabang") return true;
     return k.cabang?.nama === selectedCabang;
   });
@@ -135,13 +136,11 @@ const DataKaryawanManagerCabang = () => {
 
       <main className="main-content">
         
-        {/* HEADER AREA (Teks Saja) */}
         <header className="dk-header-area">
           <h1 className="dk-title">Data Karyawan - {userData.cabangUtama}</h1>
           <p className="dk-subtitle">Daftar pusat informasi dan detail administrasi karyawan</p>
         </header>
 
-        {/* ACTION ROW (Tombol di bawah teks, merapat ke kanan) */}
         <div className="dk-action-row">
           <div className="dk-action-group">
             <div className="filter-wrapper">
@@ -166,7 +165,6 @@ const DataKaryawanManagerCabang = () => {
           </div>
         </div>
 
-        {/* TABLE KARYAWAN */}
         <div className="dk-table-container">
           <div className="dk-table-header-title">Daftar Karyawan</div>
           <div className="dk-table-wrapper">
@@ -217,7 +215,6 @@ const DataKaryawanManagerCabang = () => {
         </div>
       </main>
 
-      {/* ================= MODAL TAMBAH KARYAWAN ================= */}
       {showModal && (
         <div className="modal-overlay-clean" onClick={() => setShowModal(false)}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()}>
@@ -252,7 +249,8 @@ const DataKaryawanManagerCabang = () => {
                   <label>Penempatan Cabang</label>
                   <select className="input-edit" required onChange={(e) => setFormData({...formData, cabang_id: e.target.value})}>
                     <option value="">Pilih Cabang...</option>
-                    {opsiCabangManager.map((c, i) => <option key={i} value={c}>{c}</option>)}
+                    {/* VALUE SEKARANG MENGGUNAKAN ID (cbg.id), BUKAN NAMA LAGI */}
+                    {cabangObjects.map((cbg) => <option key={cbg.id} value={cbg.id}>{cbg.nama}</option>)}
                   </select>
                 </div>
                 <div className="form-group"><label>No. Telepon / WA</label><input type="text" className="input-edit" onChange={(e) => setFormData({...formData, no_telp: e.target.value})} /></div>

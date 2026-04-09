@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import "../hrd/dashboard.css";
+import "../hrd/dashboard.css"; // Menggunakan CSS dari HRD
 
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
 import { Line } from "react-chartjs-2";
@@ -34,7 +34,7 @@ const DashboardManagerCabang = () => {
 
   // STATE STATISTIK & GRAFIK DARI DATABASE
   const [stats, setStats] = useState({ hadir: 0, sakit: 0, izin: 0, cuti: 0, terlambat: 0, alpha: 0 });
-  const [chartData, setChartData] = useState({ hadir: [], sakit: [], izin: [], terlambat: [], alpha: [] });
+  const [chartData, setChartData] = useState({ hadir: [], sakit: [], izin: [], cuti: [], terlambat: [], alpha: [] });
 
   useEffect(() => {
     if (user) {
@@ -86,6 +86,7 @@ const DashboardManagerCabang = () => {
       { label: "Hadir", data: chartData.hadir, borderColor: "#2fb800", backgroundColor: "#2fb800", tension: 0.3, pointRadius: 4 },
       { label: "Sakit", data: chartData.sakit, borderColor: "#f1c40f", backgroundColor: "#f1c40f", tension: 0.3, pointRadius: 4 },
       { label: "Izin", data: chartData.izin, borderColor: "#2980b9", backgroundColor: "#2980b9", tension: 0.3, pointRadius: 4 },
+      { label: "Cuti", data: chartData.cuti, borderColor: "#1abc9c", backgroundColor: "#1abc9c", tension: 0.3, pointRadius: 4 }, // TITIK PENAMBAHAN CUTI PADA GRAFIK
       { label: "Terlambat", data: chartData.terlambat, borderColor: "#9b59b6", backgroundColor: "#9b59b6", tension: 0.3, pointRadius: 4 },
       { label: "Alpha", data: chartData.alpha, borderColor: "#e74c3c", backgroundColor: "#e74c3c", tension: 0.3, pointRadius: 4 },
     ],

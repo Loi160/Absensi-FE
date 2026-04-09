@@ -150,10 +150,10 @@
   margin: 25px 35px 30px 0; 
   border-radius: 40px; 
   padding: 40px;
-  display: flex;
-  flex-direction: column;
+  display: block; 
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  overflow: hidden; 
+  overflow-y: auto; 
+  overflow-x: hidden; 
 }
 
 ::-webkit-scrollbar { width: 8px; }
@@ -166,8 +166,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin-bottom: 20px;
-  flex-shrink: 0;
+  margin-bottom: 25px;
 }
 
 .cabang-title {
@@ -187,10 +186,9 @@
 .action-row-cabang {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 15px;
+  margin-bottom: 14px;
   position: relative;
   z-index: 2;
-  flex-shrink: 0;
 }
 
 .btn-tambah-cabang-baru {
@@ -225,13 +223,13 @@
 .table-cabang-container {
   background: white;
   border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden; 
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
-  flex-grow: 1; 
-  min-height: 0; 
+  height: fit-content; /* Ini memastikan kontainer hanya setinggi isinya */
+  margin-bottom: 40px; 
 }
 
 .table-cabang-header {
@@ -244,14 +242,14 @@
 }
 
 .table-cabang-body {
-  overflow-y: auto; 
+  height: auto;
 }
 
 .table-empty-state {
-  padding: 30px;
+  padding: 40px 30px;
   text-align: center;
-  color: #666;
-  font-size: 15px;
+  color: #888;
+  font-size: 14px;
   font-style: italic;
 }
 
@@ -259,22 +257,23 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 25px;
+  padding: 16px 25px;
   border-bottom: 1px solid #eee;
   transition: 0.2s;
   cursor: pointer; 
 }
 
 .table-cabang-row:hover {
-  background-color: #f9f9f9;
+  background-color: #fdfdfd;
 }
 
 .cabang-name {
   font-weight: 600;
-  color: #333;
+  color: #111;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  font-size: 15px;
 }
 
 .sub-rows-wrapper {
@@ -291,7 +290,7 @@
 .table-cabang-actions {
   display: flex;
   align-items: center;
-  gap: 20px; 
+  gap: 15px; 
 }
 
 .btn-action-text {
@@ -315,7 +314,7 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #666;
+  color: #888;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -337,15 +336,15 @@
 .btn-status-toggle:hover { transform: scale(1.15); }
 
 .status-dot {
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   display: inline-block;
   transition: background-color 0.3s ease;
 }
 .status-dot.active { 
-  background-color: #00c853; 
-  box-shadow: 0 0 6px rgba(0, 200, 83, 0.4); 
+  background-color: #2fb800; 
+  box-shadow: 0 0 6px rgba(47, 184, 0, 0.4); 
 }
 .status-dot.inactive { 
   background-color: #ff1744; 
@@ -660,9 +659,6 @@
   .logo-img { max-width: 180px; }
 
   .menu-item { background-color: transparent; color: #ffffff; border: none; box-shadow: none; }
-  .menu-item .menu-icon-main { filter: brightness(0) invert(1); }
-  .menu-item .menu-text-main { color: #ffffff; }
-  .menu-item .arrow-icon-main { filter: brightness(0) invert(1); opacity: 0.8; }
   .menu-item.active { background-color: #2fb800 !important; color: #ffffff !important; border: 1px solid #2fb800; box-shadow: 0 4px 15px rgba(47, 184, 0, 0.35); }
   .menu-item.active .menu-icon-main, .menu-item.active .arrow-icon-main { filter: brightness(0) invert(1) !important; opacity: 1; }
   .menu-item.active .menu-text-main { color: #ffffff !important; }
@@ -680,21 +676,17 @@
   .cabang-title { font-size: 24px; margin-bottom: 4px; }
   .cabang-subtitle { font-size: 13px; margin-bottom: 0; }
   
-  .action-row-cabang { margin-bottom: 15px; }
+  .action-row-cabang { margin-bottom: 14px; }
   .btn-tambah-cabang-baru { padding: 8px 16px; font-size: 12px; }
 
+  .table-cabang-container { height: fit-content; min-height: 80px; margin-bottom: 20px; }
   .table-cabang-row { padding: 12px 15px; }
+  .cabang-name { font-size: 14px; }
   .sub-row { padding-left: 35px !important; }
   
-  /* UPDATE UNTUK MENAMPILKAN TOMBOL + SUB CABANG DI MOBILE */
-  .table-cabang-actions { gap: 8px; } /* Jarak antar ikon/tombol diperkecil agar muat */
-  
-  .btn-action-text { 
-    display: block; /* Munculkan kembali tombol yang disembunyikan */
-    padding: 4px 8px; /* Perkecil padding agar tidak memakan ruang */
-    font-size: 10px; /* Perkecil font */
-    border-width: 1px;
-  } 
+  /* UPDATE MOBILE: Tombol Aksi */
+  .table-cabang-actions { gap: 8px; } 
+  .btn-action-text { padding: 4px 10px; font-size: 10px; } 
 
   .sidebar-footer { margin-top: auto; padding-bottom: 30px; }
 

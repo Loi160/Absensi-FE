@@ -1,12 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import "../hrd/datakaryawan.css"; // Mengambil sumber desain CSS yang sama dengan HRD
+import { createClient } from "@supabase/supabase-js"; 
+import "../hrd/datakaryawan.css"; 
 
 import iconDashboard from "../../assets/dashboard.svg";
 import iconKaryawan from "../../assets/datakaryawan.svg";
 import iconPerizinan from "../../assets/perizinan.svg";
 import iconLaporan from "../../assets/laporan.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
+
+const supabaseUrl = "https://qpgmrtsgbubffmlowwes.supabase.co"; 
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwZ21ydHNnYnViZmZtbG93d2VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNTI0NzAsImV4cCI6MjA5MDcyODQ3MH0.1oJlmGHD2XjunwQZLnDlkQ-N3gKXTjPSnFZ6kxB0OtY";
+const supabase = supabaseUrl.includes("supabase.co") ? createClient(supabaseUrl, supabaseKey) : null;
 
 const DetailKaryawanManagerCabang = () => {
   const navigate = useNavigate();
@@ -16,18 +21,31 @@ const DetailKaryawanManagerCabang = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(employee || {});
   const [showPassword, setShowPassword] = useState(false);
+  const [cabangObjects, setCabangObjects] = useState([]);
+  const [uploadingState, setUploadingState] = useState(""); 
 
-  // STATE MOBILE SIDEBAR
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const openSidebar = () => setSidebarOpen(true);
   const closeSidebar = () => setSidebarOpen(false);
   const handleNav = (path) => { closeSidebar(); navigate(path); };
 
-  // MENGAMBIL DATA MANAGER DARI LOCAL STORAGE UNTUK OPSI CABANG
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
   const cabangUtama = storedUser.cabangUtama || "Cabang Utama";
   const subCabang = Array.isArray(storedUser.subCabang) ? storedUser.subCabang : [];
-  const opsiCabangManager = [cabangUtama, ...subCabang].filter(Boolean);
+
+  useEffect(() => {
+    const fetchCabang = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/api/cabang");
+        const data = await res.json();
+        
+        const allMyBranches = [cabangUtama, ...subCabang];
+        const filteredBranches = data.filter(c => allMyBranches.includes(c.nama));
+        setCabangObjects(filteredBranches);
+      } catch (err) { console.error(err); }
+    };
+    fetchCabang();
+  }, [cabangUtama, subCabang]);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -40,7 +58,55 @@ const DetailKaryawanManagerCabang = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // LOGIKA SIMPAN KE SUPABASE (UPDATE DATA KARYAWAN)
+  const handleFileUpload = async (event, dbColumnName) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert("File terlalu besar! Maksimal ukuran file adalah 2 MB.");
+      event.target.value = null; 
+      return;
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      alert("Format file tidak didukung! Hanya diperbolehkan JPG, PNG, atau PDF.");
+      event.target.value = null; 
+      return;
+    }
+
+    if (!supabase) {
+      alert("Error: URL Supabase belum diatur dengan benar! Pastikan URL berakhiran .supabase.co");
+      return;
+    }
+
+    try {
+      setUploadingState(`Sedang mengunggah file untuk ${dbColumnName}...`);
+      
+      const fileExt = file.name.split('.').pop();
+      const safeName = formData.nama.replace(/\s+/g, '_').toLowerCase();
+      const fileName = `${safeName}_${formData.nik}_${dbColumnName}_${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('dokumen_karyawan')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: publicUrlData } = supabase.storage
+        .from('dokumen_karyawan')
+        .getPublicUrl(fileName);
+
+      setFormData(prev => ({ ...prev, [dbColumnName]: publicUrlData.publicUrl }));
+      
+    } catch (error) {
+      console.error("Error upload:", error);
+      alert(`Gagal mengunggah file. Pastikan kamu sudah membuat 'New Policy' di menu Storage Supabase.`);
+    } finally {
+      setUploadingState("");
+    }
+  };
+
   const handleSaveEdit = async (e) => {
     e.preventDefault();
     try {
@@ -51,17 +117,17 @@ const DetailKaryawanManagerCabang = () => {
       });
       
       if (res.ok) {
-        alert("Perubahan data karyawan berhasil disimpan!");
+        alert("Data Karyawan berhasil diperbarui!");
         setIsEditing(false);
       } else {
-        alert("Gagal menyimpan perubahan.");
+        const errorData = await res.json();
+        alert(`Gagal menyimpan perubahan. Detail: ${errorData.detail || errorData.message}`);
       }
     } catch(err) {
       alert("Terjadi kesalahan jaringan.");
     }
   };
 
-  // JIKA DATA TIDAK DITEMUKAN (Misal refresh page langsung di URL ini)
   if (!employee) {
     return (
       <div style={{ padding: 40, textAlign: "center", fontFamily: 'Inter' }}>
@@ -73,15 +139,18 @@ const DetailKaryawanManagerCabang = () => {
   }
 
   const dokumenList = [
-    "Foto Karyawan", "Kartu Tanda Penduduk", "Kartu Keluarga", 
-    "Surat Keterangan Catatan Kepolisian", "Surat Izin Mengemudi", 
-    "Sertifikat Pendukung", "Dokumen Tambahan"
+    { label: "Foto Profil Karyawan", dbKey: "foto_karyawan" },
+    { label: "Kartu Tanda Penduduk (KTP)", dbKey: "ktp" },
+    { label: "Kartu Keluarga (KK)", dbKey: "kk" },
+    { label: "SKCK", dbKey: "skck" },
+    { label: "Surat Izin Mengemudi (SIM)", dbKey: "sim" },
+    { label: "Sertifikat Pendukung", dbKey: "sertifikat" },
+    { label: "Dokumen Tambahan", dbKey: "dokumen_tambahan" }
   ];
 
   return (
     <div className="hrd-container">
 
-      {/* ===== MOBILE TOPBAR ===== */}
       <div className="mobile-topbar">
         <img src={logoPersegi} alt="AMAGACORP" className="mobile-topbar-logo" />
         <button className="btn-hamburger" onClick={openSidebar} aria-label="Buka menu">
@@ -89,10 +158,8 @@ const DetailKaryawanManagerCabang = () => {
         </button>
       </div>
 
-      {/* ===== OVERLAY ===== */}
       <div className={`sidebar-overlay ${sidebarOpen ? "active" : ""}`} onClick={closeSidebar} />
 
-      {/* ===== SIDEBAR ===== */}
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
         <button className="btn-sidebar-close" onClick={closeSidebar} aria-label="Tutup menu">✕</button>
         <div className="logo-area"><img src={logoPersegi} alt="AMAGACORP" className="logo-img" /></div>
@@ -105,18 +172,15 @@ const DetailKaryawanManagerCabang = () => {
         <div className="sidebar-footer"><button className="btn-logout" onClick={handleLogout}>Log Out</button></div>
       </aside>
 
-      {/* ===== MAIN CONTENT ===== */}
       <main className="main-content">
         
-        {/* HEADER AREA (Teks Saja) */}
         <header className="dk-header-area">
           <div className="dk-title-group">
             <h1 className="dk-title">Detail Karyawan</h1>
-            <p className="dk-subtitle">Informasi detail data diri karyawan</p>
+            <p className="dk-subtitle">Informasi profil {formData.nama}</p>
           </div>
         </header>
 
-        {/* ACTION ROW (Tombol Edit merapat ke kanan) */}
         <div className="dk-action-row">
           <div className="dk-action-group" style={{ width: '100%', justifyContent: 'flex-end' }}>
             {!isEditing && (
@@ -128,15 +192,31 @@ const DetailKaryawanManagerCabang = () => {
           </div>
         </div>
 
-        {/* FORM DETAIL */}
+        {uploadingState && (
+          <div style={{ padding: '12px', background: '#eaf4d1', color: '#2fb800', borderRadius: '8px', marginBottom: '20px', fontWeight: 'bold', border: '1px solid #b2f2bb' }}>
+            {uploadingState}
+          </div>
+        )}
+
         <form onSubmit={handleSaveEdit}>
           <div className="detail-form-grid">
-            <div className="form-group"><label>Nama</label><input name="nama" type="text" className={isEditing ? "input-edit" : "input-read"} readOnly={!isEditing} value={formData.nama} onChange={handleInputChange} required /></div>
-            <div className="form-group"><label>Tanggal Masuk</label><input name="tanggal_masuk" type={isEditing ? "date" : "text"} className={isEditing ? "input-edit" : "input-read"} readOnly={!isEditing} value={formData.tanggal_masuk || ""} onChange={handleInputChange} /></div>
-            <div className="form-group"><label>Jabatan</label><input name="jabatan" type="text" className={isEditing ? "input-edit" : "input-read"} readOnly={!isEditing} value={formData.jabatan || ""} onChange={handleInputChange} /></div>
-            
-            <div className="form-group"><label>Divisi</label><input name="divisi" type="text" className={isEditing ? "input-edit" : "input-read"} readOnly={!isEditing} value={formData.divisi || ""} onChange={handleInputChange} /></div>
+            <div className="form-group"><label>Nama Lengkap</label><input name="nama" type="text" className={isEditing ? "input-edit" : "input-read"} readOnly={!isEditing} value={formData.nama} onChange={handleInputChange} required /></div>
             <div className="form-group"><label>NIK (Username)</label><input name="nik" type="text" className={isEditing ? "input-edit" : "input-read"} readOnly={!isEditing} value={formData.nik} onChange={handleInputChange} required /></div>
+            <div className="form-group">
+              <label>Cabang Penempatan</label>
+              {isEditing ? (
+                <select name="cabang_id" className="input-edit" value={formData.cabang_id || ""} onChange={handleInputChange}>
+                  <option value="">Pilih Cabang...</option>
+                  {cabangObjects.map(cbg => <option key={cbg.id} value={cbg.id}>{cbg.nama}</option>)}
+                </select>
+              ) : (
+                <input type="text" className="input-read" readOnly value={formData.cabang?.nama || "-"} />
+              )}
+            </div>
+            <div className="form-group"><label>Jabatan</label><input name="jabatan" type="text" className={isEditing ? "input-edit" : "input-read"} readOnly={!isEditing} value={formData.jabatan || ""} onChange={handleInputChange} /></div>
+            <div className="form-group"><label>Tanggal Masuk</label><input name="tanggal_masuk" type={isEditing ? "date" : "text"} className={isEditing ? "input-edit" : "input-read"} readOnly={!isEditing} value={formData.tanggal_masuk || ""} onChange={handleInputChange} /></div>
+            <div className="form-group"><label>Divisi</label><input name="divisi" type="text" className={isEditing ? "input-edit" : "input-read"} readOnly={!isEditing} value={formData.divisi || ""} onChange={handleInputChange} /></div>
+            
             <div className="form-group">
               <label>Password</label>
               <div className="pwd-wrapper">
@@ -165,17 +245,6 @@ const DetailKaryawanManagerCabang = () => {
             </div>
 
             <div className="form-group">
-              <label>Cabang Penempatan</label>
-              {isEditing ? (
-                <select name="cabang_id" className="input-edit" value={formData.cabang_id || ""} onChange={handleInputChange}>
-                  {opsiCabangManager.map((cbg, idx) => <option key={idx} value={cbg}>{cbg}</option>)}
-                </select>
-              ) : (
-                <input type="text" className="input-read" readOnly value={formData.cabang?.nama || "-"} />
-              )}
-            </div>
-            
-            <div className="form-group">
               <label>Status Karyawan</label>
               {isEditing ? (
                 <select name="status" className="input-edit" value={formData.status || "Aktif"} onChange={handleInputChange}>
@@ -192,14 +261,29 @@ const DetailKaryawanManagerCabang = () => {
           <div className="docs-section">
             <h4 className="docs-title">Dokumen Pendukung</h4>
             <div className="docs-grid">
-              {dokumenList.map((label, idx) => (
+              {dokumenList.map((doc, idx) => (
                 <div key={idx} className="doc-box">
-                  <span className="doc-label">{label}</span>
-                  <div className="doc-card" onClick={() => !isEditing && alert(`Membuka dokumen: ${label}`)}>
+                  <span className="doc-label">{doc.label}</span>
+                  <div className="doc-card" style={{ 
+                      backgroundColor: isEditing ? '#fff' : '#f9f9f9',
+                      border: (isEditing && formData[doc.dbKey]) ? '1px solid #2fb800' : '1px solid #ddd',
+                      padding: '12px'
+                  }}>
                     {isEditing ? (
-                      <input type="file" style={{ fontSize: '11px', padding: '10px' }} accept="image/*,.pdf" />
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        {formData[doc.dbKey] && <span style={{fontSize:'13px', color:'#2fb800', fontWeight: 'bold'}}>✅ Dokumen Berhasil Diunggah</span>}
+                        <input 
+                          type="file" 
+                          style={{ fontSize: '11px', width: '100%', marginTop: '5px' }} 
+                          accept="image/jpeg, image/png, application/pdf" 
+                          onChange={(e) => handleFileUpload(e, doc.dbKey)}
+                        />
+                        <small style={{fontSize: '11px', color: '#888', marginTop: '2px'}}>Max 2MB (JPG/PNG/PDF)</small>
+                      </div>
                     ) : (
-                      <span className="doc-text">Lihat / Unduh</span>
+                      formData[doc.dbKey] ? (
+                        <a href={formData[doc.dbKey]} target="_blank" rel="noreferrer" style={{color: '#2980b9', fontWeight: 'bold', textDecoration: 'none'}}>Lihat Dokumen</a>
+                      ) : <span style={{color:'#aaa', fontStyle: 'italic'}}>Belum ada dokumen</span>
                     )}
                   </div>
                 </div>
@@ -208,14 +292,8 @@ const DetailKaryawanManagerCabang = () => {
           </div>
 
           <div className="detail-footer">
-            {isEditing ? (
-              <>
-                <button type="button" className="btn-batal" onClick={() => { setIsEditing(false); setFormData(employee); }}>Batal</button>
-                <button type="submit" className="btn-simpan">Simpan Perubahan</button>
-              </>
-            ) : (
-              <button type="button" className="btn-batal" onClick={() => navigate(-1)}>Kembali</button>
-            )}
+            {isEditing && <button type="submit" className="btn-simpan">Simpan Perubahan</button>}
+            <button type="button" className="btn-batal" onClick={() => isEditing ? setIsEditing(false) : navigate(-1)}>Kembali</button>
           </div>
         </form>
 

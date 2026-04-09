@@ -11,23 +11,6 @@ import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg"; 
 import iconTambah from "../../assets/tambah.svg"; 
 
-// Icon Mata SVG (Sederhana)
-const EyeIcon = ({ show }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    {show ? (
-      <>
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-        <circle cx="12" cy="12" r="3"></circle>
-      </>
-    ) : (
-      <>
-        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-        <line x1="1" y1="1" x2="23" y2="23"></line>
-      </>
-    )}
-  </svg>
-);
-
 const KelolaCabang = () => {
   const navigate = useNavigate();
   
@@ -36,7 +19,6 @@ const KelolaCabang = () => {
   const [editData, setEditData] = useState(null); 
   const [parentId, setParentId] = useState(null); 
   const [expandedRows, setExpandedRows] = useState({});
-  const [showPassword, setShowPassword] = useState(false); 
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmData, setConfirmData] = useState(null);
@@ -83,7 +65,6 @@ const KelolaCabang = () => {
     setModalTitle("Edit Cabang");
     setEditData(item);
     setParentId(null);
-    setShowPassword(false);
     setShowModal(true);
   };
 
@@ -91,7 +72,6 @@ const KelolaCabang = () => {
     setModalTitle(`Tambah Sub-Cabang untuk ${parentItem.nama}`);
     setEditData(null); 
     setParentId(parentItem.id);
-    setShowPassword(false);
     setShowModal(true);
   };
 
@@ -99,7 +79,6 @@ const KelolaCabang = () => {
     setModalTitle("Tambah Cabang Baru");
     setEditData(null); 
     setParentId(null);
-    setShowPassword(false);
     setShowModal(true);
   };
 
@@ -107,6 +86,19 @@ const KelolaCabang = () => {
     e.preventDefault(); 
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
+
+    // Konversi tipe data agar sesuai dengan Supabase
+    if (data.keterlambatan) {
+      data.keterlambatan = parseInt(data.keterlambatan, 10);
+    }
+    
+    // Pastikan format jam memiliki detik "08:00:00" (tipe time without time zone)
+    if (data.jam_masuk && data.jam_masuk.length === 5) {
+      data.jam_masuk = `${data.jam_masuk}:00`;
+    }
+    if (data.jam_keluar && data.jam_keluar.length === 5) {
+      data.jam_keluar = `${data.jam_keluar}:00`;
+    }
 
     if (parentId) data.parent_id = parentId;
 
@@ -130,7 +122,8 @@ const KelolaCabang = () => {
         setShowModal(false);
         fetchCabang(); 
       } else {
-        alert("Gagal menyimpan data.");
+        const errData = await response.json();
+        alert(`Gagal menyimpan data: ${errData.detail || errData.message}`);
       }
     } catch (error) {
       console.error("Error saving:", error);
@@ -188,7 +181,7 @@ const KelolaCabang = () => {
           <div className="menu-item" onClick={() => handleNav('/hrd/dashboard')}><div className="menu-left"><img src={iconDashboard} alt="dash" className="menu-icon-main"/> <span className="menu-text-main">Dashboard</span></div></div>
           <div className="menu-item active" onClick={() => handleNav('/hrd/kelolacabang')}><div className="menu-left"><img src={iconKelola} alt="kelola" className="menu-icon-main"/> <span className="menu-text-main">Kelola Cabang</span></div></div>
           <div className="menu-item" onClick={() => handleNav('/hrd/datakaryawan')}><div className="menu-left"><img src={iconKaryawan} alt="karyawan" className="menu-icon-main"/> <span className="menu-text-main">Data Karyawan</span></div></div>
-          <div className="menu-item has-arrow" onClick={() => handleNav('/hrd/absenmanual')}><div className="menu-left"><img src={iconKehadiran} alt="hadir" className="menu-icon-main"/> <span className="menu-text-main">Kehadiran</span></div><img src={iconBawah} alt="down" className="arrow-icon-main" /></div>
+          <div className="menu-item has-arrow" onClick={() => handleNav('/hrd/kehadiran')}><div className="menu-left"><img src={iconKehadiran} alt="hadir" className="menu-icon-main"/> <span className="menu-text-main">Kehadiran</span></div><img src={iconBawah} alt="down" className="arrow-icon-main" /></div>
           <div className="menu-item" onClick={() => handleNav('/hrd/laporan')}><div className="menu-left"><img src={iconLaporan} alt="lapor" className="menu-icon-main"/> <span className="menu-text-main">Laporan</span></div></div>
         </nav>
         <div className="sidebar-footer"><button className="btn-logout" onClick={handleLogout}>Log Out</button></div>
@@ -197,20 +190,17 @@ const KelolaCabang = () => {
       {/* MAIN CONTENT */}
       <main className="main-content">
         
-        {/* 1. HEADER (Turun ke bawah / Vertikal) */}
         <header className="header-cabang-area">
             <h1 className="cabang-title">Kelola Cabang</h1>
             <p className="cabang-subtitle">Manajemen lokasi dan unit operasional</p>
         </header>
 
-        {/* 2. TOMBOL TAMBAH CABANG (Rata Kanan) */}
         <div className="action-row-cabang">
             <button className="btn-tambah-cabang-baru" onClick={handleOpenTambah}>
                 <img src={iconTambah} alt="add" /> Tambah Cabang Baru
             </button>
         </div>
 
-        {/* 3. TABEL AREA */}
         <div className="table-cabang-container">
             <div className="table-cabang-header">Nama Cabang</div>
             <div className="table-cabang-body">
@@ -268,59 +258,40 @@ const KelolaCabang = () => {
                 <h2 className="modal-title">{modalTitle}</h2>
                 <form onSubmit={handleSaveData}>
                   
-                  {/* GRID 2 KOLOM */}
+                  {/* UPDATE: Username & Password Dihapus (Pindah ke Form Karyawan) */}
                   <div className="modal-grid">
                       <div className="input-block">
-                        <label>Nama</label>
+                        <label>Nama Cabang</label>
                         <input type="text" name="nama" defaultValue={editData?.nama} className="modal-input" required />
                       </div>
                       <div className="input-block">
-                        <label>Alamat</label>
+                        <label>Alamat Lokasi</label>
                         <input type="text" name="alamat" defaultValue={editData?.alamat} className="modal-input" required />
                       </div>
                       
-                      <div className="input-block">
-                        <label>Username</label>
-                        <input type="text" name="username" defaultValue={editData?.username} className="modal-input" required />
-                      </div>
-                      <div className="input-block">
-                        <label>Password</label>
-                        <div className="password-wrapper">
-                          <input 
-                            type={showPassword ? "text" : "password"} 
-                            name="password" 
-                            defaultValue={editData?.password} 
-                            className="modal-input" 
-                            required 
-                          />
-                          <button type="button" className="btn-eye" onClick={() => setShowPassword(!showPassword)}>
-                            <EyeIcon show={showPassword} />
-                          </button>
-                        </div>
-                      </div>
-
                       <div className="input-block">
                         <label>Titik Koordinat</label>
                         <input type="text" name="titik_koordinat" defaultValue={editData?.titik_koordinat} placeholder="-6.200000, 106.816666" className="modal-input" required />
                       </div>
                       <div className="input-block">
+                        <label>Keterlambatan (Menit)</label>
+                        <input type="number" name="keterlambatan" defaultValue={editData?.keterlambatan} placeholder="Misal: 15" className="modal-input" required />
+                      </div>
+
+                      <div className="input-block">
                         <label>Jam Masuk</label>
-                        <input type="time" name="jam_masuk" defaultValue={editData?.jam_masuk} className="modal-input" required />
+                        <input type="time" name="jam_masuk" defaultValue={editData?.jam_masuk?.substring(0, 5)} className="modal-input" required />
                       </div>
 
                       <div className="input-block">
                         <label>Jam Keluar</label>
-                        <input type="time" name="jam_keluar" defaultValue={editData?.jam_keluar} className="modal-input" required />
-                      </div>
-                      <div className="input-block">
-                        <label>Keterlambatan (Menit)</label>
-                        <input type="number" name="keterlambatan" defaultValue={editData?.keterlambatan} placeholder="Misal: 15" className="modal-input" required />
+                        <input type="time" name="jam_keluar" defaultValue={editData?.jam_keluar?.substring(0, 5)} className="modal-input" required />
                       </div>
                   </div>
 
                   <div className="modal-footer-actions">
                       <button type="button" className="btn-cancel-mini" onClick={() => setShowModal(false)}>Batal</button>
-                      <button type="submit" className="btn-save-dynamic">Simpan</button>
+                      <button type="submit" className="btn-save-dynamic">Simpan Cabang</button>
                   </div>
 
                 </form>

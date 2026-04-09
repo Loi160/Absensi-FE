@@ -16,6 +16,8 @@ const Kehadiran = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('perizinan'); 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isSubmenuOpen, setIsSubmenuOpen] = useState(true); // Tambahkan state untuk buka/tutup submenu
+
   const openSidebar  = () => setSidebarOpen(true);
   const closeSidebar = () => setSidebarOpen(false);
   
@@ -59,44 +61,47 @@ const Kehadiran = () => {
       setLoading(true);
       const resCabang = await fetch("http://localhost:3000/api/cabang");
       const listCabang = await resCabang.json();
-      setCabangList(listCabang.map(c => c.nama));
+      setCabangList(Array.isArray(listCabang) ? listCabang.map(c => c.nama) : []); // PENGAMANAN DATA
 
       const resKaryawan = await fetch("http://localhost:3000/api/karyawan");
       const listKaryawan = await resKaryawan.json();
-      setKaryawanList(listKaryawan);
+      setKaryawanList(Array.isArray(listKaryawan) ? listKaryawan : []); // PENGAMANAN DATA
 
       const resPerizinan = await fetch("http://localhost:3000/api/perizinan/all");
       const allPerizinan = await resPerizinan.json();
 
       const harian = []; const fimtk = []; const cuti = [];
 
-      allPerizinan.forEach(p => {
-        const mappedData = {
-          id: p.id,
-          nama: p.users?.nama || "Unknown",
-          cabang: p.users?.cabang?.nama || "-",
-          jabatan: p.users?.jabatan || "-",
-          divisi: p.users?.divisi || "-",
-          noTelp: p.users?.no_telp || "-",
-          tipeIzin: p.jenis_izin,
-          keterangan: p.keterangan || p.keperluan,
-          tglMulai: formatDateIndo(p.tanggal_mulai),
-          tglSelesai: formatDateIndo(p.tanggal_selesai),
-          tanggal: formatDateIndo(p.tanggal_mulai), 
-          jamMulai: p.jam_mulai,
-          jamSelesai: p.jam_selesai,
-          keperluan: p.keperluan,
-          kendaraan: p.kendaraan,
-          alasan: p.keterangan,
-          status: p.status_approval,
-          foto: p.bukti_foto,
-          rawDate: new Date(p.created_at).getTime()
-        };
+      // PENGAMANAN DATA: Pastikan map hanya berjalan jika bentuknya Array
+      if (Array.isArray(allPerizinan)) {
+        allPerizinan.forEach(p => {
+          const mappedData = {
+            id: p.id,
+            nama: p.users?.nama || "Unknown",
+            cabang: p.users?.cabang?.nama || "-",
+            jabatan: p.users?.jabatan || "-",
+            divisi: p.users?.divisi || "-",
+            noTelp: p.users?.no_telp || "-",
+            tipeIzin: p.jenis_izin,
+            keterangan: p.keterangan || p.keperluan,
+            tglMulai: formatDateIndo(p.tanggal_mulai),
+            tglSelesai: formatDateIndo(p.tanggal_selesai),
+            tanggal: formatDateIndo(p.tanggal_mulai), 
+            jamMulai: p.jam_mulai,
+            jamSelesai: p.jam_selesai,
+            keperluan: p.keperluan,
+            kendaraan: p.kendaraan,
+            alasan: p.keterangan,
+            status: p.status_approval,
+            foto: p.bukti_foto,
+            rawDate: new Date(p.created_at).getTime()
+          };
 
-        if (p.kategori === 'Izin') harian.push(mappedData);
-        else if (p.kategori === 'FIMTK') fimtk.push(mappedData);
-        else if (p.kategori === 'Cuti') cuti.push(mappedData);
-      });
+          if (p.kategori === 'Izin') harian.push(mappedData);
+          else if (p.kategori === 'FIMTK') fimtk.push(mappedData);
+          else if (p.kategori === 'Cuti') cuti.push(mappedData);
+        });
+      }
 
       setDataIzinHarian(harian); setDataIzinFIMTK(fimtk); setDataCuti(cuti);
     } catch (error) {
@@ -229,14 +234,17 @@ const Kehadiran = () => {
           <div className="menu-item" onClick={() => handleNav('/hrd/kelolacabang')}><div className="menu-left"><img src={iconKelola} alt="kelola" className="menu-icon-main" /><span className="menu-text-main">Kelola Cabang</span></div></div>
           <div className="menu-item" onClick={() => handleNav('/hrd/datakaryawan')}><div className="menu-left"><img src={iconKaryawan} alt="karyawan" className="menu-icon-main" /><span className="menu-text-main">Data Karyawan</span></div></div>
           
-          <div className="menu-item active has-arrow">
+          <div className="menu-item active has-arrow" onClick={() => setIsSubmenuOpen(!isSubmenuOpen)}>
             <div className="menu-left"><img src={iconKehadiran} alt="hadir" className="menu-icon-main" /><span className="menu-text-main">Kehadiran</span></div>
-            <img src={iconBawah} alt="down" className="arrow-icon-main rotate-up" />
+            <img src={iconBawah} alt="down" className={`arrow-icon-main ${isSubmenuOpen ? 'rotate-up' : ''}`} />
           </div>
-          <div className="submenu-container">
-            <div className={`submenu-item ${activeTab === 'absenManual' ? 'active-sub' : ''}`} onClick={() => handleTabChange('absenManual')}><img src={iconAbsen} alt="-" className="submenu-icon" /><span>Absen Manual</span></div>
-            <div className={`submenu-item ${activeTab === 'perizinan' ? 'active-sub' : ''}`} onClick={() => handleTabChange('perizinan')}><img src={iconIzin} alt="-" className="submenu-icon" /><span>Perizinan</span></div>
-          </div>
+          
+          {isSubmenuOpen && (
+            <div className="submenu-container">
+              <div className={`submenu-item ${activeTab === 'absenManual' ? 'active-sub' : ''}`} onClick={() => handleTabChange('absenManual')}><img src={iconAbsen} alt="-" className="submenu-icon" /><span>Absen Manual</span></div>
+              <div className={`submenu-item ${activeTab === 'perizinan' ? 'active-sub' : ''}`} onClick={() => handleTabChange('perizinan')}><img src={iconIzin} alt="-" className="submenu-icon" /><span>Perizinan</span></div>
+            </div>
+          )}
           
           <div className="menu-item" onClick={() => handleNav('/hrd/laporan')}><div className="menu-left"><img src={iconLaporan} alt="lapor" className="menu-icon-main" /><span className="menu-text-main">Laporan</span></div></div>
         </nav>
@@ -306,7 +314,7 @@ const Kehadiran = () => {
                                             ) : <span className="text-selesai">- Selesai -</span>}
                                         </td>
                                     </tr>
-                                )) : <tr><td colSpan="6" className="text-center" style={{padding: "20px"}}>Belum ada data izin harian.</td></tr>}
+                                )) : <tr><td colSpan="6" className="text-center empty-state-cell" style={{padding: "20px"}}>Belum ada data izin harian.</td></tr>}
                             </tbody>
                         </table>
                     </div>
@@ -342,7 +350,7 @@ const Kehadiran = () => {
                                             ) : <span className="text-selesai">- Selesai -</span>}
                                         </td>
                                     </tr>
-                                )) : <tr><td colSpan="6" className="text-center" style={{padding: "20px"}}>Belum ada data izin FIMTK.</td></tr>}
+                                )) : <tr><td colSpan="6" className="text-center empty-state-cell" style={{padding: "20px"}}>Belum ada data izin FIMTK.</td></tr>}
                             </tbody>
                         </table>
                     </div>
@@ -378,7 +386,7 @@ const Kehadiran = () => {
                                             ) : <span className="text-selesai">- Selesai -</span>}
                                         </td>
                                     </tr>
-                                )) : <tr><td colSpan="6" className="text-center" style={{padding: "20px"}}>Belum ada data izin Cuti.</td></tr>}
+                                )) : <tr><td colSpan="6" className="text-center empty-state-cell" style={{padding: "20px"}}>Belum ada data izin Cuti.</td></tr>}
                             </tbody>
                         </table>
                     </div>
@@ -399,7 +407,6 @@ const Kehadiran = () => {
 
                 <form onSubmit={handleAbsenManualSubmit} className="absen-form-grid" style={{ marginTop: '20px' }}>
                     
-                    {/* FIELD NAMA (SEARCHABLE COMBOBOX) */}
                     <div className="form-group" style={{ position: 'relative' }}>
                         <label>Nama</label>
                         <div style={{ position: 'relative' }}>
@@ -423,7 +430,6 @@ const Kehadiran = () => {
                             </svg>
                         </div>
                         
-                        {/* CUSTOM DROPDOWN LIST */}
                         {showKaryawanDropdown && (
                             <div style={{
                                 position: 'absolute', top: '100%', left: 0, right: 0,
@@ -458,7 +464,6 @@ const Kehadiran = () => {
                         )}
                     </div>
 
-                    {/* FIELD AUTO-FILL */}
                     <div className="form-group">
                         <label>NIK</label>
                         <input type="text" className="input-field" value={karyawanDetail?.nik || ""} readOnly style={{backgroundColor:'#f5f5f5', color:'#666'}} />
