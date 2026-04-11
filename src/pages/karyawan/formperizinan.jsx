@@ -291,7 +291,7 @@ const FormPerizinan = () => {
                 </div>
                 <div className="fp-input-group">
                   <label className="fp-label">
-                    Bukti Foto / Surat Dokter (Jika ada)
+                    Bukti Foto (Opsional)
                   </label>
 
                   <input
@@ -354,7 +354,7 @@ const FormPerizinan = () => {
                         alt="Cam"
                         style={{ width: "20px" }}
                       />
-                      <span>Upload Foto / Dokumen</span>
+                      <span>Upload Foto/Dokumen</span>
                     </button>
                   )}
                   <small
@@ -459,11 +459,11 @@ const FormPerizinan = () => {
                   </div>
                 </div>
                 <div className="fp-input-group">
-                  <label className="fp-label">Keterangan / Keperluan</label>
+                  <label className="fp-label">Keterangan</label>
                   <textarea
                     name="keterangan"
                     className="fp-textarea"
-                    placeholder="Jelaskan keperluan cuti..."
+                    placeholder="Jelaskan keperluan cuti"
                     rows={3}
                     required
                   />
@@ -596,7 +596,7 @@ const FormPerizinan = () => {
                   <textarea
                     name="alasan"
                     className="fp-textarea"
-                    placeholder="Jelaskan alasan detail..."
+                    placeholder="Jelaskan alasan detail"
                     rows={3}
                     required
                   />

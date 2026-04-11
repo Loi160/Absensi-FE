@@ -179,27 +179,62 @@ button.mobile-only {
   color: #111;
 }
 
+/* ===============================
+   STYLE BADGES (BORDER & WARNA)
+================================ */
 .rw-badge {
   font-size: 10px;
-  padding: 3px 12px;
-  border-radius: 12px;
-  font-weight: 700;
-  border: 1px solid transparent;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+  /* Perubahan untuk memastikan teks 100% center */
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  line-height: 1;
 }
 
-.badge-sakit {
-  background-color: #ffd700;
-  color: #000;
-}
+/* 1. Badge Absensi & Alpha */
 .badge-hadir-full {
-  background-color: #00b300;
+  background-color: #2fb800;
   color: white;
-  text-transform: uppercase;
+  border: 1px solid #2fb800;
 }
 .badge-hadir-partial {
-  background: white;
-  color: #00b300;
-  border: 1.5px solid #00b300;
+  background-color: white;
+  color: #2fb800;
+  border: 1.5px solid #2fb800;
+}
+.badge-alpha {
+  background-color: #e03131;
+  color: white;
+  border: 1px solid #e03131;
+}
+
+/* 2. Badge Tipe Izin (Sakit, Cuti, Acara Pribadi, FIMTK) */
+.badge-izin-kuning {
+  background-color: #ffd700;
+  color: #000;
+  border: 1px solid #ffd700;
+}
+
+/* 3. Badge Status Approval (Disetujui/Ditolak/Pending) */
+.badge-status-disetujui {
+  background-color: white; 
+  color: #2fb800;
+  border: 1.5px solid #2fb800; 
+}
+.badge-status-ditolak {
+  background-color: white;
+  color: #e03131;
+  border: 1.5px solid #e03131; 
+}
+.badge-status-pending {
+  background-color: white;
+  color: #f08c00;
+  border: 1.5px solid #fcc419; 
 }
 
 .rw-name {

@@ -121,7 +121,7 @@ const Absensi = () => {
       return;
     }
 
-    setLocationError("Sedang mencari lokasi Anda...");
+    setLocationError("Sedang mencari lokasi Anda");
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -289,7 +289,7 @@ const Absensi = () => {
       return publicUrlData.publicUrl;
     } catch (error) {
       console.error("Error upload foto:", error);
-      throw new Error("Gagal mengunggah foto ke Supabase Storage. Cek Policy.");
+      throw new Error("Gagal mengunggah foto");
     }
   };
 
@@ -445,7 +445,7 @@ const Absensi = () => {
           {activeTab === "Istirahat" ? (
             <div className="time-row">
               <div className="input-group flex-1">
-                <label>Jam Mulai Istirahat</label>
+                <label>Jam Mulai</label>
                 <input
                   type="time"
                   className="time-display"
@@ -456,7 +456,7 @@ const Absensi = () => {
                 />
               </div>
               <div className="input-group flex-1">
-                <label>Jam Akhir Istirahat</label>
+                <label>Jam Selesai</label>
                 <div
                   className="time-display"
                   style={{ backgroundColor: "#eee", color: "#888" }}
@@ -486,7 +486,7 @@ const Absensi = () => {
                     fontWeight: "bold",
                   }}
                 >
-                  🔄 Refresh GPS
+                  Refresh GPS
                 </button>
               </label>
 
@@ -567,7 +567,7 @@ const Absensi = () => {
                         boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
                       }}
                     >
-                      📸 Jepret
+                      Ambil Foto
                     </button>
                   </div>
                 </div>
@@ -602,7 +602,7 @@ const Absensi = () => {
                       fontWeight: "bold",
                     }}
                   >
-                    🔄 Ulangi Foto
+                    Ambil Ulang Foto
                   </button>
                 </div>
               ) : (
@@ -616,7 +616,7 @@ const Absensi = () => {
                   }}
                 >
                   <img src={cameraIcon} alt="Cam" />
-                  <span>Nyalakan Kamera Depan</span>
+                  <span>Buka Kamera Depan</span>
                 </button>
               )}
 
@@ -633,7 +633,7 @@ const Absensi = () => {
               (activeTab !== "Istirahat" && isCameraOpen)
             }
           >
-            {loading ? "Menyimpan Data..." : `Simpan Absen ${activeTab}`}
+            {loading ? "Menyimpan Data" : `Simpan Absen ${activeTab}`}
           </button>
         </div>
         <div className="bottom-gap"></div>

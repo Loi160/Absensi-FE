@@ -66,24 +66,28 @@ const Riwayat = () => {
       // Format Data Absensi
       const formatAbsensi = absensiData.map((a) => {
         const rawTS = a.tanggal ? new Date(a.tanggal).getTime() : 0;
+        
+        // Pengecekan status Alpha dari Backend
+        const isAlpha = a.status_kehadiran === "ALPHA";
+        // Cek Partial (Bukan Alpha, dan salah satu jam kosong)
+        const isPartial = !isAlpha && !(a.waktu_masuk && a.waktu_pulang);
+
+        let noteText = a.waktu_pulang ? "Absen Selesai" : "Belum Absen Pulang";
+        if (isAlpha) noteText = "Tidak ada keterangan kehadiran";
+
         return {
-          id: `abs_${a.id}`,
+          id: a.is_alpha ? a.id : `abs_${a.id}`,
           realId: a.id,
           type: "Absensi",
-          status: a.status_kehadiran
-            ? a.status_kehadiran.toUpperCase()
-            : "HADIR",
+          status: a.status_kehadiran ? a.status_kehadiran.toUpperCase() : "HADIR",
           name: user.nama || "Karyawan",
           nik: user.nik || "-",
           branch: user.cabangUtama || "-",
           date: formatDateIndo(a.tanggal),
           rawDate: rawTS,
-          timeUpdate:
-            getJam(a.waktu_pulang) !== "--:--"
-              ? getJam(a.waktu_pulang)
-              : getJam(a.waktu_masuk),
-          note: a.waktu_pulang ? "Absen Selesai" : "Belum Absen Pulang",
-          isPartial: !a.waktu_pulang,
+          timeUpdate: isAlpha ? "--:--" : (getJam(a.waktu_pulang) !== "--:--" ? getJam(a.waktu_pulang) : getJam(a.waktu_masuk)),
+          note: noteText,
+          isPartial: isPartial,
           detail: {
             clockIn: getJam(a.waktu_masuk),
             clockOut: getJam(a.waktu_pulang),
@@ -101,11 +105,7 @@ const Riwayat = () => {
           id: `izin_${p.id}`,
           realId: p.id,
           type: "Perizinan",
-          status: p.jenis_izin
-            ? p.jenis_izin.toUpperCase()
-            : p.kategori
-              ? p.kategori.toUpperCase()
-              : "IZIN",
+          status: p.jenis_izin ? p.jenis_izin.toUpperCase() : p.kategori ? p.kategori.toUpperCase() : "IZIN",
           name: user.nama || "Karyawan",
           nik: user.nik || "-",
           branch: user.cabangUtama || "-",
@@ -114,13 +114,13 @@ const Riwayat = () => {
           timeUpdate: "--:--",
           note: p.keterangan || `Pengajuan ${p.kategori || "Perizinan"}`,
           isSpecial: true,
-          statusApproval: p.status_approval, // Menyimpan status Disetujui/Ditolak/Pending
+          statusApproval: p.status_approval, 
           detail: {
             tipeIzin: p.jenis_izin || p.kategori || "-",
             keterangan: p.keterangan || p.keperluan || "-",
             tglMulai: formatDateIndo(p.tanggal_mulai || p.tanggal),
             tglAkhir: formatDateIndo(p.tanggal_selesai || p.tanggal),
-            buktiFoto: p.bukti_foto || null, // <-- MENGAMBIL DATA URL BUKTI
+            buktiFoto: p.bukti_foto || null,
           },
         };
       });
@@ -162,14 +162,14 @@ const Riwayat = () => {
         );
         if (res.ok) {
           setHistoryList((prev) => prev.filter((item) => item.id !== id));
-          alert("Pengajuan berhasil dibatalkan.");
-          setSelectedItem(null); // Tutup modal jika item yg dihapus sedang dibuka
+          alert("Pengajuan berhasil dibatalkan");
+          setSelectedItem(null); 
         } else {
-          alert("Gagal menghapus data.");
+          alert("Gagal menghapus data");
         }
       } catch (err) {
         console.error(err);
-        alert("Terjadi kesalahan jaringan.");
+        alert("Terjadi kesalahan jaringan");
       }
     }
   };
@@ -178,6 +178,20 @@ const Riwayat = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     navigate("/auth/login");
+  };
+
+  const getBadgeStatusClass = (statusApp) => {
+    if (statusApp === "Disetujui") return "badge-status-disetujui";
+    if (statusApp === "Ditolak") return "badge-status-ditolak";
+    return "badge-status-pending";
+  };
+
+  const getBadgeTypeClass = (item) => {
+    if (item.type === "Absensi") {
+      if (item.status === "ALPHA") return "badge-alpha";
+      return item.isPartial ? "badge-hadir-partial" : "badge-hadir-full";
+    }
+    return "badge-izin-kuning"; 
   };
 
   return (
@@ -240,7 +254,6 @@ const Riwayat = () => {
           </div>
 
           <div className="rw-content-list">
-            {/* TAMPILKAN ERROR JIKA ADA MASALAH */}
             {errorMessage && (
               <div
                 style={{
@@ -287,39 +300,19 @@ const Riwayat = () => {
                     <div className="rw-row-top">
                       <span className="rw-type-text">{item.type}</span>
 
-                      <div style={{ display: "flex", gap: "8px" }}>
-                        {/* Badge Status Approval (Khusus Perizinan) */}
+                      {/* AREA BADGE STATUS & TIPE IZIN */}
+                      <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                        
                         {item.type === "Perizinan" && (
-                          <span
-                            style={{
-                              fontSize: "10px",
-                              fontWeight: "bold",
-                              padding: "4px 8px",
-                              borderRadius: "4px",
-                              backgroundColor:
-                                item.statusApproval === "Disetujui"
-                                  ? "#eaf4d1"
-                                  : item.statusApproval === "Ditolak"
-                                    ? "#ffebee"
-                                    : "#fff3cd",
-                              color:
-                                item.statusApproval === "Disetujui"
-                                  ? "#2fb800"
-                                  : item.statusApproval === "Ditolak"
-                                    ? "#d32f2f"
-                                    : "#f59f00",
-                            }}
-                          >
+                          <span className={`rw-badge ${getBadgeStatusClass(item.statusApproval)}`}>
                             {item.statusApproval}
                           </span>
                         )}
 
-                        {/* Badge Tipe/Kategori */}
-                        <span
-                          className={`rw-badge ${item.status === "SAKIT" ? "badge-sakit" : item.type === "Perizinan" ? "badge-izin" : item.isPartial ? "badge-hadir-partial" : "badge-hadir-full"}`}
-                        >
+                        <span className={`rw-badge ${getBadgeTypeClass(item)}`}>
                           {item.status}
                         </span>
+
                       </div>
                     </div>
 
@@ -350,7 +343,6 @@ const Riwayat = () => {
                     <p className="rw-note">{item.note}</p>
                   </div>
 
-                  {/* Tombol Hapus (Hanya jika Perizinan masih Pending) */}
                   {item.type === "Perizinan" &&
                     item.statusApproval === "Pending" && (
                       <button
@@ -487,7 +479,6 @@ const Riwayat = () => {
                 </>
               )}
 
-              {/* TAMPILAN DETAIL PERIZINAN YANG DIPERBARUI */}
               {selectedItem.type === "Perizinan" && (
                 <>
                   <div className="rw-form-group">
@@ -561,7 +552,7 @@ const Riwayat = () => {
                             className="no-photo"
                             style={{ color: "#aaa", fontStyle: "italic" }}
                           >
-                            Pengajuan ini dikirim tanpa lampiran foto bukti.
+                            Pengajuan ini dikirim tanpa lampiran foto bukti
                           </div>
                         )}
                       </div>
@@ -573,7 +564,6 @@ const Riwayat = () => {
           </div>
         )}
 
-        {/* PREVIEW IMAGE (FUNGSI ZOOM) */}
         {previewImage && (
           <div
             className="rw-preview-overlay"

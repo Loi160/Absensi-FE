@@ -122,7 +122,7 @@ const LaporanManagerCabang = () => {
   const openDetail = (item, jenis, jumlah) => {
     if (jumlah === "0" || jumlah === "-") return;
 
-    const { nama, nik, cabang, rawAbsensi = [], rawPerizinan = [] } = item;
+    const { nama, nik, cabang, rawAbsensi = [], rawPerizinan = [], rawAlpha = [] } = item;
     let realData = [];
     let title = `Rincian ${jenis}`;
 
@@ -225,6 +225,16 @@ const LaporanManagerCabang = () => {
         keperluan: p.keperluan || "-",
         kendaraan: p.kendaraan || "-",
         alasan: p.keterangan || "-",
+      }));
+    } else if (jenis === "Alpha") {
+      title = "Rincian Alpha";
+      realData = rawAlpha.map((a) => ({
+        tipe: "alpha",
+        tanggal: a.tanggal,
+        cabang: cabang,
+        jadwal: "Sesuai Jam Operasional",
+        status: "ALPHA",
+        keterangan: a.keterangan,
       }));
     }
 
@@ -598,6 +608,53 @@ const LaporanManagerCabang = () => {
                 style={{ minHeight: "40px", height: "auto" }}
               >
                 {item.alasan}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+      {item.tipe === "alpha" && (
+        <>
+          <div className="lap-modal-row">
+            <div className="lap-modal-group">
+              <label className="lap-modal-label">Tanggal</label>
+              <div className="lap-modal-input">{item.tanggal}</div>
+            </div>
+            <div className="lap-modal-group">
+              <label className="lap-modal-label">Cabang</label>
+              <div className="lap-modal-input">{item.cabang}</div>
+            </div>
+          </div>
+          <div className="lap-modal-row">
+            <div className="lap-modal-group">
+              <label className="lap-modal-label">Jadwal Kerja Seharusnya</label>
+              <div className="lap-modal-input">{item.jadwal}</div>
+            </div>
+            <div className="lap-modal-group">
+              <label className="lap-modal-label">Status</label>
+              <div
+                className="lap-modal-input"
+                style={{ color: "#e03131", fontWeight: "700" }}
+              >
+                {item.status}
+              </div>
+            </div>
+          </div>
+          <div className="lap-modal-row">
+            <div className="lap-modal-group" style={{ flex: 1 }}>
+              <label className="lap-modal-label">
+                Keterangan / Catatan Sistem
+              </label>
+              <div
+                className="lap-modal-input"
+                style={{
+                  background: "#fff5f5",
+                  borderColor: "#ffc9c9",
+                  color: "#c92a2a",
+                  fontSize: "13px",
+                }}
+              >
+                {item.keterangan}
               </div>
             </div>
           </div>
