@@ -29,6 +29,7 @@ const LaporanManagerCabang = () => {
     return `${yyyy}-${mm}-${dd}`;
   };
 
+  // LOGIKA CUT-OFF OTOMATIS TANGGAL 26 S/D 25
   const getCutoffDates = () => {
     const d = new Date();
     const date = d.getDate();
@@ -285,6 +286,11 @@ const LaporanManagerCabang = () => {
                     <span>Tidak Ada Foto</span>
                     <small>No Photo Available</small>
                   </div>
+                ) : item.masuk.foto.includes("Dihapus Otomatis") ? (
+                  <div className="lap-manual-placeholder">
+                    <span>Telah Dihapus</span>
+                    <small>Usia file &gt; 30 Hari</small>
+                  </div>
                 ) : (
                   <>
                     <img src={item.masuk.foto} alt="Masuk" className="lap-foto-img" />
@@ -298,6 +304,11 @@ const LaporanManagerCabang = () => {
                   <div className="lap-manual-placeholder">
                     <span>Tidak Ada Foto</span>
                     <small>No Photo Available</small>
+                  </div>
+                ) : item.pulang.foto.includes("Dihapus Otomatis") ? (
+                  <div className="lap-manual-placeholder">
+                    <span>Telah Dihapus</span>
+                    <small>Usia file &gt; 30 Hari</small>
                   </div>
                 ) : (
                   <>

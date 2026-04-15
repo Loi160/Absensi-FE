@@ -284,6 +284,11 @@ const Laporan = () => {
                     <span>Tidak Ada Foto</span>
                     <small>No Photo Available</small>
                   </div>
+                ) : item.masuk.foto.includes("Dihapus Otomatis") ? (
+                  <div className="lap-manual-placeholder">
+                    <span>Telah Dihapus</span>
+                    <small>Usia file &gt; 30 Hari</small>
+                  </div>
                 ) : (
                   <>
                     <img src={item.masuk.foto} alt="Masuk" className="lap-foto-img" />
@@ -297,6 +302,11 @@ const Laporan = () => {
                   <div className="lap-manual-placeholder">
                     <span>Tidak Ada Foto</span>
                     <small>No Photo Available</small>
+                  </div>
+                ) : item.pulang.foto.includes("Dihapus Otomatis") ? (
+                  <div className="lap-manual-placeholder">
+                    <span>Telah Dihapus</span>
+                    <small>Usia file &gt; 30 Hari</small>
                   </div>
                 ) : (
                   <>

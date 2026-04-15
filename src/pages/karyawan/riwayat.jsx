@@ -434,21 +434,21 @@ const Riwayat = () => {
                         className="rw-photo-item"
                         onClick={() =>
                           selectedItem.detail.photoIn &&
+                          !selectedItem.detail.photoIn.includes("Dihapus Otomatis") &&
                           setPreviewImage(selectedItem.detail.photoIn)
                         }
                       >
-                        {selectedItem.detail.photoIn ? (
+                        {selectedItem.detail.photoIn && !selectedItem.detail.photoIn.includes("Dihapus Otomatis") ? (
                           <>
-                            <img
-                              src={selectedItem.detail.photoIn}
-                              alt="Masuk"
-                            />
-                            <div className="rw-zoom-overlay">
-                              <ZoomIn size={16} />
-                            </div>
+                            <img src={selectedItem.detail.photoIn} alt="Masuk" />
+                            <div className="rw-zoom-overlay"><ZoomIn size={16} /></div>
                           </>
                         ) : (
-                          <div className="no-photo">Belum Ada Foto</div>
+                          <div className="no-photo">
+                            {selectedItem.detail.photoIn && selectedItem.detail.photoIn.includes("Dihapus Otomatis") 
+                                ? "Telah Dihapus (30 Hari)" 
+                                : "Belum Ada Foto"}
+                          </div>
                         )}
                         <div className="rw-photo-label">Absen Masuk</div>
                       </div>
@@ -456,21 +456,21 @@ const Riwayat = () => {
                         className="rw-photo-item"
                         onClick={() =>
                           selectedItem.detail.photoOut &&
+                          !selectedItem.detail.photoOut.includes("Dihapus Otomatis") &&
                           setPreviewImage(selectedItem.detail.photoOut)
                         }
                       >
-                        {selectedItem.detail.photoOut ? (
+                        {selectedItem.detail.photoOut && !selectedItem.detail.photoOut.includes("Dihapus Otomatis") ? (
                           <>
-                            <img
-                              src={selectedItem.detail.photoOut}
-                              alt="Pulang"
-                            />
-                            <div className="rw-zoom-overlay">
-                              <ZoomIn size={16} />
-                            </div>
+                            <img src={selectedItem.detail.photoOut} alt="Pulang" />
+                            <div className="rw-zoom-overlay"><ZoomIn size={16} /></div>
                           </>
                         ) : (
-                          <div className="no-photo">Belum Ada Foto</div>
+                          <div className="no-photo">
+                             {selectedItem.detail.photoOut && selectedItem.detail.photoOut.includes("Dihapus Otomatis") 
+                                ? "Telah Dihapus (30 Hari)" 
+                                : "Belum Ada Foto"}
+                          </div>
                         )}
                         <div className="rw-photo-label">Absen Pulang</div>
                       </div>
