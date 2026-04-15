@@ -227,7 +227,6 @@ const DataKaryawanManagerCabang = () => {
                 </div>
               )}
             </div>
-            {/* Tombol Tambah Karyawan dihapus untuk role ini */}
           </div>
         </div>
 

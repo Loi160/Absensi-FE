@@ -96,6 +96,11 @@ const DataKaryawanHRD = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!formData.cabang_id) return alert("Pilih cabang terlebih dahulu!");
+    
+    // Keamanan tambahan sebelum dkirim ke DB
+    if (!/^\d{8}$/.test(formData.nik)) {
+        return alert("NIK harus berupa angka tepat 8 digit!");
+    }
 
     try {
       const res = await fetch(import.meta.env.VITE_API_URL + "/api/karyawan", {
@@ -352,17 +357,26 @@ const DataKaryawanHRD = () => {
                     }
                   />
                 </div>
+                
+                {/* UPDATE: VALIDASI INPUT NIK 8 DIGIT ANGKA */}
                 <div className="form-group">
                   <label>NIK (Username)</label>
                   <input
                     type="text"
                     className="input-edit"
+                    placeholder="Wajib 8 Digit Angka"
                     required
-                    onChange={(e) =>
-                      setFormData({ ...formData, nik: e.target.value })
-                    }
+                    pattern="\d{8}"
+                    maxLength="8"
+                    minLength="8"
+                    title="NIK harus berisi 8 digit angka."
+                    onInput={(e) => {
+                        e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                        setFormData({ ...formData, nik: e.target.value });
+                    }}
                   />
                 </div>
+
                 <div className="form-group">
                   <label>Password Login</label>
                   <input
