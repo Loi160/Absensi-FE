@@ -1,683 +1,645 @@
-import express from "express";
-import cors from "cors";
-import "dotenv/config";
-import { supabase } from "./config/supabase.js";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { createClient } from "@supabase/supabase-js";
+import "./absensi.css";
+import { ChevronDown, ArrowLeft } from "lucide-react";
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+// Import assets
+import logoAmaga from "../../assets/logoamaga.svg";
+import logoPersegi from "../../assets/logopersegi.svg";
+import profileImg from "../../assets/profile.svg";
+import cameraIcon from "../../assets/camera.svg";
 
-app.get("/", (req, res) => {
-  res.send("API Absensi Amaga Corp jalan 🚀");
-});
+// =========================================================================
+// MENGGUNAKAN KEY DARI FILE .env (LEBIH AMAN)
+// =========================================================================
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-// ==========================================
-// FUNGSI PINTAR: KONVERSI KE WAKTU INDONESIA (WIB UTC+7)
-// ==========================================
-const getWaktuIndo = (offsetDays = 0) => {
-  const d = new Date();
-  const utc = d.getTime() + d.getTimezoneOffset() * 60000;
-  const wib = new Date(utc + 3600000 * 7); // Konversi ke WIB
+const Absensi = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-  if (offsetDays !== 0) {
-    wib.setDate(wib.getDate() + offsetDays);
-  }
+  const [activeTab, setActiveTab] = useState("Masuk");
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [breakStartTime, setBreakStartTime] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const yyyy = wib.getFullYear();
-  const mm = String(wib.getMonth() + 1).padStart(2, "0");
-  const dd = String(wib.getDate()).padStart(2, "0");
+  // State Kamera & Watermark
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [capturedPhoto, setCapturedPhoto] = useState(null);
 
-  return {
-    tanggal: `${yyyy}-${mm}-${dd}`,
-    hari: wib.getDay(), // 0 = Minggu
-    obj: wib,
+  // State GPS (Koordinat & Validasi Lokasi)
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [locationError, setLocationError] = useState("");
+  const [jarakDariKantor, setJarakDariKantor] = useState(null);
+  const [isLocationValid, setIsLocationValid] = useState(false);
+
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const streamRef = useRef(null);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    return () => tutupKamera();
+  }, []);
+
+  // Meminta Izin Lokasi Otomatis Saat Halaman Dibuka
+  useEffect(() => {
+    if (activeTab !== "Istirahat") {
+      cekLokasiKaryawan();
+    }
+  }, [activeTab]);
+
+  const getCurrentTimeStr = () => {
+    const now = new Date();
+    return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
   };
-};
 
-const hitungSelisihMenit = (waktuAwal, waktuAkhir) => {
-  if (!waktuAwal || !waktuAkhir) return 0;
-  const [h1, m1] = waktuAwal.split(":").map(Number);
-  const [h2, m2] = waktuAkhir.split(":").map(Number);
-  return h2 * 60 + m2 - (h1 * 60 + m1);
-};
+  const getFormatDateIndo = () => {
+    const options = {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+    return new Date().toLocaleDateString("id-ID", options);
+  };
 
-// --- LOGIN ---
-app.post("/api/login", async (req, res) => {
-  const { username, password } = req.body;
-  try {
-    const { data: user, error } = await supabase
-      .from("users")
-      .select("*, cabang(*)")
-      .eq("nik", username)
-      .single();
-    if (error || !user)
-      return res.status(401).json({ message: "Username tidak ditemukan" });
-    if (user.password !== password)
-      return res.status(401).json({ message: "Password salah" });
+  const handleStartTimeChange = (e) => {
+    const selectedTime = e.target.value;
+    const nowStr = getCurrentTimeStr().substring(0, 5);
+    if (selectedTime < nowStr) {
+      alert("Waktu sudah terlewat! Silakan pilih jam sekarang atau kedepan.");
+      setBreakStartTime(nowStr);
+    } else {
+      setBreakStartTime(selectedTime);
+    }
+  };
 
-    if (user.status === "Nonaktif")
-      return res
-        .status(403)
-        .json({ message: "Akun Anda telah dinonaktifkan. Hubungi HRD." });
+  const getEndTimeStr = () => {
+    if (!breakStartTime) return "--:--";
+    const [hh, mm] = breakStartTime.split(":").map(Number);
+    let endHh = hh + 3;
+    if (endHh >= 24) endHh -= 24;
+    return `${String(endHh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+  };
 
-    let subCabangNames = [];
-    if (user.role === "managerCabang" && user.cabang_id) {
-      const { data: subs } = await supabase
-        .from("cabang")
-        .select("nama")
-        .eq("parent_id", user.cabang_id);
-      if (subs) subCabangNames = subs.map((s) => s.nama);
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    navigate("/auth/login");
+  };
+
+  // =========================================================================
+  // SISTEM LOKASI (GPS GEOFENCING)
+  // =========================================================================
+
+  const hitungJarak = (lat1, lon1, lat2, lon2) => {
+    const R = 6371e3;
+    const p1 = (lat1 * Math.PI) / 180;
+    const p2 = (lat2 * Math.PI) / 180;
+    const dp = ((lat2 - lat1) * Math.PI) / 180;
+    const dl = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a =
+      Math.sin(dp / 2) * Math.sin(dp / 2) +
+      Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) * Math.sin(dl / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  const cekLokasiKaryawan = () => {
+    if (!navigator.geolocation) {
+      setLocationError("Browser Anda tidak mendukung GPS.");
+      return;
     }
 
-    res.status(200).json({
-      message: "Login Berhasil",
-      user: {
-        id: user.id,
-        nama: user.nama,
-        role: user.role,
-        nik: user.nik,
-        cabang_id: user.cabang_id,
-        cabangUtama: user.cabang?.nama || "Pusat",
-        titik_koordinat: user.cabang?.titik_koordinat || null,
-        radius_toleransi: user.cabang?.radius_toleransi || 20,
-        subCabang: subCabangNames,
-        jabatan: user.jabatan,
-        divisi: user.divisi,
+    setLocationError("Sedang mencari lokasi Anda");
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const userLat = position.coords.latitude;
+        const userLon = position.coords.longitude;
+        setCurrentLocation({ lat: userLat, lon: userLon });
+
+        const cabangKoordinatStr = user?.titik_koordinat;
+        const radiusToleransi = user?.radius_toleransi || 20;
+
+        if (!cabangKoordinatStr) {
+          setLocationError(
+            "Cabang Anda belum memiliki titik koordinat. Hubungi HRD.",
+          );
+          setIsLocationValid(false);
+          return;
+        }
+
+        const [cabangLat, cabangLon] = cabangKoordinatStr
+          .split(",")
+          .map((coord) => parseFloat(coord.trim()));
+
+        const jarakMeter = Math.round(
+          hitungJarak(userLat, userLon, cabangLat, cabangLon),
+        );
+        setJarakDariKantor(jarakMeter);
+
+        if (jarakMeter <= radiusToleransi) {
+          setLocationError("");
+          setIsLocationValid(true);
+        } else {
+          setLocationError(
+            `Anda berada ${jarakMeter} meter dari cabang. Maksimal toleransi adalah ${radiusToleransi} meter. Harap mendekat ke lokasi!`,
+          );
+          setIsLocationValid(false);
+        }
       },
-    });
-  } catch (err) {
-    res.status(500).json({ message: "Server Error" });
-  }
-});
+      (err) => {
+        setIsLocationValid(false);
+        if (err.code === 1)
+          setLocationError(
+            "Akses GPS ditolak! Tolong izinkan akses lokasi di browser HP Anda.",
+          );
+        else setLocationError("Sinyal GPS lemah atau tidak ditemukan.");
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+    );
+  };
 
-// --- CABANG ---
-app.get("/api/cabang", async (req, res) => {
-  const { data } = await supabase
-    .from("cabang")
-    .select("*")
-    .order("id", { ascending: true });
-  res.status(200).json(data || []);
-});
+  // =========================================================================
+  // SISTEM KAMERA LIVE WEBRTC & WATERMARK
+  // =========================================================================
 
-app.post("/api/cabang", async (req, res) => {
-  try {
-    let payload = { ...req.body };
-    if (payload.keterlambatan) payload.keterlambatan = parseInt(payload.keterlambatan, 10);
-    if (payload.parent_id) payload.parent_id = parseInt(payload.parent_id, 10);
-    if (payload.radius_toleransi) payload.radius_toleransi = parseInt(payload.radius_toleransi, 10);
+  const bukaKamera = async () => {
+    if (!isLocationValid) {
+      alert(
+        "Lokasi Anda tidak valid atau akses GPS ditolak! Silakan cek peringatan di layar.",
+      );
+      cekLokasiKaryawan();
+      return;
+    }
 
-    const timeFields = ["jam_masuk_weekday", "jam_keluar_weekday", "jam_masuk_weekend", "jam_keluar_weekend", "jam_mulai_lembur", "jam_selesai_lembur"];
-    timeFields.forEach((field) => {
-      if (payload[field] && payload[field].length === 5) payload[field] = `${payload[field]}:00`;
-    });
+    setCapturedPhoto(null);
+    setIsCameraOpen(true);
 
-    const { error } = await supabase.from("cabang").insert([payload]);
-    if (error) return res.status(400).json({ message: "Gagal menambah cabang", detail: error.message });
-    res.status(201).json({ message: "Cabang berhasil ditambahkan" });
-  } catch (err) {
-    res.status(500).json({ message: "Gagal menambah cabang", error: err.message });
-  }
-});
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" },
+        audio: false,
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err) {
+      console.error("Error akses kamera:", err);
+      alert(
+        "Gagal mengakses kamera. Tolong izinkan akses kamera di pengaturan browser Anda!",
+      );
+      setIsCameraOpen(false);
+    }
+  };
 
-app.put("/api/cabang/:id", async (req, res) => {
-  try {
-    let payload = { ...req.body };
-    if (payload.keterlambatan) payload.keterlambatan = parseInt(payload.keterlambatan, 10);
-    if (payload.parent_id) payload.parent_id = parseInt(payload.parent_id, 10);
-    if (payload.radius_toleransi) payload.radius_toleransi = parseInt(payload.radius_toleransi, 10);
+  const tutupKamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    setIsCameraOpen(false);
+  };
 
-    const timeFields = ["jam_masuk_weekday", "jam_keluar_weekday", "jam_masuk_weekend", "jam_keluar_weekend", "jam_mulai_lembur", "jam_selesai_lembur"];
-    timeFields.forEach((field) => {
-      if (payload[field] && payload[field].length === 5) payload[field] = `${payload[field]}:00`;
-    });
+  const ambilFoto = () => {
+    if (!videoRef.current || !canvasRef.current) return;
 
-    const { error } = await supabase.from("cabang").update(payload).eq("id", req.params.id);
-    if (error) throw error;
-    res.status(200).json({ message: "Data cabang berhasil diubah" });
-  } catch (err) {
-    res.status(500).json({ message: "Gagal mengubah cabang", error: err.message });
-  }
-});
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
 
-app.put("/api/cabang/:id/status", async (req, res) => {
-  try {
-    const { is_active } = req.body;
-    const { error } = await supabase.from("cabang").update({ is_active }).eq("id", req.params.id);
-    if (error) throw error;
-    res.status(200).json({ message: "Status cabang berhasil diubah" });
-  } catch (err) {
-    res.status(500).json({ message: "Gagal mengubah status cabang", error: err.message });
-  }
-});
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
 
-// --- PEMBERSIH DATA KARYAWAN ---
-const cleanUserPayload = (body) => {
-  let payload = { ...body };
-  delete payload.id;
-  delete payload.cabang;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-  if (!payload.tanggal_masuk || payload.tanggal_masuk === "") payload.tanggal_masuk = null;
-  if (!payload.tanggal_lahir || payload.tanggal_lahir === "") payload.tanggal_lahir = null;
+    const padding = 20;
+    const boxHeight = 120;
+    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.fillRect(0, canvas.height - boxHeight, canvas.width, boxHeight);
 
-  if (payload.cabang_id) {
-    payload.cabang_id = parseInt(payload.cabang_id, 10);
-    if (isNaN(payload.cabang_id)) payload.cabang_id = null;
-  } else {
-    payload.cabang_id = null;
-  }
-  return payload;
+    ctx.font = "bold 26px Arial";
+    ctx.fillStyle = "#ffffff";
+
+    const marginX = 25;
+    const startY = canvas.height - 80;
+
+    const namaTeks = user?.nama || "Unknown User";
+    const cabangTeks = `Lokasi: Cabang ${user?.cabangUtama || "-"} (${jarakDariKantor}m)`;
+    const waktuTeks = `${getFormatDateIndo()} - ${getCurrentTimeStr()}`;
+
+    ctx.fillText(namaTeks, marginX, startY);
+    ctx.font = "20px Arial";
+    ctx.fillStyle = "#ffdd57";
+    ctx.fillText(cabangTeks, marginX, startY + 30);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText(waktuTeks, marginX, startY + 60);
+
+    const dataURL = canvas.toDataURL("image/jpeg", 0.9);
+    setCapturedPhoto(dataURL);
+    tutupKamera();
+  };
+
+  const fotoUlang = () => {
+    bukaKamera();
+  };
+
+  const dataURLtoFile = (dataurl, filename) => {
+    const arr = dataurl.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  };
+
+  const uploadFotoKeSupabase = async () => {
+    if (!capturedPhoto) return null;
+    try {
+      const fileToUpload = dataURLtoFile(
+        capturedPhoto,
+        `${user.nik}_absen_${activeTab.toLowerCase()}_${Date.now()}.jpg`,
+      );
+
+      const { error: uploadError } = await supabase.storage
+        .from("foto_absensi")
+        .upload(fileToUpload.name, fileToUpload);
+
+      if (uploadError) throw uploadError;
+
+      const { data: publicUrlData } = supabase.storage
+        .from("foto_absensi")
+        .getPublicUrl(fileToUpload.name);
+
+      return publicUrlData.publicUrl;
+    } catch (error) {
+      console.error("Error upload foto:", error);
+      throw new Error("Gagal mengunggah foto");
+    }
+  };
+
+  // =========================================================================
+  // SIMPAN ABSENSI KE BACKEND
+  // =========================================================================
+  const handleAbsen = async () => {
+    if (!user) {
+      alert("Sesi anda telah habis. Silahkan login kembali.");
+      return navigate("/auth/login");
+    }
+
+    if (activeTab !== "Istirahat") {
+      if (!isLocationValid) {
+        alert(
+          "Lokasi GPS Anda di luar batas toleransi! Silakan mendekat ke area absen.",
+        );
+        return;
+      }
+      if (!capturedPhoto) {
+        alert(`Mohon ambil foto bukti absen ${activeTab} terlebih dahulu!`);
+        return;
+      }
+    }
+
+    if (activeTab === "Istirahat" && !breakStartTime) {
+      alert("Mohon tentukan jam mulai istirahat!");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      let urlFoto = null;
+      if (activeTab !== "Istirahat") {
+        urlFoto = await uploadFotoKeSupabase();
+      }
+
+      const payload = {
+        user_id: user.id,
+        tipe_absen: activeTab,
+        waktu: getCurrentTimeStr(),
+        foto: urlFoto,
+        waktu_istirahat_mulai:
+          activeTab === "Istirahat" ? `${breakStartTime}:00` : null,
+        waktu_istirahat_selesai:
+          activeTab === "Istirahat" ? `${getEndTimeStr()}:00` : null,
+      };
+
+      const response = await fetch(
+        import.meta.env.VITE_API_URL + "/api/absensi",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(data.message);
+        navigate("/karyawan/dashboard");
+      } else {
+        alert(`Gagal: ${data.message}`);
+      }
+    } catch (error) {
+      console.error("Error absensi:", error);
+      alert(error.message || "Gagal terhubung ke server backend.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="main-wrapper">
+      <div className="card-container">
+        <div className="header-section">
+          <button
+            className="btn-back mobile-only"
+            onClick={() => navigate("/karyawan/dashboard")}
+          >
+            <ArrowLeft size={24} color="white" />
+          </button>
+
+          <div className="sidebar-logo-desktop desktop-only">
+            <img src={logoPersegi} alt="Amaga Corp" />
+          </div>
+
+          <div className="logo-center-area">
+            <img
+              src={logoAmaga}
+              alt="Logo Amaga"
+              className="img-circle-content mobile-only"
+            />
+            <img
+              src={profileImg}
+              alt="Profile User"
+              className="img-circle-content desktop-only"
+            />
+          </div>
+
+          <h2 className="title-form">Absensi</h2>
+          <p className="subtitle-form">Silahkan Melakukan Absensi</p>
+
+          <button
+            className="btn-logout-desktop desktop-only"
+            onClick={handleLogout}
+          >
+            Log Out
+          </button>
+        </div>
+
+        <div className="form-section">
+          <div className="form-header-wrapper">
+            <button
+              className="btn-back-desktop desktop-only"
+              onClick={() => navigate("/karyawan/dashboard")}
+            >
+              <ArrowLeft size={24} color="#333" strokeWidth={2.5} />
+            </button>
+            <h3 className="form-header-text">Form Absensi</h3>
+          </div>
+
+          <div className="input-group">
+            <label>Absensi</label>
+            <div className="tab-container">
+              {["Masuk", "Istirahat", "Pulang"].map((tab) => (
+                <button
+                  key={tab}
+                  className={`tab-item ${activeTab === tab ? "active" : ""}`}
+                  onClick={() => {
+                    setActiveTab(tab);
+                    setCapturedPhoto(null);
+                    tutupKamera();
+                  }}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="input-group">
+            <label>Cabang Penempatan</label>
+            <div className="select-wrapper">
+              <select className="custom-select" disabled>
+                <option value="">{user?.cabangUtama || "Pilih cabang"}</option>
+              </select>
+              <ChevronDown className="select-icon" size={18} />
+            </div>
+          </div>
+
+          {activeTab === "Istirahat" ? (
+            <div className="time-row">
+              <div className="input-group flex-1">
+                <label>Jam Mulai</label>
+                <input
+                  type="time"
+                  className="time-display"
+                  value={breakStartTime}
+                  onChange={handleStartTimeChange}
+                  min={getCurrentTimeStr().substring(0, 5)}
+                  style={{ cursor: "pointer", fontFamily: "Inter" }}
+                />
+              </div>
+              <div className="input-group flex-1">
+                <label>Jam Selesai</label>
+                <div
+                  className="time-display"
+                  style={{ backgroundColor: "#eee", color: "#888" }}
+                >
+                  {getEndTimeStr()}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="input-group">
+              <label
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <span>Bukti Foto Wajah ({activeTab})</span>
+                <button
+                  onClick={cekLokasiKaryawan}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#2fb800",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Refresh GPS
+                </button>
+              </label>
+
+              {locationError && (
+                <div
+                  style={{
+                    padding: "10px",
+                    marginBottom: "10px",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    fontWeight: "bold",
+                    backgroundColor: isLocationValid ? "#eaf4d1" : "#ffebee",
+                    color: isLocationValid ? "#2fb800" : "#d32f2f",
+                    border: `1px solid ${isLocationValid ? "#2fb800" : "#ef5350"}`,
+                  }}
+                >
+                  {locationError}
+                </div>
+              )}
+
+              {isCameraOpen ? (
+                <div
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                    backgroundColor: "#000",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                  }}
+                >
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    style={{
+                      width: "100%",
+                      maxHeight: "350px",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: "0",
+                      width: "100%",
+                      padding: "15px",
+                      background: "rgba(0,0,0,0.5)",
+                      display: "flex",
+                      justifyContent: "center",
+                      gap: "15px",
+                    }}
+                  >
+                    <button
+                      onClick={tutupKamera}
+                      style={{
+                        padding: "10px 20px",
+                        background: "#ff1744",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "30px",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Batal
+                    </button>
+                    <button
+                      onClick={ambilFoto}
+                      style={{
+                        padding: "10px 20px",
+                        background: "#2fb800",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "30px",
+                        fontWeight: "bold",
+                        cursor: "pointer",
+                        boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
+                      }}
+                    >
+                      Ambil Foto
+                    </button>
+                  </div>
+                </div>
+              ) : capturedPhoto ? (
+                <div
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    border: "2px solid #2fb800",
+                  }}
+                >
+                  <img
+                    src={capturedPhoto}
+                    alt="Hasil Absen"
+                    style={{ width: "100%", display: "block" }}
+                  />
+                  <button
+                    onClick={fotoUlang}
+                    style={{
+                      position: "absolute",
+                      top: "10px",
+                      right: "10px",
+                      padding: "8px 15px",
+                      background: "rgba(0,0,0,0.6)",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "20px",
+                      cursor: "pointer",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Ambil Ulang Foto
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="btn-camera-open"
+                  onClick={bukaKamera}
+                  disabled={!isLocationValid}
+                  style={{
+                    opacity: isLocationValid ? 1 : 0.5,
+                    cursor: isLocationValid ? "pointer" : "not-allowed",
+                  }}
+                >
+                  <img src={cameraIcon} alt="Cam" />
+                  <span>Buka Kamera Depan</span>
+                </button>
+              )}
+
+              <canvas ref={canvasRef} style={{ display: "none" }} />
+            </div>
+          )}
+
+          <button
+            className="btn-submit-primary"
+            onClick={handleAbsen}
+            disabled={
+              loading ||
+              !isLocationValid ||
+              (activeTab !== "Istirahat" && isCameraOpen)
+            }
+          >
+            {loading ? "Menyimpan Data" : `Simpan Absen ${activeTab}`}
+          </button>
+        </div>
+        <div className="bottom-gap"></div>
+      </div>
+    </div>
+  );
 };
 
-app.get("/api/karyawan", async (req, res) => {
-  const { data } = await supabase.from("users").select("*, cabang(nama)").order("nama", { ascending: true });
-  res.status(200).json(data || []);
-});
-
-app.post("/api/karyawan", async (req, res) => {
-  try {
-    const payload = cleanUserPayload(req.body);
-    const { error } = await supabase.from("users").insert([payload]);
-    if (error) return res.status(400).json({ message: "Gagal menambah data", detail: error.message });
-    res.status(201).json({ message: "Karyawan berhasil ditambahkan" });
-  } catch (err) {
-    res.status(500).json({ message: "Gagal menambah karyawan", detail: err.message });
-  }
-});
-
-app.put("/api/karyawan/:id", async (req, res) => {
-  try {
-    const payload = cleanUserPayload(req.body);
-    const { error } = await supabase.from("users").update(payload).eq("id", req.params.id);
-    if (error) return res.status(400).json({ message: "Gagal mengubah data", detail: error.message });
-    res.status(200).json({ message: "Data berhasil diubah" });
-  } catch (err) {
-    res.status(500).json({ message: "Gagal mengubah data", detail: err.message });
-  }
-});
-
-app.put("/api/karyawan/:id/status", async (req, res) => {
-  try {
-    const { status } = req.body;
-    const { error } = await supabase.from("users").update({ status }).eq("id", req.params.id);
-    if (error) throw error;
-    res.status(200).json({ message: `Status berhasil diubah menjadi ${status}` });
-  } catch (err) {
-    res.status(500).json({ message: "Gagal mengubah status karyawan" });
-  }
-});
-
-// ==========================================
-// --- LOGIKA KALKULASI ABSENSI & LEMBUR ---
-// ==========================================
-app.post("/api/absensi", async (req, res) => {
-  const { user_id, tipe_absen, waktu, foto, waktu_istirahat_mulai, waktu_istirahat_selesai } = req.body;
-
-  const { tanggal: today, hari: dayOfWeek } = getWaktuIndo();
-  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-
-  try {
-    const { data: user } = await supabase.from("users").select("cabang_id").eq("id", user_id).single();
-    const { data: cabang } = await supabase.from("cabang").select("*").eq("id", user.cabang_id).single();
-
-    const { data: existing } = await supabase.from("absensi").select("*").eq("user_id", user_id).eq("tanggal", today).single();
-
-    if (tipe_absen === "Masuk") {
-      if (existing && existing.waktu_masuk) return res.status(400).json({ message: "Anda sudah melakukan Absen Masuk hari ini." });
-
-      let menit_terlambat = 0;
-      if (cabang) {
-        const jamMasukTarget = isWeekend ? cabang.jam_masuk_weekend : cabang.jam_masuk_weekday;
-        const batasToleransi = cabang.keterlambatan || 0;
-        const selisihMsk = hitungSelisihMenit(jamMasukTarget, waktu);
-        if (selisihMsk > batasToleransi) menit_terlambat = selisihMsk;
-      }
-
-      const { error } = await supabase.from("absensi").insert([{
-        user_id, tanggal: today, waktu_masuk: waktu, foto_masuk: foto, status_kehadiran: "Hadir", menit_terlambat: menit_terlambat,
-      }]);
-      if (error) throw error;
-    } else if (tipe_absen === "Istirahat") {
-      if (!existing) return res.status(400).json({ message: "Anda belum Absen Masuk hari ini." });
-      if (existing.waktu_istirahat_mulai) return res.status(400).json({ message: "Jadwal istirahat sudah diatur sebelumnya." });
-
-      const { error } = await supabase.from("absensi").update({
-        waktu_istirahat_mulai, waktu_istirahat_selesai,
-      }).eq("id", existing.id);
-      if (error) throw error;
-    } else if (tipe_absen === "Pulang") {
-      if (!existing || !existing.waktu_masuk) return res.status(400).json({ message: "Anda belum Absen Masuk hari ini." });
-      if (existing.waktu_pulang) return res.status(400).json({ message: "Anda sudah Absen Pulang hari ini." });
-
-      let menit_lembur = 0;
-      if (cabang) {
-        if (!existing.waktu_istirahat_mulai) menit_lembur += 180;
-
-        const jamMulaiLembur = cabang.jam_mulai_lembur || "18:00:00";
-        const jamBatasLembur = cabang.jam_selesai_lembur || "20:00:00";
-        const cekLewatLembur = hitungSelisihMenit(jamMulaiLembur, waktu);
-
-        if (cekLewatLembur > 0) {
-          const durasiMaksLembur = hitungSelisihMenit(jamMulaiLembur, jamBatasLembur);
-          if (cekLewatLembur >= durasiMaksLembur) menit_lembur += durasiMaksLembur;
-          else menit_lembur += cekLewatLembur;
-        }
-      }
-
-      const { error } = await supabase.from("absensi").update({
-        waktu_pulang: waktu, foto_pulang: foto, menit_lembur: menit_lembur,
-      }).eq("id", existing.id);
-      if (error) throw error;
-    }
-
-    res.status(200).json({ message: `Absen ${tipe_absen} berhasil dicatat!` });
-  } catch (error) {
-    res.status(500).json({ message: "Gagal memproses absensi.", detail: error.message });
-  }
-});
-
-app.post("/api/absensi/manual", async (req, res) => {
-  const { user_id, tanggal, waktu_masuk, waktu_pulang, keterangan } = req.body;
-  try {
-    let menit_terlambat = 0;
-    let menit_lembur = 0;
-
-    const { data: user } = await supabase.from("users").select("cabang_id").eq("id", user_id).single();
-    const { data: cabang } = await supabase.from("cabang").select("*").eq("id", user?.cabang_id).single();
-
-    if (cabang && waktu_masuk) {
-      const d = new Date(tanggal);
-      const isWeekend = d.getDay() === 0 || d.getDay() === 6;
-      const jamMasukTarget = isWeekend ? cabang.jam_masuk_weekend : cabang.jam_masuk_weekday;
-      const selisihMsk = hitungSelisihMenit(jamMasukTarget, waktu_masuk);
-      if (selisihMsk > (cabang.keterlambatan || 0)) menit_terlambat = selisihMsk;
-    }
-
-    if (cabang && waktu_pulang) {
-      const jamMulai = cabang.jam_mulai_lembur || "18:00:00";
-      const jamSelesai = cabang.jam_selesai_lembur || "20:00:00";
-      const cekLewat = hitungSelisihMenit(jamMulai, waktu_pulang);
-      if (cekLewat > 0) {
-        const maks = hitungSelisihMenit(jamMulai, jamSelesai);
-        menit_lembur = (cekLewat >= maks) ? maks : cekLewat;
-      }
-    }
-
-    const { data: existing } = await supabase.from("absensi").select("*").eq("user_id", user_id).eq("tanggal", tanggal).single();
-
-    if (existing) {
-      await supabase.from("absensi").update({
-        waktu_masuk: waktu_masuk || existing.waktu_masuk,
-        waktu_pulang: waktu_pulang || existing.waktu_pulang,
-        is_manual_masuk: true,
-        keterangan_manual: keterangan,
-        menit_terlambat: waktu_masuk ? menit_terlambat : existing.menit_terlambat,
-        menit_lembur: waktu_pulang ? menit_lembur : existing.menit_lembur,
-      }).eq("id", existing.id);
-    } else {
-      await supabase.from("absensi").insert([{
-        user_id, tanggal, waktu_masuk, waktu_pulang, status_kehadiran: "Hadir", is_manual_masuk: true, keterangan_manual: keterangan, menit_terlambat, menit_lembur
-      }]);
-    }
-    res.status(200).json({ message: "Absensi manual berhasil disimpan" });
-  } catch (err) {
-    res.status(500).json({ message: "Gagal menyimpan absensi manual" });
-  }
-});
-
-// ==========================================
-// --- API RIWAYAT ---
-// ==========================================
-app.get("/api/riwayat/:user_id", async (req, res) => {
-  const user_id = req.params.user_id;
-
-  try {
-    const { data: user } = await supabase.from("users").select("*, cabang(nama)").eq("id", user_id).single();
-    const { data: absensi } = await supabase.from("absensi").select("*").eq("user_id", user_id).order("tanggal", { ascending: false });
-    const { data: perizinan } = await supabase.from("perizinan").select("*").eq("user_id", user_id).order("created_at", { ascending: false });
-
-    const { obj: todayObj, tanggal: todayStr } = getWaktuIndo();
-    const startObj = new Date(todayObj);
-    startObj.setDate(todayObj.getDate() - 30);
-    
-    let syntheticAlpha = [];
-    const isPusat = user?.cabang?.nama?.toLowerCase().includes("amaga") || user?.cabang?.nama?.toLowerCase().includes("pusat") || !user?.cabang_id;
-
-    for (let i = 0; i <= 30; i++) {
-      let d = new Date(startObj);
-      d.setDate(d.getDate() + i);
-      let dStr = d.toISOString().split("T")[0];
-      let dayOfWeek = d.getDay();
-
-      if (dStr >= todayStr) break; 
-      if (isPusat && dayOfWeek === 0) continue; 
-
-      const adaAbsen = absensi.some((a) => a.tanggal === dStr);
-      const adaIzin = perizinan.some((p) => p.status_approval === 'Disetujui' && dStr >= p.tanggal_mulai && dStr <= p.tanggal_selesai);
-
-      if (!adaAbsen && !adaIzin) {
-        syntheticAlpha.push({
-          id: `alpha_${dStr}`,
-          user_id: user_id,
-          tanggal: dStr,
-          waktu_masuk: null,
-          waktu_pulang: null,
-          status_kehadiran: "ALPHA",
-          is_alpha: true 
-        });
-      }
-    }
-
-    const allAbsensi = [...(absensi || []), ...syntheticAlpha];
-    res.status(200).json({ absensi: allAbsensi, perizinan: perizinan || [] });
-  } catch (err) {
-    res.status(500).json({ message: "Gagal mengambil riwayat" });
-  }
-});
-
-app.post("/api/perizinan", async (req, res) => {
-  await supabase.from("perizinan").insert([req.body]);
-  res.status(201).json({ message: "Pengajuan berhasil dikirim." });
-});
-
-app.get("/api/perizinan/all", async (req, res) => {
-  const { data } = await supabase.from("perizinan").select("*, users (*, cabang(nama))").order("created_at", { ascending: false });
-  res.status(200).json(data || []);
-});
-
-app.put("/api/perizinan/:id/status", async (req, res) => {
-  await supabase.from("perizinan").update({ status_approval: req.body.status_approval }).eq("id", req.params.id);
-  res.status(200).json({ message: "Berhasil" });
-});
-
-app.get("/api/manager/perizinan/:cabang_id", async (req, res) => {
-  const { data } = await supabase.from("perizinan").select("*, users!inner(*, cabang(nama))").eq("users.cabang_id", req.params.cabang_id).order("created_at", { ascending: false });
-  res.status(200).json(data || []);
-});
-
-// ==========================================
-// --- REKAPITULASI LAPORAN ---
-// ==========================================
-app.get("/api/laporan", async (req, res) => {
-  const { role, cabang_id, start_date, end_date } = req.query;
-
-  const { obj: todayObj } = getWaktuIndo();
-  
-  let startStr = start_date;
-  let endStr = end_date;
-
-  if (!startStr || !endStr) {
-    const year = todayObj.getFullYear();
-    const month = todayObj.getMonth();
-    const date = todayObj.getDate();
-    let start, end;
-
-    if (date <= 25) {
-      start = new Date(year, month - 1, 26);
-      end = new Date(year, month, 25);
-    } else {
-      start = new Date(year, month, 26);
-      end = new Date(year, month + 1, 25);
-    }
-
-    const fmt = (dt) => {
-      const y = dt.getFullYear();
-      const m = String(dt.getMonth() + 1).padStart(2, "0");
-      const day = String(dt.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day}`;
-    };
-
-    if (!startStr) startStr = fmt(start);
-    if (!endStr) endStr = fmt(end);
-  }
-
-  const todayStr = getWaktuIndo().tanggal;
-
-  let dateList = [];
-  let currDate = new Date(startStr);
-  let stopDate = new Date(endStr);
-  if (stopDate > todayObj) stopDate = todayObj;
-
-  while (currDate <= stopDate) {
-    dateList.push({ dateStr: currDate.toISOString().split("T")[0], dayOfWeek: currDate.getDay() });
-    currDate.setDate(currDate.getDate() + 1);
-  }
-
-  try {
-    let userQuery = supabase.from("users").select("id, nama, nik, cabang_id, cabang(*)");
-    if (role === "managerCabang" && cabang_id) userQuery = userQuery.eq("cabang_id", cabang_id);
-
-    const { data: users } = await userQuery;
-    const { data: absensi } = await supabase.from("absensi").select("*");
-    const { data: perizinan } = await supabase.from("perizinan").select("*").eq("status_approval", "Disetujui");
-
-    const laporanRekap = users.map((user) => {
-      const isPusat = user.cabang?.nama?.toLowerCase().includes("amaga") || user.cabang?.nama?.toLowerCase().includes("pusat") || !user.cabang_id;
-
-      const userAbsen = absensi.filter((a) => a.user_id === user.id && a.tanggal >= startStr && a.tanggal <= endStr);
-      const userIzin = perizinan.filter((p) => p.user_id === user.id && p.tanggal_selesai >= startStr && p.tanggal_mulai <= endStr);
-
-      userAbsen.forEach((a) => {
-        if (!a.menit_terlambat && user.cabang && a.waktu_masuk) {
-          const d = new Date(a.tanggal);
-          const isWknd = d.getDay() === 0 || d.getDay() === 6;
-          const target = isWknd ? user.cabang.jam_masuk_weekend : user.cabang.jam_masuk_weekday;
-          const tol = user.cabang.keterlambatan || 0;
-          const selisih = hitungSelisihMenit(target, a.waktu_masuk);
-          if (selisih > tol) a.menit_terlambat = selisih;
-        }
-      });
-
-      const totalKaliTerlambat = userAbsen.filter((a) => a.menit_terlambat > 0).length;
-      const totalMenitLembur = userAbsen.reduce((sum, a) => sum + (a.menit_lembur || 0), 0);
-      const totalJamLembur = Math.floor(totalMenitLembur / 60);
-
-      let alphaCount = 0;
-      let alphaDates = []; 
-
-      dateList.forEach((d) => {
-        if (d.dateStr >= todayStr) return;
-        if (isPusat && d.dayOfWeek === 0) return; 
-
-        const adaAbsen = userAbsen.some((a) => a.tanggal === d.dateStr);
-        const adaIzin = userIzin.some((p) => d.dateStr >= p.tanggal_mulai && d.dateStr <= p.tanggal_selesai);
-
-        if (!adaAbsen && !adaIzin) {
-          alphaCount++;
-          alphaDates.push({
-            tanggal: d.dateStr,
-            keterangan: "Tidak ada catatan absensi atau perizinan (Tanpa Keterangan)."
-          });
-        }
-      });
-
-      return {
-        id: user.id,
-        nama: user.nama,
-        nik: user.nik,
-        cabang: user.cabang?.nama || "-",
-        hadirApp: userAbsen.filter((a) => !a.is_manual_masuk).length.toString(),
-        hadirManual: userAbsen.filter((a) => a.is_manual_masuk).length.toString(),
-        izin: userIzin.filter((p) => p.kategori === "Izin" && p.jenis_izin !== "Sakit").length.toString(),
-        sakit: userIzin.filter((p) => p.kategori === "Izin" && p.jenis_izin === "Sakit").length.toString(),
-        cuti: userIzin.filter((p) => p.kategori === "Cuti").length.toString(),
-        terlambat: totalKaliTerlambat.toString(),
-        fimtk: userIzin.filter((p) => p.kategori === "FIMTK").length.toString(),
-        lembur: `${totalJamLembur} Jam`,
-        alpha: alphaCount.toString(),
-        rawAbsensi: userAbsen,
-        rawPerizinan: userIzin,
-        rawAlpha: alphaDates 
-      };
-    });
-    res.status(200).json(laporanRekap);
-  } catch (err) {
-    res.status(500).json({ message: "Gagal" });
-  }
-});
-
-// ==========================================
-// --- STATISTIK DASHBOARD ---
-// ==========================================
-app.get("/api/dashboard/stats", async (req, res) => {
-  const { role, cabang_id, sub_cabang } = req.query; 
-  try {
-    let userQuery = supabase.from("users").select("id, cabang(nama)");
-    
-    if (role === "managerCabang" && cabang_id) {
-      if (sub_cabang && sub_cabang !== "Semua Sub-Cabang" && sub_cabang !== "Semua Cabang") {
-        userQuery = userQuery.eq("cabang.nama", sub_cabang);
-      } else {
-        userQuery = userQuery.eq("cabang_id", cabang_id);
-      }
-    } else if (role === "hrd") {
-      if (sub_cabang && sub_cabang !== "Semua Cabang") {
-         userQuery = userQuery.eq("cabang.nama", sub_cabang);
-      }
-    }
-    
-    const { data: allUsers } = await userQuery;
-    
-    const users = sub_cabang && sub_cabang !== "Semua Cabang" && sub_cabang !== "Semua Sub-Cabang" 
-      ? allUsers.filter(u => u.cabang && u.cabang.nama === sub_cabang) 
-      : allUsers;
-
-    const userIds = users.map((u) => u.id);
-
-    const defaultResponse = {
-      totals: { hadir: 0, sakit: 0, izin: 0, cuti: 0, terlambat: 0, alpha: 0 },
-      chart: { hadir: [0,0,0,0,0,0,0], sakit: [0,0,0,0,0,0,0], izin: [0,0,0,0,0,0,0], cuti: [0,0,0,0,0,0,0], terlambat: [0,0,0,0,0,0,0], alpha: [0,0,0,0,0,0,0] },
-    };
-
-    if (userIds.length === 0) return res.status(200).json(defaultResponse);
-
-    const { tanggal: todayStr } = getWaktuIndo();
-    const { tanggal: sixDaysAgoStr, obj: spanDaysAgo } = getWaktuIndo(-6);
-
-    const { data: absensi } = await supabase.from("absensi").select("*").in("user_id", userIds).gte("tanggal", sixDaysAgoStr);
-    const { data: perizinan } = await supabase.from("perizinan").select("*").in("user_id", userIds).eq("status_approval", "Disetujui");
-
-    const chart = { hadir: [0,0,0,0,0,0,0], sakit: [0,0,0,0,0,0,0], izin: [0,0,0,0,0,0,0], cuti: [0,0,0,0,0,0,0], terlambat: [0,0,0,0,0,0,0], alpha: [0,0,0,0,0,0,0] };
-    let totalAlphaCounter = 0;
-
-    for (let i = 0; i <= 6; i++) {
-      let d = new Date(spanDaysAgo);
-      d.setDate(d.getDate() + i);
-      let dStr = d.toISOString().split("T")[0];
-      let dayOfWeek = d.getDay();
-      const adjustedIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-
-      if (dStr >= todayStr) break;
-
-      users.forEach((user) => {
-        const isPusat = user.cabang?.nama?.toLowerCase().includes("amaga") || user.cabang?.nama?.toLowerCase().includes("pusat");
-        if (isPusat && dayOfWeek === 0) return;
-
-        const adaAbsen = absensi.some((a) => a.user_id === user.id && a.tanggal === dStr);
-        const adaIzin = perizinan.some((p) => p.user_id === user.id && dStr >= p.tanggal_mulai && dStr <= p.tanggal_selesai);
-
-        if (!adaAbsen && !adaIzin) {
-          totalAlphaCounter++;
-          chart.alpha[adjustedIndex] += 1;
-        }
-      });
-    }
-
-    absensi.forEach((ab) => {
-      const usr = users.find(u => u.id === ab.user_id);
-      if (!ab.menit_terlambat && usr && usr.cabang && ab.waktu_masuk) {
-          const d = new Date(ab.tanggal);
-          const isWknd = d.getDay() === 0 || d.getDay() === 6;
-          const target = isWknd ? usr.cabang.jam_masuk_weekend : usr.cabang.jam_masuk_weekday;
-          const tol = usr.cabang.keterlambatan || 0;
-          const selisih = hitungSelisihMenit(target, ab.waktu_masuk);
-          if (selisih > tol) ab.menit_terlambat = selisih;
-      }
-
-      const dayIndex = new Date(ab.tanggal).getDay();
-      const adjustedIndex = dayIndex === 0 ? 6 : dayIndex - 1;
-
-      chart.hadir[adjustedIndex] += 1;
-      if (ab.menit_terlambat > 0) chart.terlambat[adjustedIndex] += 1;
-    });
-
-    const totals = {
-      hadir: absensi.length,
-      sakit: perizinan.filter((p) => p.kategori === "Izin" && p.jenis_izin === "Sakit").length,
-      izin: perizinan.filter((p) => p.kategori === "Izin" && p.jenis_izin !== "Sakit").length,
-      cuti: perizinan.filter((p) => p.kategori === "Cuti").length,
-      terlambat: absensi.filter((a) => a.menit_terlambat > 0).length,
-      alpha: totalAlphaCounter,
-    };
-
-    res.status(200).json({ totals, chart });
-  } catch (err) {
-    res.status(500).json({ message: "Gagal mengambil statistik" });
-  }
-});
-
-
-// ==========================================
-// --- API CLEANUP FOTO (PENGHAPUSAN OTOMATIS > 30 HARI) ---
-// ==========================================
-app.delete("/api/cleanup-fotos", async (req, res) => {
-  try {
-    const { obj: todayObj } = getWaktuIndo();
-    const cutoffDate = new Date(todayObj);
-    cutoffDate.setDate(cutoffDate.getDate() - 30);
-    const cutoffStr = cutoffDate.toISOString().split("T")[0];
-
-    // Cari absensi yang umurnya > 30 hari dan masih punya foto
-    const { data: oldAbsensi, error: fetchErr } = await supabase
-      .from("absensi")
-      .select("id, foto_masuk, foto_pulang")
-      .lt("tanggal", cutoffStr)
-      .or('foto_masuk.not.is.null,foto_pulang.not.is.null');
-
-    if (fetchErr) throw fetchErr;
-    if (!oldAbsensi || oldAbsensi.length === 0) {
-      return res.status(200).json({ message: "Tidak ada foto usang yang perlu dihapus." });
-    }
-
-    let filesToDelete = [];
-    
-    // Ekstrak nama file dari URL Supabase
-    oldAbsensi.forEach(a => {
-      if (a.foto_masuk && !a.foto_masuk.includes("Telah Dihapus")) {
-        const parts = a.foto_masuk.split('/');
-        filesToDelete.push(parts[parts.length - 1]);
-      }
-      if (a.foto_pulang && !a.foto_pulang.includes("Telah Dihapus")) {
-        const parts = a.foto_pulang.split('/');
-        filesToDelete.push(parts[parts.length - 1]);
-      }
-    });
-
-    // Hapus file fisik dari Storage Bucket
-    if (filesToDelete.length > 0) {
-      const { error: rmErr } = await supabase.storage.from("foto_absensi").remove(filesToDelete);
-      if (rmErr) console.error("Gagal hapus fisik foto:", rmErr);
-    }
-
-    // Update String di Database
-    for (const a of oldAbsensi) {
-      const updatePayload = {};
-      if (a.foto_masuk && !a.foto_masuk.includes("Telah Dihapus")) updatePayload.foto_masuk = "Telah Dihapus Otomatis (Lebih dari 30 Hari)";
-      if (a.foto_pulang && !a.foto_pulang.includes("Telah Dihapus")) updatePayload.foto_pulang = "Telah Dihapus Otomatis (Lebih dari 30 Hari)";
-      
-      if (Object.keys(updatePayload).length > 0) {
-         await supabase.from("absensi").update(updatePayload).eq("id", a.id);
-      }
-    }
-
-    res.status(200).json({ message: `Berhasil membersihkan foto usang dari ${oldAbsensi.length} data absensi.` });
-  } catch (err) {
-    console.error("Cleanup Error:", err);
-    res.status(500).json({ message: "Gagal membersihkan foto", detail: err.message });
-  }
-});
-
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+export default Absensi;
