@@ -42,10 +42,9 @@ const DashboardHRD = () => {
   const closeSidebar = () => setSidebarOpen(false);
 
   const [showFilter, setShowFilter] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState("Filter Cabang");
+  const [selectedFilter, setSelectedFilter] = useState("Semua Cabang");
   const [cabangList, setCabangList] = useState([]);
 
-  // STATE STATISTIK & GRAFIK
   const [stats, setStats] = useState({
     hadir: 0,
     sakit: 0,
@@ -74,11 +73,17 @@ const DashboardHRD = () => {
           console.error(err);
         }
       };
+      fetchCabang();
+    }
+  }, [user]);
 
+  // UPDATE: Panggil ulang fetchStats JIKA filter cabang berubah
+  useEffect(() => {
+    if (user) {
       const fetchStats = async () => {
         try {
           const res = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/dashboard/stats?role=hrd`,
+            `${import.meta.env.VITE_API_URL}/api/dashboard/stats?role=hrd&sub_cabang=${selectedFilter}`,
           );
           const data = await res.json();
           if (data.totals) setStats(data.totals);
@@ -87,11 +92,9 @@ const DashboardHRD = () => {
           console.error("Gagal menarik statistik", err);
         }
       };
-
-      fetchCabang();
       fetchStats();
     }
-  }, [user]);
+  }, [user, selectedFilter]);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -144,7 +147,7 @@ const DashboardHRD = () => {
   ];
 
   const dataGrafik = {
-    labels: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"], // TAMBAH MINGGU
+    labels: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"],
     datasets: [
       {
         label: "Hadir",

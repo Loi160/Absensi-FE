@@ -73,11 +73,16 @@ const DashboardManagerCabang = () => {
         cabangUtama: user.cabangUtama,
         subCabang: user.subCabang || [],
       });
+    }
+  }, [user]);
 
+  // UPDATE: Panggil ulang fetchStats JIKA filter cabang berubah
+  useEffect(() => {
+    if (user) {
       const fetchStats = async () => {
         try {
           const res = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/dashboard/stats?role=managerCabang&cabang_id=${user.cabang_id}`,
+            `${import.meta.env.VITE_API_URL}/api/dashboard/stats?role=managerCabang&cabang_id=${user.cabang_id}&sub_cabang=${selectedFilter}`,
           );
           const data = await res.json();
           if (data.totals) setStats(data.totals);
@@ -88,7 +93,7 @@ const DashboardManagerCabang = () => {
       };
       fetchStats();
     }
-  }, [user]);
+  }, [user, selectedFilter]);
 
   const hasSubCabang = userData.subCabang.length > 0;
 
@@ -143,7 +148,7 @@ const DashboardManagerCabang = () => {
   ];
 
   const dataGrafik = {
-    labels: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"], // TAMBAH MINGGU
+    labels: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"],
     datasets: [
       {
         label: "Hadir",

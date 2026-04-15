@@ -9,7 +9,6 @@ import iconPerizinan from "../../assets/perizinan.svg";
 import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
-import iconTambah from "../../assets/tambah.svg";
 
 const EyeOffIcon = () => (
   <svg
@@ -41,29 +40,10 @@ const DataKaryawanManagerCabang = () => {
     subCabang: [],
   });
   const [karyawanList, setKaryawanList] = useState([]);
-  const [cabangObjects, setCabangObjects] = useState([]); // Menyimpan data ID & Nama cabang
   const [loading, setLoading] = useState(true);
 
   const [showFilter, setShowFilter] = useState(false);
   const [selectedCabang, setSelectedCabang] = useState("Semua Sub-Cabang");
-  const [showModal, setShowModal] = useState(false);
-  const [showPasswordInModal, setShowPasswordInModal] = useState(false);
-
-  const [formData, setFormData] = useState({
-    nama: "",
-    nik: "",
-    password: "",
-    role: "karyawan",
-    cabang_id: "",
-    jabatan: "",
-    divisi: "",
-    no_telp: "",
-    tempat_lahir: "",
-    tanggal_lahir: "",
-    jenis_kelamin: "",
-    alamat: "",
-    status: "Aktif",
-  });
 
   useEffect(() => {
     if (user) {
@@ -76,22 +56,12 @@ const DataKaryawanManagerCabang = () => {
       const fetchAllData = async () => {
         try {
           setLoading(true);
-          // 1. Fetch Cabang untuk Option ID
-          const resCbg = await fetch(
-            import.meta.env.VITE_API_URL + "/api/cabang",
-          );
-          const dataCbg = await resCbg.json();
-          const allMyBranches = [user.cabangUtama, ...(user.subCabang || [])];
-          const filteredBranches = dataCbg.filter((c) =>
-            allMyBranches.includes(c.nama),
-          );
-          setCabangObjects(filteredBranches);
-
-          // 2. Fetch Karyawan
           const res = await fetch(
             import.meta.env.VITE_API_URL + "/api/karyawan",
           );
           const data = await res.json();
+          
+          const allMyBranches = [user.cabangUtama, ...(user.subCabang || [])];
           const filteredByBranch = data.filter((k) =>
             allMyBranches.includes(k.cabang?.nama),
           );
@@ -124,29 +94,6 @@ const DataKaryawanManagerCabang = () => {
     navigate("/managerCabang/detailkaryawan", {
       state: { employee: karyawan },
     });
-  };
-
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.cabang_id) return alert("Pilih cabang terlebih dahulu!");
-
-    try {
-      const res = await fetch(import.meta.env.VITE_API_URL + "/api/karyawan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      if (res.ok) {
-        alert("Karyawan berhasil ditambahkan!");
-        setShowModal(false);
-        window.location.reload();
-      } else {
-        const errorData = await res.json();
-        alert(`Gagal menyimpan data: ${errorData.detail || errorData.message}`);
-      }
-    } catch (err) {
-      alert("Kesalahan jaringan.");
-    }
   };
 
   const filteredData = karyawanList.filter((k) => {
@@ -223,7 +170,7 @@ const DataKaryawanManagerCabang = () => {
         <header className="dk-header-area">
           <h1 className="dk-title">Data Karyawan - {userData.cabangUtama}</h1>
           <p className="dk-subtitle">
-            Daftar pusat informasi dan detail administrasi karyawan
+            Daftar pusat informasi dan detail administrasi karyawan (Read-Only)
           </p>
         </header>
 
@@ -280,12 +227,7 @@ const DataKaryawanManagerCabang = () => {
                 </div>
               )}
             </div>
-            <button
-              className="btn-dk-tambah"
-              onClick={() => setShowModal(true)}
-            >
-              <img src={iconTambah} alt="+" /> Tambah Karyawan
-            </button>
+            {/* Tombol Tambah Karyawan dihapus untuk role ini */}
           </div>
         </div>
 
@@ -362,224 +304,6 @@ const DataKaryawanManagerCabang = () => {
           </div>
         </div>
       </main>
-
-      {showModal && (
-        <div
-          className="modal-overlay-clean"
-          onClick={() => setShowModal(false)}
-        >
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <h2 className="modal-title">Tambah Karyawan Baru</h2>
-
-            <form onSubmit={handleFormSubmit}>
-              <div className="modal-grid-2">
-                <div className="form-group">
-                  <label>Nama Lengkap</label>
-                  <input
-                    type="text"
-                    className="input-edit"
-                    required
-                    onChange={(e) =>
-                      setFormData({ ...formData, nama: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="form-group">
-                  <label>NIK (Username)</label>
-                  <input
-                    type="text"
-                    className="input-edit"
-                    required
-                    onChange={(e) =>
-                      setFormData({ ...formData, nik: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Password Login</label>
-                  <div className="pwd-wrapper">
-                    <input
-                      type={showPasswordInModal ? "text" : "password"}
-                      className="input-edit"
-                      required
-                      onChange={(e) =>
-                        setFormData({ ...formData, password: e.target.value })
-                      }
-                    />
-                    <button
-                      type="button"
-                      className="btn-eye"
-                      onClick={() =>
-                        setShowPasswordInModal(!showPasswordInModal)
-                      }
-                    >
-                      {showPasswordInModal ? (
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                          <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                      ) : (
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                          <line x1="1" y1="1" x2="23" y2="23"></line>
-                        </svg>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label>Role Akses</label>
-                  <select
-                    className="input-edit"
-                    required
-                    onChange={(e) =>
-                      setFormData({ ...formData, role: e.target.value })
-                    }
-                  >
-                    <option value="karyawan">Karyawan Biasa</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Penempatan Cabang</label>
-                  <select
-                    className="input-edit"
-                    required
-                    onChange={(e) =>
-                      setFormData({ ...formData, cabang_id: e.target.value })
-                    }
-                  >
-                    <option value="">Pilih Cabang...</option>
-                    {/* VALUE SEKARANG MENGGUNAKAN ID (cbg.id), BUKAN NAMA LAGI */}
-                    {cabangObjects.map((cbg) => (
-                      <option key={cbg.id} value={cbg.id}>
-                        {cbg.nama}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>No. Telepon / WA</label>
-                  <input
-                    type="text"
-                    className="input-edit"
-                    onChange={(e) =>
-                      setFormData({ ...formData, no_telp: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Jabatan</label>
-                  <input
-                    type="text"
-                    className="input-edit"
-                    placeholder="Misal: Staff IT"
-                    onChange={(e) =>
-                      setFormData({ ...formData, jabatan: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Divisi</label>
-                  <input
-                    type="text"
-                    className="input-edit"
-                    placeholder="Misal: Technology"
-                    onChange={(e) =>
-                      setFormData({ ...formData, divisi: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Tempat Lahir</label>
-                  <input
-                    type="text"
-                    className="input-edit"
-                    onChange={(e) =>
-                      setFormData({ ...formData, tempat_lahir: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Tanggal Lahir</label>
-                  <input
-                    type="date"
-                    className="input-edit"
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        tanggal_lahir: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Jenis Kelamin</label>
-                  <select
-                    className="input-edit"
-                    required
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        jenis_kelamin: e.target.value,
-                      })
-                    }
-                  >
-                    <option value="">Pilih...</option>
-                    <option value="Laki-laki">Laki-laki</option>
-                    <option value="Perempuan">Perempuan</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Alamat</label>
-                  <input
-                    type="text"
-                    className="input-edit"
-                    onChange={(e) =>
-                      setFormData({ ...formData, alamat: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-
-              <div
-                className="detail-footer"
-                style={{ marginTop: "20px", paddingBottom: "0" }}
-              >
-                <button
-                  type="button"
-                  className="btn-batal"
-                  onClick={() => setShowModal(false)}
-                >
-                  Batal
-                </button>
-                <button type="submit" className="btn-simpan">
-                  Simpan Data
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

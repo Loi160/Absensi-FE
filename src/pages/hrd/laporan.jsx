@@ -23,17 +23,25 @@ const Laporan = () => {
     navigate(path);
   };
 
-  const getYesterday = () => {
-    const d = new Date();
-    d.setDate(d.getDate() - 1);
-    return d;
-  };
-
   const formatDate = (dateObj) => {
     const yyyy = dateObj.getFullYear();
     const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
     const dd = String(dateObj.getDate()).padStart(2, "0");
     return `${yyyy}-${mm}-${dd}`;
+  };
+
+  const getCutoffDates = () => {
+    const d = new Date();
+    const date = d.getDate();
+    let start, end;
+    if (date <= 25) {
+      start = new Date(d.getFullYear(), d.getMonth() - 1, 26);
+      end = new Date(d.getFullYear(), d.getMonth(), 25);
+    } else {
+      start = new Date(d.getFullYear(), d.getMonth(), 26);
+      end = new Date(d.getFullYear(), d.getMonth() + 1, 25);
+    }
+    return { start, end };
   };
 
   const [showFilter, setShowFilter] = useState(false);
@@ -46,21 +54,9 @@ const Laporan = () => {
   const [dataLaporan, setDataLaporan] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [startDate, setStartDate] = useState(() => {
-    const d = getYesterday();
-    let m = d.getMonth();
-    let y = d.getFullYear();
-    if (d.getDate() < 26) {
-      m -= 1;
-      if (m < 0) {
-        m = 11;
-        y -= 1;
-      }
-    }
-    return `${y}-${String(m + 1).padStart(2, "0")}-26`;
-  });
-
-  const [endDate, setEndDate] = useState(() => formatDate(getYesterday()));
+  const [startDate, setStartDate] = useState(() => formatDate(getCutoffDates().start));
+  const [endDate, setEndDate] = useState(() => formatDate(getCutoffDates().end));
+  
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [modalInfo, setModalInfo] = useState({
     title: "",
@@ -75,9 +71,7 @@ const Laporan = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const resCabang = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/cabang`,
-        );
+        const resCabang = await fetch(`${import.meta.env.VITE_API_URL}/api/cabang`);
         const listC = await resCabang.json();
         setCabangList(listC.map((c) => c.nama));
 
@@ -108,9 +102,7 @@ const Laporan = () => {
   };
 
   const filteredData = dataLaporan.filter((item) => {
-    const matchName = item.nama
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
+    const matchName = item.nama.toLowerCase().includes(searchTerm.toLowerCase());
     let matchBranch = true;
     if (selectedFilter !== "Semua Cabang") {
       matchBranch = item.cabang === selectedFilter;
@@ -119,17 +111,7 @@ const Laporan = () => {
   });
 
   const getTotals = () => {
-    let t = {
-      hadirApp: 0,
-      hadirManual: 0,
-      terlambat: 0,
-      fimtk: 0,
-      sakit: 0,
-      izin: 0,
-      cuti: 0,
-      alpha: 0,
-      lembur: 0,
-    };
+    let t = { hadirApp: 0, hadirManual: 0, terlambat: 0, fimtk: 0, sakit: 0, izin: 0, cuti: 0, alpha: 0, lembur: 0 };
     filteredData.forEach((item) => {
       t.hadirApp += parseInt(item.hadirApp) || 0;
       t.hadirManual += parseInt(item.hadirManual) || 0;
@@ -145,69 +127,24 @@ const Laporan = () => {
   };
 
   const handleExportExcel = () => {
-    const headers = [
-      "Nama Karyawan",
-      "NIK",
-      "Cabang",
-      "Hadir via App",
-      "Hadir Manual",
-      "Terlambat",
-      "FIMTK",
-      "Sakit",
-      "Izin",
-      "Cuti",
-      "Alpha",
-      "Lembur",
-    ];
+    const headers = ["Nama Karyawan", "NIK", "Cabang", "Hadir via App", "Hadir Manual", "Terlambat", "FIMTK", "Sakit", "Izin", "Cuti", "Alpha", "Lembur"];
     const csvRows = [headers.join(";")];
 
     filteredData.forEach((item) => {
-      const row = [
-        `"${item.nama}"`,
-        `"${item.nik}"`,
-        `"${item.cabang}"`,
-        item.hadirApp,
-        item.hadirManual,
-        item.terlambat,
-        item.fimtk,
-        item.sakit,
-        item.izin,
-        item.cuti,
-        item.alpha,
-        item.lembur,
-      ];
+      const row = [ `"${item.nama}"`, `"${item.nik}"`, `"${item.cabang}"`, item.hadirApp, item.hadirManual, item.terlambat, item.fimtk, item.sakit, item.izin, item.cuti, item.alpha, item.lembur ];
       csvRows.push(row.join(";"));
     });
 
     const totals = getTotals();
-    const totalRow = [
-      `"TOTAL KESELURUHAN"`,
-      `"-"`,
-      `"-"`,
-      totals.hadirApp,
-      totals.hadirManual,
-      totals.terlambat,
-      totals.fimtk,
-      totals.sakit,
-      totals.izin,
-      totals.cuti,
-      totals.alpha,
-      totals.lembur,
-    ];
+    const totalRow = [ `"TOTAL KESELURUHAN"`, `"-"`, `"-"`, totals.hadirApp, totals.hadirManual, totals.terlambat, totals.fimtk, totals.sakit, totals.izin, totals.cuti, totals.alpha, totals.lembur ];
     csvRows.push(totalRow.join(";"));
 
     const csvString = csvRows.join("\n");
-    const blob = new Blob(["\uFEFF" + csvString], {
-      type: "text/csv;charset=utf-8;",
-    });
+    const blob = new Blob(["\uFEFF" + csvString], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
-
     link.setAttribute("href", url);
-    link.setAttribute(
-      "download",
-      `Rekap_Kehadiran_${startDate}_sd_${endDate}.csv`,
-    );
+    link.setAttribute("download", `Rekap_Kehadiran_${startDate}_sd_${endDate}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -223,7 +160,7 @@ const Laporan = () => {
   };
 
   const openDetail = (item, jenis, jumlah) => {
-    if (jumlah === "0" || jumlah === "-") return;
+    if (jumlah === "0" || jumlah === "-" || jumlah === "0 Jam") return;
 
     const { nama, nik, cabang, rawAbsensi = [], rawPerizinan = [], rawAlpha = [] } = item;
     let realData = [];
@@ -233,127 +170,68 @@ const Laporan = () => {
       title = "Log Absensi Mandiri (Karyawan)";
       const dataApp = rawAbsensi.filter((a) => !a.is_manual_masuk);
       realData = dataApp.map((a) => ({
-        tipe: "absen",
-        tanggal: a.tanggal,
-        cabang: cabang,
-        masuk: {
-          jam: a.waktu_masuk || "-",
-          isManual: false,
-          foto: a.foto_masuk || null,
-          keterangan: "",
-          admin: "",
-        },
-        pulang: {
-          jam: a.waktu_pulang || "-",
-          isManual: false,
-          foto: a.foto_pulang || null,
-          keterangan: "",
-          admin: "",
-        },
+        tipe: "absen", tanggal: a.tanggal, cabang: cabang,
+        masuk: { jam: a.waktu_masuk || "-", isManual: false, foto: a.foto_masuk || null, keterangan: "", admin: "" },
+        pulang: { jam: a.waktu_pulang || "-", isManual: false, foto: a.foto_pulang || null, keterangan: "", admin: "" },
       }));
     } else if (jenis === "Hadir Manual") {
       title = "Log Rekapitulasi Manual (Admin HRD)";
       const dataManual = rawAbsensi.filter((a) => a.is_manual_masuk);
       realData = dataManual.map((a) => ({
-        tipe: "absen",
-        isLogManual: true, // Parameter baru untuk menyembunyikan foto
-        tanggal: a.tanggal,
-        cabang: cabang,
-        masuk: {
-          jam: a.waktu_masuk || "-",
-          isManual: true,
-          foto: null,
-          keterangan: a.keterangan_manual || "Absen Manual",
-          admin: "HRD",
-        },
-        pulang: {
-          jam: a.waktu_pulang || "-",
-          isManual: true,
-          foto: null,
-          keterangan: a.keterangan_manual || "Absen Manual",
-          admin: "HRD",
-        },
+        tipe: "absen", isLogManual: true, tanggal: a.tanggal, cabang: cabang,
+        masuk: { jam: a.waktu_masuk || "-", isManual: true, foto: null, keterangan: a.keterangan_manual || "-", admin: "HRD" },
+        pulang: { jam: a.waktu_pulang || "-", isManual: true, foto: null, keterangan: a.keterangan_manual || "-", admin: "HRD" },
       }));
     } else if (jenis === "Terlambat") {
       title = "Rincian Keterlambatan";
       const dataTelat = rawAbsensi.filter((a) => a.menit_terlambat > 0);
       realData = dataTelat.map((a) => ({
-        tipe: "terlambat",
-        tanggal: a.tanggal,
-        cabang: cabang,
-        jamMasuk: a.waktu_masuk || "-",
-        menitTelat: a.menit_terlambat,
-        isManual: a.is_manual_masuk,
+        tipe: "terlambat", tanggal: a.tanggal, cabang: cabang, jamMasuk: a.waktu_masuk || "-", menitTelat: a.menit_terlambat, isManual: a.is_manual_masuk,
       }));
     } else if (jenis === "Sakit") {
       title = `Log Perizinan (Sakit)`;
-      const dataSakit = rawPerizinan.filter(
-        (p) => p.kategori === "Izin" && p.jenis_izin === "Sakit",
-      );
+      const dataSakit = rawPerizinan.filter((p) => p.kategori === "Izin" && p.jenis_izin === "Sakit");
       realData = dataSakit.map((p) => ({
-        tipe: "izin_sakit",
-        jenisIzin: "Sakit",
-        tanggalMulai: p.tanggal_mulai,
-        tanggalAkhir: p.tanggal_selesai,
-        keterangan: p.keterangan || "-",
-        foto: p.bukti_foto || null,
+        tipe: "izin_sakit", jenisIzin: "Sakit", tanggalMulai: p.tanggal_mulai, tanggalAkhir: p.tanggal_selesai, keterangan: p.keterangan || "-", foto: p.bukti_foto || null,
       }));
     } else if (jenis === "Izin") {
       title = `Log Perizinan (Izin)`;
-      const dataIzin = rawPerizinan.filter(
-        (p) => p.kategori === "Izin" && p.jenis_izin !== "Sakit",
-      );
+      const dataIzin = rawPerizinan.filter((p) => p.kategori === "Izin" && p.jenis_izin !== "Sakit");
       realData = dataIzin.map((p) => ({
-        tipe: "izin_sakit",
-        jenisIzin: p.jenis_izin || "Lainnya",
-        tanggalMulai: p.tanggal_mulai,
-        tanggalAkhir: p.tanggal_selesai,
-        keterangan: p.keterangan || p.keperluan || "-",
-        foto: p.bukti_foto || null,
+        tipe: "izin_sakit", jenisIzin: p.jenis_izin || "Lainnya", tanggalMulai: p.tanggal_mulai, tanggalAkhir: p.tanggal_selesai, keterangan: p.keterangan || p.keperluan || "-", foto: p.bukti_foto || null,
       }));
     } else if (jenis === "Cuti") {
       title = `Log Perizinan (Cuti)`;
       const dataCuti = rawPerizinan.filter((p) => p.kategori === "Cuti");
       realData = dataCuti.map((p) => ({
-        tipe: "cuti",
-        cabang: cabang,
-        jabatan: item.jabatan || "-",
-        divisi: item.divisi || "-",
-        jenisCuti: p.jenis_izin || "Cuti Tahunan",
-        tanggalMulai: p.tanggal_mulai,
-        tanggalAkhir: p.tanggal_selesai,
-        keterangan: p.keterangan || p.keperluan || "-",
-        noTelp: item.noTelp || "-",
+        tipe: "cuti", cabang: cabang, jabatan: item.jabatan || "-", divisi: item.divisi || "-", jenisCuti: p.jenis_izin || "Cuti Tahunan", tanggalMulai: p.tanggal_mulai, tanggalAkhir: p.tanggal_selesai, keterangan: p.keterangan || p.keperluan || "-", noTelp: item.noTelp || "-",
       }));
     } else if (jenis === "FIMTK") {
       title = `Log Perizinan (FIMTK)`;
       const dataFimtk = rawPerizinan.filter((p) => p.kategori === "FIMTK");
       realData = dataFimtk.map((p) => ({
-        tipe: "fimtk",
-        cabang: cabang,
-        jabatan: item.jabatan || "-",
-        divisi: item.divisi || "-",
-        izinMTK: p.jenis_izin || "FIMTK",
-        tanggal: p.tanggal_mulai,
-        jamMulai: p.jam_mulai || "-",
-        jamAkhir: p.jam_selesai || "-",
-        keperluan: p.keperluan || "-",
-        kendaraan: p.kendaraan || "-",
-        alasan: p.keterangan || "-",
+        tipe: "fimtk", cabang: cabang, jabatan: item.jabatan || "-", divisi: item.divisi || "-", izinMTK: p.jenis_izin || "FIMTK", tanggal: p.tanggal_mulai, jamMulai: p.jam_mulai || "-", jamAkhir: p.jam_selesai || "-", keperluan: p.keperluan || "-", kendaraan: p.kendaraan || "-", alasan: p.keterangan || "-",
       }));
     } else if (jenis === "Alpha") {
       title = "Rincian Alpha";
       realData = rawAlpha.map((a) => ({
-        tipe: "alpha",
-        tanggal: a.tanggal,
-        cabang: cabang,
-        jadwal: "Sesuai Jam Operasional",
-        status: "ALPHA",
-        keterangan: a.keterangan,
+        tipe: "alpha", tanggal: a.tanggal, cabang: cabang, jadwal: "Sesuai Jam Operasional", status: "ALPHA", keterangan: a.keterangan,
       }));
+    } else if (jenis === "Lembur") {
+      title = "Rincian Lembur";
+      const dataLembur = rawAbsensi.filter((a) => a.menit_lembur > 0);
+      realData = dataLembur.map((a) => {
+        let alasan = "Lembur reguler di luar jam kerja";
+        if (!a.waktu_istirahat_mulai) {
+          alasan = "Kompensasi lembur karena tidak mengambil hak istirahat (3 Jam)";
+          if (a.menit_lembur > 180) alasan = "Kompensasi tidak istirahat & lembur reguler";
+        }
+        return {
+          tipe: "lembur", tanggal: a.tanggal, cabang: cabang, jamPulang: a.waktu_pulang || "-", menitLembur: a.menit_lembur, alasan: alasan, isManual: a.is_manual_masuk,
+        };
+      });
     }
 
-    // Mengurutkan data (Terbaru paling atas)
     realData.sort((a, b) => {
       const dateA = new Date(a.tanggal || a.tanggalMulai).getTime();
       const dateB = new Date(b.tanggal || b.tanggalMulai).getTime();
@@ -380,39 +258,24 @@ const Laporan = () => {
           </div>
           <div className="lap-modal-row">
             <div className="lap-modal-group">
-              <label className="lap-modal-label">Jam Masuk</label>
+              <label className="lap-modal-label">{item.isLogManual ? "Absen Masuk" : "Jam Masuk"}</label>
               <div className="lap-modal-input">{item.masuk.jam}</div>
             </div>
             <div className="lap-modal-group">
-              <label className="lap-modal-label">Jam Pulang</label>
+              <label className="lap-modal-label">{item.isLogManual ? "Absen Pulang" : "Jam Pulang"}</label>
               <div className="lap-modal-input">{item.pulang.jam}</div>
             </div>
           </div>
           {(item.masuk.isManual || item.pulang.isManual) && (
             <div className="lap-modal-row">
               <div className="lap-modal-group" style={{ flex: 1 }}>
-                <label className="lap-modal-label" style={{ color: "#d9480f" }}>
-                  ⚠️ Catatan Absensi Manual HRD
-                </label>
-                <div
-                  className="lap-modal-input"
-                  style={{
-                    background: "#fff9db",
-                    borderColor: "#fcc419",
-                    color: "#b06500",
-                    fontSize: "12px",
-                  }}
-                >
-                  {item.masuk.isManual &&
-                    `[Masuk] ${item.masuk.keterangan} (${item.masuk.admin}). `}
-                  {item.pulang.isManual &&
-                    `[Pulang] ${item.pulang.keterangan} (${item.pulang.admin}).`}
+                <label className="lap-modal-label">Keterangan</label>
+                <div className="lap-modal-input" style={{ minHeight: "40px", height: "auto" }}>
+                  {item.masuk.keterangan}
                 </div>
               </div>
             </div>
           )}
-          
-          {/* FOTO DIHILANGKAN JIKA LOG MANUAL */}
           {!item.isLogManual && (
             <div className="lap-foto-container">
               <div className="lap-foto-box">
@@ -423,19 +286,9 @@ const Laporan = () => {
                   </div>
                 ) : (
                   <>
-                    <img
-                      src={item.masuk.foto}
-                      alt="Masuk"
-                      className="lap-foto-img"
-                    />
+                    <img src={item.masuk.foto} alt="Masuk" className="lap-foto-img" />
                     <div className="lap-foto-overlay">Absen Masuk</div>
-                    <button
-                      type="button"
-                      className="lap-zoom-btn"
-                      onClick={() => setPreviewImage(item.masuk.foto)}
-                    >
-                      🔍
-                    </button>
+                    <button type="button" className="lap-zoom-btn" onClick={() => setPreviewImage(item.masuk.foto)}>🔍</button>
                   </>
                 )}
               </div>
@@ -447,19 +300,9 @@ const Laporan = () => {
                   </div>
                 ) : (
                   <>
-                    <img
-                      src={item.pulang.foto}
-                      alt="Pulang"
-                      className="lap-foto-img"
-                    />
+                    <img src={item.pulang.foto} alt="Pulang" className="lap-foto-img" />
                     <div className="lap-foto-overlay">Absen Pulang</div>
-                    <button
-                      type="button"
-                      className="lap-zoom-btn"
-                      onClick={() => setPreviewImage(item.pulang.foto)}
-                    >
-                      🔍
-                    </button>
+                    <button type="button" className="lap-zoom-btn" onClick={() => setPreviewImage(item.pulang.foto)}>🔍</button>
                   </>
                 )}
               </div>
@@ -487,10 +330,7 @@ const Laporan = () => {
             </div>
             <div className="lap-modal-group">
               <label className="lap-modal-label">Keterlambatan</label>
-              <div
-                className="lap-modal-input"
-                style={{ background: "#fff5f5", borderColor: "#ffc9c9", color: "#c92a2a", fontWeight: "700" }}
-              >
+              <div className="lap-modal-input" style={{ background: "#fff5f5", borderColor: "#ffc9c9", color: "#c92a2a", fontWeight: "700" }}>
                 {item.menitTelat} Menit
               </div>
             </div>
@@ -505,7 +345,51 @@ const Laporan = () => {
               </div>
             </div>
           )}
-          {/* KONTANER FOTO DIHILANGKAN SEPENUHNYA UNTUK TERLAMBAT */}
+        </>
+      )}
+
+      {item.tipe === "lembur" && (
+        <>
+          <div className="lap-modal-row">
+            <div className="lap-modal-group">
+              <label className="lap-modal-label">Tanggal</label>
+              <div className="lap-modal-input">{item.tanggal}</div>
+            </div>
+            <div className="lap-modal-group">
+              <label className="lap-modal-label">Cabang</label>
+              <div className="lap-modal-input">{item.cabang}</div>
+            </div>
+          </div>
+          <div className="lap-modal-row">
+            <div className="lap-modal-group">
+              <label className="lap-modal-label">Jam Pulang Aktual</label>
+              <div className="lap-modal-input" style={{ color: "#2980b9", fontWeight: "700" }}>{item.jamPulang}</div>
+            </div>
+            <div className="lap-modal-group">
+              <label className="lap-modal-label">Durasi Lembur</label>
+              <div className="lap-modal-input" style={{ background: "#e3f2fd", borderColor: "#90caf9", color: "#1565c0", fontWeight: "700" }}>
+                {Math.floor(item.menitLembur / 60)} Jam {item.menitLembur % 60} Menit
+              </div>
+            </div>
+          </div>
+          {item.isManual && (
+            <div className="lap-modal-row">
+              <div className="lap-modal-group" style={{ flex: 1 }}>
+                <label className="lap-modal-label" style={{ color: "#d9480f" }}>⚠️ Diinput Manual oleh HRD</label>
+                <div className="lap-modal-input" style={{ background: "#fff9db", borderColor: "#fcc419", color: "#b06500", fontSize: "13px" }}>
+                  Data kehadiran dan lembur ini tercatat melalui sistem Absensi Manual.
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="lap-modal-row">
+            <div className="lap-modal-group" style={{ flex: 1 }}>
+              <label className="lap-modal-label">Keterangan / Catatan Sistem</label>
+              <div className="lap-modal-input" style={{ background: "#f8f9fa", borderColor: "#ddd", color: "#555", fontSize: "13px" }}>
+                {item.alasan}
+              </div>
+            </div>
+          </div>
         </>
       )}
 
@@ -537,13 +421,7 @@ const Laporan = () => {
                 <>
                   <img src={item.foto} alt="Bukti" className="lap-foto-img" />
                   <div className="lap-foto-overlay">Bukti Dokumen / Surat</div>
-                  <button
-                    type="button"
-                    className="lap-zoom-btn"
-                    onClick={() => setPreviewImage(item.foto)}
-                  >
-                    🔍
-                  </button>
+                  <button type="button" className="lap-zoom-btn" onClick={() => setPreviewImage(item.foto)}>🔍</button>
                 </>
               ) : (
                 <div className="lap-manual-placeholder">
@@ -591,12 +469,7 @@ const Laporan = () => {
           <div className="lap-modal-row">
             <div className="lap-modal-group" style={{ flex: 1 }}>
               <label className="lap-modal-label">Keterangan</label>
-              <div
-                className="lap-modal-input"
-                style={{ minHeight: "40px", height: "auto" }}
-              >
-                {item.keterangan}
-              </div>
+              <div className="lap-modal-input" style={{ minHeight: "40px", height: "auto" }}>{item.keterangan}</div>
             </div>
           </div>
           <div className="lap-modal-row">
@@ -658,12 +531,7 @@ const Laporan = () => {
           <div className="lap-modal-row">
             <div className="lap-modal-group" style={{ flex: 1 }}>
               <label className="lap-modal-label">Alasan</label>
-              <div
-                className="lap-modal-input"
-                style={{ minHeight: "40px", height: "auto" }}
-              >
-                {item.alasan}
-              </div>
+              <div className="lap-modal-input" style={{ minHeight: "40px", height: "auto" }}>{item.alasan}</div>
             </div>
           </div>
         </>
@@ -687,28 +555,13 @@ const Laporan = () => {
             </div>
             <div className="lap-modal-group">
               <label className="lap-modal-label">Status</label>
-              <div
-                className="lap-modal-input"
-                style={{ color: "#e03131", fontWeight: "700" }}
-              >
-                {item.status}
-              </div>
+              <div className="lap-modal-input" style={{ color: "#e03131", fontWeight: "700" }}>{item.status}</div>
             </div>
           </div>
           <div className="lap-modal-row">
             <div className="lap-modal-group" style={{ flex: 1 }}>
-              <label className="lap-modal-label">
-                Keterangan / Catatan Sistem
-              </label>
-              <div
-                className="lap-modal-input"
-                style={{
-                  background: "#fff5f5",
-                  borderColor: "#ffc9c9",
-                  color: "#c92a2a",
-                  fontSize: "13px",
-                }}
-              >
+              <label className="lap-modal-label">Keterangan / Catatan Sistem</label>
+              <div className="lap-modal-input" style={{ background: "#fff5f5", borderColor: "#ffc9c9", color: "#c92a2a", fontSize: "13px" }}>
                 {item.keterangan}
               </div>
             </div>
@@ -742,9 +595,7 @@ const Laporan = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="9" className="empty-state">
-                    Memuat data...
-                  </td>
+                  <td colSpan="9" className="empty-state">Memuat data...</td>
                 </tr>
               ) : tableData.length > 0 ? (
                 tableData.map((item) => {
@@ -754,133 +605,57 @@ const Laporan = () => {
                       <td className="neo-td-name">{item.nama}</td>
                       <td className="text-center">
                         <div className="neo-dual-badge-container">
-                          <span
-                            className={`neo-badge ${item.hadirApp !== "0" ? "clickable-badge" : ""}`}
-                            onClick={() =>
-                              openDetail(item, "Hadir via App", item.hadirApp)
-                            }
-                          >
-                            {item.hadirApp}
-                          </span>
-                          <span
-                            className={`neo-badge manual ${item.hadirManual !== "0" ? "clickable-badge" : ""}`}
-                            onClick={() =>
-                              openDetail(item, "Hadir Manual", item.hadirManual)
-                            }
-                          >
-                            {item.hadirManual}
-                          </span>
+                          <span className={`neo-badge ${item.hadirApp !== "0" ? "clickable-badge" : ""}`} onClick={() => openDetail(item, "Hadir via App", item.hadirApp)}>{item.hadirApp}</span>
+                          <span className={`neo-badge manual ${item.hadirManual !== "0" ? "clickable-badge" : ""}`} onClick={() => openDetail(item, "Hadir Manual", item.hadirManual)}>{item.hadirManual}</span>
                         </div>
                       </td>
                       <td className="text-center">
-                        <span
-                          className={`neo-badge ${rowClass ? "warn-badge" : ""} ${item.terlambat !== "0" && item.terlambat !== "-" ? "clickable-badge" : ""}`}
-                          onClick={() =>
-                            openDetail(item, "Terlambat", item.terlambat)
-                          }
-                        >
-                          {item.terlambat}
-                        </span>
+                        <span className={`neo-badge ${rowClass ? "warn-badge" : ""} ${item.terlambat !== "0" && item.terlambat !== "-" ? "clickable-badge" : ""}`} onClick={() => openDetail(item, "Terlambat", item.terlambat)}>{item.terlambat}</span>
                       </td>
                       <td className="text-center">
-                        <span
-                          className={`neo-badge info ${item.fimtk !== "0" && item.fimtk !== "-" ? "clickable-badge" : ""}`}
-                          onClick={() => openDetail(item, "FIMTK", item.fimtk)}
-                        >
-                          {item.fimtk}
-                        </span>
+                        <span className={`neo-badge info ${item.fimtk !== "0" && item.fimtk !== "-" ? "clickable-badge" : ""}`} onClick={() => openDetail(item, "FIMTK", item.fimtk)}>{item.fimtk}</span>
                       </td>
                       <td className="text-center">
-                        <span
-                          className={`neo-badge ${item.sakit !== "0" && item.sakit !== "-" ? "clickable-badge" : ""}`}
-                          onClick={() => openDetail(item, "Sakit", item.sakit)}
-                        >
-                          {item.sakit}
-                        </span>
+                        <span className={`neo-badge ${item.sakit !== "0" && item.sakit !== "-" ? "clickable-badge" : ""}`} onClick={() => openDetail(item, "Sakit", item.sakit)}>{item.sakit}</span>
                       </td>
                       <td className="text-center">
-                        <span
-                          className={`neo-badge ${item.izin !== "0" && item.izin !== "-" ? "clickable-badge" : ""}`}
-                          onClick={() => openDetail(item, "Izin", item.izin)}
-                        >
-                          {item.izin}
-                        </span>
+                        <span className={`neo-badge ${item.izin !== "0" && item.izin !== "-" ? "clickable-badge" : ""}`} onClick={() => openDetail(item, "Izin", item.izin)}>{item.izin}</span>
                       </td>
                       <td className="text-center">
-                        <span
-                          className={`neo-badge ${item.cuti !== "0" && item.cuti !== "-" ? "clickable-badge" : ""}`}
-                          onClick={() => openDetail(item, "Cuti", item.cuti)}
-                        >
-                          {item.cuti}
-                        </span>
+                        <span className={`neo-badge ${item.cuti !== "0" && item.cuti !== "-" ? "clickable-badge" : ""}`} onClick={() => openDetail(item, "Cuti", item.cuti)}>{item.cuti}</span>
                       </td>
                       <td className="text-center">
-                        <span
-                          className={`neo-badge alert ${item.alpha !== "0" && item.alpha !== "-" ? "clickable-badge" : ""}`}
-                          onClick={() => openDetail(item, "Alpha", item.alpha)}
-                        >
-                          {item.alpha}
-                        </span>
+                        <span className={`neo-badge alert ${item.alpha !== "0" && item.alpha !== "-" ? "clickable-badge" : ""}`} onClick={() => openDetail(item, "Alpha", item.alpha)}>{item.alpha}</span>
                       </td>
                       <td className="text-center">
-                        <span
-                          className={`neo-badge info ${item.lembur !== "0" && item.lembur !== "-" ? "clickable-badge" : ""}`}
-                          onClick={() =>
-                            openDetail(item, "Lembur", item.lembur)
-                          }
-                        >
-                          {item.lembur}
-                        </span>
+                        <span className={`neo-badge info ${item.lembur !== "0" && item.lembur !== "-" && item.lembur !== "0 Jam" ? "clickable-badge" : ""}`} onClick={() => openDetail(item, "Lembur", item.lembur)}>{item.lembur}</span>
                       </td>
                     </tr>
                   );
                 })
               ) : (
                 <tr>
-                  <td colSpan="9" className="empty-state">
-                    Data karyawan tidak ditemukan.
-                  </td>
+                  <td colSpan="9" className="empty-state">Data karyawan tidak ditemukan.</td>
                 </tr>
               )}
             </tbody>
             {tableData.length > 0 && !loading && (
               <tfoot>
                 <tr>
-                  <td
-                    className="neo-td-name"
-                    style={{ textAlign: "right", paddingRight: "20px" }}
-                  >
-                    TOTAL KESELURUHAN
-                  </td>
+                  <td className="neo-td-name" style={{ textAlign: "right", paddingRight: "20px" }}>TOTAL KESELURUHAN</td>
                   <td className="text-center">
                     <div className="neo-dual-badge-container">
                       <span className="neo-badge">{totals.hadirApp}</span>
-                      <span className="neo-badge manual">
-                        {totals.hadirManual}
-                      </span>
+                      <span className="neo-badge manual">{totals.hadirManual}</span>
                     </div>
                   </td>
-                  <td className="text-center">
-                    <span className="neo-badge">{totals.terlambat}</span>
-                  </td>
-                  <td className="text-center">
-                    <span className="neo-badge info">{totals.fimtk}</span>
-                  </td>
-                  <td className="text-center">
-                    <span className="neo-badge">{totals.sakit}</span>
-                  </td>
-                  <td className="text-center">
-                    <span className="neo-badge">{totals.izin}</span>
-                  </td>
-                  <td className="text-center">
-                    <span className="neo-badge">{totals.cuti}</span>
-                  </td>
-                  <td className="text-center">
-                    <span className="neo-badge alert">{totals.alpha}</span>
-                  </td>
-                  <td className="text-center">
-                    <span className="neo-badge info">{totals.lembur}</span>
-                  </td>
+                  <td className="text-center"><span className="neo-badge">{totals.terlambat}</span></td>
+                  <td className="text-center"><span className="neo-badge info">{totals.fimtk}</span></td>
+                  <td className="text-center"><span className="neo-badge">{totals.sakit}</span></td>
+                  <td className="text-center"><span className="neo-badge">{totals.izin}</span></td>
+                  <td className="text-center"><span className="neo-badge">{totals.cuti}</span></td>
+                  <td className="text-center"><span className="neo-badge alert">{totals.alpha}</span></td>
+                  <td className="text-center"><span className="neo-badge info">{totals.lembur}</span></td>
                 </tr>
               </tfoot>
             )}
@@ -894,90 +669,22 @@ const Laporan = () => {
     <div className="hrd-container">
       <div className="mobile-topbar">
         <img src={logoPersegi} alt="AMAGACORP" className="mobile-topbar-logo" />
-        <button
-          className="btn-hamburger"
-          onClick={openSidebar}
-          aria-label="Buka menu"
-        >
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
+        <button className="btn-hamburger" onClick={openSidebar} aria-label="Buka menu"><span></span><span></span><span></span></button>
       </div>
 
-      <div
-        className={`sidebar-overlay ${sidebarOpen ? "active" : ""}`}
-        onClick={closeSidebar}
-      />
+      <div className={`sidebar-overlay ${sidebarOpen ? "active" : ""}`} onClick={closeSidebar} />
 
       <aside className={`sidebar no-print ${sidebarOpen ? "open" : ""}`}>
-        <button
-          className="btn-sidebar-close"
-          onClick={closeSidebar}
-          aria-label="Tutup menu"
-        >
-          ✕
-        </button>
-        <div className="logo-area">
-          <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
-        </div>
+        <button className="btn-sidebar-close" onClick={closeSidebar} aria-label="Tutup menu">✕</button>
+        <div className="logo-area"><img src={logoPersegi} alt="AMAGACORP" className="logo-img" /></div>
         <nav className="menu-nav">
-          <div
-            className="menu-item"
-            onClick={() => handleNav("/hrd/dashboard")}
-          >
-            <div className="menu-left">
-              <img src={iconDashboard} alt="dash" className="menu-icon-main" />
-              <span className="menu-text-main">Dashboard</span>
-            </div>
-          </div>
-          <div
-            className="menu-item"
-            onClick={() => handleNav("/hrd/kelolacabang")}
-          >
-            <div className="menu-left">
-              <img src={iconKelola} alt="kelola" className="menu-icon-main" />
-              <span className="menu-text-main">Kelola Cabang</span>
-            </div>
-          </div>
-          <div
-            className="menu-item"
-            onClick={() => handleNav("/hrd/datakaryawan")}
-          >
-            <div className="menu-left">
-              <img
-                src={iconKaryawan}
-                alt="karyawan"
-                className="menu-icon-main"
-              />
-              <span className="menu-text-main">Data Karyawan</span>
-            </div>
-          </div>
-          <div
-            className="menu-item has-arrow"
-            onClick={() => handleNav("/hrd/kehadiran")}
-          >
-            <div className="menu-left">
-              <img src={iconKehadiran} alt="hadir" className="menu-icon-main" />
-              <span className="menu-text-main">Kehadiran</span>
-            </div>
-            <img src={iconBawah} alt="down" className="arrow-icon-main" />
-          </div>
-          <div
-            className="menu-item active"
-            onClick={() => handleNav("/hrd/laporan")}
-          >
-            <div className="menu-left">
-              <img src={iconLaporan} alt="lapor" className="menu-icon-main" />
-              <span className="menu-text-main">Laporan</span>
-            </div>
-          </div>
+          <div className="menu-item" onClick={() => handleNav("/hrd/dashboard")}><div className="menu-left"><img src={iconDashboard} alt="dash" className="menu-icon-main" /><span className="menu-text-main">Dashboard</span></div></div>
+          <div className="menu-item" onClick={() => handleNav("/hrd/kelolacabang")}><div className="menu-left"><img src={iconKelola} alt="kelola" className="menu-icon-main" /><span className="menu-text-main">Kelola Cabang</span></div></div>
+          <div className="menu-item" onClick={() => handleNav("/hrd/datakaryawan")}><div className="menu-left"><img src={iconKaryawan} alt="karyawan" className="menu-icon-main" /><span className="menu-text-main">Data Karyawan</span></div></div>
+          <div className="menu-item has-arrow" onClick={() => handleNav("/hrd/kehadiran")}><div className="menu-left"><img src={iconKehadiran} alt="hadir" className="menu-icon-main" /><span className="menu-text-main">Kehadiran</span></div><img src={iconBawah} alt="down" className="arrow-icon-main" /></div>
+          <div className="menu-item active" onClick={() => handleNav("/hrd/laporan")}><div className="menu-left"><img src={iconLaporan} alt="lapor" className="menu-icon-main" /><span className="menu-text-main">Laporan</span></div></div>
         </nav>
-        <div className="sidebar-footer">
-          <button className="btn-logout" onClick={handleLogout}>
-            Log Out
-          </button>
-        </div>
+        <div className="sidebar-footer"><button className="btn-logout" onClick={handleLogout}>Log Out</button></div>
       </aside>
 
       <main className="main-content">
@@ -992,101 +699,38 @@ const Laporan = () => {
           <div className="input-group-neo">
             <div className="neo-field">
               <label>Cari Nama</label>
-              <input
-                type="text"
-                placeholder="Ketik nama..."
-                className="neo-input"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+              <input type="text" placeholder="Ketik nama..." className="neo-input" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
             <div className="neo-field">
               <label>Tanggal Mulai</label>
-              <input
-                type="date"
-                className="neo-input"
-                max={formatDate(getYesterday())}
-                value={startDate}
-                onChange={(e) => {
-                  setStartDate(e.target.value);
-                  if (endDate && e.target.value > endDate) setEndDate("");
-                }}
-              />
+              <input type="date" className="neo-input" value={startDate} onChange={(e) => { setStartDate(e.target.value); if (endDate && e.target.value > endDate) setEndDate(""); }} />
             </div>
             <div className="neo-field">
               <label>Tanggal Selesai</label>
-              <input
-                type="date"
-                className="neo-input"
-                min={startDate}
-                max={formatDate(getYesterday())}
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                disabled={!startDate}
-              />
+              <input type="date" className="neo-input" min={startDate} value={endDate} onChange={(e) => setEndDate(e.target.value)} disabled={!startDate} />
             </div>
           </div>
 
           <div className="button-group-vertical-right">
             <div className="dropdown-neo-bottom-wrapper">
-              <button
-                className="btn-neo-print-top no-print"
-                onClick={() => setShowExportMenu(!showExportMenu)}
-              >
-                Print
-              </button>
+              <button className="btn-neo-print-top no-print" onClick={() => setShowExportMenu(!showExportMenu)}>Print</button>
               {showExportMenu && (
-                <div
-                  className="neo-dropdown-list-right"
-                  style={{ top: "115%" }}
-                >
-                  <div
-                    className="neo-drop-item"
-                    onClick={() => {
-                      window.print();
-                      setShowExportMenu(false);
-                    }}
-                  >
-                    Unduh PDF
-                  </div>
-                  <div
-                    className="neo-drop-item"
-                    onClick={() => {
-                      handleExportExcel();
-                      setShowExportMenu(false);
-                    }}
-                  >
-                    Unduh Excel
-                  </div>
+                <div className="neo-dropdown-list-right" style={{ top: "115%" }}>
+                  <div className="neo-drop-item" onClick={() => { window.print(); setShowExportMenu(false); }}>Unduh PDF</div>
+                  <div className="neo-drop-item" onClick={() => { handleExportExcel(); setShowExportMenu(false); }}>Unduh Excel</div>
                 </div>
               )}
             </div>
 
             <div className="dropdown-neo-bottom-wrapper">
               <button className="btn-neo-filter-bottom" onClick={toggleFilter}>
-                {selectedFilter}
-                <img
-                  src={iconBawah}
-                  alt="v"
-                  className={showFilter ? "rotate" : ""}
-                />
+                {selectedFilter} <img src={iconBawah} alt="v" className={showFilter ? "rotate" : ""} />
               </button>
               {showFilter && (
                 <div className="neo-dropdown-list-right">
-                  <div
-                    className="neo-drop-item"
-                    onClick={() => handleSelectFilter("Semua Cabang")}
-                  >
-                    Semua Cabang
-                  </div>
+                  <div className="neo-drop-item" onClick={() => handleSelectFilter("Semua Cabang")}>Semua Cabang</div>
                   {cabangList.map((c) => (
-                    <div
-                      key={c}
-                      className="neo-drop-item"
-                      onClick={() => handleSelectFilter(c)}
-                    >
-                      {c}
-                    </div>
+                    <div key={c} className="neo-drop-item" onClick={() => handleSelectFilter(c)}>{c}</div>
                   ))}
                 </div>
               )}
@@ -1098,54 +742,23 @@ const Laporan = () => {
       </main>
 
       {showDetailModal && (
-        <div
-          className="modal-overlay-lap"
-          onClick={() => setShowDetailModal(false)}
-        >
-          <div
-            className="modal-content-lap"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="modal-overlay-lap" onClick={() => setShowDetailModal(false)}>
+          <div className="modal-content-lap" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header-lap">
               <h2>{modalInfo.title}</h2>
-              <button
-                className="close-btn-lap"
-                onClick={() => setShowDetailModal(false)}
-              >
-                &times;
-              </button>
+              <button className="close-btn-lap" onClick={() => setShowDetailModal(false)}>&times;</button>
             </div>
             <div className="modal-body-lap">
               <div className="lap-modal-row">
-                <div className="lap-modal-group">
-                  <label className="lap-modal-label">Nama</label>
-                  <div className="lap-modal-input">{modalInfo.nama}</div>
-                </div>
-                <div className="lap-modal-group">
-                  <label className="lap-modal-label">NIK</label>
-                  <div className="lap-modal-input">{modalInfo.nik}</div>
-                </div>
+                <div className="lap-modal-group"><label className="lap-modal-label">Nama</label><div className="lap-modal-input">{modalInfo.nama}</div></div>
+                <div className="lap-modal-group"><label className="lap-modal-label">NIK</label><div className="lap-modal-input">{modalInfo.nik}</div></div>
               </div>
-              <hr
-                style={{
-                  border: "none",
-                  borderBottom: "1px solid #eee",
-                  margin: "20px 0",
-                }}
-              />
+              <hr style={{ border: "none", borderBottom: "1px solid #eee", margin: "20px 0" }} />
               <div className="lap-modal-scroll-area">
                 {modalInfo.data.length > 0 ? (
                   modalInfo.data.map((item, idx) => renderModalBody(item, idx))
                 ) : (
-                  <p
-                    style={{
-                      textAlign: "center",
-                      color: "#888",
-                      marginTop: "20px",
-                    }}
-                  >
-                    Belum ada riwayat detail yang tercatat.
-                  </p>
+                  <p style={{ textAlign: "center", color: "#888", marginTop: "20px" }}>Belum ada riwayat detail yang tercatat.</p>
                 )}
               </div>
             </div>
@@ -1154,22 +767,9 @@ const Laporan = () => {
       )}
 
       {previewImage && (
-        <div
-          className="lap-preview-overlay"
-          onClick={() => setPreviewImage(null)}
-        >
-          <button
-            className="lap-preview-close"
-            onClick={() => setPreviewImage(null)}
-          >
-            &times;
-          </button>
-          <img
-            src={previewImage}
-            alt="Preview"
-            className="lap-preview-img"
-            onClick={(e) => e.stopPropagation()}
-          />
+        <div className="lap-preview-overlay" onClick={() => setPreviewImage(null)}>
+          <button className="lap-preview-close" onClick={() => setPreviewImage(null)}>&times;</button>
+          <img src={previewImage} alt="Preview" className="lap-preview-img" onClick={(e) => e.stopPropagation()} />
         </div>
       )}
     </div>
