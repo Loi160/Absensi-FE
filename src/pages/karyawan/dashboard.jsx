@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { supabase } from "../../supabase"; // Sesuaikan path ini dengan file config Supabase-mu 
 import "./dashboard.css";
 
 import logoPersegi from "../../assets/logopersegi.svg";
@@ -53,10 +54,8 @@ const MENU_ITEMS = [
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [dateTime, setDateTime] = useState(new Date());
-
+  console.log("Cek data user:", user);
   useEffect(() => {
-    const timer = setInterval(() => setDateTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
@@ -67,6 +66,15 @@ const Dashboard = () => {
   };
 
   const namaPanggilan = user?.nama || "Karyawan";
+
+  // Fungsi penentu foto profil
+  const getProfilePic = () => {
+    if (!user || !user.foto_karyawan) {
+      return profileImg; 
+    }
+    const { data } = supabase.storage.from('karyawan-docs').getPublicUrl(user.foto_karyawan);
+    return data.publicUrl;
+  };
 
   return (
     <div className="main-wrapper">
@@ -89,7 +97,12 @@ const Dashboard = () => {
           </div>
 
           <div className="logo-center-area desktop-only">
-            <img src={profileImg} alt="Profile User" className="img-circle-content" />
+            <img 
+              src={getProfilePic()} 
+              alt="Profile User" 
+              className="img-circle-content" 
+              style={{ objectFit: 'cover' }} 
+            />
           </div>
 
           <h2 className="title-form desktop-only">Dashboard</h2>
