@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { supabase } from "../../supabase"; // Sesuaikan path ini dengan file config Supabase-mu 
+import { supabase } from "../../supabase";
 import "./dashboard.css";
 
 import logoPersegi from "../../assets/logopersegi.svg";
@@ -54,10 +54,17 @@ const MENU_ITEMS = [
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  console.log("Cek data user:", user);
+  
+  // --- KEMBALIKAN LOGIKA JAM DI SINI ---
+  const [dateTime, setDateTime] = useState(new Date());
+
   useEffect(() => {
+    const timer = setInterval(() => {
+      setDateTime(new Date());
+    }, 1000);
     return () => clearInterval(timer);
   }, []);
+  // -------------------------------------
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -67,10 +74,9 @@ const Dashboard = () => {
 
   const namaPanggilan = user?.nama || "Karyawan";
 
-  // Fungsi penentu foto profil
   const getProfilePic = () => {
     if (!user || !user.foto_karyawan) {
-      return profileImg; 
+      return profileImg;
     }
     const { data } = supabase.storage.from('karyawan-docs').getPublicUrl(user.foto_karyawan);
     return data.publicUrl;
@@ -82,7 +88,12 @@ const Dashboard = () => {
         <div className="header-section">
           <div className="header-top-mobile mobile-only">
             <div className="header-user-info">
-              <img src={profileImg} alt="Profile" className="mobile-profile-img" />
+              <img 
+                src={getProfilePic()} 
+                alt="Profile" 
+                className="mobile-profile-img" 
+                style={{ objectFit: 'cover' }}
+              />
               <div className="mobile-greeting">
                 <h2>{namaPanggilan}</h2>
               </div>
@@ -97,11 +108,11 @@ const Dashboard = () => {
           </div>
 
           <div className="logo-center-area desktop-only">
-            <img 
-              src={getProfilePic()} 
-              alt="Profile User" 
-              className="img-circle-content" 
-              style={{ objectFit: 'cover' }} 
+            <img
+              src={getProfilePic()}
+              alt="Profile User"
+              className="img-circle-content"
+              style={{ objectFit: 'cover' }}
             />
           </div>
 
