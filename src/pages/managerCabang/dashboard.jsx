@@ -32,6 +32,41 @@ ChartJS.register(
   Legend,
 );
 
+const MENU_ITEMS = [
+  { path: "/managerCabang/dashboard", icon: iconDashboard, text: "Dashboard", active: true },
+  { path: "/managerCabang/datakaryawan", icon: iconKaryawan, text: "Data Karyawan" },
+  { path: "/managerCabang/perizinan", icon: iconPerizinan, text: "Perizinan" },
+  { path: "/managerCabang/laporan", icon: iconLaporan, text: "Laporan" },
+];
+
+const optionsGrafik = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: "bottom",
+      labels: {
+        usePointStyle: true,
+        boxWidth: 8,
+        font: { size: 12, family: "'Inter', sans-serif" },
+        color: "#555",
+      },
+    },
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      suggestedMax: 10,
+      ticks: { stepSize: 5, color: "#999", font: { size: 11 } },
+      grid: { color: "#f0f0f0" },
+    },
+    x: {
+      ticks: { color: "#999", font: { size: 11 } },
+      grid: { display: false },
+    },
+  },
+};
+
 const DashboardManagerCabang = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -57,6 +92,7 @@ const DashboardManagerCabang = () => {
     terlambat: 0,
     alpha: 0,
   });
+
   const [chartData, setChartData] = useState({
     hadir: [],
     sakit: [],
@@ -76,7 +112,6 @@ const DashboardManagerCabang = () => {
     }
   }, [user]);
 
-  // UPDATE: Panggil ulang fetchStats JIKA filter cabang berubah
   useEffect(() => {
     if (user) {
       const fetchStats = async () => {
@@ -88,7 +123,7 @@ const DashboardManagerCabang = () => {
           if (data.totals) setStats(data.totals);
           if (data.chart) setChartData(data.chart);
         } catch (err) {
-          console.error("Gagal menarik statistik", err);
+          console.error(err);
         }
       };
       fetchStats();
@@ -201,39 +236,11 @@ const DashboardManagerCabang = () => {
     ],
   };
 
-  const optionsGrafik = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: "bottom",
-        labels: {
-          usePointStyle: true,
-          boxWidth: 8,
-          font: { size: 12, family: "'Inter', sans-serif" },
-          color: "#555",
-        },
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        suggestedMax: 10,
-        ticks: { stepSize: 5, color: "#999", font: { size: 11 } },
-        grid: { color: "#f0f0f0" },
-      },
-      x: {
-        ticks: { color: "#999", font: { size: 11 } },
-        grid: { display: false },
-      },
-    },
-  };
-
   return (
     <div className="hrd-container">
       <div className="mobile-topbar">
         <img src={logoPersegi} alt="AMAGACORP" className="mobile-topbar-logo" />
-        <button className="btn-hamburger" onClick={() => setSidebarOpen(true)}>
+        <button className="btn-hamburger" onClick={openSidebar}>
           <span></span>
           <span></span>
           <span></span>
@@ -242,64 +249,29 @@ const DashboardManagerCabang = () => {
 
       <div
         className={`sidebar-overlay ${sidebarOpen ? "active" : ""}`}
-        onClick={() => setSidebarOpen(false)}
+        onClick={closeSidebar}
       />
 
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
-        <button
-          className="btn-sidebar-close"
-          onClick={() => setSidebarOpen(false)}
-        >
+        <button className="btn-sidebar-close" onClick={closeSidebar}>
           ✕
         </button>
         <div className="logo-area">
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
         <nav className="menu-nav">
-          <div
-            className="menu-item active"
-            onClick={() => handleNav("/managerCabang/dashboard")}
-          >
-            <div className="menu-left">
-              <img src={iconDashboard} alt="dash" className="menu-icon-main" />
-              <span className="menu-text-main">Dashboard</span>
+          {MENU_ITEMS.map((item, index) => (
+            <div
+              key={index}
+              className={`menu-item ${item.active ? "active" : ""}`}
+              onClick={() => handleNav(item.path)}
+            >
+              <div className="menu-left">
+                <img src={item.icon} alt="" className="menu-icon-main" />
+                <span className="menu-text-main">{item.text}</span>
+              </div>
             </div>
-          </div>
-          <div
-            className="menu-item"
-            onClick={() => handleNav("/managerCabang/datakaryawan")}
-          >
-            <div className="menu-left">
-              <img
-                src={iconKaryawan}
-                alt="karyawan"
-                className="menu-icon-main"
-              />
-              <span className="menu-text-main">Data Karyawan</span>
-            </div>
-          </div>
-          <div
-            className="menu-item"
-            onClick={() => handleNav("/managerCabang/perizinan")}
-          >
-            <div className="menu-left">
-              <img
-                src={iconPerizinan}
-                alt="perizinan"
-                className="menu-icon-main"
-              />
-              <span className="menu-text-main">Perizinan</span>
-            </div>
-          </div>
-          <div
-            className="menu-item"
-            onClick={() => handleNav("/managerCabang/laporan")}
-          >
-            <div className="menu-left">
-              <img src={iconLaporan} alt="lapor" className="menu-icon-main" />
-              <span className="menu-text-main">Laporan</span>
-            </div>
-          </div>
+          ))}
         </nav>
         <div className="sidebar-footer">
           <button className="btn-logout" onClick={handleLogout}>
@@ -335,9 +307,7 @@ const DashboardManagerCabang = () => {
                 <img
                   src={iconBawah}
                   alt="v"
-                  className={
-                    showFilter ? "filter-arrow rotate" : "filter-arrow"
-                  }
+                  className={showFilter ? "filter-arrow rotate" : "filter-arrow"}
                 />
               )}
             </button>

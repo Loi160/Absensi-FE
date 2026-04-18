@@ -1,7 +1,5 @@
-/* ================= GOOGLE FONT ================= */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
-/* ================= GLOBAL RESET ================= */
 * {
   margin: 0;
   padding: 0;
@@ -9,7 +7,6 @@
   font-family: "Inter", sans-serif;
 }
 
-/* ================= LAYOUT UTAMA ================= */
 .hrd-container {
   display: flex;
   width: 100vw;
@@ -19,7 +16,6 @@
   position: relative;
 }
 
-/* ================= SIDEBAR ================= */
 .sidebar {
   width: 300px;
   padding: 25px 25px;
@@ -44,7 +40,6 @@
   filter: grayscale(100%) brightness(0) invert(1) contrast(1000%) !important;
 }
 
-/* --- MENU NAV --- */
 .menu-nav {
   display: flex;
   flex-direction: column;
@@ -89,7 +84,6 @@
   transition: all 0.3s ease;
 }
 
-/* ================= MENU ITEM ACTIVE ================= */
 .menu-item.active {
   background-color: #ffffff !important;
   color: #2fb800 !important;
@@ -111,7 +105,6 @@
   background-color: rgba(255, 255, 255, 0.15);
 }
 
-/* ================= MAIN CONTENT ================= */
 .main-content {
   position: absolute;
   top: 25px;
@@ -128,25 +121,24 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 }
 
-/* KUSTOMISASI SCROLLBAR */
 .main-content::-webkit-scrollbar {
   width: 8px;
 }
+
 .main-content::-webkit-scrollbar-track {
   background: transparent;
   margin: 30px 0;
 }
+
 .main-content::-webkit-scrollbar-thumb {
   background-color: #d1d1d1;
   border-radius: 10px;
 }
+
 .main-content::-webkit-scrollbar-thumb:hover {
   background-color: #8dae12;
 }
 
-/* ================= SPECIFIC DASHBOARD STYLES ================= */
-
-/* 1. Header Area */
 .dashboard-header-area {
   display: flex;
   flex-direction: column;
@@ -168,7 +160,6 @@
   margin: 0;
 }
 
-/* 2. Filter Row (Di bawah judul, rata kanan) */
 .dashboard-filter-row {
   display: flex;
   justify-content: flex-end;
@@ -177,7 +168,6 @@
   z-index: 20;
 }
 
-/* 3. Chart Box */
 .dashboard-chart-box {
   background: white;
   border-radius: 20px;
@@ -194,7 +184,6 @@
   width: 100%;
 }
 
-/* ================= FILTER DROPDOWN STYLE ================= */
 .filter-wrapper {
   position: relative;
 }
@@ -260,7 +249,6 @@
   color: #111;
 }
 
-/* ================= STATS GRID ================= */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -300,7 +288,6 @@
   margin: 0;
 }
 
-/* ================= SIDEBAR FOOTER (LOG OUT) ================= */
 .sidebar-footer {
   margin-top: auto;
   padding-top: 25px;
@@ -330,7 +317,6 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* ================= MOBILE-ONLY ELEMENTS ================= */
 .mobile-topbar {
   display: none;
 }
@@ -343,7 +329,6 @@
   display: none;
 }
 
-/* ================= RESPONSIVE ================= */
 @media (max-width: 1200px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -490,7 +475,6 @@
     background-color: #fdfdfd;
   }
 
-  /* Penyesuaian Elemen Khusus Mobile */
   .dashboard-header-area { margin-bottom: 15px; }
   .dashboard-title { font-size: 24px; margin-bottom: 4px; }
   .dashboard-subtitle { font-size: 13px; }

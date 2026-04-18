@@ -12,6 +12,36 @@ import logoPersegi from "../../assets/logopersegi.svg";
 import iconAbsen from "../../assets/tambah.svg";
 import iconIzin from "../../assets/perizinan.svg";
 
+const formatDateIndo = (dateString) => {
+  if (!dateString) return "-";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const sortData = (dataArray) => {
+  return [...dataArray].sort((a, b) => {
+    if (a.status === "Pending" && b.status !== "Pending") return -1;
+    if (a.status !== "Pending" && b.status === "Pending") return 1;
+    return b.rawDate - a.rawDate;
+  });
+};
+
+const getBadgeClass = (tipe) => {
+  if (!tipe) return "lainnya";
+  const lower = tipe.toLowerCase();
+  if (lower.includes("sakit")) return "sakit";
+  if (lower.includes("pribadi")) return "pribadi";
+  if (lower.includes("keluar")) return "keluar";
+  if (lower.includes("pulang")) return "pulang";
+  if (lower.includes("khusus")) return "khusus";
+  if (lower.includes("tahunan")) return "tahunan";
+  return "lainnya";
+};
+
 const Kehadiran = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("perizinan");
@@ -43,42 +73,23 @@ const Kehadiran = () => {
   const [searchKaryawan, setSearchKaryawan] = useState("");
   const [showKaryawanDropdown, setShowKaryawanDropdown] = useState(false);
 
-  // STATE MODAL DETAIL & PREVIEW IMAGE
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState("");
   const [selectedData, setSelectedData] = useState(null);
-  const [previewImage, setPreviewImage] = useState(null); // <-- STATE BARU UNTUK ZOOM FOTO
-
-  const formatDateIndo = (dateString) => {
-    if (!dateString) return "-";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("id-ID", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
+  const [previewImage, setPreviewImage] = useState(null); 
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const resCabang = await fetch(
-        import.meta.env.VITE_API_URL + "/api/cabang",
-      );
+      const resCabang = await fetch(import.meta.env.VITE_API_URL + "/api/cabang");
       const listCabang = await resCabang.json();
-      setCabangList(
-        Array.isArray(listCabang) ? listCabang.map((c) => c.nama) : [],
-      );
+      setCabangList(Array.isArray(listCabang) ? listCabang.map((c) => c.nama) : []);
 
-      const resKaryawan = await fetch(
-        import.meta.env.VITE_API_URL + "/api/karyawan",
-      );
+      const resKaryawan = await fetch(import.meta.env.VITE_API_URL + "/api/karyawan");
       const listKaryawan = await resKaryawan.json();
       setKaryawanList(Array.isArray(listKaryawan) ? listKaryawan : []);
 
-      const resPerizinan = await fetch(
-        import.meta.env.VITE_API_URL + "/api/perizinan/all",
-      );
+      const resPerizinan = await fetch(import.meta.env.VITE_API_URL + "/api/perizinan/all");
       const allPerizinan = await resPerizinan.json();
 
       const harian = [];
@@ -131,9 +142,7 @@ const Kehadiran = () => {
 
   useEffect(() => {
     if (selectedKaryawanId) {
-      const found = karyawanList.find(
-        (k) => String(k.id) === String(selectedKaryawanId),
-      );
+      const found = karyawanList.find((k) => String(k.id) === String(selectedKaryawanId));
       setKaryawanDetail(found);
     } else {
       setKaryawanDetail(null);
@@ -144,7 +153,7 @@ const Kehadiran = () => {
     (k) =>
       (k.nama.toLowerCase().includes(searchKaryawan.toLowerCase()) ||
         k.nik.includes(searchKaryawan)) &&
-      (k.status === "Aktif" || !k.status),
+      (k.status === "Aktif" || !k.status)
   );
 
   const handleLogout = () => {
@@ -158,6 +167,7 @@ const Kehadiran = () => {
     setModalType(type);
     setShowModal(true);
   };
+
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedData(null);
@@ -166,14 +176,11 @@ const Kehadiran = () => {
 
   const handleUpdateStatus = async (id, newStatus) => {
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/perizinan/${id}/status`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status_approval: newStatus }),
-        },
-      );
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/perizinan/${id}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status_approval: newStatus }),
+      });
       if (res.ok) {
         alert(`Berhasil di-${newStatus}`);
         fetchData();
@@ -206,14 +213,11 @@ const Kehadiran = () => {
     };
 
     try {
-      const res = await fetch(
-        import.meta.env.VITE_API_URL + "/api/absensi/manual",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        },
-      );
+      const res = await fetch(import.meta.env.VITE_API_URL + "/api/absensi/manual", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
       const result = await res.json();
       if (res.ok) {
         alert(result.message);
@@ -231,35 +235,16 @@ const Kehadiran = () => {
     }
   };
 
-  const sortData = (dataArray) => {
-    return [...dataArray].sort((a, b) => {
-      if (a.status === "Pending" && b.status !== "Pending") return -1;
-      if (a.status !== "Pending" && b.status === "Pending") return 1;
-      return b.rawDate - a.rawDate;
-    });
-  };
-
   const filterByCabang = (dataArray) => {
     if (selectedFilter === "Semua Cabang") return dataArray;
     return dataArray.filter((item) => item.cabang === selectedFilter);
-  };
-
-  const getBadgeClass = (tipe) => {
-    if (!tipe) return "lainnya";
-    const lower = tipe.toLowerCase();
-    if (lower.includes("sakit")) return "sakit";
-    if (lower.includes("pribadi")) return "pribadi";
-    if (lower.includes("keluar")) return "keluar";
-    if (lower.includes("pulang")) return "pulang";
-    if (lower.includes("khusus")) return "khusus";
-    if (lower.includes("tahunan")) return "tahunan";
-    return "lainnya";
   };
 
   const handleNav = (path) => {
     closeSidebar();
     navigate(path);
   };
+
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     closeSidebar();
@@ -288,34 +273,21 @@ const Kehadiran = () => {
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
         <nav className="menu-nav">
-          <div
-            className="menu-item"
-            onClick={() => handleNav("/hrd/dashboard")}
-          >
+          <div className="menu-item" onClick={() => handleNav("/hrd/dashboard")}>
             <div className="menu-left">
               <img src={iconDashboard} alt="dash" className="menu-icon-main" />
               <span className="menu-text-main">Dashboard</span>
             </div>
           </div>
-          <div
-            className="menu-item"
-            onClick={() => handleNav("/hrd/kelolacabang")}
-          >
+          <div className="menu-item" onClick={() => handleNav("/hrd/kelolacabang")}>
             <div className="menu-left">
               <img src={iconKelola} alt="kelola" className="menu-icon-main" />
               <span className="menu-text-main">Kelola Cabang</span>
             </div>
           </div>
-          <div
-            className="menu-item"
-            onClick={() => handleNav("/hrd/datakaryawan")}
-          >
+          <div className="menu-item" onClick={() => handleNav("/hrd/datakaryawan")}>
             <div className="menu-left">
-              <img
-                src={iconKaryawan}
-                alt="karyawan"
-                className="menu-icon-main"
-              />
+              <img src={iconKaryawan} alt="karyawan" className="menu-icon-main" />
               <span className="menu-text-main">Data Karyawan</span>
             </div>
           </div>
@@ -418,22 +390,14 @@ const Kehadiran = () => {
             </div>
 
             {loading ? (
-              <div
-                style={{
-                  textAlign: "center",
-                  marginTop: "50px",
-                  color: "#666",
-                }}
-              >
+              <div style={{ textAlign: "center", marginTop: "50px", color: "#666" }}>
                 Memuat data perizinan...
               </div>
             ) : (
               <>
                 <h3 className="section-title">Permohonan Izin Harian</h3>
                 <div className="perizinan-card">
-                  <div className="card-header-green">
-                    Permintaan Menunggu Approval
-                  </div>
+                  <div className="card-header-green">Permintaan Menunggu Approval</div>
                   <table className="table-izin">
                     <thead>
                       <tr>
@@ -441,12 +405,8 @@ const Kehadiran = () => {
                         <th style={{ width: "15%" }}>MULAI</th>
                         <th style={{ width: "15%" }}>SELESAI</th>
                         <th style={{ width: "15%" }}>TIPE IZIN</th>
-                        <th style={{ width: "10%" }} className="text-center">
-                          STATUS
-                        </th>
-                        <th style={{ width: "25%" }} className="text-center">
-                          AKSI
-                        </th>
+                        <th style={{ width: "10%" }} className="text-center">STATUS</th>
+                        <th style={{ width: "25%" }} className="text-center">AKSI</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -461,9 +421,7 @@ const Kehadiran = () => {
                             <td>{item.tglMulai}</td>
                             <td>{item.tglSelesai}</td>
                             <td>
-                              <span
-                                className={`badge-jenis ${getBadgeClass(item.tipeIzin)}`}
-                              >
+                              <span className={`badge-jenis ${getBadgeClass(item.tipeIzin)}`}>
                                 {item.tipeIzin}
                               </span>
                             </td>
@@ -474,44 +432,31 @@ const Kehadiran = () => {
                                 {item.status}
                               </span>
                             </td>
-                            <td
-                              className="text-center"
-                              onClick={(e) => e.stopPropagation()}
-                            >
+                            <td className="text-center" onClick={(e) => e.stopPropagation()}>
                               {item.status === "Pending" ? (
                                 <div className="action-buttons">
                                   <button
                                     className="btn-approve"
-                                    onClick={() =>
-                                      handleUpdateStatus(item.id, "Disetujui")
-                                    }
+                                    onClick={() => handleUpdateStatus(item.id, "Disetujui")}
                                   >
                                     Setujui
                                   </button>
                                   <button
                                     className="btn-reject"
-                                    onClick={() =>
-                                      handleUpdateStatus(item.id, "Ditolak")
-                                    }
+                                    onClick={() => handleUpdateStatus(item.id, "Ditolak")}
                                   >
                                     Tolak
                                   </button>
                                 </div>
                               ) : (
-                                <span className="text-selesai">
-                                  - Selesai -
-                                </span>
+                                <span className="text-selesai">- Selesai -</span>
                               )}
                             </td>
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td
-                            colSpan="6"
-                            className="text-center empty-state-cell"
-                            style={{ padding: "20px" }}
-                          >
+                          <td colSpan="6" className="text-center empty-state-cell" style={{ padding: "20px" }}>
                             Belum ada data izin harian.
                           </td>
                         </tr>
@@ -520,13 +465,9 @@ const Kehadiran = () => {
                   </table>
                 </div>
 
-                <h3 className="section-title">
-                  Permohonan Izin Meninggalkan Tempat Kerja
-                </h3>
+                <h3 className="section-title">Permohonan Izin Meninggalkan Tempat Kerja</h3>
                 <div className="perizinan-card">
-                  <div className="card-header-green">
-                    Permintaan Menunggu Approval
-                  </div>
+                  <div className="card-header-green">Permintaan Menunggu Approval</div>
                   <table className="table-izin">
                     <thead>
                       <tr>
@@ -534,12 +475,8 @@ const Kehadiran = () => {
                         <th style={{ width: "15%" }}>JABATAN</th>
                         <th style={{ width: "15%" }}>TIPE IZIN</th>
                         <th style={{ width: "15%" }}>TANGGAL</th>
-                        <th style={{ width: "10%" }} className="text-center">
-                          STATUS
-                        </th>
-                        <th style={{ width: "25%" }} className="text-center">
-                          AKSI
-                        </th>
+                        <th style={{ width: "10%" }} className="text-center">STATUS</th>
+                        <th style={{ width: "25%" }} className="text-center">AKSI</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -553,9 +490,7 @@ const Kehadiran = () => {
                             <td className="clickable-name">{item.nama}</td>
                             <td>{item.jabatan}</td>
                             <td>
-                              <span
-                                className={`badge-jenis ${getBadgeClass(item.tipeIzin)}`}
-                              >
+                              <span className={`badge-jenis ${getBadgeClass(item.tipeIzin)}`}>
                                 {item.tipeIzin}
                               </span>
                             </td>
@@ -567,44 +502,31 @@ const Kehadiran = () => {
                                 {item.status}
                               </span>
                             </td>
-                            <td
-                              className="text-center"
-                              onClick={(e) => e.stopPropagation()}
-                            >
+                            <td className="text-center" onClick={(e) => e.stopPropagation()}>
                               {item.status === "Pending" ? (
                                 <div className="action-buttons">
                                   <button
                                     className="btn-approve"
-                                    onClick={() =>
-                                      handleUpdateStatus(item.id, "Disetujui")
-                                    }
+                                    onClick={() => handleUpdateStatus(item.id, "Disetujui")}
                                   >
                                     Setujui
                                   </button>
                                   <button
                                     className="btn-reject"
-                                    onClick={() =>
-                                      handleUpdateStatus(item.id, "Ditolak")
-                                    }
+                                    onClick={() => handleUpdateStatus(item.id, "Ditolak")}
                                   >
                                     Tolak
                                   </button>
                                 </div>
                               ) : (
-                                <span className="text-selesai">
-                                  - Selesai -
-                                </span>
+                                <span className="text-selesai">- Selesai -</span>
                               )}
                             </td>
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td
-                            colSpan="6"
-                            className="text-center empty-state-cell"
-                            style={{ padding: "20px" }}
-                          >
+                          <td colSpan="6" className="text-center empty-state-cell" style={{ padding: "20px" }}>
                             Belum ada data izin FIMTK.
                           </td>
                         </tr>
@@ -615,9 +537,7 @@ const Kehadiran = () => {
 
                 <h3 className="section-title">Permohonan Izin Cuti Karyawan</h3>
                 <div className="perizinan-card">
-                  <div className="card-header-green">
-                    Permintaan Menunggu Approval
-                  </div>
+                  <div className="card-header-green">Permintaan Menunggu Approval</div>
                   <table className="table-izin">
                     <thead>
                       <tr>
@@ -625,12 +545,8 @@ const Kehadiran = () => {
                         <th style={{ width: "15%" }}>JABATAN</th>
                         <th style={{ width: "15%" }}>TIPE IZIN</th>
                         <th style={{ width: "15%" }}>MULAI CUTI</th>
-                        <th style={{ width: "10%" }} className="text-center">
-                          STATUS
-                        </th>
-                        <th style={{ width: "25%" }} className="text-center">
-                          AKSI
-                        </th>
+                        <th style={{ width: "10%" }} className="text-center">STATUS</th>
+                        <th style={{ width: "25%" }} className="text-center">AKSI</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -644,9 +560,7 @@ const Kehadiran = () => {
                             <td className="clickable-name">{item.nama}</td>
                             <td>{item.jabatan}</td>
                             <td>
-                              <span
-                                className={`badge-jenis ${getBadgeClass(item.tipeIzin)}`}
-                              >
+                              <span className={`badge-jenis ${getBadgeClass(item.tipeIzin)}`}>
                                 {item.tipeIzin}
                               </span>
                             </td>
@@ -658,44 +572,31 @@ const Kehadiran = () => {
                                 {item.status}
                               </span>
                             </td>
-                            <td
-                              className="text-center"
-                              onClick={(e) => e.stopPropagation()}
-                            >
+                            <td className="text-center" onClick={(e) => e.stopPropagation()}>
                               {item.status === "Pending" ? (
                                 <div className="action-buttons">
                                   <button
                                     className="btn-approve"
-                                    onClick={() =>
-                                      handleUpdateStatus(item.id, "Disetujui")
-                                    }
+                                    onClick={() => handleUpdateStatus(item.id, "Disetujui")}
                                   >
                                     Setujui
                                   </button>
                                   <button
                                     className="btn-reject"
-                                    onClick={() =>
-                                      handleUpdateStatus(item.id, "Ditolak")
-                                    }
+                                    onClick={() => handleUpdateStatus(item.id, "Ditolak")}
                                   >
                                     Tolak
                                   </button>
                                 </div>
                               ) : (
-                                <span className="text-selesai">
-                                  - Selesai -
-                                </span>
+                                <span className="text-selesai">- Selesai -</span>
                               )}
                             </td>
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td
-                            colSpan="6"
-                            className="text-center empty-state-cell"
-                            style={{ padding: "20px" }}
-                          >
+                          <td colSpan="6" className="text-center empty-state-cell" style={{ padding: "20px" }}>
                             Belum ada data izin Cuti.
                           </td>
                         </tr>
@@ -708,7 +609,6 @@ const Kehadiran = () => {
           </>
         )}
 
-        {/* TAB 2: ABSEN MANUAL */}
         {activeTab === "absenManual" && (
           <div className="absen-form-wrapper">
             <div className="header-titles">
@@ -716,22 +616,14 @@ const Kehadiran = () => {
               <p>Formulir penginputan data absensi karyawan secara manual</p>
             </div>
 
-            <form
-              onSubmit={handleAbsenManualSubmit}
-              className="absen-form-grid"
-              style={{ marginTop: "20px" }}
-            >
+            <form onSubmit={handleAbsenManualSubmit} className="absen-form-grid" style={{ marginTop: "20px" }}>
               <div className="form-group" style={{ position: "relative" }}>
                 <label>Nama</label>
                 <div style={{ position: "relative" }}>
                   <input
                     type="text"
                     className="input-field"
-                    style={{
-                      width: "100%",
-                      paddingRight: "35px",
-                      cursor: "text",
-                    }}
+                    style={{ width: "100%", paddingRight: "35px", cursor: "text" }}
                     placeholder="Ketik atau pilih Karyawan..."
                     value={searchKaryawan}
                     onChange={(e) => {
@@ -742,19 +634,11 @@ const Kehadiran = () => {
                       }
                     }}
                     onFocus={() => setShowKaryawanDropdown(true)}
-                    onBlur={() =>
-                      setTimeout(() => setShowKaryawanDropdown(false), 200)
-                    }
+                    onBlur={() => setTimeout(() => setShowKaryawanDropdown(false), 200)}
                     required={!selectedKaryawanId}
                   />
                   <svg
-                    style={{
-                      position: "absolute",
-                      right: "15px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      pointerEvents: "none",
-                    }}
+                    style={{ position: "absolute", right: "15px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}
                     width="16"
                     height="16"
                     viewBox="0 0 24 24"
@@ -789,47 +673,22 @@ const Kehadiran = () => {
                       filteredKaryawanList.map((k) => (
                         <div
                           key={k.id}
-                          style={{
-                            padding: "10px 15px",
-                            cursor: "pointer",
-                            borderBottom: "1px solid #eee",
-                          }}
+                          style={{ padding: "10px 15px", cursor: "pointer", borderBottom: "1px solid #eee" }}
                           onMouseDown={(e) => {
                             e.preventDefault();
                             setSelectedKaryawanId(k.id);
                             setSearchKaryawan(k.nama);
                             setShowKaryawanDropdown(false);
                           }}
-                          onMouseEnter={(e) =>
-                            (e.target.style.backgroundColor = "#f9f9f9")
-                          }
-                          onMouseLeave={(e) =>
-                            (e.target.style.backgroundColor = "transparent")
-                          }
+                          onMouseEnter={(e) => (e.target.style.backgroundColor = "#f9f9f9")}
+                          onMouseLeave={(e) => (e.target.style.backgroundColor = "transparent")}
                         >
-                          <div
-                            style={{
-                              fontWeight: "600",
-                              fontSize: "14px",
-                              color: "#333",
-                            }}
-                          >
-                            {k.nama}
-                          </div>
-                          <div style={{ fontSize: "11px", color: "#888" }}>
-                            {k.nik} - {k.cabang?.nama}
-                          </div>
+                          <div style={{ fontWeight: "600", fontSize: "14px", color: "#333" }}>{k.nama}</div>
+                          <div style={{ fontSize: "11px", color: "#888" }}>{k.nik} - {k.cabang?.nama}</div>
                         </div>
                       ))
                     ) : (
-                      <div
-                        style={{
-                          padding: "15px",
-                          color: "#888",
-                          fontSize: "13px",
-                          textAlign: "center",
-                        }}
-                      >
+                      <div style={{ padding: "15px", color: "#888", fontSize: "13px", textAlign: "center" }}>
                         Karyawan tidak ditemukan
                       </div>
                     )}
@@ -880,12 +739,7 @@ const Kehadiran = () => {
               </div>
               <div className="form-group">
                 <label>Jam Absen</label>
-                <input
-                  type="time"
-                  name="jam_absen"
-                  className="input-field"
-                  required
-                />
+                <input type="time" name="jam_absen" className="input-field" required />
               </div>
               <div className="form-group">
                 <label>Cabang Penempatan</label>
@@ -928,11 +782,7 @@ const Kehadiran = () => {
                 >
                   Batal
                 </button>
-                <button
-                  type="submit"
-                  className="btn-simpan-green"
-                  disabled={loadingAbsen}
-                >
+                <button type="submit" className="btn-simpan-green" disabled={loadingAbsen}>
                   {loadingAbsen ? "Menyimpan..." : "Simpan Data"}
                 </button>
               </div>
@@ -941,9 +791,6 @@ const Kehadiran = () => {
         )}
       </main>
 
-      {/* ========================================================== */}
-      {/* MODAL DETAIL PERIZINAN */}
-      {/* ========================================================== */}
       {showModal && selectedData && (
         <div className="modal-overlay" onClick={handleCloseModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -964,68 +811,42 @@ const Kehadiran = () => {
                   <div className="modal-row-split">
                     <div className="modal-field-group">
                       <label className="modal-field-label">Nama</label>
-                      <div className="modal-field-value">
-                        {selectedData.nama}
-                      </div>
+                      <div className="modal-field-value">{selectedData.nama}</div>
                     </div>
                     <div className="modal-field-group">
                       <label className="modal-field-label">Cabang</label>
-                      <div className="modal-field-value">
-                        {selectedData.cabang}
-                      </div>
+                      <div className="modal-field-value">{selectedData.cabang}</div>
                     </div>
                   </div>
                   <div className="modal-field-group">
                     <label className="modal-field-label">Tipe Izin</label>
-                    <div className="modal-field-value">
-                      {selectedData.tipeIzin}
-                    </div>
+                    <div className="modal-field-value">{selectedData.tipeIzin}</div>
                   </div>
                   <div className="modal-row-split">
                     <div className="modal-field-group">
                       <label className="modal-field-label">Tanggal Mulai</label>
-                      <div className="modal-field-value">
-                        {selectedData.tglMulai}
-                      </div>
+                      <div className="modal-field-value">{selectedData.tglMulai}</div>
                     </div>
                     <div className="modal-field-group">
-                      <label className="modal-field-label">
-                        Tanggal Selesai
-                      </label>
-                      <div className="modal-field-value">
-                        {selectedData.tglSelesai}
-                      </div>
+                      <label className="modal-field-label">Tanggal Selesai</label>
+                      <div className="modal-field-value">{selectedData.tglSelesai}</div>
                     </div>
                   </div>
                   <div className="modal-field-group">
-                    <label className="modal-field-label">
-                      Keterangan / Alasan
-                    </label>
-                    <div
-                      className="modal-field-value"
-                      style={{ minHeight: "60px" }}
-                    >
+                    <label className="modal-field-label">Keterangan / Alasan</label>
+                    <div className="modal-field-value" style={{ minHeight: "60px" }}>
                       {selectedData.keterangan}
                     </div>
                   </div>
                   <div className="modal-field-group">
                     <label className="modal-field-label">Bukti Foto</label>
-                    {/* UPDATE: BISA KLIK ZOOM */}
-                    <div
-                      className="modal-foto-box"
-                      style={{ position: "relative" }}
-                    >
+                    <div className="modal-foto-box" style={{ position: "relative" }}>
                       {selectedData.foto ? (
                         <>
                           <img
                             src={selectedData.foto}
                             alt="Bukti"
-                            style={{
-                              maxWidth: "100%",
-                              maxHeight: "100%",
-                              cursor: "pointer",
-                              objectFit: "contain",
-                            }}
+                            style={{ maxWidth: "100%", maxHeight: "100%", cursor: "pointer", objectFit: "contain" }}
                             onClick={() => setPreviewImage(selectedData.foto)}
                           />
                           <button
@@ -1063,43 +884,31 @@ const Kehadiran = () => {
                   <div className="modal-row-split">
                     <div className="modal-field-group">
                       <label className="modal-field-label">Nama</label>
-                      <div className="modal-field-value">
-                        {selectedData.nama}
-                      </div>
+                      <div className="modal-field-value">{selectedData.nama}</div>
                     </div>
                     <div className="modal-field-group">
                       <label className="modal-field-label">Cabang</label>
-                      <div className="modal-field-value">
-                        {selectedData.cabang}
-                      </div>
+                      <div className="modal-field-value">{selectedData.cabang}</div>
                     </div>
                   </div>
                   <div className="modal-field-group">
                     <label className="modal-field-label">Tipe Izin</label>
-                    <div className="modal-field-value">
-                      {selectedData.tipeIzin}
-                    </div>
+                    <div className="modal-field-value">{selectedData.tipeIzin}</div>
                   </div>
                   <div className="modal-row-split">
                     <div className="modal-field-group">
                       <label className="modal-field-label">Jabatan</label>
-                      <div className="modal-field-value">
-                        {selectedData.jabatan}
-                      </div>
+                      <div className="modal-field-value">{selectedData.jabatan}</div>
                     </div>
                     <div className="modal-field-group">
                       <label className="modal-field-label">Divisi</label>
-                      <div className="modal-field-value">
-                        {selectedData.divisi}
-                      </div>
+                      <div className="modal-field-value">{selectedData.divisi}</div>
                     </div>
                   </div>
                   <div className="modal-row-split">
                     <div className="modal-field-group">
                       <label className="modal-field-label">Tanggal</label>
-                      <div className="modal-field-value">
-                        {selectedData.tanggal}
-                      </div>
+                      <div className="modal-field-value">{selectedData.tanggal}</div>
                     </div>
                     <div className="modal-field-group">
                       <label className="modal-field-label">Jam Izin</label>
@@ -1111,25 +920,16 @@ const Kehadiran = () => {
                   <div className="modal-row-split">
                     <div className="modal-field-group">
                       <label className="modal-field-label">Keperluan</label>
-                      <div className="modal-field-value">
-                        {selectedData.keperluan}
-                      </div>
+                      <div className="modal-field-value">{selectedData.keperluan}</div>
                     </div>
                     <div className="modal-field-group">
                       <label className="modal-field-label">Kendaraan</label>
-                      <div className="modal-field-value">
-                        {selectedData.kendaraan}
-                      </div>
+                      <div className="modal-field-value">{selectedData.kendaraan}</div>
                     </div>
                   </div>
                   <div className="modal-field-group">
-                    <label className="modal-field-label">
-                      Keterangan / Alasan
-                    </label>
-                    <div
-                      className="modal-field-value"
-                      style={{ minHeight: "60px" }}
-                    >
+                    <label className="modal-field-label">Keterangan / Alasan</label>
+                    <div className="modal-field-value" style={{ minHeight: "60px" }}>
                       {selectedData.keterangan}
                     </div>
                   </div>
@@ -1141,63 +941,42 @@ const Kehadiran = () => {
                   <div className="modal-row-split">
                     <div className="modal-field-group">
                       <label className="modal-field-label">Nama</label>
-                      <div className="modal-field-value">
-                        {selectedData.nama}
-                      </div>
+                      <div className="modal-field-value">{selectedData.nama}</div>
                     </div>
                     <div className="modal-field-group">
                       <label className="modal-field-label">Cabang</label>
-                      <div className="modal-field-value">
-                        {selectedData.cabang}
-                      </div>
+                      <div className="modal-field-value">{selectedData.cabang}</div>
                     </div>
                   </div>
                   <div className="modal-field-group">
                     <label className="modal-field-label">Tipe Izin</label>
-                    <div className="modal-field-value">
-                      {selectedData.tipeIzin}
-                    </div>
+                    <div className="modal-field-value">{selectedData.tipeIzin}</div>
                   </div>
                   <div className="modal-row-split">
                     <div className="modal-field-group">
                       <label className="modal-field-label">Tanggal Mulai</label>
-                      <div className="modal-field-value">
-                        {selectedData.tglMulai}
-                      </div>
+                      <div className="modal-field-value">{selectedData.tglMulai}</div>
                     </div>
                     <div className="modal-field-group">
-                      <label className="modal-field-label">
-                        Tanggal Selesai
-                      </label>
-                      <div className="modal-field-value">
-                        {selectedData.tglSelesai}
-                      </div>
+                      <label className="modal-field-label">Tanggal Selesai</label>
+                      <div className="modal-field-value">{selectedData.tglSelesai}</div>
                     </div>
                   </div>
                   <div className="modal-row-split">
                     <div className="modal-field-group">
-                      <label className="modal-field-label">
-                        Jabatan & Divisi
-                      </label>
+                      <label className="modal-field-label">Jabatan & Divisi</label>
                       <div className="modal-field-value">
                         {selectedData.jabatan} - {selectedData.divisi}
                       </div>
                     </div>
                     <div className="modal-field-group">
                       <label className="modal-field-label">No. Telepon</label>
-                      <div className="modal-field-value">
-                        {selectedData.noTelp}
-                      </div>
+                      <div className="modal-field-value">{selectedData.noTelp}</div>
                     </div>
                   </div>
                   <div className="modal-field-group">
-                    <label className="modal-field-label">
-                      Keterangan / Alasan
-                    </label>
-                    <div
-                      className="modal-field-value"
-                      style={{ minHeight: "60px" }}
-                    >
+                    <label className="modal-field-label">Keterangan / Alasan</label>
+                    <div className="modal-field-value" style={{ minHeight: "60px" }}>
                       {selectedData.keterangan}
                     </div>
                   </div>
@@ -1215,9 +994,7 @@ const Kehadiran = () => {
                 </button>
                 <button
                   className="btn-approve-modern"
-                  onClick={() =>
-                    handleUpdateStatus(selectedData.id, "Disetujui")
-                  }
+                  onClick={() => handleUpdateStatus(selectedData.id, "Disetujui")}
                 >
                   Setujui
                 </button>
@@ -1227,7 +1004,6 @@ const Kehadiran = () => {
         </div>
       )}
 
-      {/* ================= MODAL PREVIEW FOTO ZOOM ================= */}
       {previewImage && (
         <div
           style={{

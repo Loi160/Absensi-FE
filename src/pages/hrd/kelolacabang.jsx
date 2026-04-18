@@ -11,6 +11,14 @@ import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 import iconTambah from "../../assets/tambah.svg";
 
+const MENU_ITEMS = [
+  { path: "/hrd/dashboard", icon: iconDashboard, text: "Dashboard" },
+  { path: "/hrd/kelolacabang", icon: iconKelola, text: "Kelola Cabang", active: true },
+  { path: "/hrd/datakaryawan", icon: iconKaryawan, text: "Data Karyawan" },
+  { path: "/hrd/kehadiran", icon: iconKehadiran, text: "Kehadiran", hasArrow: true },
+  { path: "/hrd/laporan", icon: iconLaporan, text: "Laporan" },
+];
+
 const KelolaCabang = () => {
   const navigate = useNavigate();
 
@@ -30,9 +38,7 @@ const KelolaCabang = () => {
   const fetchCabang = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        import.meta.env.VITE_API_URL + "/api/cabang",
-      );
+      const response = await fetch(import.meta.env.VITE_API_URL + "/api/cabang");
       const data = await response.json();
 
       const parents = data.filter((c) => !c.parent_id);
@@ -92,13 +98,9 @@ const KelolaCabang = () => {
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
 
-    // Konversi tipe data agar sesuai dengan Supabase
-    if (data.keterlambatan)
-      data.keterlambatan = parseInt(data.keterlambatan, 10);
-    if (data.radius_toleransi)
-      data.radius_toleransi = parseInt(data.radius_toleransi, 10);
+    if (data.keterlambatan) data.keterlambatan = parseInt(data.keterlambatan, 10);
+    if (data.radius_toleransi) data.radius_toleransi = parseInt(data.radius_toleransi, 10);
 
-    // Pastikan semua format jam memiliki detik "08:00:00"
     const timeFields = [
       "jam_masuk_weekday",
       "jam_keluar_weekday",
@@ -107,6 +109,7 @@ const KelolaCabang = () => {
       "jam_mulai_lembur",
       "jam_selesai_lembur",
     ];
+    
     timeFields.forEach((field) => {
       if (data[field] && data[field].length === 5) {
         data[field] = `${data[field]}:00`;
@@ -160,7 +163,7 @@ const KelolaCabang = () => {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ is_active: !confirmData.is_active }),
-        },
+        }
       );
 
       if (response.ok) {
@@ -182,7 +185,6 @@ const KelolaCabang = () => {
 
   return (
     <div className="hrd-container">
-      {/* MOBILE TOPBAR */}
       <div className="mobile-topbar">
         <img src={logoPersegi} alt="AMAGACORP" className="mobile-topbar-logo" />
         <button className="btn-hamburger" onClick={openSidebar}>
@@ -196,7 +198,6 @@ const KelolaCabang = () => {
         onClick={closeSidebar}
       />
 
-      {/* SIDEBAR */}
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
         <button className="btn-sidebar-close" onClick={closeSidebar}>
           ✕
@@ -205,53 +206,19 @@ const KelolaCabang = () => {
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
         <nav className="menu-nav">
-          <div
-            className="menu-item"
-            onClick={() => handleNav("/hrd/dashboard")}
-          >
-            <div className="menu-left">
-              <img src={iconDashboard} alt="dash" className="menu-icon-main" />{" "}
-              <span className="menu-text-main">Dashboard</span>
+          {MENU_ITEMS.map((item, index) => (
+            <div
+              key={index}
+              className={`menu-item ${item.active ? "active" : ""} ${item.hasArrow ? "has-arrow" : ""}`}
+              onClick={() => handleNav(item.path)}
+            >
+              <div className="menu-left">
+                <img src={item.icon} alt="" className="menu-icon-main" />
+                <span className="menu-text-main">{item.text}</span>
+              </div>
+              {item.hasArrow && <img src={iconBawah} alt="down" className="arrow-icon-main" />}
             </div>
-          </div>
-          <div
-            className="menu-item active"
-            onClick={() => handleNav("/hrd/kelolacabang")}
-          >
-            <div className="menu-left">
-              <img src={iconKelola} alt="kelola" className="menu-icon-main" />{" "}
-              <span className="menu-text-main">Kelola Cabang</span>
-            </div>
-          </div>
-          <div
-            className="menu-item"
-            onClick={() => handleNav("/hrd/datakaryawan")}
-          >
-            <div className="menu-left">
-              <img
-                src={iconKaryawan}
-                alt="karyawan"
-                className="menu-icon-main"
-              />{" "}
-              <span className="menu-text-main">Data Karyawan</span>
-            </div>
-          </div>
-          <div
-            className="menu-item has-arrow"
-            onClick={() => handleNav("/hrd/kehadiran")}
-          >
-            <div className="menu-left">
-              <img src={iconKehadiran} alt="hadir" className="menu-icon-main" />{" "}
-              <span className="menu-text-main">Kehadiran</span>
-            </div>
-            <img src={iconBawah} alt="down" className="arrow-icon-main" />
-          </div>
-          <div className="menu-item" onClick={() => handleNav("/hrd/laporan")}>
-            <div className="menu-left">
-              <img src={iconLaporan} alt="lapor" className="menu-icon-main" />{" "}
-              <span className="menu-text-main">Laporan</span>
-            </div>
-          </div>
+          ))}
         </nav>
         <div className="sidebar-footer">
           <button className="btn-logout" onClick={handleLogout}>
@@ -260,7 +227,6 @@ const KelolaCabang = () => {
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
       <main className="main-content">
         <header className="header-cabang-area">
           <h1 className="cabang-title">Kelola Cabang</h1>
@@ -279,23 +245,16 @@ const KelolaCabang = () => {
           <div className="table-cabang-header">Nama Cabang</div>
           <div className="table-cabang-body">
             {loading ? (
-              <div className="table-empty-state">
-                Memuat data dari server...
-              </div>
+              <div className="table-empty-state">Memuat data dari server...</div>
             ) : dataCabang.length === 0 ? (
               <div className="table-empty-state">Belum ada data cabang.</div>
             ) : (
               dataCabang.map((item) => (
                 <React.Fragment key={item.id}>
-                  <div
-                    className="table-cabang-row"
-                    onClick={() => toggleRow(item.id)}
-                  >
+                  <div className="table-cabang-row" onClick={() => toggleRow(item.id)}>
                     <span className="cabang-name">
                       {item.nama}{" "}
-                      {item.subCabang &&
-                        item.subCabang.length > 0 &&
-                        (expandedRows[item.id] ? "▲" : "▼")}
+                      {item.subCabang && item.subCabang.length > 0 && (expandedRows[item.id] ? "▲" : "▼")}
                     </span>
 
                     <div className="table-cabang-actions">
@@ -316,16 +275,7 @@ const KelolaCabang = () => {
                         }}
                         title="Edit Cabang"
                       >
-                        <svg
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                         </svg>
@@ -335,60 +285,42 @@ const KelolaCabang = () => {
                         onClick={(e) => handleToggleStatusClick(e, item)}
                         title="Ubah Status"
                       >
-                        <span
-                          className={`status-dot ${item.is_active ? "active" : "inactive"}`}
-                        ></span>
+                        <span className={`status-dot ${item.is_active ? "active" : "inactive"}`}></span>
                       </button>
                     </div>
                   </div>
 
-                  {item.subCabang &&
-                    item.subCabang.length > 0 &&
-                    expandedRows[item.id] && (
-                      <div className="sub-rows-wrapper">
-                        {item.subCabang.map((sub) => (
-                          <div
-                            className="table-cabang-row sub-row"
-                            key={sub.id}
-                          >
-                            <span className="cabang-name">{sub.nama}</span>
-                            <div className="table-cabang-actions">
-                              <button
-                                className="btn-icon-action"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenEdit(sub);
-                                }}
-                                title="Edit Sub-Cabang"
-                              >
-                                <svg
-                                  width="18"
-                                  height="18"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                </svg>
-                              </button>
-                              <button
-                                className="btn-status-toggle"
-                                onClick={(e) => handleToggleStatusClick(e, sub)}
-                                title="Ubah Status"
-                              >
-                                <span
-                                  className={`status-dot ${sub.is_active ? "active" : "inactive"}`}
-                                ></span>
-                              </button>
-                            </div>
+                  {item.subCabang && item.subCabang.length > 0 && expandedRows[item.id] && (
+                    <div className="sub-rows-wrapper">
+                      {item.subCabang.map((sub) => (
+                        <div className="table-cabang-row sub-row" key={sub.id}>
+                          <span className="cabang-name">{sub.nama}</span>
+                          <div className="table-cabang-actions">
+                            <button
+                              className="btn-icon-action"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenEdit(sub);
+                              }}
+                              title="Edit Sub-Cabang"
+                            >
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                              </svg>
+                            </button>
+                            <button
+                              className="btn-status-toggle"
+                              onClick={(e) => handleToggleStatusClick(e, sub)}
+                              title="Ubah Status"
+                            >
+                              <span className={`status-dot ${sub.is_active ? "active" : "inactive"}`}></span>
+                            </button>
                           </div>
-                        ))}
-                      </div>
-                    )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </React.Fragment>
               ))
             )}
@@ -396,225 +328,84 @@ const KelolaCabang = () => {
         </div>
       </main>
 
-      {/* ================= MODAL FORM TAMBAH/EDIT ================= */}
       {showModal && (
-        <div
-          className="modal-overlay-clean"
-          onClick={() => setShowModal(false)}
-        >
-          <div
-            className="modal-card-edit"
-            onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: "650px" }}
-          >
+        <div className="modal-overlay-clean" onClick={() => setShowModal(false)}>
+          <div className="modal-card-edit" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "650px" }}>
             <h2 className="modal-title">{modalTitle}</h2>
             <form onSubmit={handleSaveData}>
               <div className="modal-grid">
                 <div className="input-block">
                   <label>Nama Cabang</label>
-                  <input
-                    type="text"
-                    name="nama"
-                    defaultValue={editData?.nama}
-                    className="modal-input"
-                    required
-                  />
+                  <input type="text" name="nama" defaultValue={editData?.nama} className="modal-input" required />
                 </div>
                 <div className="input-block">
                   <label>Alamat Lokasi</label>
-                  <input
-                    type="text"
-                    name="alamat"
-                    defaultValue={editData?.alamat}
-                    className="modal-input"
-                    required
-                  />
+                  <input type="text" name="alamat" defaultValue={editData?.alamat} className="modal-input" required />
                 </div>
-
                 <div className="input-block">
                   <label>Titik Koordinat</label>
-                  <input
-                    type="text"
-                    name="titik_koordinat"
-                    defaultValue={editData?.titik_koordinat}
-                    placeholder="-6.200000, 106.816666"
-                    className="modal-input"
-                    required
-                  />
+                  <input type="text" name="titik_koordinat" defaultValue={editData?.titik_koordinat} placeholder="-6.200000, 106.816666" className="modal-input" required />
                 </div>
                 <div className="input-block">
                   <label>Toleransi Titik Koordinat (m)</label>
-                  <input
-                    type="number"
-                    name="radius_toleransi"
-                    defaultValue={editData?.radius_toleransi || 20}
-                    placeholder="Misal: 20"
-                    className="modal-input"
-                    required
-                  />
+                  <input type="number" name="radius_toleransi" defaultValue={editData?.radius_toleransi || 20} placeholder="Misal: 20" className="modal-input" required />
                 </div>
               </div>
 
-              {/* SECTION JADWAL KERJA */}
-              <div
-                style={{
-                  marginTop: "20px",
-                  marginBottom: "15px",
-                  borderTop: "1px solid #eee",
-                  paddingTop: "15px",
-                }}
-              >
-                <h4
-                  style={{
-                    fontSize: "14px",
-                    marginBottom: "10px",
-                    color: "#333",
-                  }}
-                >
+              <div style={{ marginTop: "20px", marginBottom: "15px", borderTop: "1px solid #eee", paddingTop: "15px" }}>
+                <h4 style={{ fontSize: "14px", marginBottom: "10px", color: "#333" }}>
                   Jadwal Kerja Reguler (Senin - Jumat)
                 </h4>
-                <div
-                  className="modal-grid"
-                  style={{ gridTemplateColumns: "1fr 1fr" }}
-                >
+                <div className="modal-grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
                   <div className="input-block">
                     <label>Jam Masuk</label>
-                    <input
-                      type="time"
-                      name="jam_masuk_weekday"
-                      defaultValue={
-                        editData?.jam_masuk_weekday?.substring(0, 5) || "08:00"
-                      }
-                      className="modal-input"
-                      required
-                    />
+                    <input type="time" name="jam_masuk_weekday" defaultValue={editData?.jam_masuk_weekday?.substring(0, 5) || "08:00"} className="modal-input" required />
                   </div>
                   <div className="input-block">
                     <label>Jam Keluar</label>
-                    <input
-                      type="time"
-                      name="jam_keluar_weekday"
-                      defaultValue={
-                        editData?.jam_keluar_weekday?.substring(0, 5) || "17:00"
-                      }
-                      className="modal-input"
-                      required
-                    />
+                    <input type="time" name="jam_keluar_weekday" defaultValue={editData?.jam_keluar_weekday?.substring(0, 5) || "17:00"} className="modal-input" required />
                   </div>
                 </div>
               </div>
 
-              <div
-                style={{
-                  marginBottom: "15px",
-                  borderTop: "1px solid #eee",
-                  paddingTop: "15px",
-                }}
-              >
-                <h4
-                  style={{
-                    fontSize: "14px",
-                    marginBottom: "10px",
-                    color: "#333",
-                  }}
-                >
+              <div style={{ marginBottom: "15px", borderTop: "1px solid #eee", paddingTop: "15px" }}>
+                <h4 style={{ fontSize: "14px", marginBottom: "10px", color: "#333" }}>
                   Jadwal Kerja Weekend (Sabtu - Minggu)
                 </h4>
-                <div
-                  className="modal-grid"
-                  style={{ gridTemplateColumns: "1fr 1fr" }}
-                >
+                <div className="modal-grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
                   <div className="input-block">
                     <label>Jam Masuk</label>
-                    <input
-                      type="time"
-                      name="jam_masuk_weekend"
-                      defaultValue={
-                        editData?.jam_masuk_weekend?.substring(0, 5) || "08:00"
-                      }
-                      className="modal-input"
-                      required
-                    />
+                    <input type="time" name="jam_masuk_weekend" defaultValue={editData?.jam_masuk_weekend?.substring(0, 5) || "08:00"} className="modal-input" required />
                   </div>
                   <div className="input-block">
                     <label>Jam Keluar</label>
-                    <input
-                      type="time"
-                      name="jam_keluar_weekend"
-                      defaultValue={
-                        editData?.jam_keluar_weekend?.substring(0, 5) || "15:00"
-                      }
-                      className="modal-input"
-                      required
-                    />
+                    <input type="time" name="jam_keluar_weekend" defaultValue={editData?.jam_keluar_weekend?.substring(0, 5) || "15:00"} className="modal-input" required />
                   </div>
                 </div>
               </div>
 
-              <div
-                style={{
-                  marginBottom: "15px",
-                  borderTop: "1px solid #eee",
-                  paddingTop: "15px",
-                }}
-              >
-                <h4
-                  style={{
-                    fontSize: "14px",
-                    marginBottom: "10px",
-                    color: "#333",
-                  }}
-                >
+              <div style={{ marginBottom: "15px", borderTop: "1px solid #eee", paddingTop: "15px" }}>
+                <h4 style={{ fontSize: "14px", marginBottom: "10px", color: "#333" }}>
                   Aturan Lembur & Keterlambatan
                 </h4>
-                <div
-                  className="modal-grid"
-                  style={{ gridTemplateColumns: "1fr 1fr 1fr" }}
-                >
+                <div className="modal-grid" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
                   <div className="input-block">
                     <label>Mulai Lembur</label>
-                    <input
-                      type="time"
-                      name="jam_mulai_lembur"
-                      defaultValue={
-                        editData?.jam_mulai_lembur?.substring(0, 5) || "18:00"
-                      }
-                      className="modal-input"
-                      required
-                    />
+                    <input type="time" name="jam_mulai_lembur" defaultValue={editData?.jam_mulai_lembur?.substring(0, 5) || "18:00"} className="modal-input" required />
                   </div>
                   <div className="input-block">
                     <label>Batas Lembur</label>
-                    <input
-                      type="time"
-                      name="jam_selesai_lembur"
-                      defaultValue={
-                        editData?.jam_selesai_lembur?.substring(0, 5) || "20:00"
-                      }
-                      className="modal-input"
-                      required
-                    />
+                    <input type="time" name="jam_selesai_lembur" defaultValue={editData?.jam_selesai_lembur?.substring(0, 5) || "20:00"} className="modal-input" required />
                   </div>
                   <div className="input-block">
                     <label>Keterlambatan (Menit)</label>
-                    <input
-                      type="number"
-                      name="keterlambatan"
-                      defaultValue={editData?.keterlambatan || 15}
-                      placeholder="Misal: 15"
-                      className="modal-input"
-                      required
-                    />
+                    <input type="number" name="keterlambatan" defaultValue={editData?.keterlambatan || 15} placeholder="Misal: 15" className="modal-input" required />
                   </div>
                 </div>
               </div>
 
               <div className="modal-footer-actions">
-                <button
-                  type="button"
-                  className="btn-cancel-mini"
-                  onClick={() => setShowModal(false)}
-                >
+                <button type="button" className="btn-cancel-mini" onClick={() => setShowModal(false)}>
                   Batal
                 </button>
                 <button type="submit" className="btn-save-dynamic">
@@ -626,16 +417,9 @@ const KelolaCabang = () => {
         </div>
       )}
 
-      {/* ================= MODAL KONFIRMASI STATUS ================= */}
       {showConfirmModal && (
-        <div
-          className="modal-overlay-clean"
-          onClick={() => setShowConfirmModal(false)}
-        >
-          <div
-            className="modal-card-confirm"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="modal-overlay-clean" onClick={() => setShowConfirmModal(false)}>
+          <div className="modal-card-confirm" onClick={(e) => e.stopPropagation()}>
             <h3>Konfirmasi Perubahan</h3>
             <p>Apakah Anda yakin ingin mengubah status cabang ini?</p>
             <div className="confirm-btn-group">
@@ -648,10 +432,7 @@ const KelolaCabang = () => {
               >
                 Batal
               </button>
-              <button
-                className="btn-konfirm-yakin"
-                onClick={executeToggleStatus}
-              >
+              <button className="btn-konfirm-yakin" onClick={executeToggleStatus}>
                 Ya, Ubah
               </button>
             </div>

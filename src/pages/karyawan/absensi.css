@@ -1,6 +1,3 @@
-/* =========================================
-   1. BASE & MOBILE LAYOUT (TIDAK DIUBAH SAMA SEKALI)
-   ========================================= */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 * {
@@ -39,7 +36,6 @@
   border-bottom-right-radius: 40px;
 }
 
-/* Visibility Control */
 .desktop-only { display: none; }
 .mobile-only { display: block; }
 button.mobile-only { display: flex; } 
@@ -51,7 +47,7 @@ button.mobile-only { display: flex; }
   width: 40px;
   height: 40px;
   background: transparent;
-  border: 1.5px solid white; /* UPDATE: Mengubah border menjadi putih sesuai Riwayat */
+  border: 1.5px solid white; 
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -84,7 +80,6 @@ button.mobile-only { display: flex; }
   z-index: 10;
 }
 
-/* Wrapper judul (Mobile biarkan normal) */
 .form-header-wrapper {
   display: block; 
 }
@@ -155,13 +150,7 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
   .header-section { border-radius: 0; }
 }
 
-
-/* ============================================================
-   2. DESKTOP SIDEBAR & CONTENT (LOGO BESAR & RATA KIRI)
-   ============================================================ */
-
 @media (min-width: 1024px) {
-  
   .main-wrapper {
     background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
     height: 100vh;
@@ -180,13 +169,11 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     background-color: transparent !important;
   }
 
-  /* Visibility Control Desktop */
   .desktop-only { display: flex !important; }
   button.desktop-only { display: flex !important; }
   div.desktop-only { display: flex !important; }
   .mobile-only { display: none !important; }
 
-  /* SIDEBAR KIRI (Transparan & Lebar 300px) */
   .header-section {
     position: relative;
     width: 300px; 
@@ -209,13 +196,10 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     top: -40px; 
   }
 
-  /* ==========================================
-     LOGO AMAGA CORP - RATA KIRI & LEBIH BESAR
-     ========================================== */
   .sidebar-logo-desktop {
     position: absolute !important;
-    top: 60px !important; /* Jarak atas disamakan dengan HRD */
-    left: 35px !important; /* Rata kiri */
+    top: 60px !important; 
+    left: 35px !important; 
     width: auto !important;
     padding: 0 !important;
     display: flex !important;
@@ -224,13 +208,12 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
   }
 
   .sidebar-logo-desktop img {
-    width: 260px !important; /* [FIX] DIbesarkan agar sama dengan HRD */
+    width: 260px !important; 
     height: auto !important;
     filter: brightness(0) invert(1) !important; 
     opacity: 1 !important;
   }
 
-  /* PROFIL KARYAWAN (TENGAH) */
   .logo-center-area {
     margin: 0 0 10px 0 !important;
     display: flex !important;
@@ -265,13 +248,10 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     text-align: center !important;
   }
 
-  /* ==========================================
-     TOMBOL LOG OUT - PRESISI & SEJAJAR 
-     ========================================== */
   .btn-logout-desktop {
     position: absolute !important;
     bottom: 40px !important; 
-    left: 30px !important; /* Diselaraskan dengan garis logo */
+    left: 30px !important; 
     width: calc(100% - 60px) !important; 
     transform: none !important; 
     padding: 12px 0 !important;
@@ -283,13 +263,11 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     font-size: 18px !important; 
     cursor: pointer !important;
     transition: all 0.3s ease !important;
-    
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
   }
 
-  /* Garis pembatas atas tombol Logout */
   .btn-logout-desktop::before {
     content: "";
     position: absolute;
@@ -307,9 +285,6 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; 
   }
 
-  /* =========================================
-     AREA KANAN (FORM MENGAMBANG / FLOATING)
-     ========================================= */
   .form-section {
     flex: 1; 
     background-color: #fdfdfd; 
@@ -322,7 +297,6 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     max-width: none !important; 
   }
 
-  /* FLEXBOX UNTUK SEJAJARKAN TOMBOL BACK & JUDUL FORM */
   .form-header-wrapper {
     display: flex !important;
     align-items: center !important;
@@ -354,7 +328,6 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     margin-bottom: 0 !important; 
   }
 
-  /* --- Sisa elemen form --- */
   .tab-item {
     font-size: 20px !important; 
     padding: 15px 5px !important; 

@@ -1,9 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-/* ================================================= */
-/* ================= LAYOUT UTAMA ================== */
-/* ================================================= */
-
 * {
   margin: 0;
   padding: 0;
@@ -18,10 +14,6 @@
   background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
   overflow: hidden;
 }
-
-/* ================================================= */
-/* ==================== SIDEBAR ==================== */
-/* ================================================= */
 
 .sidebar {
   width: 300px;
@@ -140,10 +132,6 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; 
 }
 
-/* ================================================= */
-/* ================= CONTENT AREA ================== */
-/* ================================================= */
-
 .main-content {
   flex: 1; 
   background-color: #fdfdfd; 
@@ -161,7 +149,6 @@
 ::-webkit-scrollbar-thumb { background-color: #d1d1d1; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background-color: #8dae12; }
 
-/* HEADER & TOMBOL TAMBAH CABANG */
 .header-cabang-area {
   display: flex;
   flex-direction: column;
@@ -216,10 +203,6 @@
   filter: brightness(0) invert(1);
 }
 
-/* ================================================= */
-/* ================= TABLE STYLING ================= */
-/* ================================================= */
-
 .table-cabang-container {
   background: white;
   border: 1px solid #ddd;
@@ -228,7 +211,7 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
-  height: fit-content; /* Ini memastikan kontainer hanya setinggi isinya */
+  height: fit-content; 
   margin-bottom: 40px; 
 }
 
@@ -286,7 +269,6 @@
   border-bottom: 1px solid #f0f0f0 !important;
 }
 
-/* ================= TATA LETAK AKSI TABEL ================= */
 .table-cabang-actions {
   display: flex;
   align-items: center;
@@ -321,6 +303,7 @@
   transition: 0.2s;
   padding: 4px;
 }
+
 .btn-icon-action:hover { color: #8dae12; transform: scale(1.1); }
 
 .btn-status-toggle {
@@ -333,6 +316,7 @@
   padding: 5px;
   transition: 0.2s;
 }
+
 .btn-status-toggle:hover { transform: scale(1.15); }
 
 .status-dot {
@@ -342,18 +326,16 @@
   display: inline-block;
   transition: background-color 0.3s ease;
 }
+
 .status-dot.active { 
   background-color: #2fb800; 
   box-shadow: 0 0 6px rgba(47, 184, 0, 0.4); 
 }
+
 .status-dot.inactive { 
   background-color: #ff1744; 
   box-shadow: 0 0 6px rgba(255, 23, 68, 0.4); 
 }
-
-/* ================================================= */
-/* ====================== MODAL ==================== */
-/* ================================================= */
 
 .modal-overlay-clean {
   position: fixed;
@@ -446,6 +428,7 @@
   padding: 0;
   transition: color 0.2s;
 }
+
 .btn-eye:hover { color: #333; }
 
 .modal-footer-actions {
@@ -468,6 +451,7 @@
   height: 48px;
   transition: 0.3s;
 }
+
 .btn-cancel-mini:hover { background: #f9f9f9; }
 
 .btn-save-dynamic {
@@ -554,17 +538,9 @@
   to { transform: scale(1); opacity: 1; }
 }
 
-/* ================================================= */
-/* ===== MOBILE-ONLY ELEMENTS (HIDDEN DI DESKTOP) == */
-/* ================================================= */
-
 .mobile-topbar { display: none; }
 .btn-sidebar-close { display: none; }
 .sidebar-overlay { display: none; }
-
-/* ================================================= */
-/* ================= RESPONSIVE ==================== */
-/* ================================================= */
 
 @media (max-width: 768px) {
   .hrd-container {
@@ -684,13 +660,11 @@
   .cabang-name { font-size: 14px; }
   .sub-row { padding-left: 35px !important; }
   
-  /* UPDATE MOBILE: Tombol Aksi */
   .table-cabang-actions { gap: 8px; } 
   .btn-action-text { padding: 4px 10px; font-size: 10px; } 
 
   .sidebar-footer { margin-top: auto; padding-bottom: 30px; }
 
-  /* Modal HP */
   .modal-card-edit { padding: 25px 20px; border-radius: 16px; }
   .modal-title { font-size: 22px; margin-bottom: 20px; }
   .modal-grid { grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px; }

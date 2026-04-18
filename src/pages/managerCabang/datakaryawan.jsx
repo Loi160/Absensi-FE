@@ -10,6 +10,13 @@ import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 
+const MENU_ITEMS = [
+  { path: "/managerCabang/dashboard", icon: iconDashboard, text: "Dashboard" },
+  { path: "/managerCabang/datakaryawan", icon: iconKaryawan, text: "Data Karyawan", active: true },
+  { path: "/managerCabang/perizinan", icon: iconPerizinan, text: "Perizinan" },
+  { path: "/managerCabang/laporan", icon: iconLaporan, text: "Laporan" },
+];
+
 const EyeOffIcon = () => (
   <svg
     width="16"
@@ -56,9 +63,7 @@ const DataKaryawanManagerCabang = () => {
       const fetchAllData = async () => {
         try {
           setLoading(true);
-          const res = await fetch(
-            import.meta.env.VITE_API_URL + "/api/karyawan",
-          );
+          const res = await fetch(import.meta.env.VITE_API_URL + "/api/karyawan");
           const data = await res.json();
           
           const allMyBranches = [user.cabangUtama, ...(user.subCabang || [])];
@@ -67,7 +72,7 @@ const DataKaryawanManagerCabang = () => {
           );
           setKaryawanList(filteredByBranch);
         } catch (err) {
-          console.error("Error fetching data:", err);
+          console.error(err);
         } finally {
           setLoading(false);
         }
@@ -125,39 +130,18 @@ const DataKaryawanManagerCabang = () => {
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
         <nav className="menu-nav">
-          <div
-            className="menu-item"
-            onClick={() => handleNav("/managerCabang/dashboard")}
-          >
-            <div className="menu-left">
-              <img src={iconDashboard} alt="" className="menu-icon-main" />
-              <span className="menu-text-main">Dashboard</span>
+          {MENU_ITEMS.map((item, index) => (
+            <div
+              key={index}
+              className={`menu-item ${item.active ? "active" : ""}`}
+              onClick={() => handleNav(item.path)}
+            >
+              <div className="menu-left">
+                <img src={item.icon} alt="" className="menu-icon-main" />
+                <span className="menu-text-main">{item.text}</span>
+              </div>
             </div>
-          </div>
-          <div className="menu-item active">
-            <div className="menu-left">
-              <img src={iconKaryawan} alt="" className="menu-icon-main" />
-              <span className="menu-text-main">Data Karyawan</span>
-            </div>
-          </div>
-          <div
-            className="menu-item"
-            onClick={() => handleNav("/managerCabang/perizinan")}
-          >
-            <div className="menu-left">
-              <img src={iconPerizinan} alt="" className="menu-icon-main" />
-              <span className="menu-text-main">Perizinan</span>
-            </div>
-          </div>
-          <div
-            className="menu-item"
-            onClick={() => handleNav("/managerCabang/laporan")}
-          >
-            <div className="menu-left">
-              <img src={iconLaporan} alt="" className="menu-icon-main" />
-              <span className="menu-text-main">Laporan</span>
-            </div>
-          </div>
+          ))}
         </nav>
         <div className="sidebar-footer">
           <button className="btn-logout" onClick={handleLogout}>

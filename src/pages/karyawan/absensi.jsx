@@ -5,18 +5,54 @@ import { createClient } from "@supabase/supabase-js";
 import "./absensi.css";
 import { ChevronDown, ArrowLeft } from "lucide-react";
 
-// Import assets
 import logoAmaga from "../../assets/logoamaga.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 import profileImg from "../../assets/profile.svg";
 import cameraIcon from "../../assets/camera.svg";
 
-// =========================================================================
-// MENGGUNAKAN KEY DARI FILE .env (LEBIH AMAN)
-// =========================================================================
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+const hitungJarak = (lat1, lon1, lat2, lon2) => {
+  const R = 6371e3;
+  const p1 = (lat1 * Math.PI) / 180;
+  const p2 = (lat2 * Math.PI) / 180;
+  const dp = ((lat2 - lat1) * Math.PI) / 180;
+  const dl = ((lon2 - lon1) * Math.PI) / 180;
+
+  const a =
+    Math.sin(dp / 2) * Math.sin(dp / 2) +
+    Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) * Math.sin(dl / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
+const dataURLtoFile = (dataurl, filename) => {
+  const arr = dataurl.split(",");
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime });
+};
+
+const getCurrentTimeStr = () => {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+};
+
+const getFormatDateIndo = () => {
+  return new Date().toLocaleDateString("id-ID", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
 
 const Absensi = () => {
   const { user } = useAuth();
@@ -27,11 +63,9 @@ const Absensi = () => {
   const [breakStartTime, setBreakStartTime] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // State Kamera & Watermark
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [capturedPhoto, setCapturedPhoto] = useState(null);
 
-  // State GPS (Koordinat & Validasi Lokasi)
   const [currentLocation, setCurrentLocation] = useState(null);
   const [locationError, setLocationError] = useState("");
   const [jarakDariKantor, setJarakDariKantor] = useState(null);
@@ -50,27 +84,11 @@ const Absensi = () => {
     return () => tutupKamera();
   }, []);
 
-  // Meminta Izin Lokasi Otomatis Saat Halaman Dibuka
   useEffect(() => {
     if (activeTab !== "Istirahat") {
       cekLokasiKaryawan();
     }
   }, [activeTab]);
-
-  const getCurrentTimeStr = () => {
-    const now = new Date();
-    return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
-  };
-
-  const getFormatDateIndo = () => {
-    const options = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    };
-    return new Date().toLocaleDateString("id-ID", options);
-  };
 
   const handleStartTimeChange = (e) => {
     const selectedTime = e.target.value;
@@ -97,27 +115,9 @@ const Absensi = () => {
     navigate("/auth/login");
   };
 
-  // =========================================================================
-  // SISTEM LOKASI (GPS GEOFENCING)
-  // =========================================================================
-
-  const hitungJarak = (lat1, lon1, lat2, lon2) => {
-    const R = 6371e3;
-    const p1 = (lat1 * Math.PI) / 180;
-    const p2 = (lat2 * Math.PI) / 180;
-    const dp = ((lat2 - lat1) * Math.PI) / 180;
-    const dl = ((lon2 - lon1) * Math.PI) / 180;
-
-    const a =
-      Math.sin(dp / 2) * Math.sin(dp / 2) +
-      Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) * Math.sin(dl / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  };
-
   const cekLokasiKaryawan = () => {
     if (!navigator.geolocation) {
-      setLocationError("Browser Anda tidak mendukung GPS.");
+      setLocationError("Browser Anda tidak mendukung GPS");
       return;
     }
 
@@ -133,53 +133,39 @@ const Absensi = () => {
         const radiusToleransi = user?.radius_toleransi || 20;
 
         if (!cabangKoordinatStr) {
-          setLocationError(
-            "Cabang Anda belum memiliki titik koordinat. Hubungi HRD.",
-          );
+          setLocationError("Cabang Anda belum memiliki titik koordinat. Hubungi HRD.");
           setIsLocationValid(false);
           return;
         }
 
-        const [cabangLat, cabangLon] = cabangKoordinatStr
-          .split(",")
-          .map((coord) => parseFloat(coord.trim()));
-
-        const jarakMeter = Math.round(
-          hitungJarak(userLat, userLon, cabangLat, cabangLon),
-        );
+        const [cabangLat, cabangLon] = cabangKoordinatStr.split(",").map((coord) => parseFloat(coord.trim()));
+        const jarakMeter = Math.round(hitungJarak(userLat, userLon, cabangLat, cabangLon));
+        
         setJarakDariKantor(jarakMeter);
 
         if (jarakMeter <= radiusToleransi) {
           setLocationError("");
           setIsLocationValid(true);
         } else {
-          setLocationError(
-            `Anda berada ${jarakMeter} meter dari cabang. Maksimal toleransi adalah ${radiusToleransi} meter. Harap mendekat ke lokasi!`,
-          );
+          setLocationError(`Anda berada ${jarakMeter} meter dari cabang. Maksimal toleransi adalah ${radiusToleransi} meter. Harap mendekat ke lokasi!`);
           setIsLocationValid(false);
         }
       },
       (err) => {
         setIsLocationValid(false);
-        if (err.code === 1)
-          setLocationError(
-            "Akses GPS ditolak! Tolong izinkan akses lokasi di browser HP Anda.",
-          );
-        else setLocationError("Sinyal GPS lemah atau tidak ditemukan.");
+        if (err.code === 1) {
+          setLocationError("Akses GPS ditolak! Izinkan akses lokasi di browser HP Anda.");
+        } else {
+          setLocationError("Sinyal GPS lemah atau tidak ditemukan.");
+        }
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
-  // =========================================================================
-  // SISTEM KAMERA LIVE WEBRTC & WATERMARK
-  // =========================================================================
-
   const bukaKamera = async () => {
     if (!isLocationValid) {
-      alert(
-        "Lokasi Anda tidak valid atau akses GPS ditolak! Silakan cek peringatan di layar.",
-      );
+      alert("Lokasi Anda tidak valid atau akses GPS ditolak! Silakan cek peringatan di layar.");
       cekLokasiKaryawan();
       return;
     }
@@ -198,9 +184,7 @@ const Absensi = () => {
       }
     } catch (err) {
       console.error("Error akses kamera:", err);
-      alert(
-        "Gagal mengakses kamera. Tolong izinkan akses kamera di pengaturan browser Anda!",
-      );
+      alert("Gagal mengakses kamera. Izinkan akses kamera di pengaturan browser Anda!");
       setIsCameraOpen(false);
     }
   };
@@ -256,24 +240,12 @@ const Absensi = () => {
     bukaKamera();
   };
 
-  const dataURLtoFile = (dataurl, filename) => {
-    const arr = dataurl.split(",");
-    const mime = arr[0].match(/:(.*?);/)[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new File([u8arr], filename, { type: mime });
-  };
-
   const uploadFotoKeSupabase = async () => {
     if (!capturedPhoto) return null;
     try {
       const fileToUpload = dataURLtoFile(
         capturedPhoto,
-        `${user.nik}_absen_${activeTab.toLowerCase()}_${Date.now()}.jpg`,
+        `${user.nik}_absen_${activeTab.toLowerCase()}_${Date.now()}.jpg`
       );
 
       const { error: uploadError } = await supabase.storage
@@ -293,9 +265,6 @@ const Absensi = () => {
     }
   };
 
-  // =========================================================================
-  // SIMPAN ABSENSI KE BACKEND
-  // =========================================================================
   const handleAbsen = async () => {
     if (!user) {
       alert("Sesi anda telah habis. Silahkan login kembali.");
@@ -304,9 +273,7 @@ const Absensi = () => {
 
     if (activeTab !== "Istirahat") {
       if (!isLocationValid) {
-        alert(
-          "Lokasi GPS Anda di luar batas toleransi! Silakan mendekat ke area absen.",
-        );
+        alert("Lokasi GPS Anda di luar batas toleransi! Silakan mendekat ke area absen.");
         return;
       }
       if (!capturedPhoto) {
@@ -332,20 +299,15 @@ const Absensi = () => {
         tipe_absen: activeTab,
         waktu: getCurrentTimeStr(),
         foto: urlFoto,
-        waktu_istirahat_mulai:
-          activeTab === "Istirahat" ? `${breakStartTime}:00` : null,
-        waktu_istirahat_selesai:
-          activeTab === "Istirahat" ? `${getEndTimeStr()}:00` : null,
+        waktu_istirahat_mulai: activeTab === "Istirahat" ? `${breakStartTime}:00` : null,
+        waktu_istirahat_selesai: activeTab === "Istirahat" ? `${getEndTimeStr()}:00` : null,
       };
 
-      const response = await fetch(
-        import.meta.env.VITE_API_URL + "/api/absensi",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        },
-      );
+      const response = await fetch(import.meta.env.VITE_API_URL + "/api/absensi", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       const data = await response.json();
 
@@ -367,10 +329,7 @@ const Absensi = () => {
     <div className="main-wrapper">
       <div className="card-container">
         <div className="header-section">
-          <button
-            className="btn-back mobile-only"
-            onClick={() => navigate("/karyawan/dashboard")}
-          >
+          <button className="btn-back mobile-only" onClick={() => navigate("/karyawan/dashboard")}>
             <ArrowLeft size={24} color="white" />
           </button>
 
@@ -379,35 +338,21 @@ const Absensi = () => {
           </div>
 
           <div className="logo-center-area">
-            <img
-              src={logoAmaga}
-              alt="Logo Amaga"
-              className="img-circle-content mobile-only"
-            />
-            <img
-              src={profileImg}
-              alt="Profile User"
-              className="img-circle-content desktop-only"
-            />
+            <img src={logoAmaga} alt="Logo Amaga" className="img-circle-content mobile-only" />
+            <img src={profileImg} alt="Profile User" className="img-circle-content desktop-only" />
           </div>
 
           <h2 className="title-form">Absensi</h2>
           <p className="subtitle-form">Silahkan Melakukan Absensi</p>
 
-          <button
-            className="btn-logout-desktop desktop-only"
-            onClick={handleLogout}
-          >
+          <button className="btn-logout-desktop desktop-only" onClick={handleLogout}>
             Log Out
           </button>
         </div>
 
         <div className="form-section">
           <div className="form-header-wrapper">
-            <button
-              className="btn-back-desktop desktop-only"
-              onClick={() => navigate("/karyawan/dashboard")}
-            >
+            <button className="btn-back-desktop desktop-only" onClick={() => navigate("/karyawan/dashboard")}>
               <ArrowLeft size={24} color="#333" strokeWidth={2.5} />
             </button>
             <h3 className="form-header-text">Form Absensi</h3>
@@ -457,34 +402,18 @@ const Absensi = () => {
               </div>
               <div className="input-group flex-1">
                 <label>Jam Selesai</label>
-                <div
-                  className="time-display"
-                  style={{ backgroundColor: "#eee", color: "#888" }}
-                >
+                <div className="time-display" style={{ backgroundColor: "#eee", color: "#888" }}>
                   {getEndTimeStr()}
                 </div>
               </div>
             </div>
           ) : (
             <div className="input-group">
-              <label
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
+              <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span>Bukti Foto Wajah ({activeTab})</span>
                 <button
                   onClick={cekLokasiKaryawan}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#2fb800",
-                    cursor: "pointer",
-                    fontSize: "12px",
-                    fontWeight: "bold",
-                  }}
+                  style={{ background: "none", border: "none", color: "#2fb800", cursor: "pointer", fontSize: "12px", fontWeight: "bold" }}
                 >
                   Refresh GPS
                 </button>
@@ -508,112 +437,24 @@ const Absensi = () => {
               )}
 
               {isCameraOpen ? (
-                <div
-                  style={{
-                    position: "relative",
-                    width: "100%",
-                    backgroundColor: "#000",
-                    borderRadius: "10px",
-                    overflow: "hidden",
-                  }}
-                >
-                  <video
-                    ref={videoRef}
-                    autoPlay
-                    playsInline
-                    style={{
-                      width: "100%",
-                      maxHeight: "350px",
-                      objectFit: "cover",
-                      display: "block",
-                    }}
-                  />
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: "0",
-                      width: "100%",
-                      padding: "15px",
-                      background: "rgba(0,0,0,0.5)",
-                      display: "flex",
-                      justifyContent: "center",
-                      gap: "15px",
-                    }}
-                  >
-                    <button
-                      onClick={tutupKamera}
-                      style={{
-                        padding: "10px 20px",
-                        background: "#ff1744",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "30px",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Batal
-                    </button>
-                    <button
-                      onClick={ambilFoto}
-                      style={{
-                        padding: "10px 20px",
-                        background: "#2fb800",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "30px",
-                        fontWeight: "bold",
-                        cursor: "pointer",
-                        boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
-                      }}
-                    >
-                      Ambil Foto
-                    </button>
+                <div style={{ position: "relative", width: "100%", backgroundColor: "#000", borderRadius: "10px", overflow: "hidden" }}>
+                  <video ref={videoRef} autoPlay playsInline style={{ width: "100%", maxHeight: "350px", objectFit: "cover", display: "block" }} />
+                  <div style={{ position: "absolute", bottom: "0", width: "100%", padding: "15px", background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", gap: "15px" }}>
+                    <button onClick={tutupKamera} style={{ padding: "10px 20px", background: "#ff1744", color: "white", border: "none", borderRadius: "30px", cursor: "pointer", fontWeight: "bold" }}>Batal</button>
+                    <button onClick={ambilFoto} style={{ padding: "10px 20px", background: "#2fb800", color: "white", border: "none", borderRadius: "30px", fontWeight: "bold", cursor: "pointer", boxShadow: "0 4px 10px rgba(0,0,0,0.3)" }}>Ambil Foto</button>
                   </div>
                 </div>
               ) : capturedPhoto ? (
-                <div
-                  style={{
-                    position: "relative",
-                    width: "100%",
-                    borderRadius: "10px",
-                    overflow: "hidden",
-                    border: "2px solid #2fb800",
-                  }}
-                >
-                  <img
-                    src={capturedPhoto}
-                    alt="Hasil Absen"
-                    style={{ width: "100%", display: "block" }}
-                  />
-                  <button
-                    onClick={fotoUlang}
-                    style={{
-                      position: "absolute",
-                      top: "10px",
-                      right: "10px",
-                      padding: "8px 15px",
-                      background: "rgba(0,0,0,0.6)",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "20px",
-                      cursor: "pointer",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Ambil Ulang Foto
-                  </button>
+                <div style={{ position: "relative", width: "100%", borderRadius: "10px", overflow: "hidden", border: "2px solid #2fb800" }}>
+                  <img src={capturedPhoto} alt="Hasil Absen" style={{ width: "100%", display: "block" }} />
+                  <button onClick={fotoUlang} style={{ position: "absolute", top: "10px", right: "10px", padding: "8px 15px", background: "rgba(0,0,0,0.6)", color: "white", border: "none", borderRadius: "20px", cursor: "pointer", fontSize: "12px", fontWeight: "bold" }}>Ambil Ulang Foto</button>
                 </div>
               ) : (
                 <button
                   className="btn-camera-open"
                   onClick={bukaKamera}
                   disabled={!isLocationValid}
-                  style={{
-                    opacity: isLocationValid ? 1 : 0.5,
-                    cursor: isLocationValid ? "pointer" : "not-allowed",
-                  }}
+                  style={{ opacity: isLocationValid ? 1 : 0.5, cursor: isLocationValid ? "pointer" : "not-allowed" }}
                 >
                   <img src={cameraIcon} alt="Cam" />
                   <span>Buka Kamera Depan</span>
@@ -627,11 +468,7 @@ const Absensi = () => {
           <button
             className="btn-submit-primary"
             onClick={handleAbsen}
-            disabled={
-              loading ||
-              !isLocationValid ||
-              (activeTab !== "Istirahat" && isCameraOpen)
-            }
+            disabled={loading || !isLocationValid || (activeTab !== "Istirahat" && isCameraOpen)}
           >
             {loading ? "Menyimpan Data" : `Simpan Absen ${activeTab}`}
           </button>

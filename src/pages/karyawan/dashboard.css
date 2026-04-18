@@ -25,14 +25,9 @@
   overflow-x: hidden; 
 }
 
-/* Visibility Control */
 .desktop-only { display: none !important; }
 .mobile-only { display: flex !important; }
 
-
-/* =========================================
-   HEADER HIJAU MOBILE
-   ========================================= */
 .header-section {
   background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
   height: 40vh; 
@@ -45,7 +40,6 @@
   border-bottom-right-radius: 40px;
 }
 
-/* Layout Profil Mobile */
 .header-top-mobile {
   display: flex !important;
   justify-content: space-between;
@@ -82,10 +76,6 @@
 .mobile-header-logout { background: transparent; border: none; cursor: pointer; }
 .mobile-header-logout img { width: 28px; height: 28px; }
 
-
-/* =========================================
-   KONTEN UTAMA (KARTU-KARTU)
-   ========================================= */
 .dashboard-content {
   position: relative;
   z-index: 10; 
@@ -93,9 +83,6 @@
   flex-direction: column;
 }
 
-/* =========================================
-   KARTU INFO (PUTIH) - TANGGAL & WAKTU
-   ========================================= */
 .info-card {
   position: relative;
   z-index: 20;
@@ -124,7 +111,6 @@
   align-items: center; 
 }
 
-/* FIX JAM KELUAR BATAS PADA MOBILE */
 .date-box {
   flex: 1; 
   display: flex;
@@ -183,10 +169,6 @@
   margin: 0 10px; 
 }
 
-
-/* =========================================
-   KARTU MENU (WRAPPER PUTIH BESAR)
-   ========================================= */
 .menu-card {
   margin: 20px 20px 40px 20px;
   background: #FFFFFF;
@@ -226,13 +208,7 @@
 .btn-title { font-size: 18px; font-weight: 800; margin-bottom: 2px; }
 .btn-subtitle { font-size: 12px; opacity: 0.85; font-weight: 400; }
 
-
-/* ============================================================
-   2. DESKTOP SIDEBAR & CONTENT (100% IDENTIK DENGAN ABSENSI)
-   ============================================================ */
-
 @media (min-width: 1024px) {
-  
   .main-wrapper {
     background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
     height: 100vh;
@@ -248,11 +224,9 @@
     height: 100vh;
   }
 
-  /* Visibility Control Desktop */
   .desktop-only { display: flex !important; }
   .mobile-only { display: none !important; }
 
-  /* SIDEBAR SECTION (300px lebar tetap) */
   .header-section {
     position: relative; 
     width: 300px;
@@ -273,9 +247,6 @@
     top: -40px; 
   }
 
-  /* ==========================================
-     LOGO AMAGA CORP - FIX RATA KIRI, 260px
-     ========================================== */
   .sidebar-logo-desktop {
     position: absolute !important;
     top: 60px !important; 
@@ -287,14 +258,12 @@
     align-items: flex-start !important;
   }
 
-  /* FIX GEPENG: Kunci max-width dan biarkan height auto */
   .sidebar-logo-desktop img {
     width: 260px !important; 
     height: auto !important;
     filter: brightness(0) invert(1) !important; 
   }
 
-  /* PROFIL TENGAH KARYAWAN */
   .logo-center-area { margin-bottom: 10px !important; }
   .img-circle-content {
     width: 130px !important;
@@ -307,9 +276,6 @@
   .title-form { font-size: 24px !important; font-weight: 800 !important; text-align: center; color: white !important; margin: 0 !important;}
   .subtitle-form { font-size: 15px !important; margin-top: 5px !important; text-align: center; opacity: 0.9; color: white !important;}
 
-  /* ==========================================
-     TOMBOL LOG OUT - SEJAJAR & TIDAK MEPET 
-     ========================================== */
   .btn-logout-desktop {
     position: absolute !important;
     bottom: 40px !important; 
@@ -330,7 +296,6 @@
     transform: none !important;
   }
 
-  /* Garis tipis di atas Logout */
   .btn-logout-desktop::before {
     content: "";
     position: absolute;
@@ -348,11 +313,10 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; 
   }
 
-  /* KONTEN AREA KANAN (FLOATING) */
   .dashboard-content {
     flex: 1; 
     background-color: #fdfdfd; 
-    margin: 30px 40px 30px 20px !important; /* Ruang napas agar tidak mepet sidebar */
+    margin: 30px 40px 30px 20px !important;
     border-radius: 40px !important;
     padding: 40px !important;
     overflow-y: auto; 
@@ -360,7 +324,6 @@
     height: calc(100vh - 60px); 
   }
 
-  /* KARTU INFO TANGGAL/WAKTU */
   .info-card {
     margin: 0 0 30px 0 !important;
     flex-direction: row;
@@ -378,7 +341,6 @@
   .time-big { font-size: 32px !important; }
   .divider-vertical { height: 80px !important; }
 
-  /* KARTU MENU (WARNA BIRU) */
   .menu-card {
     margin: 0 !important;
     display: grid !important;

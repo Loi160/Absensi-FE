@@ -38,7 +38,6 @@
   z-index: 1;
 }
 
-/* Visibility Control Mobile/Desktop */
 .desktop-only { display: none; }
 .mobile-only { display: block; }
 button.mobile-only { display: flex; }
@@ -48,7 +47,7 @@ button.mobile-only { display: flex; }
   top: 30px;
   left: 25px;
   background: transparent;
-  border: 1.5px solid white; /* UPDATE: Border diubah menjadi putih */
+  border: 1.5px solid white; 
   border-radius: 50%;
   width: 35px;
   height: 35px;
@@ -85,10 +84,10 @@ button.mobile-only { display: flex; }
   font-weight: 400;
 }
 
-/* Form Wrapper Khusus Mobile */
 .fp-form-header-wrapper {
   display: block; 
 }
+
 .fp-btn-back-desktop {
   display: none;
 }
@@ -244,14 +243,8 @@ button.mobile-only { display: flex; }
   align-items: center;
 }
 
-/* ============================================================
-   2. DESKTOP SIDEBAR & CONTENT (IDENTIK DENGAN ABSENSI & DASHBOARD)
-   ============================================================ */
-
 @media (min-width: 1024px) {
-  
   .fp-wrapper {
-    /* Background Full Gradasi Hijau */
     background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
     height: 100vh;
     padding: 0;
@@ -262,21 +255,19 @@ button.mobile-only { display: flex; }
     max-width: 100% !important;
     width: 100%;
     height: 100vh;
-    display: flex !important; /* Diubah jadi Flex agar kembar identik */
+    display: flex !important; 
     flex-direction: row;
     background-color: transparent !important;
   }
 
-  /* Visibility Control Desktop */
   .desktop-only { display: flex !important; }
   button.desktop-only { display: flex !important; }
   div.desktop-only { display: flex !important; }
   .mobile-only { display: none !important; }
 
-  /* SIDEBAR KIRI (Transparan & Lebar 300px) */
   .fp-header {
     position: relative;
-    width: 300px; /* Lebar dikunci 300px */
+    width: 300px; 
     flex-shrink: 0;
     height: 100vh;
     border-radius: 0;
@@ -297,13 +288,10 @@ button.mobile-only { display: flex; }
     top: -40px; 
   }
 
-  /* ==========================================
-     LOGO AMAGA CORP - RATA KIRI, 260px
-     ========================================== */
   .fp-sidebar-logo-desktop {
     position: absolute !important;
     top: 60px !important; 
-    left: 35px !important; /* Rata Kiri */
+    left: 35px !important; 
     width: auto !important;
     padding: 0 !important;
     display: flex !important;
@@ -313,13 +301,12 @@ button.mobile-only { display: flex; }
   }
 
   .fp-sidebar-logo-desktop img {
-    width: 260px !important; /* Ukuran identik dengan file lain */
+    width: 260px !important; 
     height: auto !important;
     filter: brightness(0) invert(1) !important; 
     opacity: 1 !important;
   }
 
-  /* --- PROFIL KARYAWAN (TENGAH) --- */
   .fp-logo-center-area {
     margin: 0 0 10px 0 !important;
     display: flex !important;
@@ -354,19 +341,16 @@ button.mobile-only { display: flex; }
     text-align: center !important;
   }
 
-  /* ==========================================
-     TOMBOL LOG OUT - OVAL & SEJAJAR LOGO
-     ========================================== */
   .fp-btn-logout-desktop {
     position: absolute !important;
     bottom: 40px !important;
-    left: 30px !important; /* Sejajar dengan logo */
-    width: calc(100% - 60px) !important; /* Spasi aman kiri-kanan */
-    transform: none !important; /* Jangan ditengahin paksa */
+    left: 30px !important; 
+    width: calc(100% - 60px) !important; 
+    transform: none !important; 
     padding: 12px 0 !important;
     background: transparent !important; 
     border: 1px solid rgba(255, 255, 255, 0.8) !important; 
-    border-radius: 50px !important; /* Pill shape */
+    border-radius: 50px !important; 
     color: #fff !important; 
     font-weight: 700 !important;
     font-size: 18px !important;
@@ -377,7 +361,6 @@ button.mobile-only { display: flex; }
     align-items: center !important;
   }
 
-  /* Garis tipis pembatas */
   .fp-btn-logout-desktop::before {
     content: "";
     position: absolute;
@@ -395,13 +378,10 @@ button.mobile-only { display: flex; }
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; 
   }
 
-  /* =========================================
-     AREA KANAN (FORM MENGAMBANG / FLOATING)
-     ========================================= */
   .fp-form-card {
     flex: 1; 
     background-color: #fdfdfd; 
-    margin: 30px 40px 30px 20px !important; /* Ruang napas persis dashboard */
+    margin: 30px 40px 30px 20px !important; 
     padding: 50px 80px !important; 
     border-radius: 40px !important; 
     box-shadow: 0 10px 40px rgba(0,0,0,0.1);
@@ -411,25 +391,26 @@ button.mobile-only { display: flex; }
     overflow-y: auto !important; 
   }
 
-  /* Memperhalus scrollbar desktop */
   .fp-form-card::-webkit-scrollbar {
     display: block; 
     width: 8px;
   }
+  
   .fp-form-card::-webkit-scrollbar-track {
     background: #f1f1f1; 
     border-radius: 10px;
-    margin: 40px 0; /* Jarak agar scrollbar tidak mentok ujung form */
+    margin: 40px 0; 
   }
+  
   .fp-form-card::-webkit-scrollbar-thumb {
     background: #ccc; 
     border-radius: 10px;
   }
+  
   .fp-form-card::-webkit-scrollbar-thumb:hover {
     background: #aaa; 
   }
 
-  /* --- FLEXBOX UNTUK SEJAJARKAN BACK BUTTON & JUDUL --- */
   .fp-form-header-wrapper {
     display: flex !important;
     align-items: center !important;
@@ -461,7 +442,6 @@ button.mobile-only { display: flex; }
     margin-bottom: 0 !important; 
   }
 
-  /* --- Sisa elemen form (Input & Button Submit) --- */
   .fp-tab-btn {
     font-size: 20px !important; 
     padding: 15px 5px !important; 

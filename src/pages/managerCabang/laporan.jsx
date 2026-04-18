@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import * as XLSX from "xlsx"; 
 import "../hrd/laporan.css";
 
 import iconDashboard from "../../assets/dashboard.svg";
@@ -10,6 +11,43 @@ import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 
+const MENU_ITEMS = [
+  { path: "/managerCabang/dashboard", icon: iconDashboard, text: "Dashboard" },
+  { path: "/managerCabang/datakaryawan", icon: iconKaryawan, text: "Data Karyawan" },
+  { path: "/managerCabang/perizinan", icon: iconIzin, text: "Perizinan" },
+  { path: "/managerCabang/laporan", icon: iconLaporan, text: "Laporan", active: true },
+];
+
+const formatDate = (dateObj) => {
+  const yyyy = dateObj.getFullYear();
+  const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const dd = String(dateObj.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+const getCutoffDates = () => {
+  const d = new Date();
+  const date = d.getDate();
+  let start, end;
+  if (date <= 25) {
+    start = new Date(d.getFullYear(), d.getMonth() - 1, 26);
+    end = new Date(d.getFullYear(), d.getMonth(), 25);
+  } else {
+    start = new Date(d.getFullYear(), d.getMonth(), 26);
+    end = new Date(d.getFullYear(), d.getMonth() + 1, 25);
+  }
+  return { start, end };
+};
+
+const getRowTerlambatClass = (jumlahTerlambat) => {
+  const angka = parseInt(jumlahTerlambat, 10);
+  if (isNaN(angka)) return "";
+  if (angka === 3) return "row-warn-yellow";
+  if (angka >= 4 && angka <= 5) return "row-warn-orange";
+  if (angka >= 6) return "row-warn-red";
+  return "";
+};
+
 const LaporanManagerCabang = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -17,31 +55,10 @@ const LaporanManagerCabang = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const openSidebar = () => setSidebarOpen(true);
   const closeSidebar = () => setSidebarOpen(false);
+
   const handleNav = (path) => {
     closeSidebar();
     navigate(path);
-  };
-
-  const formatDate = (dateObj) => {
-    const yyyy = dateObj.getFullYear();
-    const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
-    const dd = String(dateObj.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
-  };
-
-  // LOGIKA CUT-OFF OTOMATIS TANGGAL 26 S/D 25
-  const getCutoffDates = () => {
-    const d = new Date();
-    const date = d.getDate();
-    let start, end;
-    if (date <= 25) {
-      start = new Date(d.getFullYear(), d.getMonth() - 1, 26);
-      end = new Date(d.getFullYear(), d.getMonth(), 25);
-    } else {
-      start = new Date(d.getFullYear(), d.getMonth(), 26);
-      end = new Date(d.getFullYear(), d.getMonth() + 1, 25);
-    }
-    return { start, end };
   };
 
   const [showFilter, setShowFilter] = useState(false);
@@ -75,10 +92,10 @@ const LaporanManagerCabang = () => {
       try {
         setLoading(true);
         const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/laporan?role=managerCabang&cabang_id=${user.cabang_id}&start_date=${startDate}&end_date=${endDate}`,
+          `${import.meta.env.VITE_API_URL}/api/laporan?role=managerCabang&cabang_id=${user.cabang_id}&start_date=${startDate}&end_date=${endDate}`
         );
         const data = await res.json();
-        setDataLaporan(data);
+        setDataLaporan(data || []);
       } catch (err) {
         console.error("Gagal mengambil data:", err);
       } finally {
@@ -97,18 +114,79 @@ const LaporanManagerCabang = () => {
   const toggleFilter = () => {
     if (hasSubCabang) setShowFilter(!showFilter);
   };
+
   const handleSelectFilter = (val) => {
     setSelectedFilter(val);
     setShowFilter(false);
   };
 
-  const getRowTerlambatClass = (jumlahTerlambat) => {
-    const angka = parseInt(jumlahTerlambat, 10);
-    if (isNaN(angka)) return "";
-    if (angka === 3) return "row-warn-yellow";
-    if (angka >= 4 && angka <= 5) return "row-warn-orange";
-    if (angka >= 6) return "row-warn-red";
-    return "";
+  const filteredData = (dataLaporan || []).filter((item) => {
+    const namaKaryawan = item.nama || "";
+    const pencarian = searchTerm || "";
+    const matchName = namaKaryawan.toLowerCase().includes(pencarian.toLowerCase());
+    
+    let matchBranch = true;
+    if (hasSubCabang && selectedFilter !== "Semua Sub-Cabang") {
+      matchBranch = item.cabang === selectedFilter;
+    }
+    return matchName && matchBranch;
+  });
+
+  const getTotals = (dataArray) => {
+    let t = { hadirApp: 0, hadirManual: 0, terlambat: 0, fimtk: 0, sakit: 0, izin: 0, cuti: 0, alpha: 0, lembur: 0 };
+    if (!dataArray) return t; 
+    
+    dataArray.forEach((item) => {
+      t.hadirApp += parseInt(item.hadirApp) || 0;
+      t.hadirManual += parseInt(item.hadirManual) || 0;
+      t.terlambat += parseInt(item.terlambat) || 0;
+      t.fimtk += parseInt(item.fimtk) || 0;
+      t.sakit += parseInt(item.sakit) || 0;
+      t.izin += parseInt(item.izin) || 0;
+      t.cuti += parseInt(item.cuti) || 0;
+      t.alpha += parseInt(item.alpha) || 0;
+      t.lembur += parseInt(item.lembur) || 0;
+    });
+    return t;
+  };
+
+  const handleExportExcel = () => {
+    const exportData = filteredData.map((item) => ({
+      "Nama Karyawan": item.nama || "-",
+      "NIK": item.nik || "-",
+      "Cabang": item.cabang || "-",
+      "Hadir via App": parseInt(item.hadirApp) || 0,
+      "Hadir Manual": parseInt(item.hadirManual) || 0,
+      "Terlambat": parseInt(item.terlambat) || 0,
+      "FIMTK": parseInt(item.fimtk) || 0,
+      "Sakit": parseInt(item.sakit) || 0,
+      "Izin": parseInt(item.izin) || 0,
+      "Cuti": parseInt(item.cuti) || 0,
+      "Alpha": parseInt(item.alpha) || 0,
+      "Lembur": item.lembur || "0 Jam",
+    }));
+
+    const totals = getTotals(filteredData);
+    exportData.push({
+      "Nama Karyawan": "TOTAL KESELURUHAN",
+      "NIK": "-",
+      "Cabang": "-",
+      "Hadir via App": totals.hadirApp,
+      "Hadir Manual": totals.hadirManual,
+      "Terlambat": totals.terlambat,
+      "FIMTK": totals.fimtk,
+      "Sakit": totals.sakit,
+      "Izin": totals.izin,
+      "Cuti": totals.cuti,
+      "Alpha": totals.alpha,
+      "Lembur": `${totals.lembur} Jam`,
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Kehadiran");
+
+    XLSX.writeFile(workbook, `Rekap_Kehadiran_Cabang_${startDate}_sd_${endDate}.xlsx`);
   };
 
   const openDetail = (item, jenis, jumlah) => {
@@ -194,56 +272,6 @@ const LaporanManagerCabang = () => {
     setShowDetailModal(true);
   };
 
-  const filteredData = dataLaporan.filter((item) => {
-    const matchName = item.nama.toLowerCase().includes(searchTerm.toLowerCase());
-    let matchBranch = true;
-    if (hasSubCabang && selectedFilter !== "Semua Sub-Cabang") {
-      matchBranch = item.cabang === selectedFilter;
-    }
-    return matchName && matchBranch;
-  });
-
-  const getTotals = (dataArray) => {
-    let t = { hadirApp: 0, hadirManual: 0, terlambat: 0, fimtk: 0, sakit: 0, izin: 0, cuti: 0, alpha: 0, lembur: 0 };
-    dataArray.forEach((item) => {
-      t.hadirApp += parseInt(item.hadirApp) || 0;
-      t.hadirManual += parseInt(item.hadirManual) || 0;
-      t.terlambat += parseInt(item.terlambat) || 0;
-      t.fimtk += parseInt(item.fimtk) || 0;
-      t.sakit += parseInt(item.sakit) || 0;
-      t.izin += parseInt(item.izin) || 0;
-      t.cuti += parseInt(item.cuti) || 0;
-      t.alpha += parseInt(item.alpha) || 0;
-      t.lembur += parseInt(item.lembur) || 0;
-    });
-    return t;
-  };
-
-  const handleExportExcel = () => {
-    const headers = ["Nama Karyawan", "NIK", "Cabang", "Hadir via App", "Hadir Manual", "Terlambat", "FIMTK", "Sakit", "Izin", "Cuti", "Alpha", "Lembur"];
-    const csvRows = [headers.join(";")];
-    const dataToExport = filteredData;
-
-    dataToExport.forEach((item) => {
-      const row = [ `"${item.nama}"`, `"${item.nik}"`, `"${item.cabang}"`, item.hadirApp, item.hadirManual, item.terlambat, item.fimtk, item.sakit, item.izin, item.cuti, item.alpha, item.lembur ];
-      csvRows.push(row.join(";"));
-    });
-
-    const totals = getTotals(dataToExport);
-    const totalRow = [ `"TOTAL KESELURUHAN"`, `"-"`, `"-"`, totals.hadirApp, totals.hadirManual, totals.terlambat, totals.fimtk, totals.sakit, totals.izin, totals.cuti, totals.alpha, totals.lembur ];
-    csvRows.push(totalRow.join(";"));
-
-    const csvString = csvRows.join("\n");
-    const blob = new Blob(["\uFEFF" + csvString], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `Rekap_Kehadiran_Cabang_${startDate}_sd_${endDate}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const renderModalBody = (item, idx) => (
     <div key={idx} className="lap-modal-record-card">
       {item.tipe === "absen" && (
@@ -261,19 +289,19 @@ const LaporanManagerCabang = () => {
           <div className="lap-modal-row">
             <div className="lap-modal-group">
               <label className="lap-modal-label">{item.isLogManual ? "Absen Masuk" : "Jam Masuk"}</label>
-              <div className="lap-modal-input">{item.masuk.jam}</div>
+              <div className="lap-modal-input">{item.masuk?.jam || "-"}</div>
             </div>
             <div className="lap-modal-group">
               <label className="lap-modal-label">{item.isLogManual ? "Absen Pulang" : "Jam Pulang"}</label>
-              <div className="lap-modal-input">{item.pulang.jam}</div>
+              <div className="lap-modal-input">{item.pulang?.jam || "-"}</div>
             </div>
           </div>
-          {(item.masuk.isManual || item.pulang.isManual) && (
+          {(item.masuk?.isManual || item.pulang?.isManual) && (
             <div className="lap-modal-row">
               <div className="lap-modal-group" style={{ flex: 1 }}>
                 <label className="lap-modal-label">Keterangan</label>
                 <div className="lap-modal-input" style={{ minHeight: "40px", height: "auto" }}>
-                  {item.masuk.keterangan}
+                  {item.masuk?.keterangan || "-"}
                 </div>
               </div>
             </div>
@@ -281,7 +309,7 @@ const LaporanManagerCabang = () => {
           {!item.isLogManual && (
             <div className="lap-foto-container">
               <div className="lap-foto-box">
-                {!item.masuk.foto ? (
+                {!item.masuk?.foto ? (
                   <div className="lap-manual-placeholder">
                     <span>Tidak Ada Foto</span>
                     <small>No Photo Available</small>
@@ -300,7 +328,7 @@ const LaporanManagerCabang = () => {
                 )}
               </div>
               <div className="lap-foto-box">
-                {!item.pulang.foto ? (
+                {!item.pulang?.foto ? (
                   <div className="lap-manual-placeholder">
                     <span>Tidak Ada Foto</span>
                     <small>No Photo Available</small>
@@ -446,6 +474,7 @@ const LaporanManagerCabang = () => {
           </div>
         </>
       )}
+      
       {item.tipe === "cuti" && (
         <>
           <div className="lap-modal-row">
@@ -492,6 +521,7 @@ const LaporanManagerCabang = () => {
           </div>
         </>
       )}
+
       {item.tipe === "fimtk" && (
         <>
           <div className="lap-modal-row">
@@ -548,6 +578,7 @@ const LaporanManagerCabang = () => {
           </div>
         </>
       )}
+
       {item.tipe === "alpha" && (
         <>
           <div className="lap-modal-row">
@@ -609,7 +640,7 @@ const LaporanManagerCabang = () => {
                 <tr>
                   <td colSpan="9" className="empty-state">Memuat data...</td>
                 </tr>
-              ) : tableData.length > 0 ? (
+              ) : tableData && tableData.length > 0 ? (
                 tableData.map((item) => {
                   const rowClass = getRowTerlambatClass(item.terlambat);
                   return (
@@ -651,7 +682,7 @@ const LaporanManagerCabang = () => {
                 </tr>
               )}
             </tbody>
-            {tableData.length > 0 && !loading && (
+            {tableData && tableData.length > 0 && !loading && (
               <tfoot>
                 <tr>
                   <td className="neo-td-name" style={{ textAlign: "right", paddingRight: "20px" }}>TOTAL KESELURUHAN</td>
@@ -711,43 +742,18 @@ const LaporanManagerCabang = () => {
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
         <nav className="menu-nav">
-          <div
-            className="menu-item"
-            onClick={() => handleNav("/managerCabang/dashboard")}
-          >
-            <div className="menu-left">
-              <img src={iconDashboard} alt="dash" className="menu-icon-main" />
-              <span className="menu-text-main">Dashboard</span>
+          {MENU_ITEMS.map((item, index) => (
+            <div
+              key={index}
+              className={`menu-item ${item.active ? "active" : ""}`}
+              onClick={() => handleNav(item.path)}
+            >
+              <div className="menu-left">
+                <img src={item.icon} alt="" className="menu-icon-main" />
+                <span className="menu-text-main">{item.text}</span>
+              </div>
             </div>
-          </div>
-          <div
-            className="menu-item"
-            onClick={() => handleNav("/managerCabang/datakaryawan")}
-          >
-            <div className="menu-left">
-              <img
-                src={iconKaryawan}
-                alt="karyawan"
-                className="menu-icon-main"
-              />
-              <span className="menu-text-main">Data Karyawan</span>
-            </div>
-          </div>
-          <div
-            className="menu-item"
-            onClick={() => handleNav("/managerCabang/perizinan")}
-          >
-            <div className="menu-left">
-              <img src={iconIzin} alt="perizinan" className="menu-icon-main" />
-              <span className="menu-text-main">Perizinan</span>
-            </div>
-          </div>
-          <div className="menu-item active">
-            <div className="menu-left">
-              <img src={iconLaporan} alt="lapor" className="menu-icon-main" />
-              <span className="menu-text-main">Laporan</span>
-            </div>
-          </div>
+          ))}
         </nav>
         <div className="sidebar-footer">
           <button className="btn-logout" onClick={handleLogout}>
@@ -957,7 +963,7 @@ const LaporanManagerCabang = () => {
                 }}
               />
               <div className="lap-modal-scroll-area">
-                {modalInfo.data.length > 0 ? (
+                {modalInfo.data && modalInfo.data.length > 0 ? (
                   modalInfo.data.map((item, idx) => renderModalBody(item, idx))
                 ) : (
                   <p

@@ -10,12 +10,32 @@ import logoPersegi from "../../assets/logopersegi.svg";
 import profileImg from "../../assets/profile.svg";
 import cameraIcon from "../../assets/camera.svg";
 
-// =========================================================================
-// MENGGUNAKAN KEY DARI FILE .env
-// =========================================================================
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+const getTodayDate = () => {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const dd = String(today.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+const TAB_CONTENT = {
+  Izin: {
+    title: "Form Perizinan",
+    subtitle: "Silahkan Melakukan Perizinan",
+  },
+  Cuti: {
+    title: "Form Cuti",
+    subtitle: "Silahkan Melakukan Perizinan Cuti",
+  },
+  FIMTK: {
+    title: "Form FIMTK",
+    subtitle: "Silahkan Melakukan Perizinan Meninggalkan Tempat Kerja",
+  },
+};
 
 const FormPerizinan = () => {
   const navigate = useNavigate();
@@ -29,26 +49,7 @@ const FormPerizinan = () => {
   const [fileName, setFileName] = useState("");
   const fileInputRef = useRef(null);
 
-  const getTitle = () => {
-    if (activeTab === "Izin") return "Form Perizinan";
-    if (activeTab === "Cuti") return "Form Cuti";
-    if (activeTab === "FIMTK") return "Form FIMTK";
-  };
-
-  const getSubtitle = () => {
-    if (activeTab === "Izin") return "Silahkan Melakukan Perizinan";
-    if (activeTab === "Cuti") return "Silahkan Melakukan Perizinan Cuti";
-    if (activeTab === "FIMTK")
-      return "Silahkan Melakukan Perizinan Meninggalkan Tempat Kerja";
-  };
-
-  const getTodayDate = () => {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const dd = String(today.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
-  };
+  const currentTabInfo = TAB_CONTENT[activeTab];
 
   const handleBukaFile = () => {
     if (fileInputRef.current) fileInputRef.current.click();
@@ -87,7 +88,7 @@ const FormPerizinan = () => {
     } catch (error) {
       console.error("Error upload file:", error);
       throw new Error(
-        "Gagal mengunggah bukti ke Supabase. Pastikan bucket 'bukti_perizinan' sudah dibuat dan memiliki Policy INSERT.",
+        "Gagal mengunggah bukti ke Supabase. Pastikan bucket 'bukti_perizinan' sudah dibuat dan memiliki Policy INSERT."
       );
     }
   };
@@ -134,14 +135,11 @@ const FormPerizinan = () => {
         payload.keterangan = data.alasan;
       }
 
-      const response = await fetch(
-        import.meta.env.VITE_API_URL + "/api/perizinan",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        },
-      );
+      const response = await fetch(import.meta.env.VITE_API_URL + "/api/perizinan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       const result = await response.json();
 
@@ -185,8 +183,8 @@ const FormPerizinan = () => {
               className="fp-img-circle-content desktop-only"
             />
           </div>
-          <h2 className="fp-title">{getTitle()}</h2>
-          <p className="fp-subtitle">{getSubtitle()}</p>
+          <h2 className="fp-title">{currentTabInfo.title}</h2>
+          <p className="fp-subtitle">{currentTabInfo.subtitle}</p>
         </div>
 
         <div className="fp-form-card">
@@ -197,13 +195,13 @@ const FormPerizinan = () => {
             >
               <ArrowLeft size={24} color="#333" strokeWidth={2.5} />
             </button>
-            <h3 className="fp-card-title">{getTitle()}</h3>
+            <h3 className="fp-card-title">{currentTabInfo.title}</h3>
           </div>
 
           <div className="fp-input-group">
             <label className="fp-label">Jenis Izin</label>
             <div className="fp-tab-container">
-              {["Izin", "Cuti", "FIMTK"].map((tab) => (
+              {Object.keys(TAB_CONTENT).map((tab) => (
                 <button
                   key={tab}
                   type="button"
@@ -268,7 +266,7 @@ const FormPerizinan = () => {
                 </div>
                 <div className="fp-input-group fp-row-2">
                   <div className="fp-col">
-                    <label className="fp-label">Tanggal Mulai</label>
+                    <label className="fp-label">Tanggal Awal</label>
                     <input
                       name="tanggal_mulai"
                       type="date"
@@ -290,10 +288,7 @@ const FormPerizinan = () => {
                   </div>
                 </div>
                 <div className="fp-input-group">
-                  <label className="fp-label">
-                    Bukti Foto (Opsional)
-                  </label>
-
+                  <label className="fp-label">Bukti Foto (Opsional)</label>
                   <input
                     type="file"
                     accept="image/*, .pdf"
@@ -301,7 +296,6 @@ const FormPerizinan = () => {
                     style={{ display: "none" }}
                     onChange={handleFileChange}
                   />
-
                   {fileName ? (
                     <div
                       style={{
@@ -349,30 +343,15 @@ const FormPerizinan = () => {
                       onClick={handleBukaFile}
                       style={{ cursor: "pointer", opacity: 1 }}
                     >
-                      <img
-                        src={cameraIcon}
-                        alt="Cam"
-                        style={{ width: "20px" }}
-                      />
+                      <img src={cameraIcon} alt="Cam" style={{ width: "20px" }} />
                       <span>Upload Foto/Dokumen</span>
                     </button>
                   )}
-                  <small
-                    style={{
-                      fontSize: "11px",
-                      color: "#888",
-                      marginTop: "5px",
-                      display: "block",
-                    }}
-                  >
+                  <small style={{ fontSize: "11px", color: "#888", marginTop: "5px", display: "block" }}>
                     Format: JPG/PNG/PDF (Max 2MB)
                   </small>
                 </div>
-                <button
-                  type="submit"
-                  className="btn-submit-green"
-                  disabled={loading}
-                >
+                <button type="submit" className="btn-submit-green" disabled={loading}>
                   {loading ? "Mengirim..." : "Kirim Pengajuan"}
                 </button>
               </>
@@ -437,7 +416,7 @@ const FormPerizinan = () => {
                 </div>
                 <div className="fp-input-group fp-row-2">
                   <div className="fp-col">
-                    <label className="fp-label">Tanggal Mulai Cuti</label>
+                    <label className="fp-label">Tanggal Awal Cuti</label>
                     <input
                       name="tanggal_mulai"
                       type="date"
@@ -468,12 +447,8 @@ const FormPerizinan = () => {
                     required
                   />
                 </div>
-                <button
-                  type="submit"
-                  className="btn-submit-green"
-                  disabled={loading}
-                >
-                  {loading ? "Mengirim..." : "Kirim Pengajuan Cuti"}
+                <button type="submit" className="btn-submit-green" disabled={loading}>
+                  {loading ? "Mengirim..." : "Kirim Pengajuan"}
                 </button>
               </>
             )}
@@ -549,27 +524,17 @@ const FormPerizinan = () => {
                 </div>
                 <div className="fp-input-group fp-row-2">
                   <div className="fp-col">
-                    <label className="fp-label">Jam Mulai Keluar</label>
-                    <input
-                      name="jam_mulai"
-                      type="time"
-                      className="fp-input"
-                      required
-                    />
+                    <label className="fp-label">Jam Keluar</label>
+                    <input name="jam_mulai" type="time" className="fp-input" required />
                   </div>
                   <div className="fp-col">
-                    <label className="fp-label">Jam Estimasi Kembali</label>
-                    <input
-                      name="jam_selesai"
-                      type="time"
-                      className="fp-input"
-                      required
-                    />
+                    <label className="fp-label">Jam Kembali</label>
+                    <input name="jam_selesai" type="time" className="fp-input" required />
                   </div>
                 </div>
                 <div className="fp-input-group fp-row-2">
                   <div className="fp-col">
-                    <label className="fp-label">Kategori Keperluan</label>
+                    <label className="fp-label">Keperluan</label>
                     <div className="fp-select-wrapper">
                       <select name="keperluan" className="fp-select" required>
                         <option value="">Pilih</option>
@@ -601,12 +566,8 @@ const FormPerizinan = () => {
                     required
                   />
                 </div>
-                <button
-                  type="submit"
-                  className="btn-submit-green"
-                  disabled={loading}
-                >
-                  {loading ? "Mengirim..." : "Kirim Pengajuan FIMTK"}
+                <button type="submit" className="btn-submit-green" disabled={loading}>
+                  {loading ? "Mengirim..." : "Kirim Pengajuan"}
                 </button>
               </>
             )}

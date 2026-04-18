@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import * as XLSX from "xlsx";
 import "./laporan.css";
 
 import iconDashboard from "../../assets/dashboard.svg";
@@ -11,6 +12,44 @@ import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 
+const MENU_ITEMS = [
+  { path: "/hrd/dashboard", icon: iconDashboard, text: "Dashboard" },
+  { path: "/hrd/kelolacabang", icon: iconKelola, text: "Kelola Cabang" },
+  { path: "/hrd/datakaryawan", icon: iconKaryawan, text: "Data Karyawan" },
+  { path: "/hrd/kehadiran", icon: iconKehadiran, text: "Kehadiran", hasArrow: true },
+  { path: "/hrd/laporan", icon: iconLaporan, text: "Laporan", active: true },
+];
+
+const formatDate = (dateObj) => {
+  const yyyy = dateObj.getFullYear();
+  const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const dd = String(dateObj.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+const getCutoffDates = () => {
+  const d = new Date();
+  const date = d.getDate();
+  let start, end;
+  if (date <= 25) {
+    start = new Date(d.getFullYear(), d.getMonth() - 1, 26);
+    end = new Date(d.getFullYear(), d.getMonth(), 25);
+  } else {
+    start = new Date(d.getFullYear(), d.getMonth(), 26);
+    end = new Date(d.getFullYear(), d.getMonth() + 1, 25);
+  }
+  return { start, end };
+};
+
+const getRowTerlambatClass = (jumlahTerlambat) => {
+  const angka = parseInt(jumlahTerlambat, 10);
+  if (isNaN(angka)) return "";
+  if (angka === 3) return "row-warn-yellow";
+  if (angka >= 4 && angka <= 5) return "row-warn-orange";
+  if (angka >= 6) return "row-warn-red";
+  return "";
+};
+
 const Laporan = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -18,31 +57,6 @@ const Laporan = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const openSidebar = () => setSidebarOpen(true);
   const closeSidebar = () => setSidebarOpen(false);
-  const handleNav = (path) => {
-    closeSidebar();
-    navigate(path);
-  };
-
-  const formatDate = (dateObj) => {
-    const yyyy = dateObj.getFullYear();
-    const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
-    const dd = String(dateObj.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
-  };
-
-  const getCutoffDates = () => {
-    const d = new Date();
-    const date = d.getDate();
-    let start, end;
-    if (date <= 25) {
-      start = new Date(d.getFullYear(), d.getMonth() - 1, 26);
-      end = new Date(d.getFullYear(), d.getMonth(), 25);
-    } else {
-      start = new Date(d.getFullYear(), d.getMonth(), 26);
-      end = new Date(d.getFullYear(), d.getMonth() + 1, 25);
-    }
-    return { start, end };
-  };
 
   const [showFilter, setShowFilter] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -95,6 +109,11 @@ const Laporan = () => {
     navigate("/auth/login");
   };
 
+  const handleNav = (path) => {
+    closeSidebar();
+    navigate(path);
+  };
+
   const toggleFilter = () => setShowFilter(!showFilter);
   const handleSelectFilter = (val) => {
     setSelectedFilter(val);
@@ -127,36 +146,42 @@ const Laporan = () => {
   };
 
   const handleExportExcel = () => {
-    const headers = ["Nama Karyawan", "NIK", "Cabang", "Hadir via App", "Hadir Manual", "Terlambat", "FIMTK", "Sakit", "Izin", "Cuti", "Alpha", "Lembur"];
-    const csvRows = [headers.join(";")];
-
-    filteredData.forEach((item) => {
-      const row = [ `"${item.nama}"`, `"${item.nik}"`, `"${item.cabang}"`, item.hadirApp, item.hadirManual, item.terlambat, item.fimtk, item.sakit, item.izin, item.cuti, item.alpha, item.lembur ];
-      csvRows.push(row.join(";"));
-    });
+    const exportData = filteredData.map((item) => ({
+      "Nama Karyawan": item.nama,
+      "NIK": item.nik,
+      "Cabang": item.cabang,
+      "Hadir via App": parseInt(item.hadirApp) || 0,
+      "Hadir Manual": parseInt(item.hadirManual) || 0,
+      "Terlambat": parseInt(item.terlambat) || 0,
+      "FIMTK": parseInt(item.fimtk) || 0,
+      "Sakit": parseInt(item.sakit) || 0,
+      "Izin": parseInt(item.izin) || 0,
+      "Cuti": parseInt(item.cuti) || 0,
+      "Alpha": parseInt(item.alpha) || 0,
+      "Lembur": item.lembur,
+    }));
 
     const totals = getTotals();
-    const totalRow = [ `"TOTAL KESELURUHAN"`, `"-"`, `"-"`, totals.hadirApp, totals.hadirManual, totals.terlambat, totals.fimtk, totals.sakit, totals.izin, totals.cuti, totals.alpha, totals.lembur ];
-    csvRows.push(totalRow.join(";"));
+    exportData.push({
+      "Nama Karyawan": "TOTAL KESELURUHAN",
+      "NIK": "-",
+      "Cabang": "-",
+      "Hadir via App": totals.hadirApp,
+      "Hadir Manual": totals.hadirManual,
+      "Terlambat": totals.terlambat,
+      "FIMTK": totals.fimtk,
+      "Sakit": totals.sakit,
+      "Izin": totals.izin,
+      "Cuti": totals.cuti,
+      "Alpha": totals.alpha,
+      "Lembur": totals.lembur,
+    });
 
-    const csvString = csvRows.join("\n");
-    const blob = new Blob(["\uFEFF" + csvString], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `Rekap_Kehadiran_${startDate}_sd_${endDate}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Kehadiran");
 
-  const getRowTerlambatClass = (jumlahTerlambat) => {
-    const angka = parseInt(jumlahTerlambat, 10);
-    if (isNaN(angka)) return "";
-    if (angka === 3) return "row-warn-yellow";
-    if (angka >= 4 && angka <= 5) return "row-warn-orange";
-    if (angka >= 6) return "row-warn-red";
-    return "";
+    XLSX.writeFile(workbook, `Rekap_Kehadiran_HRD_${startDate}_sd_${endDate}.xlsx`);
   };
 
   const openDetail = (item, jenis, jumlah) => {
@@ -688,11 +713,19 @@ const Laporan = () => {
         <button className="btn-sidebar-close" onClick={closeSidebar} aria-label="Tutup menu">✕</button>
         <div className="logo-area"><img src={logoPersegi} alt="AMAGACORP" className="logo-img" /></div>
         <nav className="menu-nav">
-          <div className="menu-item" onClick={() => handleNav("/hrd/dashboard")}><div className="menu-left"><img src={iconDashboard} alt="dash" className="menu-icon-main" /><span className="menu-text-main">Dashboard</span></div></div>
-          <div className="menu-item" onClick={() => handleNav("/hrd/kelolacabang")}><div className="menu-left"><img src={iconKelola} alt="kelola" className="menu-icon-main" /><span className="menu-text-main">Kelola Cabang</span></div></div>
-          <div className="menu-item" onClick={() => handleNav("/hrd/datakaryawan")}><div className="menu-left"><img src={iconKaryawan} alt="karyawan" className="menu-icon-main" /><span className="menu-text-main">Data Karyawan</span></div></div>
-          <div className="menu-item has-arrow" onClick={() => handleNav("/hrd/kehadiran")}><div className="menu-left"><img src={iconKehadiran} alt="hadir" className="menu-icon-main" /><span className="menu-text-main">Kehadiran</span></div><img src={iconBawah} alt="down" className="arrow-icon-main" /></div>
-          <div className="menu-item active" onClick={() => handleNav("/hrd/laporan")}><div className="menu-left"><img src={iconLaporan} alt="lapor" className="menu-icon-main" /><span className="menu-text-main">Laporan</span></div></div>
+          {MENU_ITEMS.map((item, index) => (
+            <div
+              key={index}
+              className={`menu-item ${item.active ? "active" : ""} ${item.hasArrow ? "has-arrow" : ""}`}
+              onClick={() => handleNav(item.path)}
+            >
+              <div className="menu-left">
+                <img src={item.icon} alt="" className="menu-icon-main" />
+                <span className="menu-text-main">{item.text}</span>
+              </div>
+              {item.hasArrow && <img src={iconBawah} alt="down" className="arrow-icon-main" />}
+            </div>
+          ))}
         </nav>
         <div className="sidebar-footer"><button className="btn-logout" onClick={handleLogout}>Log Out</button></div>
       </aside>

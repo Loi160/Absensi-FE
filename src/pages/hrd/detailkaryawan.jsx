@@ -11,12 +11,23 @@ import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 
-// =========================================================================
-// MENGGUNAKAN KEY DARI FILE .env
-// =========================================================================
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+const EyeOpenIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+    <circle cx="12" cy="12" r="3"></circle>
+  </svg>
+);
+
+const EyeOffIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+    <line x1="1" y1="1" x2="23" y2="23"></line>
+  </svg>
+);
 
 const DetailKaryawan = () => {
   const navigate = useNavigate();
@@ -32,14 +43,23 @@ const DetailKaryawan = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const openSidebar = () => setSidebarOpen(true);
   const closeSidebar = () => setSidebarOpen(false);
+
+  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const isManager = storedUser.role === "managerCabang";
+  const basePath = isManager ? "/managerCabang" : "/hrd";
+
   const handleNav = (path) => {
     closeSidebar();
     navigate(path);
   };
 
-  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-  const isManager = storedUser.role === "managerCabang";
-  const basePath = isManager ? "/managerCabang" : "/hrd";
+  const MENU_ITEMS = [
+    { path: `${basePath}/dashboard`, icon: iconDashboard, text: "Dashboard", show: true },
+    { path: `${basePath}/kelolacabang`, icon: iconKelola, text: "Kelola Cabang", show: !isManager },
+    { path: `${basePath}/datakaryawan`, icon: iconKaryawan, text: "Data Karyawan", show: true, active: true },
+    { path: `${basePath}/absenmanual`, icon: iconKehadiran, text: "Kehadiran", show: !isManager, hasArrow: true },
+    { path: `${basePath}/laporan`, icon: iconLaporan, text: "Laporan", show: true },
+  ];
 
   useEffect(() => {
     const fetchCabang = async () => {
@@ -74,16 +94,9 @@ const DetailKaryawan = () => {
       return;
     }
 
-    const allowedTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/jpg",
-      "application/pdf",
-    ];
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "application/pdf"];
     if (!allowedTypes.includes(file.type)) {
-      alert(
-        "Format file tidak didukung! Hanya diperbolehkan JPG, PNG, atau PDF.",
-      );
+      alert("Format file tidak didukung! Hanya diperbolehkan JPG, PNG, atau PDF.");
       event.target.value = null;
       return;
     }
@@ -111,9 +124,7 @@ const DetailKaryawan = () => {
       }));
     } catch (error) {
       console.error("Error upload:", error);
-      alert(
-        `Gagal mengunggah file. Pastikan kamu sudah membuat 'New Policy' di menu Storage Supabase agar diizinkan upload.`,
-      );
+      alert("Gagal mengunggah file. Pastikan kamu sudah membuat 'New Policy' di menu Storage Supabase agar diizinkan upload.");
     } finally {
       setUploadingState("");
     }
@@ -122,29 +133,23 @@ const DetailKaryawan = () => {
   const handleSaveEdit = async (e) => {
     e.preventDefault();
     
-    // Keamanan NIK saat Edit
     if (!/^\d{8}$/.test(formData.nik)) {
         return alert("Simpan Gagal: NIK harus berupa angka tepat 8 digit!");
     }
 
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/karyawan/${formData.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        },
-      );
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/karyawan/${formData.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
       if (res.ok) {
         alert("Data Karyawan berhasil diperbarui!");
         setIsEditing(false);
       } else {
         const errorData = await res.json();
-        alert(
-          `Gagal menyimpan perubahan. Detail: ${errorData.detail || errorData.message}`,
-        );
+        alert(`Gagal menyimpan perubahan. Detail: ${errorData.detail || errorData.message}`);
       }
     } catch (err) {
       alert("Terjadi kesalahan jaringan.");
@@ -200,56 +205,19 @@ const DetailKaryawan = () => {
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
         <nav className="menu-nav">
-          <div
-            className="menu-item"
-            onClick={() => handleNav(`${basePath}/dashboard`)}
-          >
-            <div className="menu-left">
-              <img src={iconDashboard} alt="" className="menu-icon-main" />
-              <span className="menu-text-main">Dashboard</span>
-            </div>
-          </div>
-          {!isManager && (
+          {MENU_ITEMS.filter(item => item.show).map((item, index) => (
             <div
-              className="menu-item"
-              onClick={() => handleNav(`${basePath}/kelolacabang`)}
+              key={index}
+              className={`menu-item ${item.active ? "active" : ""} ${item.hasArrow ? "has-arrow" : ""}`}
+              onClick={() => handleNav(item.path)}
             >
               <div className="menu-left">
-                <img src={iconKelola} alt="" className="menu-icon-main" />
-                <span className="menu-text-main">Kelola Cabang</span>
+                <img src={item.icon} alt="" className="menu-icon-main" />
+                <span className="menu-text-main">{item.text}</span>
               </div>
+              {item.hasArrow && <img src={iconBawah} alt="" className="arrow-icon-main" />}
             </div>
-          )}
-          <div
-            className="menu-item active"
-            onClick={() => handleNav(`${basePath}/datakaryawan`)}
-          >
-            <div className="menu-left">
-              <img src={iconKaryawan} alt="" className="menu-icon-main" />
-              <span className="menu-text-main">Data Karyawan</span>
-            </div>
-          </div>
-          {!isManager && (
-            <div
-              className="menu-item has-arrow"
-              onClick={() => handleNav(`${basePath}/absenmanual`)}
-            >
-              <div className="menu-left">
-                <img src={iconKehadiran} alt="" className="menu-icon-main" />
-                <span className="menu-text-main">Kehadiran</span>
-              </div>
-              <img src={iconBawah} alt="" className="arrow-icon-main" />
-            </div>
-          )}
-          <div
-            className="menu-item"
-            onClick={() => handleNav(`${basePath}/laporan`)}
-          >
-            <div className="menu-left">
-              <img src={iconLaporan} alt="" className="menu-icon-main" />
-              <span className="menu-text-main">Laporan</span>
-            </div>
-          </div>
+          ))}
         </nav>
         <div className="sidebar-footer">
           <button className="btn-logout" onClick={handleLogout}>
@@ -267,15 +235,9 @@ const DetailKaryawan = () => {
         </header>
 
         <div className="dk-action-row">
-          <div
-            className="dk-action-group"
-            style={{ justifyContent: "flex-end", width: "100%" }}
-          >
+          <div className="dk-action-group" style={{ justifyContent: "flex-end", width: "100%" }}>
             {!isEditing && (
-              <button
-                className="btn-edit-outline"
-                onClick={() => setIsEditing(true)}
-              >
+              <button className="btn-edit-outline" onClick={() => setIsEditing(true)}>
                 <svg
                   width="16"
                   height="16"
@@ -326,7 +288,6 @@ const DetailKaryawan = () => {
               />
             </div>
             
-            {/* UPDATE: VALIDASI INPUT NIK SAAT EDIT */}
             <div className="form-group">
               <label>NIK (Username)</label>
               <input
@@ -374,6 +335,7 @@ const DetailKaryawan = () => {
                 />
               )}
             </div>
+            
             <div className="form-group">
               <label>Jabatan</label>
               <input
@@ -385,6 +347,7 @@ const DetailKaryawan = () => {
                 onChange={handleInputChange}
               />
             </div>
+            
             <div className="form-group">
               <label>Tanggal Masuk</label>
               <input
@@ -396,6 +359,7 @@ const DetailKaryawan = () => {
                 onChange={handleInputChange}
               />
             </div>
+            
             <div className="form-group">
               <label>Divisi</label>
               <input
@@ -425,11 +389,7 @@ const DetailKaryawan = () => {
                   className="btn-eye"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                  ) : (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
-                  )}
+                  {showPassword ? <EyeOpenIcon /> : <EyeOffIcon />}
                 </button>
               </div>
             </div>
@@ -445,6 +405,7 @@ const DetailKaryawan = () => {
                 onChange={handleInputChange}
               />
             </div>
+            
             <div className="form-group">
               <label>Tanggal Lahir</label>
               <input
@@ -456,6 +417,7 @@ const DetailKaryawan = () => {
                 onChange={handleInputChange}
               />
             </div>
+            
             <div className="form-group">
               <label>Jenis Kelamin</label>
               {isEditing ? (
@@ -499,11 +461,7 @@ const DetailKaryawan = () => {
                   readOnly
                   value={formData.status || "Aktif"}
                   style={{
-                    color:
-                      formData.status === "Nonaktif" ||
-                      formData.status === "Resign"
-                        ? "#e74c3c"
-                        : "#2fb800",
+                    color: formData.status === "Nonaktif" || formData.status === "Resign" ? "#e74c3c" : "#2fb800",
                     fontWeight: "700",
                   }}
                 />
@@ -533,49 +491,24 @@ const DetailKaryawan = () => {
                     className="doc-card"
                     style={{
                       backgroundColor: isEditing ? "#fff" : "#f9f9f9",
-                      border:
-                        isEditing && formData[doc.dbKey]
-                          ? "1px solid #2fb800"
-                          : "1px solid #ddd",
+                      border: isEditing && formData[doc.dbKey] ? "1px solid #2fb800" : "1px solid #ddd",
                       padding: "12px",
                     }}
                   >
                     {isEditing ? (
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "5px",
-                        }}
-                      >
+                      <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
                         {formData[doc.dbKey] && (
-                          <span
-                            style={{
-                              fontSize: "13px",
-                              color: "#2fb800",
-                              fontWeight: "bold",
-                            }}
-                          >
+                          <span style={{ fontSize: "13px", color: "#2fb800", fontWeight: "bold" }}>
                             ✅ Dokumen Berhasil Diunggah
                           </span>
                         )}
                         <input
                           type="file"
-                          style={{
-                            fontSize: "11px",
-                            width: "100%",
-                            marginTop: "5px",
-                          }}
+                          style={{ fontSize: "11px", width: "100%", marginTop: "5px" }}
                           accept="image/jpeg, image/png, application/pdf"
                           onChange={(e) => handleFileUpload(e, doc.dbKey)}
                         />
-                        <small
-                          style={{
-                            fontSize: "11px",
-                            color: "#888",
-                            marginTop: "2px",
-                          }}
-                        >
+                        <small style={{ fontSize: "11px", color: "#888", marginTop: "2px" }}>
                           Max 2MB (JPG/PNG/PDF)
                         </small>
                       </div>
@@ -584,11 +517,7 @@ const DetailKaryawan = () => {
                         href={formData[doc.dbKey]}
                         target="_blank"
                         rel="noreferrer"
-                        style={{
-                          color: "#2980b9",
-                          fontWeight: "bold",
-                          textDecoration: "none",
-                        }}
+                        style={{ color: "#2980b9", fontWeight: "bold", textDecoration: "none" }}
                       >
                         Lihat Dokumen
                       </a>

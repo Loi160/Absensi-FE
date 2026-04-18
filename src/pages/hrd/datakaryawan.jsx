@@ -12,6 +12,14 @@ import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 import iconTambah from "../../assets/tambah.svg";
 
+const MENU_ITEMS = [
+  { path: "/hrd/dashboard", icon: iconDashboard, text: "Dashboard" },
+  { path: "/hrd/kelolacabang", icon: iconKelola, text: "Kelola Cabang" },
+  { path: "/hrd/datakaryawan", icon: iconKaryawan, text: "Data Karyawan", active: true },
+  { path: "/hrd/kehadiran", icon: iconKehadiran, text: "Kehadiran", hasArrow: true },
+  { path: "/hrd/laporan", icon: iconLaporan, text: "Laporan" },
+];
+
 const EyeOffIcon = () => (
   <svg
     width="16"
@@ -58,14 +66,10 @@ const DataKaryawanHRD = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const resCabang = await fetch(
-        import.meta.env.VITE_API_URL + "/api/cabang",
-      );
+      const resCabang = await fetch(import.meta.env.VITE_API_URL + "/api/cabang");
       setCabangList(await resCabang.json());
 
-      const resKaryawan = await fetch(
-        import.meta.env.VITE_API_URL + "/api/karyawan",
-      );
+      const resKaryawan = await fetch(import.meta.env.VITE_API_URL + "/api/karyawan");
       setKaryawanList(await resKaryawan.json());
     } catch (err) {
       console.error("Error fetching data:", err);
@@ -97,7 +101,6 @@ const DataKaryawanHRD = () => {
     e.preventDefault();
     if (!formData.cabang_id) return alert("Pilih cabang terlebih dahulu!");
     
-    // Keamanan tambahan sebelum dkirim ke DB
     if (!/^\d{8}$/.test(formData.nik)) {
         return alert("NIK harus berupa angka tepat 8 digit!");
     }
@@ -121,9 +124,7 @@ const DataKaryawanHRD = () => {
   };
 
   const filteredData = karyawanList.filter((k) => {
-    return (
-      selectedCabang === "Semua Cabang" || k.cabang?.nama === selectedCabang
-    );
+    return selectedCabang === "Semua Cabang" || k.cabang?.nama === selectedCabang;
   });
 
   return (
@@ -149,46 +150,19 @@ const DataKaryawanHRD = () => {
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
         <nav className="menu-nav">
-          <div
-            className="menu-item"
-            onClick={() => handleNav("/hrd/dashboard")}
-          >
-            <div className="menu-left">
-              <img src={iconDashboard} alt="" className="menu-icon-main" />
-              <span className="menu-text-main">Dashboard</span>
+          {MENU_ITEMS.map((item, index) => (
+            <div
+              key={index}
+              className={`menu-item ${item.active ? "active" : ""} ${item.hasArrow ? "has-arrow" : ""}`}
+              onClick={() => handleNav(item.path)}
+            >
+              <div className="menu-left">
+                <img src={item.icon} alt="" className="menu-icon-main" />
+                <span className="menu-text-main">{item.text}</span>
+              </div>
+              {item.hasArrow && <img src={iconBawah} alt="down" className="arrow-icon-main" />}
             </div>
-          </div>
-          <div
-            className="menu-item"
-            onClick={() => handleNav("/hrd/kelolacabang")}
-          >
-            <div className="menu-left">
-              <img src={iconKelola} alt="" className="menu-icon-main" />
-              <span className="menu-text-main">Kelola Cabang</span>
-            </div>
-          </div>
-          <div className="menu-item active">
-            <div className="menu-left">
-              <img src={iconKaryawan} alt="" className="menu-icon-main" />
-              <span className="menu-text-main">Data Karyawan</span>
-            </div>
-          </div>
-          <div
-            className="menu-item has-arrow"
-            onClick={() => handleNav("/hrd/kehadiran")}
-          >
-            <div className="menu-left">
-              <img src={iconKehadiran} alt="" className="menu-icon-main" />
-              <span className="menu-text-main">Kehadiran</span>
-            </div>
-            <img src={iconBawah} alt="down" className="arrow-icon-main" />
-          </div>
-          <div className="menu-item" onClick={() => handleNav("/hrd/laporan")}>
-            <div className="menu-left">
-              <img src={iconLaporan} alt="" className="menu-icon-main" />
-              <span className="menu-text-main">Laporan</span>
-            </div>
-          </div>
+          ))}
         </nav>
         <div className="sidebar-footer">
           <button className="btn-logout" onClick={handleLogout}>
@@ -198,7 +172,6 @@ const DataKaryawanHRD = () => {
       </aside>
 
       <main className="main-content">
-        {/* HEADER AREA (Teks Saja) */}
         <header className="dk-header-area">
           <h1 className="dk-title">Data Karyawan</h1>
           <p className="dk-subtitle">
@@ -206,7 +179,6 @@ const DataKaryawanHRD = () => {
           </p>
         </header>
 
-        {/* ACTION ROW (Tombol di bawah teks, merapat ke kanan) */}
         <div className="dk-action-row">
           <div className="dk-action-group">
             <div className="filter-wrapper">
@@ -280,27 +252,13 @@ const DataKaryawanHRD = () => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td
-                      colSpan="8"
-                      style={{
-                        textAlign: "center",
-                        padding: "30px",
-                        color: "#666",
-                      }}
-                    >
+                    <td colSpan="8" style={{ textAlign: "center", padding: "30px", color: "#666" }}>
                       Memuat data...
                     </td>
                   </tr>
                 ) : filteredData.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan="8"
-                      style={{
-                        textAlign: "center",
-                        padding: "30px",
-                        color: "#666",
-                      }}
-                    >
+                    <td colSpan="8" style={{ textAlign: "center", padding: "30px", color: "#666" }}>
                       Tidak ada karyawan.
                     </td>
                   </tr>
@@ -321,9 +279,7 @@ const DataKaryawanHRD = () => {
                         <td>{k.tanggal_lahir || "-"}</td>
                         <td>{k.alamat || "-"}</td>
                         <td className="text-center">
-                          <span
-                            className={`status-dot ${isActive ? "active" : "inactive"}`}
-                          ></span>
+                          <span className={`status-dot ${isActive ? "active" : "inactive"}`}></span>
                         </td>
                       </tr>
                     );
@@ -335,12 +291,8 @@ const DataKaryawanHRD = () => {
         </div>
       </main>
 
-      {/* ================= MODAL TAMBAH KARYAWAN ================= */}
       {showModal && (
-        <div
-          className="modal-overlay-clean"
-          onClick={() => setShowModal(false)}
-        >
+        <div className="modal-overlay-clean" onClick={() => setShowModal(false)}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()}>
             <h2 className="modal-title">Tambah Karyawan Baru</h2>
 
@@ -352,13 +304,10 @@ const DataKaryawanHRD = () => {
                     type="text"
                     className="input-edit"
                     required
-                    onChange={(e) =>
-                      setFormData({ ...formData, nama: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
                   />
                 </div>
                 
-                {/* UPDATE: VALIDASI INPUT NIK 8 DIGIT ANGKA */}
                 <div className="form-group">
                   <label>NIK (Username)</label>
                   <input
@@ -383,9 +332,7 @@ const DataKaryawanHRD = () => {
                     type="text"
                     className="input-edit"
                     required
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   />
                 </div>
                 <div className="form-group">
@@ -393,9 +340,7 @@ const DataKaryawanHRD = () => {
                   <select
                     className="input-edit"
                     required
-                    onChange={(e) =>
-                      setFormData({ ...formData, role: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                   >
                     <option value="karyawan">Karyawan Biasa</option>
                     <option value="managerCabang">Manager Cabang</option>
@@ -407,9 +352,7 @@ const DataKaryawanHRD = () => {
                   <select
                     className="input-edit"
                     required
-                    onChange={(e) =>
-                      setFormData({ ...formData, cabang_id: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, cabang_id: e.target.value })}
                   >
                     <option value="">Pilih Cabang...</option>
                     {cabangList.map((c) => (
@@ -424,9 +367,7 @@ const DataKaryawanHRD = () => {
                   <input
                     type="text"
                     className="input-edit"
-                    onChange={(e) =>
-                      setFormData({ ...formData, no_telp: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, no_telp: e.target.value })}
                   />
                 </div>
                 <div className="form-group">
@@ -435,9 +376,7 @@ const DataKaryawanHRD = () => {
                     type="text"
                     className="input-edit"
                     placeholder="Misal: Staff IT"
-                    onChange={(e) =>
-                      setFormData({ ...formData, jabatan: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, jabatan: e.target.value })}
                   />
                 </div>
                 <div className="form-group">
@@ -446,17 +385,12 @@ const DataKaryawanHRD = () => {
                     type="text"
                     className="input-edit"
                     placeholder="Misal: Technology"
-                    onChange={(e) =>
-                      setFormData({ ...formData, divisi: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, divisi: e.target.value })}
                   />
                 </div>
               </div>
 
-              <div
-                className="detail-footer"
-                style={{ marginTop: "20px", paddingBottom: "0" }}
-              >
+              <div className="detail-footer" style={{ marginTop: "20px", paddingBottom: "0" }}>
                 <button
                   type="button"
                   className="btn-batal"

@@ -1,9 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
-/* ================================================= */
-/* ================= RESET & BASE ================== */
-/* ================================================= */
-
 * {
   margin: 0;
   padding: 0;
@@ -19,10 +15,6 @@
   overflow: hidden;
   position: relative;
 }
-
-/* ================================================= */
-/* ==================== SIDEBAR ==================== */
-/* ================================================= */
 
 .sidebar {
   width: 300px;
@@ -47,7 +39,6 @@
   filter: grayscale(100%) brightness(0) invert(1) contrast(1000%) !important;
 }
 
-/* --- MENU NAV --- */
 .menu-nav {
   display: flex;
   flex-direction: column;
@@ -96,7 +87,6 @@
   transform: rotate(180deg);
 }
 
-/* --- MENU ITEM ACTIVE --- */
 .menu-item.active {
   background-color: #ffffff !important;
   color: #2fb800 !important;
@@ -118,7 +108,6 @@
   background-color: rgba(255, 255, 255, 0.15);
 }
 
-/* --- SUBMENU STYLING --- */
 .submenu-container {
   display: flex;
   flex-direction: column;
@@ -162,7 +151,6 @@
   background-color: rgba(255, 255, 255, 0.15);
 }
 
-/* --- SIDEBAR FOOTER --- */
 .sidebar-footer {
   margin-top: auto;
   padding-top: 25px;
@@ -191,17 +179,12 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* ================================================= */
-/* ================= MAIN CONTENT ================== */
-/* ================================================= */
-
 .main-content {
   position: absolute;
   top: 25px;
   bottom: 25px;
   left: 310px;
   right: 35px;
-
   background-color: #fdfdfd;
   border-radius: 40px;
   padding: 40px;
@@ -212,13 +195,11 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 }
 
-/* SCROLLBAR */
 .main-content::-webkit-scrollbar { width: 8px; }
 .main-content::-webkit-scrollbar-track { background: transparent; margin: 30px 0; }
 .main-content::-webkit-scrollbar-thumb { background-color: #d1d1d1; border-radius: 10px; }
 .main-content::-webkit-scrollbar-thumb:hover { background-color: #8dae12; }
 
-/* ================= HEADER TYPOGRAPHY ================= */
 .header-titles {
   display: flex;
   flex-direction: column;
@@ -242,7 +223,6 @@
   font-size: 16px !important;
 }
 
-/* ================= FORM ABSENSI MANUAL ================= */
 .absen-form-wrapper {
   margin-top: 20px;
 }
@@ -312,7 +292,6 @@
 }
 .btn-batal-red:hover { background-color: #f5f5f5 !important; }
 
-/* ================= ACTION ROW PERIZINAN (FILTER) ================= */
 .action-row-perizinan {
   display: flex;
   justify-content: flex-end;
@@ -377,7 +356,6 @@
 
 .dropdown-item:hover { background-color: #f5f5f5; color: #111; }
 
-/* ================= TABLE & BADGES ================= */
 .section-title {
   font-size: 20px;
   font-weight: 800;
@@ -390,13 +368,12 @@
   margin-top: 35px; 
 }
 
-/* UPDATE: Tambahkan min-height agar kotak putih tidak kempes jika data kosong */
 .perizinan-card {
   background: white;
   border-radius: 12px;
   border: 1px solid #ddd;
   margin-bottom: 30px;
-  min-height: 150px; /* <--- Mencegah area putih menghilang */
+  min-height: 150px;
   height: fit-content; 
   overflow-x: auto;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
@@ -445,7 +422,6 @@
 
 .text-center { text-align: center !important; }
 
-/* Empty state message inside table */
 .empty-state-cell {
   text-align: center;
   padding: 40px 20px !important;
@@ -453,7 +429,6 @@
   font-style: italic;
 }
 
-/* --- Badge Types (Jenis) --- */
 .badge-jenis {
   padding: 5px 12px;
   border-radius: 20px;
@@ -473,7 +448,6 @@
 .badge-jenis.khusus { color: #e67e22; border-color: #e67e22; }
 .badge-jenis.tahunan { color: #2ecc71; border-color: #2ecc71; }
 
-/* --- Badge Statuses (Solid) --- */
 .badge-status {
   padding: 6px 12px;
   border-radius: 20px;
@@ -487,7 +461,6 @@
 .badge-status.approve { background-color: #2fb800; color: white; }
 .badge-status.reject { background-color: #ff1744; color: white; }
 
-/* --- Action Buttons --- */
 .action-buttons {
   display: flex;
   gap: 8px;
@@ -518,9 +491,6 @@
 
 .table-izin tbody tr:last-child td { border-bottom: none; }
 
-/* ================================================= */
-/* ============== MODAL STYLES (MODERN) ============ */
-/* ================================================= */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -639,14 +609,7 @@
 .btn-reject-modern { background: #ff1744; }
 .btn-reject-modern:hover { background: #d50000; }
 
-/* ================================================= */
-/* ======= MOBILE-ONLY ELEMENTS (HIDDEN DI DESKTOP) ======= */
-/* ================================================= */
 .mobile-topbar, .btn-sidebar-close, .sidebar-overlay { display: none; }
-
-/* ================================================= */
-/* =================== RESPONSIVE ================== */
-/* ================================================= */
 
 @media (max-width: 768px) {
   .hrd-container {
@@ -705,6 +668,7 @@
     pointer-events: none;
     transition: opacity 0.3s ease;
   }
+  
   .sidebar-overlay.active { opacity: 1; pointer-events: all; }
 
   .sidebar {
@@ -719,6 +683,7 @@
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%);
   }
+  
   .sidebar.open { transform: translateX(0); }
 
   .btn-sidebar-close {
@@ -765,11 +730,11 @@
   .header-titles h1 { font-size: 24px !important; }
   .header-titles p { font-size: 13px !important; }
 
-  /* UPDATE MOBILE TATA LETAK */
   .action-row-perizinan {
     justify-content: flex-end;
     margin-bottom: 10px; 
   }
+  
   .btn-filter-green { padding: 8px 16px; font-size: 12px; }
 
   .section-title { font-size: 16px; margin-top: 0; margin-bottom: 10px; }
@@ -778,18 +743,17 @@
   .perizinan-card {
     margin-bottom: 20px;
     border-radius: 12px;
-    min-height: 130px; /* Minimal height di mobile */
+    min-height: 130px;
     height: fit-content;
   }
+  
   .card-header-green { font-size: 13px; padding: 12px 15px; }
 
-  /* FORM ABSENSI MANUAL MOBILE */
   .absen-form-grid { grid-template-columns: 1fr; row-gap: 15px; }
   .full-width { grid-column: span 1; }
   .form-actions-bottom { grid-column: span 1; flex-direction: column-reverse; gap: 10px; margin-top: 10px; }
   .btn-simpan-green, .btn-batal-red { width: 100%; text-align: center; }
 
-  /* MODAL MOBILE */
   .modal-content { padding: 25px 20px; border-radius: 16px; }
   .modal-header-modern h2 { font-size: 18px; }
   .modal-row-split { flex-direction: column; gap: 12px; }
