@@ -13,6 +13,7 @@ import cameraIcon from "../../assets/camera.svg";
 import profileImg from "../../assets/profile.svg";
 import logoutIcon from "../../assets/kembalidashbord.svg";
 
+// Fungsi bantuan untuk mengubah format tanggal bawaan sistem jadi format lokal Indonesia 
 const formatDateIndo = (date) => {
   return date.toLocaleDateString('id-ID', {
     weekday: 'long',
@@ -22,6 +23,7 @@ const formatDateIndo = (date) => {
   });
 };
 
+// Fungsi bantuan untuk mengatur format jam digital agar selalu rapi 2 digit (HH : MM : SS)
 const formatTimeIndo = (date) => {
   const hours = String(date.getHours()).padStart(2, '0');
   const minutes = String(date.getMinutes()).padStart(2, '0');
@@ -29,6 +31,7 @@ const formatTimeIndo = (date) => {
   return `${hours} : ${minutes} : ${seconds}`;
 };
 
+// Konfigurasi daftar tombol menu utama yang bakal ditampilin di halaman dashboard karyawan
 const MENU_ITEMS = [
   {
     path: "/karyawan/absensi",
@@ -51,29 +54,33 @@ const MENU_ITEMS = [
   },
 ];
 
+// Komponen utama untuk kerangka halaman Dashboard
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   
-  // --- KEMBALIKAN LOGIKA JAM DI SINI ---
+  // State khusus untuk menyimpan waktu saat ini agar jam digital bisa berjalan
   const [dateTime, setDateTime] = useState(new Date());
 
+  // Efek samping (interval) untuk memperbarui detak jam setiap 1 detik sekali
   useEffect(() => {
     const timer = setInterval(() => {
       setDateTime(new Date());
     }, 1000);
     return () => clearInterval(timer);
   }, []);
-  // -------------------------------------
 
+  // Fungsi untuk menghapus sesi login dan melempar user kembali ke halaman login
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     navigate("/auth/login");
   };
 
+  // Menyiapkan sapaan nama pengguna, kalau data kosong maka dipanggil "Karyawan"
   const namaPanggilan = user?.nama || "Karyawan";
 
+  // Mengambil URL foto profil dari database Supabase, kalau belum unggah pakai avatar bawaan
   const getProfilePic = () => {
     if (!user || !user.foto_karyawan) {
       return profileImg;

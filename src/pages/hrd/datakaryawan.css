@@ -1,12 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
+/* Pengaturan dasar untuk menghapus margin/padding bawaan dan menetapkan font Inter ke seluruh elemen */
 * { 
   margin: 0; 
   padding: 0; 
   box-sizing: border-box; 
   font-family: 'Inter', sans-serif; 
 }
-
+/* Mengatur pembungkus utama halaman HRD dengan latar belakang gradasi hijau yang memenuhi layar */
 .hrd-container {
   display: flex; 
   width: 100vw; 
@@ -14,7 +15,7 @@
   overflow: hidden;
   background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
 }
-
+/* Mengatur lebar, jarak, dan tata letak panel navigasi samping (sidebar) */
 .sidebar { 
   width: 300px; 
   padding: 25px; 
@@ -23,7 +24,7 @@
   flex-direction: column; 
   flex-shrink: 0; 
 }
-
+/* Mengatur posisi logo di dalam sidebar dan mengubah warnanya menjadi putih bersih menggunakan filter */
 .logo-area { 
   margin-top: 40px; 
   margin-bottom: 26px !important; 
@@ -36,13 +37,13 @@
   display: block; 
   filter: grayscale(100%) brightness(0) invert(1) contrast(1000%) !important; 
 }
-
+/* Mengatur daftar item menu navigasi agar tersusun secara vertikal dengan jarak yang rapi */
 .menu-nav { 
   display: flex; 
   flex-direction: column; 
   gap: 18px; 
 }
-
+/* Mendesain tampilan dasar setiap item menu, termasuk animasi transisi saat kursor diarahkan ke menu tersebut */
 .menu-item { 
   display: flex; 
   align-items: center; 
@@ -59,7 +60,7 @@
   align-items: center; 
   gap: 15px; 
 }
-
+/* Mengatur ukuran ikon utama dan teks menu agar terlihat proporsional di dalam sidebar */
 .menu-icon-main { 
   width: 28px; 
   height: 28px; 
@@ -79,13 +80,13 @@
   filter: brightness(0) invert(1); 
   opacity: 0.8; 
 }
-
+/* Mengatur gaya visual khusus untuk menu yang sedang aktif, mengubah latar belakang menjadi putih dan teks menjadi hijau */
 .menu-item.active { 
   background-color: #ffffff !important; 
   color: #2fb800 !important; 
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
 }
-
+/* Mengubah warna ikon menjadi hijau menggunakan filter khusus saat menu tersebut berada dalam posisi aktif */
 .menu-item.active .menu-icon-main, 
 .menu-item.active .arrow-icon-main { 
   filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg) brightness(95%) contrast(105%) !important; 
@@ -95,11 +96,11 @@
 .menu-item.active .menu-text-main { 
   color: #2fb800 !important; 
 }
-
+/* Memberikan efek warna latar transparan tipis saat kursor diarahkan ke menu yang sedang tidak aktif */
 .menu-item:hover:not(.active) { 
   background-color: rgba(255, 255, 255, 0.15); 
 }
-
+/* Mengatur area bawah sidebar untuk tombol logout, lengkap dengan garis pembatas transparan */
 .sidebar-footer { 
   margin-top: auto; 
   padding-top: 25px; 
@@ -107,7 +108,7 @@
   text-align: center; 
   padding-bottom: 15px; 
 }
-
+/* Mendesain tombol logout agar transparan dengan garis tepi, dan berubah menjadi putih saat kursor diarahkan (hover) */
 .btn-logout { 
   background: transparent; 
   border: 1px solid rgba(255,255,255,0.7); 
@@ -127,7 +128,7 @@
   border-color: #ffffff !important; 
   box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important; 
 }
-
+/* Mengatur area konten utama (kanan) sebagai kotak putih besar dengan sudut melengkung dan bayangan halus */
 .main-content {
   flex: 1; 
   background-color: #fdfdfd; 
@@ -140,7 +141,7 @@
   overflow-y: auto; 
   overflow-x: hidden;
 }
-
+/* Mengatur desain batang gulir (scrollbar) agar terlihat lebih minimalis dan modern */
 ::-webkit-scrollbar { 
   width: 8px; 
   height: 8px; 
@@ -154,7 +155,7 @@
 ::-webkit-scrollbar-thumb:hover { 
   background-color: #8dae12; 
 }
-
+/* Mengatur tata letak bagian judul dan subjudul di dalam halaman data karyawan */
 .dk-header-area { 
   display: flex; 
   flex-direction: column; 
@@ -176,7 +177,7 @@
   color: #666; 
   margin: 0; 
 }
-
+/* Mengatur posisi baris tombol aksi (filter & tambah) agar berada di sisi kanan halaman */
 .dk-action-row {
   display: flex;
   justify-content: flex-end;
@@ -190,7 +191,7 @@
   align-items: center; 
   gap: 15px; 
 }
-
+/* Mendesain tombol filter dan tombol tambah karyawan dengan warna hijau zaitun, sudut melengkung, dan efek bayangan */
 .btn-dk-filter { 
   background: #8dae12; 
   color: white; 
@@ -227,6 +228,7 @@
   transition: 0.2s; 
 }
 
+/* Mengatur efek hover pada tombol tambah dan memberikan warna putih pada ikon di dalamnya */
 .btn-dk-tambah:hover { 
   background: #7a9610; 
 }
@@ -235,7 +237,7 @@
   width: 14px; 
   filter: brightness(0) invert(1); 
 }
-
+/* Mendesain tombol edit dengan gaya garis tepi (outline) yang akan berubah menjadi penuh warna saat disorot */
 .btn-edit-outline { 
   background: transparent; 
   border: 1.5px solid #8dae12; 
@@ -255,7 +257,7 @@
   background: #8dae12; 
   color: white; 
 }
-
+/* Mengatur wadah utama tabel agar memiliki sudut melengkung, bayangan halus, dan batas tinggi maksimal agar tetap rapi */
 .dk-table-container { 
   background: white; 
   border: 1px solid #ddd; 
@@ -267,7 +269,7 @@
   height: fit-content; 
   max-height: 100%; 
 }
-
+/* Mengatur judul di atas tabel dengan latar belakang hijau zaitun */
 .dk-table-header-title { 
   background-color: #8dae12; 
   color: white; 
@@ -276,7 +278,7 @@
   font-size: 15px; 
   flex-shrink: 0; 
 }
-
+/* Mengatur area tabel agar bisa digulir (scroll) dan menetapkan gaya sel tabel beserta barisnya */
 .dk-table-wrapper { 
   overflow: auto; 
 }
@@ -317,7 +319,7 @@
 .dk-table tbody tr:hover { 
   background: #fdfdfd; 
 }
-
+/* Mengatur gaya teks nama di tabel dan masker tampilan password (titik-titik) */
 .dk-td-name { 
   font-weight: 600; 
   color: #111; 
@@ -331,7 +333,7 @@
   font-size: 18px; 
   letter-spacing: 2px; 
 }
-
+/* Mengatur indikator status berupa titik kecil berwarna hijau (aktif) atau merah (tidak aktif) */
 .status-dot { 
   width: 10px; 
   height: 10px; 
@@ -346,7 +348,7 @@
 .status-dot.inactive { 
   background-color: #e74c3c; 
 }
-
+/* Mengatur tata letak kotak input pada halaman detail menjadi 3 kolom yang sejajar */
 .detail-form-grid { 
   display: grid; 
   grid-template-columns: repeat(3, 1fr); 
@@ -365,7 +367,7 @@
   font-weight: 700; 
   color: #222; 
 }
-
+/* Mengatur gaya kotak input untuk mode baca saja (putih bersih) dan mode edit (abu-abu saat belum diketik) */
 .input-read { 
   background: #ffffff; 
   border: 1px solid #eee; 
@@ -393,7 +395,7 @@
   background: #fff; 
   border-color: #8dae12; 
 }
-
+/* Mengatur pembungkus input password agar tombol ikon mata bisa diletakkan di sisi kanan dalam kotak */
 .pwd-wrapper { 
   position: relative; 
   display: flex; 
@@ -413,7 +415,7 @@
   color: #888; 
   display: flex; 
 }
-
+/* Mengatur bagian lampiran dokumen (KTP, Ijazah, dsb) dengan tata letak grid yang rapi */
 .docs-section { 
   margin-top: 20px; 
   border-top: 1px solid #eee; 
@@ -444,7 +446,7 @@
   font-weight: 600; 
   color: #333; 
 }
-
+/* Mengatur desain kotak lampiran dokumen (seperti kartu kecil) yang memiliki efek perubahan warna saat disentuh kursor */
 .doc-card { 
   background: #fff; 
   border: 1px solid #ddd; 
@@ -461,13 +463,13 @@
   border-color: #8dae12; 
   background: #fafafa; 
 }
-
+/* Mengatur warna dan gaya teks label di dalam kartu dokumen */
 .doc-text { 
   color: #8dae12; 
   font-size: 13px; 
   font-weight: 700; 
 }
-
+/* Mengatur posisi tombol simpan dan batal agar berada di pojok kanan bawah halaman detail */
 .detail-footer { 
   display: flex; 
   justify-content: flex-end; 
@@ -475,7 +477,7 @@
   margin-top: 40px; 
   padding-bottom: 20px; 
 }
-
+/* Mendesain tombol 'Batal' dengan warna putih netral dan tombol 'Simpan' dengan warna hijau zaitun yang mencolok */
 .btn-batal { 
   padding: 12px 25px; 
   border-radius: 10px; 
@@ -505,7 +507,7 @@
 .btn-simpan:hover { 
   background: #7a9610; 
 }
-
+/* Mengatur posisi dan tampilan kotak pilihan (dropdown) filter agar muncul tepat di bawah tombolnya dengan efek bayangan */
 .filter-wrapper { 
   position: relative; 
 }
@@ -522,7 +524,7 @@
   min-width: 160px; 
   z-index: 100; 
 }
-
+/* Mengatur gaya setiap item di dalam dropdown, termasuk efek warna latar saat kursor diarahkan ke pilihan tersebut */
 .dropdown-item { 
   padding: 10px 15px; 
   font-size: 13px; 
@@ -537,7 +539,7 @@
   background: #f5f5f5; 
   color: #111; 
 }
-
+/* Mengatur latar belakang gelap transparan yang menutupi seluruh layar saat jendela modal (tambah data) muncul */
 .modal-overlay-clean { 
   position: fixed; 
   top: 0; 
@@ -551,7 +553,7 @@
   z-index: 10000; 
   padding: 20px; 
 }
-
+/* Mengatur desain kotak jendela modal, termasuk ukuran maksimal, jarak dalam (padding), dan kemampuan gulir jika kontennya panjang */
 .modal-card { 
   background: white; 
   width: 700px; 
@@ -562,7 +564,7 @@
   border-radius: 16px; 
   box-shadow: 0 20px 50px rgba(0,0,0,0.2); 
 }
-
+/* Mengatur gaya tulisan judul modal dan membagi tata letak input di dalamnya menjadi dua kolom yang sejajar */
 .modal-title { 
   font-size: 24px; 
   font-weight: 800; 
@@ -576,26 +578,26 @@
   gap: 20px; 
   margin-bottom: 25px; 
 }
-
+/* Menyembunyikan elemen-elemen khusus navigasi mobile agar tidak muncul di layar besar (Desktop) */
 .mobile-topbar, 
 .btn-sidebar-close, 
 .sidebar-overlay { 
   display: none; 
 }
-
+/* Mengatur tata letak grid form dan dokumen menjadi 2 kolom saat dibuka di layar Tablet atau layar berukuran menengah */
 @media (max-width: 1024px) {
   .detail-form-grid, 
   .docs-grid { 
     grid-template-columns: repeat(2, 1fr); 
   }
 }
-
+/* Mengatur tampilan khusus HP: mengubah susunan menjadi vertikal, mengaktifkan navigasi atas (topbar), dan menyesuaikan ukuran elemen agar pas di layar kecil */
 @media (max-width: 768px) {
   .hrd-container { 
     flex-direction: column; 
     background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%); 
   }
-  
+  /* Memunculkan bar atas yang berisi logo dan tombol menu hamburger di perangkat mobile */
   .mobile-topbar { 
     display: flex; 
     align-items: center; 
@@ -624,7 +626,7 @@
     background-color: #fff; 
     border-radius: 3px; 
   }
-  
+  /* Mengatur layar gelap (overlay) dan posisi sidebar yang bisa muncul/sembunyi dengan animasi geser di HP */
   .sidebar-overlay { 
     display: block; 
     position: fixed; 
@@ -667,7 +669,7 @@
     font-size: 28px; 
     cursor: pointer; 
   }
-  
+  /* Menyesuaikan kotak konten utama, judul, dan tombol-tombol agar ukurannya lebih proporsional untuk jari pengguna HP */
   .main-content { 
     position: static; 
     flex: 1; 
@@ -706,7 +708,7 @@
     padding: 8px 16px; 
     font-size: 12px; 
   }
-
+  /* Mengubah semua tata letak grid (form, dokumen, dan modal) menjadi 1 kolom saja agar tidak berhimpitan di layar HP */
   .detail-form-grid, 
   .docs-grid, 
   .modal-grid-2 { 

@@ -10,6 +10,7 @@ import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 
+/* Menyimpan daftar menu yang ditampilkan pada sidebar */
 const MENU_ITEMS = [
   { path: "/managerCabang/dashboard", icon: iconDashboard, text: "Dashboard" },
   { path: "/managerCabang/datakaryawan", icon: iconKaryawan, text: "Data Karyawan", active: true },
@@ -17,6 +18,7 @@ const MENU_ITEMS = [
   { path: "/managerCabang/laporan", icon: iconLaporan, text: "Laporan" },
 ];
 
+/* Menampilkan icon mata tertutup */
 const EyeOffIcon = () => (
   <svg
     width="16"
@@ -33,12 +35,17 @@ const EyeOffIcon = () => (
   </svg>
 );
 
+/* Komponen utama halaman data karyawan manager cabang */
 const DataKaryawanManagerCabang = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  /* Membuka sidebar */
   const openSidebar = () => setSidebarOpen(true);
+
+  /* Menutup sidebar */
   const closeSidebar = () => setSidebarOpen(false);
 
   const [userData, setUserData] = useState({
@@ -52,6 +59,7 @@ const DataKaryawanManagerCabang = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [selectedCabang, setSelectedCabang] = useState("Semua Sub-Cabang");
 
+  /* Mengambil data user dan data karyawan sesuai cabang manager */
   useEffect(() => {
     if (user) {
       setUserData({
@@ -82,25 +90,30 @@ const DataKaryawanManagerCabang = () => {
     }
   }, [user]);
 
+  /* Mengecek apakah manager memiliki sub cabang */
   const hasSubCabang = userData.subCabang.length > 0;
 
+  /* Menghapus data login dan mengarahkan user ke halaman login */
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     navigate("/auth/login");
   };
 
+  /* Mengarahkan user ke halaman sesuai menu yang dipilih */
   const handleNav = (path) => {
     closeSidebar();
     navigate(path);
   };
 
+  /* Mengarahkan user ke halaman detail karyawan yang dipilih */
   const handleRowClick = (karyawan) => {
     navigate("/managerCabang/detailkaryawan", {
       state: { employee: karyawan },
     });
   };
 
+  /* Menyaring data karyawan berdasarkan sub cabang yang dipilih */
   const filteredData = karyawanList.filter((k) => {
     if (!hasSubCabang) return true;
     if (selectedCabang === "Semua Sub-Cabang") return true;

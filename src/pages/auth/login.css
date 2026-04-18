@@ -1,5 +1,8 @@
+/* PENGATURAN GAYA (CSS) TAMPILAN MOBILE UNTUK HALAMAN LOGIN
+   Berfungsi mengatur font utama, menyembunyikan elemen desktop, serta merapikan tata letak background, logo, dan form login agar responsif di HP. */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
+/* Mengatur font utama dan menghapus jarak (margin/padding) bawaan browser */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -7,13 +10,11 @@
   font-family: 'Inter', sans-serif;
 }
 
-/* ===== VISIBILITY ===== */
+/* Mengatur elemen mana yang disembunyikan atau ditampilkan khusus HP atau Desktop */
 .desktop-only { display: none !important; }
 .mobile-only  { display: block !important; }
 
-/* ======================================================
-   MOBILE LAYOUT — FIXED & POLISHED
-   ====================================================== */
+/* Membungkus seluruh halaman login agar posisinya terpusat di layar */
 .login-wrapper {
   background-color: #f0f2f5;
   min-height: 100vh;
@@ -21,7 +22,7 @@
   justify-content: center;
   align-items: flex-start;
 }
-
+/* Membatasi lebar maksimal konten agar pas seperti ukuran layar HP */
 .login-split-container {
   width: 100%;
   max-width: 450px;
@@ -31,7 +32,7 @@
   position: relative;
 }
 
-/* Mobile brand section - FIXED: Linear gradient added */
+/* Mengatur area atas (banner) dengan background warna gradient hijau */
 .login-brand-section {
   background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
   height: 48vh;
@@ -47,7 +48,7 @@
   overflow: hidden;
 }
 
-/* Subtle dot grid on mobile too */
+/* Membuat efek background titik-titik transparan di area banner */
 .login-brand-section .brand-dot-grid {
   position: absolute;
   inset: 0;
@@ -57,6 +58,7 @@
   z-index: 0;
 }
 
+/* Memastikan konten di dalam banner (seperti logo dan teks) berada tepat di tengah */
 .brand-content-centered {
   position: relative;
   z-index: 2;
@@ -66,23 +68,20 @@
   padding: 0 24px;
 }
 
-/* Mobile logo - UPDATED: Removed white circle, centers logo */
+/* Mengatur posisi dan ukuran gambar logo untuk tampilan mobile */
 .logo-mobile-wrapper {
-  margin-bottom: 0px; /* Keep gap */
+  margin-bottom: 0px; 
   display: flex; 
   justify-content: center;
   align-items: center;
-  /* Removed fixed width, height, background-color, border-radius, box-shadow, overflow */
 }
-
-/* Mobile logo image - UPDATED: Simple size and centered */
 .login-logo-mobile {
-  width: 210px; /* Adjust size as needed, e.g., slightly larger than before to be visible on new background */
+  width: 210px; 
   height: auto;
-  object-fit: contain; /* Ensure full logo is visible, no cropping */
-  /* Removed position: absolute, 115% width/height, and transform */
+  object-fit: contain; 
 }
 
+/* Mengatur ukuran font, ketebalan, dan jarak untuk teks judul dan subjudul */
 .login-brand-title {
   font-size: 26px;
   font-weight: 800;
@@ -95,12 +94,13 @@
   font-weight: 400;
 }
 
-/* Mobile form section */
+/* Membungkus area form login (input dan tombol) dengan margin dan padding */
 .login-form-section {
   padding: 0 20px 40px;
   z-index: 10;
 }
 
+/* Membuat kotak form berwarna putih, ujung melengkung, dengan efek bayangan */
 .login-form-box {
   background: #ffffff;
   margin-top: -40px;
@@ -108,8 +108,7 @@
   border-radius: 28px;
   box-shadow: 0 20px 50px rgba(0,0,0,0.12);
 }
-
-/* Mobile form header */
+/* Mengatur jarak dan gaya teks (ukuran, ketebalan, warna) untuk bagian judul form di tampilan HP */
 .mobile-form-header {
   margin-bottom: 28px;
 }
@@ -133,6 +132,7 @@
   font-weight: 400;
 }
 
+/* Mengatur desain kotak input (username/password), teks label, tata letak ikon, serta efek warna saat kotak input sedang diklik/diketik (focus) */
 .login-field-group                { margin-bottom: 18px; }
 .login-field-group label          { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px; color: #777; }
 .login-input-wrapper              { position: relative; display: flex; align-items: center; }
@@ -141,6 +141,7 @@
 .login-input-wrapper input:focus { border-color: #2fb800; background: #fff; box-shadow: 0 0 0 4px rgba(47,184,0,0.09); }
 .login-field-icon                 { position: absolute; left: 14px; width: 18px; height: 18px; opacity: 0.35; filter: grayscale(100%); }
 
+/* Mengatur tampilan tombol login utama, termasuk warna gradient hijau, bayangan, dan efek animasi saat tombol disorot (hover) atau diklik (active) */
 .login-btn-green {
   width: 100%;
   padding: 15px;
@@ -168,11 +169,10 @@
 .login-btn-green:hover  { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(50,180,0,0.38); }
 .login-btn-green:active { transform: translateY(0); }
 
+/* Mengatur gaya teks bantuan kecil yang letaknya ada di bawah tombol login */
 .login-help-text { text-align: center; font-size: 11px; color: #ccc; margin-top: 22px; }
 
-/* ======================================================
-   TABLET  641 – 1023px
-   ====================================================== */
+/* Mengatur tampilan khusus untuk perangkat Tablet (ukuran layar menengah), menyesuaikan ukuran kotak login, tata letak, dan mengecilkan ukuran logo agar pas. */
 @media (min-width: 641px) and (max-width: 1023px) {
   .login-wrapper {
     align-items: center;
@@ -210,10 +210,7 @@
   .login-form-section  { padding: 0 28px 32px; }
   .login-form-box      { margin-top: -50px; padding: 32px 28px; border-radius: 22px; }
 }
-
-/* ======================================================
-   DESKTOP  ≥ 1024px
-   ====================================================== */
+/* Mengatur tata letak utama khusus untuk layar Komputer/Laptop (Desktop). Tampilan berubah dari memanjang ke bawah menjadi dua sisi menyamping (kiri dan kanan). */
 @media (min-width: 1024px) {
 
   .desktop-only { display: flex !important; }
@@ -233,7 +230,7 @@
     flex-direction: row !important;
   }
 
-  /* ══ LEFT — Form panel ══ */
+  /* Mengatur panel bagian kiri (area form login) pada desktop, menghilangkan efek bayangan kotak putih, dan menambah garis pemisah tipis di sisi kanannya. */
   .login-form-section {
     flex: none;
     width: 44%;
@@ -269,7 +266,7 @@
     background: transparent;
   }
 
-  /* Desktop form header */
+  /* Mengatur tata letak, jarak, dan gaya tulisan judul (Amaga Corporation & Sistem Absensi) khusus pada area form desktop. */
   .desktop-form-header {
     margin-bottom: 40px;
     display: flex !important;
@@ -278,7 +275,6 @@
     gap: 0;
   }
 
-  /* "Amaga Corporation" text badge */
   .desktop-brand-name {
     display: inline-block;
     font-size: 20px;
@@ -289,7 +285,7 @@
     text-transform: uppercase;
     letter-spacing: 1px;
   }
-
+  /* Mengatur gaya tulisan (ukuran, warna, jarak) untuk judul utama dan subjudul pada area form di tampilan Desktop, serta menambahkan garis pemisah bergradasi di bawahnya. */
   .desktop-form-header h2 {
     font-size: 38px;
     font-weight: 800;
@@ -315,7 +311,7 @@
     margin-top: 18px;
   }
 
-  /* Fields */
+  /* Mengatur desain kotak input (username/password) khusus Desktop, termasuk teks label, posisi ikon, dan efek perubahan warna/bayangan saat kotak sedang diklik (focus). */
   .login-field-group       { margin-bottom: 20px; }
   .login-field-group label { font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #1c1b1b; margin-bottom: 6px; }
 
@@ -336,7 +332,8 @@
     outline: none;
   }
   .login-field-icon { width: 18px; height: 18px; left: 16px; opacity: 0.30; filter: grayscale(100%); }
-
+  
+  /* Mengatur ukuran, warna gradasi hijau, bayangan, dan efek animasi (bergerak naik sedikit) pada tombol login utama khusus untuk tampilan Desktop. */
   .login-btn-green {
     width: 100%;
     padding: 15px 0;
@@ -364,10 +361,10 @@
   }
   .login-btn-green:hover  { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(50,180,0,0.40); }
   .login-btn-green:active { transform: translateY(0); }
-
+  /* Memperbesar ukuran teks bantuan dan mengubah posisinya menjadi rata kiri (text-align: left) khusus di Desktop. */
   .login-help-text { font-size: 14px; color: #252323; margin-top: 22px; text-align: left; }
 
-  /* ══ RIGHT — Brand panel ══ */
+  /* Mengatur panel bagian kanan (area banner) pada desktop, membuatnya mengisi sisa layar, dan memberikan warna latar berupa gradasi hijau yang lebih kompleks. */
   .login-brand-section {
     flex: 1;
     height: 100vh;
@@ -388,7 +385,7 @@
     );
   }
 
-  /* Blurred glow blobs */
+  /* Menambahkan efek hiasan berupa lingkaran cahaya putih yang blur di pojok kiri atas dan lingkaran bergaris tipis di pojok kanan bawah banner. */
   .login-brand-section::before {
     content: '';
     position: absolute;
@@ -411,7 +408,7 @@
     z-index: 0;
   }
 
-  /* Dot grid */
+  /* Membuat pola titik-titik transparan berulang yang melapisi seluruh area banner desktop. */
   .brand-dot-grid {
     position: absolute !important;
     display: block !important;
@@ -422,7 +419,7 @@
     pointer-events: none;
   }
 
-  /* Brand content stack */
+  /* Mengatur konten di dalam banner (seperti logo dan teks) agar posisinya berada di atas efek background dan tersusun rapi di tengah. */
   .brand-content-centered {
     position: relative;
     z-index: 5;
@@ -434,7 +431,7 @@
     gap: 0;
   }
 
-  /* Logo panjang — white, NO card background */
+  /* Mengatur ukuran logo desktop agar berwarna putih (menggunakan filter), serta menambahkan garis pemisah tipis transparan di bawahnya. */
   .login-logo-desktop {
     display: block !important;
     width: 400px !important;
@@ -442,8 +439,6 @@
     filter: brightness(0) invert(1);
     margin-bottom: 32px;
   }
-
-  /* Divider line under logo */
   .brand-logo-divider {
     display: block !important;
     width: 500px;
@@ -453,7 +448,7 @@
     margin-bottom: 18px;
   }
 
-  /* Brand text */
+  /* Mengatur tata letak, ukuran font, bayangan, dan warna teks untuk deskripsi atau slogan yang berada di area banner. */
   .brand-text-desktop {
     display: flex !important;
     flex-direction: column !important;
@@ -475,7 +470,7 @@
     margin: 0;
   }
 
-  /* Feature pills */
+  /* Mendesain elemen berbentuk kapsul (label/tag) berisi info tambahan, dibuat berderet dengan efek latar belakang seperti kaca (blur). */
   .brand-pills {
     display: flex !important;
     gap: 8px;
@@ -501,9 +496,7 @@
   .brand-pill svg { width: 12px; height: 12px; flex-shrink: 0; }
 }
 
-/* ======================================================
-   LARGE DESKTOP  ≥ 1440px
-   ====================================================== */
+/* Mengatur penyesuaian khusus untuk layar monitor yang sangat besar (Ultra Wide/Layar Lebar). Bagian ini memastikan form tidak terlihat terlalu kecil dan font judul diperbesar agar tetap proporsional. */
 @media (min-width: 1440px) {
   .login-form-section     { width: 40%; padding: 0 5%; }
   .login-form-box         { max-width: 420px; }

@@ -11,6 +11,7 @@ import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 
+/* Menyimpan daftar menu sidebar manager cabang */
 const MENU_ITEMS = [
   { path: "/managerCabang/dashboard", icon: iconDashboard, text: "Dashboard" },
   { path: "/managerCabang/datakaryawan", icon: iconKaryawan, text: "Data Karyawan" },
@@ -18,6 +19,7 @@ const MENU_ITEMS = [
   { path: "/managerCabang/laporan", icon: iconLaporan, text: "Laporan", active: true },
 ];
 
+/* Mengubah format tanggal menjadi YYYY-MM-DD */
 const formatDate = (dateObj) => {
   const yyyy = dateObj.getFullYear();
   const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
@@ -25,6 +27,7 @@ const formatDate = (dateObj) => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
+/* Menentukan tanggal awal dan akhir berdasarkan periode cut off */
 const getCutoffDates = () => {
   const d = new Date();
   const date = d.getDate();
@@ -39,6 +42,7 @@ const getCutoffDates = () => {
   return { start, end };
 };
 
+/* Menentukan warna baris berdasarkan jumlah keterlambatan */
 const getRowTerlambatClass = (jumlahTerlambat) => {
   const angka = parseInt(jumlahTerlambat, 10);
   if (isNaN(angka)) return "";
@@ -48,14 +52,20 @@ const getRowTerlambatClass = (jumlahTerlambat) => {
   return "";
 };
 
+/* Komponen utama halaman laporan manager cabang */
 const LaporanManagerCabang = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  /* Membuka sidebar */
   const openSidebar = () => setSidebarOpen(true);
+
+  /* Menutup sidebar */
   const closeSidebar = () => setSidebarOpen(false);
 
+  /* Mengarahkan user ke halaman sesuai menu yang dipilih */
   const handleNav = (path) => {
     closeSidebar();
     navigate(path);
@@ -86,6 +96,7 @@ const LaporanManagerCabang = () => {
   });
   const [previewImage, setPreviewImage] = useState(null);
 
+  /* Mengambil data laporan berdasarkan cabang dan rentang tanggal */
   useEffect(() => {
     const fetchLaporan = async () => {
       if (!user?.cabang_id) return;
@@ -105,21 +116,25 @@ const LaporanManagerCabang = () => {
     fetchLaporan();
   }, [user, startDate, endDate]);
 
+  /* Menghapus data login dan mengarahkan user ke halaman login */
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     navigate("/auth/login");
   };
 
+  /* Menampilkan atau menyembunyikan filter sub cabang */
   const toggleFilter = () => {
     if (hasSubCabang) setShowFilter(!showFilter);
   };
 
+  /* Menyimpan sub cabang yang dipilih lalu menutup filter */
   const handleSelectFilter = (val) => {
     setSelectedFilter(val);
     setShowFilter(false);
   };
 
+  /* Menyaring data laporan berdasarkan nama karyawan dan cabang */
   const filteredData = (dataLaporan || []).filter((item) => {
     const namaKaryawan = item.nama || "";
     const pencarian = searchTerm || "";
@@ -132,6 +147,7 @@ const LaporanManagerCabang = () => {
     return matchName && matchBranch;
   });
 
+  /* Menghitung total seluruh data laporan */
   const getTotals = (dataArray) => {
     let t = { hadirApp: 0, hadirManual: 0, terlambat: 0, fimtk: 0, sakit: 0, izin: 0, cuti: 0, alpha: 0, lembur: 0 };
     if (!dataArray) return t; 
@@ -150,6 +166,7 @@ const LaporanManagerCabang = () => {
     return t;
   };
 
+  /* Menyiapkan data laporan untuk diexport ke file Excel */
   const handleExportExcel = () => {
     const exportData = filteredData.map((item) => ({
       "Nama Karyawan": item.nama || "-",
@@ -182,13 +199,16 @@ const LaporanManagerCabang = () => {
       "Lembur": `${totals.lembur} Jam`,
     });
 
+    /* Membuat worksheet dan workbook untuk file Excel */
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Kehadiran");
 
+    /* Mengunduh file Excel dengan nama sesuai periode tanggal */
     XLSX.writeFile(workbook, `Rekap_Kehadiran_Cabang_${startDate}_sd_${endDate}.xlsx`);
   };
 
+  /* Membuka modal detail berdasarkan jenis data yang dipilih */
   const openDetail = (item, jenis, jumlah) => {
     if (jumlah === "0" || jumlah === "-" || jumlah === "0 Jam") return;
 
@@ -262,16 +282,19 @@ const LaporanManagerCabang = () => {
       });
     }
 
+    /* Mengurutkan data detail berdasarkan tanggal terbaru */
     realData.sort((a, b) => {
       const dateA = new Date(a.tanggal || a.tanggalMulai).getTime();
       const dateB = new Date(b.tanggal || b.tanggalMulai).getTime();
       return dateB - dateA;
     });
 
+    /* Menyimpan data detail ke modal lalu menampilkan modal */
     setModalInfo({ title, nama, nik, jenisData: jenis, data: realData });
     setShowDetailModal(true);
   };
 
+  /* Menampilkan isi modal detail sesuai jenis data */
   const renderModalBody = (item, idx) => (
     <div key={idx} className="lap-modal-record-card">
       {item.tipe === "absen" && (

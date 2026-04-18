@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
+/* Reset standar untuk memastikan jarak (margin/padding) seragam di semua browser */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -7,6 +8,7 @@
   font-family: 'Inter', sans-serif;
 }
 
+/* Area paling luar yang mengisi seluruh layar dan mengatur posisi konten agar di tengah */
 .main-wrapper {
   background-color: #d1a5a5; 
   min-height: 100vh;
@@ -15,6 +17,7 @@
   align-items: flex-start;
 }
 
+/* Kotak utama pembungkus aplikasi dengan gaya tampilan layar HP (maksimal lebar 450px) */
 .card-container {
   width: 100%;
   max-width: 450px;
@@ -25,6 +28,7 @@
   flex-direction: column;
 }
 
+/* Bagian atas aplikasi dengan gradasi hijau dan sudut bawah yang melengkung cantik */
 .header-section {
   background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
   height: 45vh;
@@ -36,10 +40,12 @@
   border-bottom-right-radius: 40px;
 }
 
+/* Kelas bantuan (utility) untuk menyembunyikan elemen di Desktop atau HP */
 .desktop-only { display: none; }
 .mobile-only { display: block; }
 button.mobile-only { display: flex; } 
 
+/* Desain tombol kembali berbentuk bundar di pojok kiri atas layar */
 .btn-back {
   position: absolute;
   top: 30px;
@@ -56,21 +62,25 @@ button.mobile-only { display: flex; }
   z-index: 50;
 }
 
+/* Area khusus untuk memposisikan gambar atau logo pas di tengah-tengah */
 .logo-center-area {
   display: flex;
   justify-content: center;
   margin-bottom: 15px;
 }
 
+/* Pengaturan ukuran gambar agar tidak gepeng dan proporsional */
 .img-circle-content { 
   width: 180px; 
   height: 180px;
   object-fit: contain;
 }
 
+/* Gaya teks untuk judul dan sub-judul di bagian header aplikasi */
 .title-form { font-size: 30px; font-weight: 700; }
 .subtitle-form { font-size: 14px; opacity: 0.9; }
 
+/* Kotak putih tempat mengisi form, posisinya dibuat sedikit naik menimpa header hijau (overlapping) */
 .form-section {
   background: white;
   margin: -60px 25px 0 25px; 
@@ -80,14 +90,17 @@ button.mobile-only { display: flex; }
   z-index: 10;
 }
 
+/* Pembungkus judul form di dalam kotak putih */
 .form-header-wrapper {
   display: block; 
 }
 
+/* Sembunyikan tombol kembali versi desktop secara default (akan muncul lewat media query) */
 .btn-back-desktop {
   display: none;
 }
 
+/* Gaya teks judul form agar terlihat tegas dan tebal */
 .form-header-text { 
   font-size: 20px; 
   margin-bottom: 20px; 
@@ -95,17 +108,29 @@ button.mobile-only { display: flex; }
   color: #000;
 }
 
+/* Memberikan jarak antar kolom input dan menebalkan teks label petunjuknya */
 .input-group { margin-bottom: 18px; }
 label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #000; }
 
+/* Mengatur wadah tab (Masuk/Pulang/Istirahat) agar berjejer rapi ke samping */
 .tab-container { display: flex; gap: 8px; }
+
+/* Desain standar tombol tab dengan latar putih dan teks biasa */
 .tab-item { flex: 1; padding: 10px 5px; border: 1px solid #e0e0e0; border-radius: 8px; background: white; font-size: 12px; font-weight: 600; cursor: pointer; color: #000; }
+
+/* Mengubah warna tombol tab menjadi hijau pekat saat sedang dipilih (aktif) */
 .tab-item.active { background: #008000; color: white; border-color: #008000; font-weight: 700; }
 
+/* Wadah untuk kotak pilihan (dropdown) agar ikon panahnya bisa diatur posisinya */
 .select-wrapper { position: relative; display: flex; align-items: center; }
+
+/* Menghilangkan gaya bawaan browser pada kotak dropdown dan menggantinya dengan desain khusus */
 .custom-select { width: 100%; padding: 12px 15px; border: 1px solid #e0e0e0; border-radius: 10px; background: #ffffff; font-size: 13px; color: #333; cursor: pointer; appearance: none; -webkit-appearance: none; }
+
+/* Posisi ikon panah di dalam kotak dropdown (di pojok kanan) */
 .select-icon { position: absolute; right: 12px; pointer-events: none; color: #000; }
 
+/* Desain tombol buka kamera dengan warna latar biru muda yang lembut */
 .btn-camera-open {
   width: 100%;
   padding: 12px;
@@ -122,10 +147,16 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
   color: #333;
 }
 
+/* Mengatur baris waktu (misal: Jam Masuk & Jam Keluar) agar sejajar kiri-kanan */
 .time-row { display: flex; gap: 12px; margin-bottom: 18px; }
+
+/* Memaksa elemen untuk membagi ruang kosong secara rata (50:50) */
 .flex-1 { flex: 1; }
+
+/* Desain kotak penunjuk waktu digital dengan latar biru terang */
 .time-display { width: 100%; padding: 12px; background: #e3f2fd; border: 1px solid #bbdefb; border-radius: 10px; text-align: center; font-size: 13px; font-weight: 600; }
 
+/* Tombol aksi utama (Absen Sekarang) dengan ukuran besar dan warna hijau cerah */
 .btn-submit-primary {
   width: 100%;
   padding: 15px;
@@ -142,15 +173,28 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
   align-items: center;
 }
 
+/* Memberikan sedikit ruang kosong di bagian paling bawah halaman agar tidak terlalu mentok */
 .bottom-gap { height: 60px; }
 
+
+/* ==========================================================================
+   PENGATURAN TAMPILAN KHUSUS LAYAR HP (Maksimal 480px)
+   ========================================================================== */
 @media (max-width: 480px) {
+  /* Menghilangkan jarak luar dan mengubah latar belakang agar pas menempel di pinggir layar HP */
   .main-wrapper { background-color: #e0e0e0; padding: 0; }
+  
+  /* Menghilangkan batas melengkung dan bayangan pada kotak utama di layar kecil */
   .card-container { max-width: 100%; border-radius: 0; box-shadow: none; }
   .header-section { border-radius: 0; }
 }
 
+
+/* ==========================================================================
+   PENGATURAN TAMPILAN KHUSUS LAYAR LAPTOP/DESKTOP (Minimal 1024px)
+   ========================================================================== */
 @media (min-width: 1024px) {
+  /* Mengatur latar belakang halaman menjadi gradasi hijau penuh dan mengunci layar agar tidak bisa di-scroll ke bawah */
   .main-wrapper {
     background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
     height: 100vh;
@@ -158,6 +202,7 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     overflow: hidden; 
   }
 
+  /* Mengubah arah susunan dari yang tadinya bertumpuk atas-bawah menjadi menyamping kiri-kanan (row) */
   .card-container {
     max-width: 100% !important;
     width: 100%;
@@ -169,11 +214,13 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     background-color: transparent !important;
   }
 
+  /* Membalik logika utility class: Elemen desktop dimunculkan, elemen mobile disembunyikan */
   .desktop-only { display: flex !important; }
   button.desktop-only { display: flex !important; }
   div.desktop-only { display: flex !important; }
   .mobile-only { display: none !important; }
 
+  /* Menyulap header hijau (yang di HP ada di atas) menjadi bilah samping (sidebar) di sebelah kiri */
   .header-section {
     position: relative;
     width: 300px; 
@@ -189,6 +236,7 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     z-index: 100;
   }
 
+  /* Menggeser naik gambar profil, nama, dan jabatan agar posisinya pas di tengah sidebar Desktop */
   .header-section > .logo-center-area,
   .header-section > .title-form,
   .header-section > .subtitle-form {
@@ -196,6 +244,7 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     top: -40px; 
   }
 
+  /* Mengatur tata letak Logo Perusahaan khusus di layar Desktop agar menetap di pojok kiri atas */
   .sidebar-logo-desktop {
     position: absolute !important;
     top: 60px !important; 
@@ -207,6 +256,7 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     align-items: flex-start !important;
   }
 
+  /* Memperbesar ukuran logo perusahaan di Desktop dan mengubah warnanya jadi putih solid (invert) */
   .sidebar-logo-desktop img {
     width: 260px !important; 
     height: auto !important;
@@ -214,6 +264,7 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     opacity: 1 !important;
   }
 
+  /* Memastikan bingkai foto profil berada di posisi tengah dengan jarak bawah yang cukup */
   .logo-center-area {
     margin: 0 0 10px 0 !important;
     display: flex !important;
@@ -222,6 +273,7 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     height: auto !important;
   }
 
+  /* Desain bingkai foto profil karyawan di Desktop agar bulat sempurna dengan efek border transparan */
   .img-circle-content {
     width: 130px !important;
     height: 130px !important;
@@ -232,6 +284,7 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     object-fit: cover !important; 
   }
 
+  /* Memperbesar ukuran font nama karyawan dan memastikannya berada di tengah */
   .title-form {
     font-size: 24px !important;
     font-weight: 800 !important;
@@ -240,6 +293,7 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     text-align: center !important;
   }
 
+  /* Mengatur tampilan teks jabatan di bawah nama agar sedikit transparan dan elegan */
   .subtitle-form {
     font-size: 15px !important;
     color: white !important;
@@ -248,6 +302,7 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     text-align: center !important;
   }
 
+  /* Desain khusus tombol Keluar (Logout) yang menetap di paling bawah sidebar Desktop */
   .btn-logout-desktop {
     position: absolute !important;
     bottom: 40px !important; 
@@ -268,6 +323,7 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     align-items: center !important;
   }
 
+  /* Menambahkan garis pemisah tipis di atas tombol Keluar (Logout) */
   .btn-logout-desktop::before {
     content: "";
     position: absolute;
@@ -278,6 +334,7 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     background-color: rgba(255, 255, 255, 0.3); 
   }
 
+  /* Efek saat tombol keluar (logout) versi desktop disorot kursor: warna dibalik jadi putih solid */
   .btn-logout-desktop:hover {
     background-color: #ffffff !important; 
     color: #2fb800 !important; 
@@ -285,6 +342,7 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; 
   }
 
+  /* Mengatur area form utama di desktop agar mengisi sisa ruang di sebelah kanan sidebar */
   .form-section {
     flex: 1; 
     background-color: #fdfdfd; 
@@ -297,6 +355,7 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     max-width: none !important; 
   }
 
+  /* Membuat judul form dan tombol kembali di desktop sejajar menyamping, dilengkapi garis bawah pemisah */
   .form-header-wrapper {
     display: flex !important;
     align-items: center !important;
@@ -306,6 +365,7 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     margin-bottom: 30px !important;
   }
 
+  /* Desain tombol kembali khusus layar desktop (bulat dengan garis tepi abu-abu terang) */
   .btn-back-desktop {
     background: white !important;
     border: 1.5px solid #d1d1d1 !important;
@@ -319,32 +379,38 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     transition: all 0.2s !important;
   }
 
+  /* Efek berubah sedikit abu-abu saat tombol kembali di desktop disorot kursor */
   .btn-back-desktop:hover {
     background: #f0f0f0 !important;
   }
 
+  /* Memperbesar ukuran teks judul utama di form (misal: "Form Absensi") untuk layar besar */
   .form-header-text {
     font-size: 32px !important;
     margin-bottom: 0 !important; 
   }
 
+  /* Memperbesar ukuran tombol pilihan tab (Masuk/Istirahat/Pulang) di layar PC agar lebih proporsional */
   .tab-item {
     font-size: 20px !important; 
     padding: 15px 5px !important; 
     font-weight: 700 !important;
   }
 
+  /* Memperbesar ukuran teks label petunjuk (misal: "Pilih Cabang") */
   .input-group label {
     font-size: 18px;
     margin-bottom: 10px;
   }
 
+  /* Menyesuaikan ukuran kotak pilihan, tombol kamera, dan penunjuk waktu agar lebih lega diklik di PC */
   .custom-select, .btn-camera-open, .time-display {
     padding: 18px;
     font-size: 16px;
     border-radius: 15px;
   }
 
+  /* Memperbesar tombol utama "Absen Sekarang" agar lebih menonjol di layar Desktop */
   .btn-submit-primary {
     padding: 20px;
     font-size: 20px;
@@ -353,6 +419,7 @@ label { display: block; font-size: 16px; font-weight: 600; margin-bottom: 8px; c
     transition: all 0.3s ease;
   }
 
+  /* Efek saat tombol absen utama disorot: warna jadi hijau lebih gelap dan tombol seolah terangkat naik */
   .btn-submit-primary:hover {
     background-color: #3ca32b;
     transform: translateY(-3px);

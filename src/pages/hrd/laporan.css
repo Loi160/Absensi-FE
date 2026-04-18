@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
+/* Mengambil font Inter dari Google Fonts dan reset dasar untuk semua elemen */
 * { 
   margin: 0; 
   padding: 0; 
@@ -7,6 +8,7 @@
   font-family: 'Inter', sans-serif; 
 }
 
+/* Bungkus utama seluruh halaman dengan background gradasi hijau khas HRD */
 .hrd-container { 
   display: flex; 
   width: 100vw; 
@@ -16,6 +18,7 @@
   position: relative;
 }
 
+/* Area menu navigasi kiri (sidebar) dengan lebar yang sudah ditentukan */
 .sidebar { 
   width: 300px; 
   padding: 25px; 
@@ -25,12 +28,14 @@
   flex-shrink: 0; 
 }
 
+/* Mengatur posisi dan jarak area logo di dalam sidebar */
 .logo-area { 
   margin-top: 38px; 
   margin-bottom: 26px !important; 
   padding-left: 10px; 
 }
 
+/* Memastikan gambar logo menyesuaikan ukuran kotak dan difilter jadi warna putih bersih */
 .logo-img { 
   width: 100%; 
   max-width: 250px; 
@@ -39,12 +44,14 @@
   filter: grayscale(100%) brightness(0) invert(1) contrast(1000%) !important; 
 }
 
+/* Bungkus susunan tombol menu navigasi agar rapi dan berjarak vertikal */
 .menu-nav { 
   display: flex; 
   flex-direction: column; 
   gap: 18px; 
 }
 
+/* Desain tiap tombol menu, memakai flex agar posisi kiri-kanannya seimbang */
 .menu-item { 
   display: flex; 
   align-items: center; 
@@ -56,12 +63,14 @@
   color: #fff; 
 }
 
+/* Mengatur susunan ikon dan teks menu agar berdekatan di sebelah kiri */
 .menu-left { 
   display: flex; 
   align-items: center; 
   gap: 15px; 
 }
 
+/* Mengatur ukuran dan warna ikon utama pada setiap menu */
 .menu-icon-main { 
   width: 28px; 
   height: 28px; 
@@ -69,12 +78,14 @@
   transition: all 0.3s ease; 
 }
 
+/* Mengatur ukuran dan ketebalan teks di menu navigasi */
 .menu-text-main { 
   font-size: 18px; 
   font-weight: 600; 
   transition: all 0.3s ease; 
 }
 
+/* Ikon panah penunjuk (dropdown) dengan sedikit transparansi */
 .arrow-icon-main { 
   width: 20px; 
   height: 20px; 
@@ -83,10 +94,12 @@
   transition: all 0.3s ease; 
 }
 
+/* Memberikan efek putar ke atas pada ikon panah saat menu sedang dibuka */
 .arrow-icon-main.rotate-up { 
   transform: rotate(180deg); 
 }
 
+/* Gaya tampilan saat menu sedang diklik atau berada di halaman yang aktif */
 .menu-item.active { 
   background-color: #ffffff !important; 
   color: #2fb800 !important; 
@@ -94,20 +107,24 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
 }
 
+/* Mengubah warna ikon menjadi hijau saat menu dalam status aktif */
 .menu-item.active .menu-icon-main, 
 .menu-item.active .arrow-icon-main { 
   filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg) brightness(95%) contrast(105%) !important; 
   opacity: 1; 
 }
 
+/* Mengubah teks menu jadi warna hijau jika sedang aktif */
 .menu-item.active .menu-text-main { 
   color: #2fb800 !important; 
 }
 
+/* Efek sorot (hover) putih transparan buat menu yang sedang nggak aktif */
 .menu-item:hover:not(.active) { 
   background-color: rgba(255, 255, 255, 0.15); 
 }
 
+/* Area bawah sidebar (tempat tombol logout) dengan garis pemisah tipis */
 .sidebar-footer { 
   margin-top: auto; 
   padding-top: 25px; 
@@ -116,6 +133,7 @@
   padding-bottom: 15px; 
 }
 
+/* Desain tombol logout yang minimalis dengan bentuk kapsul dan border putih */
 .btn-logout { 
   background: transparent; 
   border: 1px solid rgba(255, 255, 255, 0.7); 
@@ -130,6 +148,7 @@
   border-radius: 50px; 
 }
 
+/* Tombol logout jadi warna putih solid dan teks hijau saat kena kursor */
 .btn-logout:hover { 
   background-color: #ffffff !important; 
   color: #2fb800 !important; 
@@ -137,6 +156,7 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; 
 }
 
+/* Kotak besar tempat konten laporan berada, ditaruh di sebelah kanan sidebar */
 .main-content { 
   position: absolute; 
   top: 25px; 
@@ -152,6 +172,7 @@
   box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
 }
 
+/* Mengatur bagian atas konten agar elemen kiri (judul) dan kanan sejajar di bawah */
 .content-header { 
   display: flex; 
   justify-content: space-between; 
@@ -162,6 +183,7 @@
 
 .header-text { align-self: flex-start; }
 
+/* Desain judul utama halaman dengan huruf tebal dan warna gelap */
 .header-text h1 { 
   font-size: 32px; 
   font-weight: 700; 
@@ -170,11 +192,13 @@
   letter-spacing: -0.5px; 
 }
 
+/* Deskripsi kecil di bawah judul */
 .header-text p { 
   color: #666; 
   font-size: 16px; 
 }
 
+/* Area khusus untuk kotak filter dan tombol, dibuat terpisah dari judul */
 .neo-filter-zone { 
   display: flex; 
   justify-content: space-between; 
@@ -184,11 +208,13 @@
   flex-shrink: 0; 
 }
 
+/* Mengelompokkan input pencarian/filter agar berjejer ke samping */
 .input-group-neo { 
   display: flex; 
   gap: 20px; 
 }
 
+/* Mengatur label dan kotak input agar berjejer dari atas ke bawah */
 .neo-field { 
   display: flex; 
   flex-direction: column; 
@@ -202,6 +228,7 @@
   margin-left: 5px; 
 }
 
+/* Desain kotak input tanggal dengan warna hijau zaitun khas dan ujung unik */
 .neo-input { 
   background-color: #8dae12; 
   color: white; 
@@ -214,10 +241,12 @@
   width: 200px; 
 }
 
+/* Menyesuaikan warna teks bayangan (placeholder) dan ikon kalender bawaan browser */
 .neo-input::placeholder { color: rgba(255, 255, 255, 0.8); }
 .neo-input::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
 .neo-input:disabled { opacity: 0.6; cursor: not-allowed; }
 
+/* Mengelompokkan tombol ekspor dan filter agar bertumpuk ke bawah di sisi kanan */
 .button-group-vertical-right { 
   display: flex; 
   flex-direction: column; 
@@ -225,6 +254,7 @@
   align-items: flex-end; 
 }
 
+/* Tombol utama untuk mencetak/ekspor laporan ke Excel (warna hijau solid) */
 .btn-neo-print-top { 
   background-color: #8dae12; 
   color: white; 
@@ -243,8 +273,10 @@
 
 .btn-neo-print-top:hover { background-color: #7a9610; }
 
+/* Wadah relatif agar menu dropdown (pop-up) muncul tepat di bawah tombol pemicunya */
 .dropdown-neo-bottom-wrapper { position: relative; display: inline-block; }
 
+/* Tombol sekunder untuk filter cabang (desain garis luar/outline hijau) */
 .btn-neo-filter-bottom { 
   background: white; 
   color: #8dae12; 
@@ -260,6 +292,7 @@
   transition: 0.2s; 
 }
 
+/* Menyesuaikan warna ikon filter agar sama dengan hijau border-nya */
 .btn-neo-filter-bottom img { 
   width: 10px; 
   filter: invert(56%) sepia(88%) saturate(354%) hue-rotate(34deg) brightness(94%) contrast(87%); 
@@ -268,6 +301,7 @@
 
 .btn-neo-filter-bottom img.rotate { transform: rotate(180deg); }
 
+/* Kotak melayang (dropdown) yang berisi daftar pilihan filter cabang */
 .neo-dropdown-list-right { 
   position: absolute; 
   top: 120%; 
@@ -283,6 +317,7 @@
   flex-direction: column; 
 }
 
+/* Tampilan tiap item pilihan di dalam kotak dropdown filter */
 .neo-drop-item { 
   padding: 10px 15px; 
   border-radius: 8px; 
@@ -297,6 +332,7 @@
 
 .neo-drop-item:hover { background: #f5f5f5; color: #111; }
 
+/* Kotak pembungkus utama untuk area tabel dengan sudut melengkung dan garis luar halus */
 .neo-table-card { 
   background: white; 
   border-radius: 20px; 
@@ -309,6 +345,7 @@
   box-shadow: 0 4px 10px rgba(0,0,0,0.03);
 }
 
+/* Bagian paling atas dari kotak tabel yang berwarna hijau pekat */
 .neo-table-header { 
   background: #8dae12; 
   color: white; 
@@ -318,9 +355,11 @@
   flex-shrink: 0; 
 }
 
+/* Area tabel yang bisa di-scroll ke kanan/kiri dan bawah */
 .neo-table-wrapper { overflow: auto; }
 .neo-table { width: 100%; border-collapse: collapse; min-width: 900px; }
 
+/* Desain kepala kolom (header tabel) agar teksnya di tengah dan menempel saat di-scroll (sticky) */
 .neo-table th { 
   text-align: center; 
   padding: 15px 10px; 
@@ -335,12 +374,15 @@
   z-index: 10; 
 }
 
+/* Pengecualian: kolom pertama (Nama Karyawan) diatur rata kiri */
 .neo-table th:first-child { text-align: left; padding-left: 25px; }
 .neo-table td { padding: 15px 10px; border-bottom: 1px solid #f9f9f9; font-size: 14px; vertical-align: middle; }
 .neo-td-name { font-weight: 700; color: #111; padding-left: 25px !important; }
 
+/* Bungkus untuk menampung dua kotak lencana kecil (badge) agar berdampingan di tengah sel tabel */
 .neo-dual-badge-container { display: flex; justify-content: center; gap: 6px; }
 
+/* Gaya dasar untuk kotak angka (badge) di dalam tabel */
 .neo-badge { 
   background: #eee; 
   padding: 6px 12px; 
@@ -353,35 +395,47 @@
   color: #444; 
 }
 
+/* Membuat badge bisa diklik dan membesar halus saat diarahkan kursor */
 .clickable-badge { cursor: pointer; transition: all 0.2s ease; }
 .clickable-badge:hover { transform: scale(1.15); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+
+/* Varian warna badge khusus: absen manual (biru muda), izin (biru), dan alpha (merah muda) */
 .neo-badge.manual { background: #e3f2fd; color: #1565c0; }
 .neo-badge.info { background: #f0f7ff; color: #2980b9; }  
 .neo-badge.alert { background: #fff5f4; color: #e74c3c; } 
 
+/* Sistem pewarnaan peringatan keterlambatan. Kuning: teguran awal */
 tr.row-warn-yellow td { background-color: #fff3bf !important; border-bottom: 1px solid #f59f00 !important; }
+/* Oranye: teguran menengah */
 tr.row-warn-orange td { background-color: #ffd8a8 !important; border-bottom: 1px solid #e8590c !important; }
+/* Merah muda pekat: teguran keras/SP */
 tr.row-warn-red td { background-color: #ffc9c9 !important; border-bottom: 1px solid #e03131 !important; }
 
+/* Menyesuaikan warna teks nama karyawan sesuai level keterlambatannya */
 tr.row-warn-yellow .neo-td-name { color: #b06500 !important; } 
 tr.row-warn-orange .neo-td-name { color: #d9480f !important; } 
 tr.row-warn-red .neo-td-name { color: #c92a2a !important; }    
 
+/* Menyesuaikan warna badge angka keterlambatan agar senada dengan warna barisnya */
 tr.row-warn-yellow .neo-badge.warn-badge { background-color: #f59f00; color: white; box-shadow: 0 2px 6px rgba(245, 159, 0, 0.4); }
 tr.row-warn-orange .neo-badge.warn-badge { background-color: #e8590c; color: white; box-shadow: 0 2px 6px rgba(232, 89, 12, 0.4); }
 tr.row-warn-red .neo-badge.warn-badge { background-color: #e03131; color: white; box-shadow: 0 2px 6px rgba(224, 49, 49, 0.4); }
 
+/* Pengaturan perataan teks ke tengah dan gaya teks jika tabel belum ada data */
 .text-center { text-align: center; }
 .empty-state { text-align: center; padding: 40px; color: #888; font-style: italic; font-size: 14px; }
 
+/* Desain baris total di paling bawah tabel dengan teks yang lebih tebal dan latar belakang abu-abu */
 .neo-table tfoot tr td { background-color: #f5f5f5 !important; border-top: 2px solid #ccc; padding: 12px 10px; font-weight: 800;}
 .neo-table tfoot .neo-badge { background-color: #fff; border: 1px solid #ddd; }
 
+/* Desain scrollbar khusus untuk tabel agar terlihat bersih dan berubah warna saat di-hover */
 .neo-table-wrapper::-webkit-scrollbar { width: 8px; height: 8px; }
 .neo-table-wrapper::-webkit-scrollbar-track { background: transparent; }
 .neo-table-wrapper::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
 .neo-table-wrapper::-webkit-scrollbar-thumb:hover { background: #8dae12; }
 
+/* Lapisan gelap transparan yang menutupi layar saat jendela detail laporan terbuka */
 .modal-overlay-lap { 
   position: fixed; 
   top: 0; 
@@ -396,6 +450,7 @@ tr.row-warn-red .neo-badge.warn-badge { background-color: #e03131; color: white;
   padding: 20px;
 }
 
+/* Kotak utama modal dengan latar putih, batas maksimal lebar, dan efek bayangan (shadow) */
 .modal-content-lap { 
   background: white; 
   width: 650px; 
@@ -407,6 +462,7 @@ tr.row-warn-red .neo-badge.warn-badge { background-color: #e03131; color: white;
   overflow-y: auto; 
 }
 
+/* Bagian paling atas modal yang berisi judul dan tombol tutup */
 .modal-header-lap { 
   display: flex; 
   justify-content: space-between; 
@@ -417,31 +473,56 @@ tr.row-warn-red .neo-badge.warn-badge { background-color: #e03131; color: white;
 }
 
 .modal-header-lap h2 { font-size: 20px; font-weight: 800; color: #111; margin:0;}
+
+/* Desain tombol silang (X) untuk menutup modal detail */
 .close-btn-lap { background: none; border: none; font-size: 28px; cursor: pointer; color: #aaa; transition: 0.2s; line-height: 1;}
 .close-btn-lap:hover { color: #111; }
 
+/* Desain kotak yang membungkus setiap riwayat/catatan laporan di dalam modal */
 .lap-modal-record-card { border: 1px solid #eee; border-radius: 12px; padding: 20px; margin-bottom: 20px; background: #fafafa; }
+
+/* Tata letak untuk membuat kolom-kolom data sejajar dalam satu baris */
 .lap-modal-row { display: flex; gap: 20px; margin-bottom: 15px; }
 .lap-modal-row:last-child { margin-bottom: 0; }
+
+/* Mengelompokkan label dan kotak nilai data agar tersusun rapi dari atas ke bawah */
 .lap-modal-group { flex: 1; display: flex; flex-direction: column; gap: 6px; }
 .lap-modal-label { font-size: 13px; font-weight: 700; color: #111; }
+
+/* Desain kotak nilai data (hanya baca) agar terlihat seperti input standar */
 .lap-modal-input { border: 1px solid #ddd; background: #fff; padding: 10px 15px; border-radius: 8px; font-size: 13px; color: #555; cursor: default; min-height: 40px; display: flex; align-items: center; }
 
+/* Area khusus untuk menampilkan foto bukti kehadiran atau surat izin */
 .lap-foto-container { display: flex; gap: 20px; margin-top: 10px; }
+
+/* Bingkai pembungkus foto dengan batas melengkung dan garis tepi */
 .lap-foto-box { flex: 1; position: relative; border-radius: 12px; overflow: hidden; height: 180px; border: 1px solid #ddd; background-color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; }
 .lap-foto-img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Pita hitam transparan di bagian bawah foto untuk keterangan (Masuk/Pulang) */
 .lap-foto-overlay { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0, 0, 0, 0.7); color: white; text-align: center; padding: 8px 0; font-size: 12px; font-weight: 600; }
+
+/* Tombol kecil berbentuk bulat di pojok kanan foto untuk memperbesar gambar */
 .lap-zoom-btn { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; background: rgba(255, 255, 255, 0.9); border: none; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-size: 14px; transition: 0.2s; }
 .lap-zoom-btn:hover { background: #fff; transform: scale(1.1); }
+
+/* Teks pengganti yang muncul jika foto bukti tidak tersedia atau absen diinput manual */
 .lap-manual-placeholder { text-align: center; display: flex; flex-direction: column; gap: 5px; }
 .lap-manual-placeholder span { font-weight: 700; font-size: 14px; color: #555; }
 .lap-manual-placeholder small { font-size: 12px; color: #888; font-style: italic; }
 
+/* Pengaturan layar gelap saat foto diperbesar ke mode pratinjau penuh (fullscreen) */
 .lap-preview-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 99999; }
+
+/* Desain gambar pada mode pratinjau agar tetap proporsional dan tidak pecah */
 .lap-preview-img { max-width: 90%; max-height: 90vh; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+
+/* Tombol silang besar di pojok kanan atas untuk keluar dari mode pratinjau foto */
 .lap-preview-close { position: absolute; top: 20px; right: 30px; background: none; border: none; color: white; font-size: 40px; cursor: pointer; transition: 0.2s; }
 .lap-preview-close:hover { transform: scale(1.2); }
 
+/* ==== PENGATURAN MODE CETAK (PRINT) ==== */
+/* Menyembunyikan elemen navigasi (sidebar) dan hanya menampilkan konten inti (tabel) */
 @media print { 
     @page { margin: 0; } 
 
@@ -476,8 +557,9 @@ tr.row-warn-red .neo-badge.warn-badge { background-color: #e03131; color: white;
     
     .no-print, .sidebar, .mobile-topbar, .neo-filter-zone, .sidebar-overlay { 
         display: none !important; 
-    } 
+    }
     
+    /* Menghilangkan bayangan dan lengkungan pada kotak tabel agar hasil cetak (print) lebih bersih */
     .neo-table-card { 
         border: 1px solid #000 !important; 
         box-shadow: none !important; 
@@ -486,16 +568,19 @@ tr.row-warn-red .neo-badge.warn-badge { background-color: #e03131; color: white;
         border-radius: 0 !important;
     }
     
+    /* Memastikan seluruh data tabel bisa tercetak tanpa terpotong batas tinggi */
     .neo-table-wrapper { 
         overflow: visible !important; 
         max-height: none !important; 
     }
     
+    /* Mengatur tabel agar lebarnya menyesuaikan kertas */
     .neo-table { 
         width: 100% !important; 
         table-layout: auto !important; 
     }
     
+    /* Mengecilkan teks dan menambahkan garis batas (border) pada setiap sel agar rapi di kertas */
     .neo-table th, .neo-table td { 
         padding: 8px 5px !important; 
         font-size: 11px !important; 
@@ -504,11 +589,13 @@ tr.row-warn-red .neo-badge.warn-badge { background-color: #e03131; color: white;
         border: 1px solid #ccc !important; 
     }
     
+    /* Mempertahankan warna hijau zaitun pada kepala tabel saat dicetak */
     .neo-table th { 
         background-color: #8dae12 !important; 
         color: white !important; 
     }
 
+    /* Menghilangkan warna latar badge agar tampil sebagai teks biasa saat diprint */
     .neo-badge { 
         border: none !important; 
         background: transparent !important; 
@@ -519,54 +606,85 @@ tr.row-warn-red .neo-badge.warn-badge { background-color: #e03131; color: white;
         font-weight: 700 !important;
     }
     
+    /* Mencegah satu baris tabel terpotong menjadi dua halaman yang berbeda */
     tr { page-break-inside: avoid !important; }
+    
+    /* Memaksa browser/printer untuk mencetak warna latar persis seperti di layar */
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
 
+/* Menyembunyikan elemen navigasi khusus HP saat dibuka di layar komputer (Desktop) */
 .mobile-topbar, .btn-sidebar-close, .sidebar-overlay { display: none; }
 
+/* ==== PENGATURAN RESPONSIF UNTUK LAYAR HP (Maksimal 768px) ==== */
 @media (max-width: 768px) {
+  /* Mengubah susunan container jadi vertikal dan menyesuaikan gradasi latar belakang */
   .hrd-container { flex-direction: column; height: 100vh; overflow: hidden; position: relative; background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%); }
   
+  /* Menampilkan bar navigasi atas di HP agar admin bisa membuka menu */
   .mobile-topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: transparent; flex-shrink: 0; z-index: 200; }
+  
+  /* Membuat logo di HP berwarna putih bersih */
   .mobile-topbar-logo { width: 130px; display: block; filter: grayscale(100%) brightness(0) invert(1); }
+  
+  /* Desain tombol menu hamburger (tiga garis) khusus layar sentuh */
   .btn-hamburger { background: transparent; border: none; cursor: pointer; display: flex; flex-direction: column; gap: 5px; padding: 4px; }
   .btn-hamburger span { display: block; width: 26px; height: 3px; background-color: #ffffff; border-radius: 3px; }
 
+  /* Menyiapkan lapisan gelap (overlay) saat menu samping dibuka di HP */
   .sidebar-overlay { display: block; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); z-index: 300; opacity: 0; pointer-events: none; transition: 0.3s; }
   .sidebar-overlay.active { opacity: 1; pointer-events: all; }
 
+  /* Menyembunyikan menu samping (sidebar) di luar layar kiri, siap digeser masuk (slide-in) */
   .sidebar { position: fixed; top: 0; left: 0; width: 280px; height: 100vh; z-index: 400; padding: 25px 20px; transform: translateX(-100%); transition: 0.3s; background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%); }
   .sidebar.open { transform: translateX(0); }
+  
+  /* Tombol silang untuk menutup sidebar di HP */
   .btn-sidebar-close { display: flex; align-self: flex-end; background: transparent; border: none; color: #fff; font-size: 28px; cursor: pointer; padding: 0 4px; margin-bottom: 10px; }
 
+  /* Membuat area konten memanjang ke bawah dengan sudut melengkung di bagian atas saja */
   .main-content { position: static; flex: 1; height: auto; border-radius: 28px 28px 0 0; margin: 0; padding: 25px 20px; overflow-y: auto; overflow-x: hidden; }
 
+  /* Mengecilkan ukuran teks judul laporan agar muat di layar kecil */
   .content-header { margin-bottom: 15px; }
   .header-text h1 { font-size: 24px; letter-spacing: -0.3px; }
   .header-text p { font-size: 13px; margin-bottom: 10px; }
 
+  /* Mengubah susunan area filter dan tombol aksi agar bertumpuk rapi di HP */
   .neo-filter-zone { flex-direction: column-reverse; align-items: stretch; gap: 0px; margin-bottom: 25px; }
   .button-group-vertical-right { flex-direction: row; justify-content: flex-end; width: 100%; gap: 12px; align-items: center; }
 
+  /* Mengecilkan ukuran tombol cetak dan filter */
   .btn-neo-print-top { padding: 8px 16px; font-size: 12px; margin: 0; }
   .btn-neo-filter-bottom { padding: 8px 16px; font-size: 12px; }
 
+  /* Mengatur tata letak kotak pencarian dan filter tanggal agar fleksibel */
   .input-group-neo { flex-direction: row; flex-wrap: wrap; width: 100%; gap: 12px; }
+  /* Kotak pencarian nama mengambil lebar penuh (100%) */
   .input-group-neo .neo-field:nth-child(1) { width: 100%; } 
+  /* Kotak filter tanggal awal dan akhir masing-masing mengambil separuh layar (50%) */
   .input-group-neo .neo-field:nth-child(2),
   .input-group-neo .neo-field:nth-child(3) { width: calc(50% - 6px); } 
   
+  /* Menormalkan bentuk lengkungan kotak input di HP */
   .neo-input { width: 100%; border-radius: 8px; padding: 10px 15px; }
 
+  /* Mengizinkan tabel digeser (scroll) ke kanan-kiri tanpa merusak layout halaman */
   .neo-table-card { overflow-x: auto; flex: none; height: fit-content; }
   .neo-table-wrapper { overflow-x: auto; max-height: 55vh; }
   .neo-table { min-width: 800px; }
+  
+  /* Mengecilkan ruang (padding) antar sel tabel di HP */
   .neo-table th, .neo-table td { padding: 10px 8px; font-size: 11px; white-space: nowrap; }
 
+  /* Menyesuaikan ukuran kotak modal (detail laporan) agar nyaman dilihat di HP */
   .modal-content-lap { padding: 25px 20px; border-radius: 14px; max-height: 85vh; }
   .modal-header-lap h2 { font-size: 18px; }
+  
+  /* Mengubah susunan baris data di dalam modal menjadi vertikal */
   .lap-modal-row { flex-direction: column; gap: 12px; }
+  
+  /* Menyesuaikan area foto bukti agar bertumpuk ke bawah (bukan ke samping) */
   .lap-foto-container { flex-direction: column; height: auto; gap: 12px; }
   .lap-foto-box { height: 200px; }
 }

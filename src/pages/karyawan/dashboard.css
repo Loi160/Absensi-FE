@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
+/* Mengambil font Inter dari Google Fonts dan mereset margin/padding bawaan browser */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -7,6 +8,7 @@
   font-family: 'Inter', sans-serif;
 }
 
+/* Bungkus terluar untuk memastikan aplikasi berada tepat di tengah layar perangkat */
 .main-wrapper {
   background-color: #e5e5e5;
   min-height: 100vh;
@@ -14,6 +16,7 @@
   justify-content: center;
 }
 
+/* Wadah utama aplikasi, dibatasi maksimal 480px agar terlihat pas seperti tampilan HP */
 .card-container {
   width: 100%;
   max-width: 480px; 
@@ -25,9 +28,11 @@
   overflow-x: hidden; 
 }
 
+/* Kelas bantuan (utility) untuk mengatur mana yang tampil di HP dan mana yang di Desktop */
 .desktop-only { display: none !important; }
 .mobile-only { display: flex !important; }
 
+/* Bagian header atas dengan latar belakang gradasi hijau dan sudut bawah melengkung */
 .header-section {
   background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
   height: 40vh; 
@@ -40,6 +45,7 @@
   border-bottom-right-radius: 40px;
 }
 
+/* Mengatur baris atas header di HP (untuk profil dan tombol logout) agar sejajar menyamping */
 .header-top-mobile {
   display: flex !important;
   justify-content: space-between;
@@ -48,12 +54,14 @@
   padding: 0 10px;
 }
 
+/* Mengelompokkan foto profil dan sapaan agar berdekatan */
 .header-user-info {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
+/* Desain foto profil bulat dengan garis tepi putih transparan */
 .mobile-profile-img {
   width: 55px;
   height: 55px;
@@ -63,6 +71,7 @@
   border: 2px solid rgba(255,255,255,0.8);
 }
 
+/* Susunan teks sapaan (Nama & Jabatan) agar rata kiri dan tersusun atas-bawah */
 .mobile-greeting {
   display: flex;
   flex-direction: column;
@@ -73,9 +82,11 @@
 .mobile-greeting h2 { font-size: 18px; font-weight: 800; margin: 0; color: white; }
 .mobile-greeting p { font-size: 13px; font-weight: 500; margin: 0; opacity: 0.9; color: white; }
 
+/* Tombol logout khusus HP tanpa latar belakang (hanya ikon) */
 .mobile-header-logout { background: transparent; border: none; cursor: pointer; }
 .mobile-header-logout img { width: 28px; height: 28px; }
 
+/* Wadah untuk konten di bawah header agar posisinya di atas layer latar belakang */
 .dashboard-content {
   position: relative;
   z-index: 10; 
@@ -83,6 +94,7 @@
   flex-direction: column;
 }
 
+/* Kartu putih utama (Info Card) yang posisinya sengaja ditarik naik menimpa header hijau (overlapping) */
 .info-card {
   position: relative;
   z-index: 20;
@@ -98,12 +110,14 @@
   align-items: center;
 }
 
+/* Pengaturan logo perusahaan yang ada di dalam Info Card putih */
 .company-logo {
   width: 250px; 
   margin-bottom: 25px; 
   display: block;
 }
 
+/* Mengatur baris tanggal dan waktu agar letaknya sejajar dan saling berjauhan (kiri-kanan) */
 .datetime-row {
   display: flex;
   width: 100%;
@@ -111,6 +125,7 @@
   align-items: center; 
 }
 
+/* Kotak khusus untuk bagian tanggal, isinya disusun dari atas ke bawah rata kiri */
 .date-box {
   flex: 1; 
   display: flex;
@@ -119,6 +134,7 @@
   padding-left: 5px; 
 }
 
+/* Kotak khusus untuk jam/waktu, dikasih sedikit jarak kiri biar nggak terlalu nempel ke garis tengah */
 .time-box {
   flex: 1; 
   display: flex;
@@ -127,6 +143,7 @@
   padding-left: 10px; 
 }
 
+/* Gaya tulisan untuk label kecil di atas tanggal/waktu (misal: tulisan "Tanggal Hari Ini") */
 .dt-label { 
   font-size: 14px; 
   font-weight: 400; 
@@ -138,6 +155,7 @@
   margin-bottom: 8px;
 }
 
+/* Mengubah ikon di sebelah label menjadi warna abu-abu (grayscale) biar lebih kalem */
 .black-icon { 
   width: 16px; 
   height: 16px; 
@@ -145,6 +163,7 @@
   filter: grayscale(1);
 }
 
+/* Desain teks utama untuk tanggal biar tebal, gelap, dan nggak turun ke baris baru kalau kepanjangan */
 .dt-value { 
   font-size: 14px; 
   color: #222; 
@@ -153,6 +172,7 @@
   white-space: nowrap; 
 }
 
+/* Desain khusus untuk angka jam digital biar ukurannya lebih besar dan paling menonjol */
 .time-big { 
   font-size: 18px; 
   font-weight: 800; 
@@ -162,6 +182,7 @@
   white-space: nowrap; 
 }
 
+/* Garis pemisah tipis vertikal di antara kotak tanggal dan kotak waktu */
 .divider-vertical { 
   width: 1.5px; 
   background-color: #eee; 
@@ -169,6 +190,7 @@
   margin: 0 10px; 
 }
 
+/* Kotak melayang (card) putih besar tempat menaruh tombol-tombol menu utama karyawan */
 .menu-card {
   margin: 20px 20px 40px 20px;
   background: #FFFFFF;
@@ -182,6 +204,7 @@
   gap: 15px;
 }
 
+/* Desain tombol menu (Absen, Izin, dll) dengan latar biru terang, sudut melengkung, dan bayangan */
 .menu-btn-item {
   background-color: #0029FF; 
   color: white;
@@ -196,25 +219,35 @@
   box-shadow: 0 4px 15px rgba(0, 41, 255, 0.2);
 }
 
+/* Wadah untuk ikon di dalam tombol menu agar posisinya pas di tengah kotak */
 .icon-box { display: flex; justify-content: center; align-items: center; }
+
+/* Memaksa ikon gambar di dalam tombol menu menjadi warna putih solid */
 .white-icon { width: 40px; height: 40px; filter: brightness(0) invert(1); }
 
+/* Mengatur susunan teks (Judul & Subjudul) di dalam tombol agar bertumpuk rapi ke bawah */
 .text-content {
   display: flex;
   flex-direction: column;
   text-align: left;
 }
 
+/* Gaya tulisan untuk judul menu (misal: "Absensi") biar tebal dan tegas */
 .btn-title { font-size: 18px; font-weight: 800; margin-bottom: 2px; }
+
+/* Gaya tulisan untuk penjelasan singkat (sub-judul) di bawah judul menu agar sedikit transparan */
 .btn-subtitle { font-size: 12px; opacity: 0.85; font-weight: 400; }
 
+
 @media (min-width: 1024px) {
+  /* Mengubah background utama jadi gradasi hijau penuh dan mengunci layar agar tidak bisa di-scroll ke bawah */
   .main-wrapper {
     background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
     height: 100vh;
     overflow: hidden; 
   }
 
+  /* Mengubah arah susunan yang asalnya bertumpuk atas-bawah (HP) menjadi menyamping kiri-kanan (PC) */
   .card-container {
     max-width: 100% !important;
     width: 100%;
@@ -224,9 +257,11 @@
     height: 100vh;
   }
 
+  /* Memastikan elemen khusus PC muncul dan elemen khusus HP disembunyikan sepenuhnya */
   .desktop-only { display: flex !important; }
   .mobile-only { display: none !important; }
 
+  /* Menyulap header atas menjadi bilah samping (sidebar) yang menetap di sisi kiri layar */
   .header-section {
     position: relative; 
     width: 300px;
@@ -242,11 +277,13 @@
     background: transparent !important;
   }
 
+  /* Menggeser naik posisi foto profil dan nama agar terlihat lebih seimbang di tengah sidebar */
   .logo-center-area, .title-form, .subtitle-form {
     position: relative;
     top: -40px; 
   }
 
+  /* Menahan posisi logo perusahaan agar selalu berada di pojok kiri atas */
   .sidebar-logo-desktop {
     position: absolute !important;
     top: 60px !important; 
@@ -258,13 +295,17 @@
     align-items: flex-start !important;
   }
 
+  /* Memperbesar ukuran logo dan memastikannya berwarna putih bersih di atas latar hijau */
   .sidebar-logo-desktop img {
     width: 260px !important; 
     height: auto !important;
     filter: brightness(0) invert(1) !important; 
   }
 
+  /* Mengatur jarak bawah untuk area wadah foto profil */
   .logo-center-area { margin-bottom: 10px !important; }
+  
+  /* Desain bingkai bulat untuk foto profil dengan garis luar putih transparan */
   .img-circle-content {
     width: 130px !important;
     height: 130px !important;
@@ -273,9 +314,13 @@
     object-fit: cover;
   }
 
+  /* Gaya tulisan untuk nama karyawan, dibuat tebal, besar, dan posisinya di tengah */
   .title-form { font-size: 24px !important; font-weight: 800 !important; text-align: center; color: white !important; margin: 0 !important;}
+  
+  /* Gaya tulisan untuk jabatan, ukurannya lebih kecil dan warnanya sedikit diredam (transparan) */
   .subtitle-form { font-size: 15px !important; margin-top: 5px !important; text-align: center; opacity: 0.9; color: white !important;}
 
+  /* Desain dan tata letak tombol keluar (logout) agar menetap di bagian paling bawah sidebar */
   .btn-logout-desktop {
     position: absolute !important;
     bottom: 40px !important; 
@@ -296,6 +341,7 @@
     transform: none !important;
   }
 
+  /* Membuat garis pemisah horizontal tipis tepat di atas tombol logout */
   .btn-logout-desktop::before {
     content: "";
     position: absolute;
@@ -306,6 +352,7 @@
     background-color: rgba(255, 255, 255, 0.3); 
   }
 
+  /* Efek saat tombol logout disorot mouse: latar belakang jadi putih dan teks berubah hijau */
   .btn-logout-desktop:hover {
     background-color: #ffffff !important; 
     color: #2fb800 !important; 
@@ -313,6 +360,7 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; 
   }
 
+  /* Mengatur area konten utama agar mengambil sisa ruang di kanan, dengan sudut melengkung dan bisa di-scroll */
   .dashboard-content {
     flex: 1; 
     background-color: #fdfdfd; 
@@ -324,6 +372,7 @@
     height: calc(100vh - 60px); 
   }
 
+  /* Mengatur tata letak kotak info (Tanggal & Jam) di desktop agar tidak saling menumpuk */
   .info-card {
     margin: 0 0 30px 0 !important;
     flex-direction: row;
@@ -335,12 +384,22 @@
     background: white;
   }
 
+  /* Mengatur agar teks tanggal dan jam memiliki jarak yang sama rata (kiri, tengah, kanan) */
   .datetime-row { justify-content: space-around; width: 100%; }
+  
+  /* Memperbesar ukuran teks label keterangan (Tanggal/Jam) */
   .dt-label { font-size: 16px !important; }
+  
+  /* Memperbesar ukuran teks tulisan tanggal hari ini */
   .dt-value { font-size: 22px !important; }
+  
+  /* Memperbesar ukuran teks jam digital utama */
   .time-big { font-size: 32px !important; }
+  
+  /* Memperpanjang garis vertikal pemisah antara tanggal dan jam */
   .divider-vertical { height: 80px !important; }
 
+  /* Menyulap wadah menu menjadi layout Grid dengan 3 kolom agar tombolnya berjejer menyamping */
   .menu-card {
     margin: 0 !important;
     display: grid !important;
@@ -352,6 +411,7 @@
     border-radius: 0 !important;
   }
 
+  /* Mengubah desain tombol menu menjadi kotak tinggi warna putih dengan teks di tengah */
   .menu-btn-item {
     background: white !important;
     color: #333 !important;
@@ -365,6 +425,7 @@
     box-shadow: 0 8px 20px rgba(0,0,0,0.05); 
   }
 
+  /* Memberikan filter warna biru khusus pada ikon yang aslinya berwarna putih */
   .menu-btn-item .white-icon {
     filter: brightness(0) saturate(100%) invert(15%) sepia(96%) saturate(6862%) hue-rotate(244deg) brightness(96%) contrast(108%);
     width: 80px;
@@ -373,17 +434,26 @@
     transition: all 0.3s ease;
   }
 
+  /* Memastikan teks judul dan sub-judul tombol berada tepat di tengah kotak */
   .text-content { text-align: center; }
+  
+  /* Desain khusus judul tombol menu (warna biru) */
   .btn-title { font-size: 26px !important; color: #0029FF !important; text-align: center; transition: all 0.3s ease; }
+  
+  /* Desain khusus teks penjelasan (sub-judul) tombol menu (warna abu-abu) */
   .btn-subtitle { font-size: 14px !important; color: #777; text-align: center; margin-top: 8px; transition: all 0.3s ease;}
 
+  /* Efek saat tombol menu disorot (hover): Latar berubah biru gradasi dan tombol seolah terangkat naik */
   .menu-btn-item:hover {
     background: linear-gradient(135deg, #0029FF 0%, #001FBD 100%) !important; 
     transform: translateY(-5px) !important;
     box-shadow: 0 8px 20px rgba(0, 41, 255, 0.3) !important; 
   }
 
+  /* Saat disorot, ikon dikembalikan ke warna aslinya (putih) */
   .menu-btn-item:hover .white-icon { filter: brightness(0) invert(1) !important; }
+  
+  /* Saat disorot, teks judul dan sub-judul juga diubah menjadi warna putih agar kontras */
   .menu-btn-item:hover .btn-title,
   .menu-btn-item:hover .btn-subtitle { color: white !important; }
 }

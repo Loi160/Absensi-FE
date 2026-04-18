@@ -11,6 +11,7 @@ import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 import iconTambah from "../../assets/tambah.svg";
 
+// Daftar menu navigasi sidebar dengan status aktif pada menu Kelola Cabang
 const MENU_ITEMS = [
   { path: "/hrd/dashboard", icon: iconDashboard, text: "Dashboard" },
   { path: "/hrd/kelolacabang", icon: iconKelola, text: "Kelola Cabang", active: true },
@@ -19,22 +20,27 @@ const MENU_ITEMS = [
   { path: "/hrd/laporan", icon: iconLaporan, text: "Laporan" },
 ];
 
+// Komponen utama untuk mengelola data operasional cabang dan sub-cabang
 const KelolaCabang = () => {
   const navigate = useNavigate();
 
+  // State untuk manajemen jendela pop-up (modal) tambah/edit dan data yang sedang diproses
   const [showModal, setShowModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [editData, setEditData] = useState(null);
   const [parentId, setParentId] = useState(null);
   const [expandedRows, setExpandedRows] = useState({});
 
+  // State untuk modal konfirmasi perubahan status cabang (aktif/non-aktif)
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmData, setConfirmData] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // State untuk menyimpan daftar cabang hasil sinkronisasi dengan database
   const [dataCabang, setDataCabang] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Mengambil data dari server dan menyusunnya menjadi struktur pohon (parent-child)
   const fetchCabang = async () => {
     try {
       setLoading(true);
@@ -57,21 +63,26 @@ const KelolaCabang = () => {
     }
   };
 
+  // Memicu pengambilan data cabang saat halaman pertama kali dimuat
   useEffect(() => {
     fetchCabang();
   }, []);
 
   const openSidebar = () => setSidebarOpen(true);
   const closeSidebar = () => setSidebarOpen(false);
+
+  // Berpindah halaman navigasi dan otomatis menutup menu sidebar mobile
   const handleNav = (path) => {
     closeSidebar();
     navigate(path);
   };
 
+  // Membuka atau menutup baris sub-cabang pada tabel (fitur accordion)
   const toggleRow = (id) => {
     setExpandedRows((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  // Menyiapkan modal untuk memperbarui informasi cabang yang sudah ada
   const handleOpenEdit = (item) => {
     setModalTitle("Edit Cabang");
     setEditData(item);
@@ -79,6 +90,7 @@ const KelolaCabang = () => {
     setShowModal(true);
   };
 
+  // Menyiapkan modal untuk menambah cabang baru di bawah naungan cabang tertentu
   const handleOpenTambahSub = (parentItem) => {
     setModalTitle(`Tambah Sub-Cabang untuk ${parentItem.nama}`);
     setEditData(null);
@@ -86,6 +98,7 @@ const KelolaCabang = () => {
     setShowModal(true);
   };
 
+  // Menyiapkan modal kosong untuk membuat cabang utama baru
   const handleOpenTambah = () => {
     setModalTitle("Tambah Cabang Baru");
     setEditData(null);
@@ -93,14 +106,17 @@ const KelolaCabang = () => {
     setShowModal(true);
   };
 
+  // Memproses data formulir, melakukan validasi tipe data, dan mengirimkannya ke API
   const handleSaveData = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
 
+    // Memastikan nilai angka dikirim dalam format integer, bukan string
     if (data.keterlambatan) data.keterlambatan = parseInt(data.keterlambatan, 10);
     if (data.radius_toleransi) data.radius_toleransi = parseInt(data.radius_toleransi, 10);
 
+    // Menambahkan detik (:00) pada input jam agar sesuai dengan format waktu database
     const timeFields = [
       "jam_masuk_weekday",
       "jam_keluar_weekday",
@@ -147,12 +163,14 @@ const KelolaCabang = () => {
     }
   };
 
+  // Menampilkan modal konfirmasi sebelum mengubah status aktif/non-aktif sebuah cabang
   const handleToggleStatusClick = (e, item) => {
     e.stopPropagation();
     setConfirmData(item);
     setShowConfirmModal(true);
   };
 
+  // Mengeksekusi perintah perubahan status cabang ke server
   const executeToggleStatus = async () => {
     if (!confirmData) return;
 
@@ -177,6 +195,7 @@ const KelolaCabang = () => {
     }
   };
 
+  // Menghapus data akun dan mengarahkan kembali ke halaman masuk
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");

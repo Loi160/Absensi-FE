@@ -1,5 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
+/* Reset standar untuk memastikan font Inter dan jarak (margin/padding) seragam */
 * {
   box-sizing: border-box;
   font-family: "Inter", sans-serif;
@@ -7,6 +8,7 @@
   padding: 0;
 }
 
+/* Bungkus paling luar untuk memastikan latar belakang abu-abu menutupi seluruh layar */
 .rw-wrapper {
   background-color: #e5e5e5;
   min-height: 100vh;
@@ -15,6 +17,7 @@
   overflow-x: hidden;
 }
 
+/* Kotak utama aplikasi dengan lebar maksimal layar HP (480px) agar tetap responsif */
 .rw-container {
   width: 100%;
   max-width: 480px;
@@ -24,6 +27,7 @@
   flex-direction: column;
 }
 
+/* Background gradasi hijau yang menetap di bagian atas aplikasi saat di-scroll (khusus mobile) */
 .rw-mobile-bg {
   position: fixed;
   top: 0;
@@ -39,6 +43,7 @@
   z-index: 1;
 }
 
+/* Kelas utility untuk mengatur visibilitas elemen antara mode Desktop dan Mobile */
 .desktop-none {
   display: block;
 }
@@ -55,6 +60,7 @@ button.mobile-only {
   display: flex;
 }
 
+/* Bagian header yang menempel di atas (sticky) dengan gradasi hijau khas HRD */
 .rw-header-section {
   position: sticky;
   top: 0;
@@ -70,6 +76,7 @@ button.mobile-only {
   width: 100%;
 }
 
+/* Mengatur susunan tombol kembali dan judul di dalam header mobile */
 .rw-header-mobile-content {
   display: flex;
   align-items: center;
@@ -77,6 +84,7 @@ button.mobile-only {
   width: 100%;
 }
 
+/* Desain tombol kembali berbentuk bundar dengan garis tepi putih di pojok kiri */
 .rw-btn-back {
   background: transparent;
   border: 1.5px solid white;
@@ -90,18 +98,21 @@ button.mobile-only {
   flex-shrink: 0;
 }
 
+/* Wadah teks judul agar berada di tengah, dengan kompensasi jarak tombol back */
 .rw-header-text-group {
   flex: 1;
   text-align: center;
   padding-right: 40px;
 }
 
+/* Gaya teks judul utama di header (misal: "Riwayat Kehadiran") agar tebal dan besar */
 .rw-title-text {
   font-size: 22px;
   font-weight: 800;
   margin-bottom: 2px;
 }
 
+/* Gaya teks keterangan kecil di bawah judul utama */
 .rw-subtitle-text {
   font-size: 12px;
   font-weight: 500;
@@ -109,6 +120,7 @@ button.mobile-only {
   margin-bottom: 0;
 }
 
+/* Wadah luar untuk daftar riwayat agar posisinya berada di atas background hijau */
 .rw-content-list-wrapper {
   z-index: 10;
   position: relative;
@@ -117,6 +129,7 @@ button.mobile-only {
   padding-bottom: 50px;
 }
 
+/* Mengatur susunan daftar kartu agar rapi dari atas ke bawah dengan jarak antar kartu */
 .rw-content-list {
   padding: 0 20px;
   display: flex;
@@ -124,6 +137,7 @@ button.mobile-only {
   gap: 15px;
 }
 
+/* Desain satu kotak (kartu) riwayat: warna putih, sudut melengkung, dan ada bayangannya */
 .rw-card-item {
   background: white;
   border-radius: 20px;
@@ -136,20 +150,24 @@ button.mobile-only {
   position: relative;
 }
 
+/* Memberikan efek kartu sedikit terangkat saat disorot kursor */
 .rw-card-item:hover {
   transform: translateY(-3px);
 }
 
+/* Mengatur ukuran dan memberikan filter warna biru pada ikon utama di dalam kartu */
 .rw-icon-main {
   width: 42px;
   height: 42px;
   filter: brightness(0) saturate(100%) invert(18%) sepia(88%) saturate(3025%) hue-rotate(224deg) brightness(90%) contrast(98%);
 }
 
+/* Area teks informasi di dalam kartu agar mengambil sisa ruang yang tersedia */
 .rw-info-box {
   flex: 1;
 }
 
+/* Baris paling atas di dalam kartu yang berisi judul tipe dan badge status */
 .rw-row-top {
   display: flex;
   align-items: center;
@@ -157,12 +175,14 @@ button.mobile-only {
   margin-bottom: 6px;
 }
 
+/* Gaya teks untuk tipe data (misal: "Absensi" atau "Perizinan") */
 .rw-type-text {
   font-weight: 700;
   font-size: 15px;
   color: #111;
 }
 
+/* Gaya dasar untuk kotak label kecil (badge) status di dalam kartu */
 .rw-badge {
   font-size: 10px;
   padding: 4px 10px;
@@ -176,48 +196,58 @@ button.mobile-only {
   line-height: 1;
 }
 
+/* ==== VARIAN WARNA BADGE STATUS ==== */
+
+/* Badge hadir penuh: latar hijau solid dengan teks putih */
 .badge-hadir-full {
   background-color: #2fb800;
   color: white;
   border: 1px solid #2fb800;
 }
 
+/* Badge hadir sebagian: latar putih dengan garis tepi dan teks hijau */
 .badge-hadir-partial {
   background-color: white;
   color: #2fb800;
   border: 1.5px solid #2fb800;
 }
 
+/* Badge tidak hadir (Alpha): latar merah solid dengan teks putih */
 .badge-alpha {
   background-color: #e03131;
   color: white;
   border: 1px solid #e03131;
 }
 
+/* Badge izin/cuti: latar kuning solid dengan teks hitam */
 .badge-izin-kuning {
   background-color: #ffd700;
   color: #000;
   border: 1px solid #ffd700;
 }
 
+/* Badge status yang disetujui HRD: latar putih dengan garis tepi hijau */
 .badge-status-disetujui {
   background-color: white; 
   color: #2fb800;
   border: 1.5px solid #2fb800; 
 }
 
+/* Badge status yang ditolak HRD: latar putih dengan garis tepi merah */
 .badge-status-ditolak {
   background-color: white;
   color: #e03131;
   border: 1.5px solid #e03131; 
 }
 
+/* Badge status menunggu (pending): latar putih dengan garis tepi oranye/kuning */
 .badge-status-pending {
   background-color: white;
   color: #f08c00;
   border: 1.5px solid #fcc419; 
 }
 
+/* Gaya teks untuk nama karyawan di dalam kartu riwayat agar terlihat tebal */
 .rw-name {
   font-weight: 700;
   font-size: 14px;
@@ -225,6 +255,7 @@ button.mobile-only {
   color: #222;
 }
 
+/* Baris penampung data kecil (metadata) seperti tanggal, lokasi, dan jam */
 .rw-meta-row {
   display: flex;
   flex-wrap: wrap;
@@ -234,23 +265,27 @@ button.mobile-only {
   margin-bottom: 6px;
 }
 
+/* Mengatur susunan ikon kecil dan teks informasi agar sejajar menyamping */
 .rw-meta-item {
   display: flex;
   align-items: center;
   gap: 5px;
 }
 
+/* Ukuran ikon kecil pembantu di dalam baris metadata */
 .rw-mini-icon {
   width: 1.1em;
   height: 1.1em;
   opacity: 0.8;
 }
 
+/* Teks catatan tambahan di bagian bawah kartu riwayat */
 .rw-note {
   font-size: 12px;
   color: #666;
 }
 
+/* Desain tombol tempat sampah untuk menghapus pengajuan izin */
 .rw-btn-delete {
   background: none;
   border: none;
@@ -261,11 +296,13 @@ button.mobile-only {
   opacity: 0.7;
 }
 
+/* Memberikan efek warna merah terang saat tombol hapus disorot */
 .rw-btn-delete:hover {
   opacity: 1;
   color: #ff4d4d;
 }
 
+/* Lapisan latar belakang gelap dan blur saat jendela detail (modal) terbuka */
 .rw-modal-overlay {
   position: fixed;
   inset: 0;
@@ -277,6 +314,7 @@ button.mobile-only {
   align-items: center;
 }
 
+/* Kotak putih utama jendela modal dengan batas maksimal lebar dan efek animasi muncul */
 .rw-modal-content {
   background: white;
   width: 90%;
@@ -290,6 +328,7 @@ button.mobile-only {
   animation: popIn 0.3s ease;
 }
 
+/* Tombol silang untuk menutup jendela modal detail */
 .rw-modal-close {
   position: absolute;
   top: 15px;
@@ -300,6 +339,7 @@ button.mobile-only {
   color: #888;
 }
 
+/* Judul besar di dalam jendela modal dengan garis bawah tipis sebagai pemisah */
 .rw-modal-title {
   font-size: 18px;
   font-weight: 800;
@@ -308,10 +348,12 @@ button.mobile-only {
   padding-bottom: 10px;
 }
 
+/* Memberikan jarak antar kelompok data informasi di dalam modal */
 .rw-form-group {
   margin-bottom: 15px;
 }
 
+/* Gaya teks label petunjuk (misal: "Keterangan") di dalam jendela modal */
 .rw-form-group label {
   display: block;
   font-size: 13px;
@@ -319,6 +361,7 @@ button.mobile-only {
   margin-bottom: 6px;
 }
 
+/* Desain kotak isian data (hanya baca) di dalam modal agar terlihat bersih */
 .rw-input {
   width: 100%;
   padding: 12px 15px;
@@ -329,37 +372,44 @@ button.mobile-only {
   color: #333;
 }
 
+/* Mengatur tampilan input yang terkunci (disabled) agar teksnya tetap jelas terbaca */
 .rw-input:disabled {
   background: #f9f9f9;
   color: #555;
   opacity: 1;
 }
 
+/* Kotak teks panjang untuk keterangan izin, tingginya dikunci agar tidak bisa ditarik manual */
 .rw-textarea {
   min-height: 80px;
   resize: none;
 }
 
+/* Mengatur agar dua kolom data (misal jam masuk & pulang) sejajar menyamping */
 .rw-row-2 {
   display: flex;
   gap: 10px;
   margin-bottom: 15px;
 }
 
+/* Memastikan kolom data membagi ruang secara adil (50:50) */
 .rw-col {
   flex: 1;
 }
 
+/* Utilitas untuk meratakan teks ke tengah */
 .text-center {
   text-align: center;
 }
 
+/* Mengatur tata letak foto bukti (masuk & pulang) menjadi dua kolom sejajar */
 .rw-photo-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
 
+/* Bingkai foto bukti dengan batas melengkung dan efek kursor tangan saat diarahkan */
 .rw-photo-item {
   position: relative;
   height: 120px;
@@ -370,12 +420,14 @@ button.mobile-only {
   cursor: pointer;
 }
 
+/* Memastikan gambar bukti memenuhi seluruh bingkai tanpa merusak proporsi (object-fit) */
 .rw-photo-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
+/* Pita hitam transparan di bawah foto untuk label (misal: "Foto Masuk") */
 .rw-photo-label {
   position: absolute;
   bottom: 0;
@@ -387,6 +439,7 @@ button.mobile-only {
   padding: 5px;
 }
 
+/* Ikon kaca pembesar (zoom) di pojok foto agar user tahu foto bisa diperbesar */
 .rw-zoom-overlay {
   position: absolute;
   top: 5px;
@@ -398,6 +451,7 @@ button.mobile-only {
   opacity: 0.85;
 }
 
+/* Tampilan teks pengganti jika karyawan tidak mengunggah foto bukti */
 .no-photo {
   display: flex;
   justify-content: center;
@@ -408,6 +462,7 @@ button.mobile-only {
   font-weight: 600;
 }
 
+/* Layar hitam pekat (overlay) yang muncul saat gambar sedang diperbesar */
 .rw-preview-overlay {
   position: fixed;
   inset: 0;
@@ -418,17 +473,20 @@ button.mobile-only {
   align-items: center;
 }
 
+/* Wadah utama untuk menampilkan foto saat diperbesar (zoom) */
 .rw-preview-container {
   position: relative;
   width: 90%;
   max-width: 600px;
 }
 
+/* Memastikan foto yang diperbesar tampil penuh dan sudutnya sedikit melengkung */
 .rw-full-image {
   width: 100%;
   border-radius: 10px;
 }
 
+/* Tombol silang untuk menutup pratinjau foto, posisinya melayang di atas gambar */
 .rw-preview-close {
   position: absolute;
   top: -50px;
@@ -438,6 +496,7 @@ button.mobile-only {
   cursor: pointer;
 }
 
+/* Animasi halus saat jendela modal muncul agar tidak kaku */
 @keyframes popIn {
   from {
     transform: scale(0.9);
@@ -449,11 +508,16 @@ button.mobile-only {
   }
 }
 
+/* ==========================================================================
+   PENGATURAN KHUSUS LAYAR DESKTOP (Minimal 1024px)
+   ========================================================================== */
 @media (min-width: 1024px) {
+  /* Menyembunyikan elemen yang hanya ditujukan untuk tampilan HP */
   .desktop-none {
     display: none !important;
   }
   
+  /* Mengubah background halaman menjadi gradasi hijau penuh dan mengunci scroll layar utama */
   .rw-wrapper {
     background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
     height: 100vh;
@@ -461,6 +525,7 @@ button.mobile-only {
     overflow: hidden; 
   }
 
+  /* Mengubah susunan konten dari bertumpuk (HP) menjadi menyamping kiri-kanan (PC) */
   .rw-container {
     max-width: 100% !important;
     width: 100%;
@@ -470,11 +535,13 @@ button.mobile-only {
     background-color: transparent !important;
   }
 
+  /* Memunculkan elemen khusus desktop dan menyembunyikan elemen khusus mobile */
   .desktop-only { display: block !important; }
   button.desktop-only { display: flex !important; }
   div.desktop-only { display: flex !important; }
   .mobile-only { display: none !important; }
 
+  /* Menyulap header atas menjadi sidebar (bilah samping) yang elegan di sisi kiri */
   .rw-header-section {
     position: relative;
     width: 300px;
@@ -491,6 +558,7 @@ button.mobile-only {
     z-index: 100;
   }
 
+  /* Menggeser naik posisi logo profil dan teks agar pas di tengah sidebar PC */
   .rw-header-section > .rw-logo-center-area,
   .rw-header-section > .rw-title-text,
   .rw-header-section > .rw-subtitle-text {
@@ -498,6 +566,7 @@ button.mobile-only {
     top: -40px;
   }
 
+  /* Menempatkan logo perusahaan tetap di pojok kiri atas khusus untuk sidebar desktop */
   .rw-sidebar-logo-desktop {
     position: absolute !important;
     top: 60px !important; 
@@ -510,6 +579,7 @@ button.mobile-only {
     border-bottom: none !important;
   }
 
+  /* Memperbesar logo perusahaan dan mengubah warnanya jadi putih solid (invert) */
   .rw-sidebar-logo-desktop img {
     width: 260px !important;
     height: auto !important;
@@ -517,6 +587,7 @@ button.mobile-only {
     opacity: 1 !important;
   }
 
+  /* Menghilangkan margin berlebih pada area foto profil agar lebih rapi di sidebar */
   .rw-logo-center-area {
     margin: 0 0 10px 0 !important;
     display: flex !important;
@@ -525,6 +596,7 @@ button.mobile-only {
     height: auto !important;
   }
 
+  /* Mengatur tampilan gambar profil agar berbentuk lingkaran */
   .rw-img-circle-content {
     width: 130px !important;
     height: 130px !important;
@@ -536,6 +608,7 @@ button.mobile-only {
     object-fit: cover !important;
   }
 
+  /* Mengatur tampilan judul utama */
   .rw-title-text {
     font-size: 24px !important;
     font-weight: 800 !important;
@@ -544,6 +617,7 @@ button.mobile-only {
     margin: 0 !important;
   }
 
+  /* Mengatur tampilan subtitle di bawah judul */
   .rw-subtitle-text {
     font-size: 15px !important;
     color: white !important;
@@ -553,6 +627,7 @@ button.mobile-only {
     padding: 0 !important;
   }
 
+  /* Mengatur tampilan tombol logout pada tampilan desktop */
   .rw-btn-logout-desktop {
     position: absolute !important;
     bottom: 40px !important;
@@ -573,6 +648,7 @@ button.mobile-only {
     align-items: center !important;
   }
 
+  /* Menambahkan garis pemisah di atas tombol logout */
   .rw-btn-logout-desktop::before {
     content: "";
     position: absolute;
@@ -583,6 +659,7 @@ button.mobile-only {
     background-color: rgba(255, 255, 255, 0.3);
   }
 
+  /* Mengatur perubahan tampilan tombol logout saat diarahkan cursor */
   .rw-btn-logout-desktop:hover {
     background-color: #ffffff !important;
     color: #2fb800 !important;
@@ -590,6 +667,7 @@ button.mobile-only {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
   }
 
+  /* Mengatur tampilan area daftar konten utama */
   .rw-content-list-wrapper {
     flex: 1;
     background-color: #fdfdfd;
@@ -603,26 +681,31 @@ button.mobile-only {
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   }
 
+  /* Mengatur tampilan scrollbar pada area daftar konten */
   .rw-content-list-wrapper::-webkit-scrollbar {
     display: block;
     width: 8px;
   }
 
+  /* Mengatur tampilan background track scrollbar */
   .rw-content-list-wrapper::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 10px;
     margin: 40px 0; 
   }
 
+  /* Mengatur tampilan bagian scrollbar yang dapat digeser */
   .rw-content-list-wrapper::-webkit-scrollbar-thumb {
     background: #ccc;
     border-radius: 10px;
   }
 
+  /* Mengatur perubahan warna scrollbar saat diarahkan cursor */
   .rw-content-list-wrapper::-webkit-scrollbar-thumb:hover {
     background: #aaa;
   }
 
+  /* Mengatur tampilan header pada bagian form */
   .rw-form-header-wrapper {
     display: flex !important;
     align-items: center !important;
@@ -632,6 +715,7 @@ button.mobile-only {
     margin-bottom: 30px !important;
   }
 
+  /* Mengatur tampilan tombol kembali pada desktop */
   .rw-btn-back-desktop {
     background: white !important;
     border: 1.5px solid #d1d1d1 !important;
@@ -645,10 +729,12 @@ button.mobile-only {
     transition: all 0.2s !important;
   }
 
+  /* Mengatur perubahan tampilan tombol kembali saat diarahkan cursor */
   .rw-btn-back-desktop:hover {
     background: #f0f0f0 !important;
   }
 
+  /* Mengatur tampilan judul pada card */
   .rw-card-title {
     font-size: 32px !important;
     font-weight: 800 !important;
@@ -656,12 +742,14 @@ button.mobile-only {
     color: black;
   }
 
+  /* Mengatur jarak antar daftar konten */
   .rw-content-list {
     margin-top: 0 !important;
     padding: 0 !important;
     gap: 25px;
   }
 
+  /* Mengatur tampilan setiap card item */
   .rw-card-item {
     border-radius: 20px !important; 
     padding: 30px 40px;
@@ -669,50 +757,60 @@ button.mobile-only {
     border: 1px solid #f0f0f0;
   }
 
+  /* Mengatur perubahan tampilan card saat diarahkan cursor */
   .rw-card-item:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
     border-color: #4cff00;
   }
 
+  /* Mengatur ukuran teks tipe laporan */
   .rw-type-text {
     font-size: 22px;
   }
 
+  /* Mengatur ukuran teks nama */
   .rw-name {
     font-size: 17px;
   }
 
+  /* Mengatur ukuran teks informasi tambahan */
   .rw-meta-row {
     font-size: 14px;
   }
 
+  /* Mengatur ukuran icon utama */
   .rw-icon-main {
     width: 60px;
     height: 60px;
   }
 
+  /* Mengatur tampilan badge */
   .rw-badge {
     font-size: 13px;
     padding: 6px 18px;
     border-radius: 20px;
   }
 
+  /* Mengatur tampilan modal */
   .rw-modal-content {
     max-width: 900px;
     padding: 50px 60px;
     border-radius: 30px;
   }
 
+  /* Mengatur ukuran teks label pada form */
   .rw-form-group label {
     font-size: 16px;
   }
 
+  /* Mengatur tampilan input form */
   .rw-input {
     padding: 15px;
     font-size: 16px;
   }
 
+  /* Mengatur tinggi tampilan foto */
   .rw-photo-item {
     height: 300px;
   }

@@ -12,6 +12,7 @@ import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 import iconTambah from "../../assets/tambah.svg";
 
+// Daftar menu navigasi untuk sidebar, dengan penanda 'active' pada menu Data Karyawan
 const MENU_ITEMS = [
   { path: "/hrd/dashboard", icon: iconDashboard, text: "Dashboard" },
   { path: "/hrd/kelolacabang", icon: iconKelola, text: "Kelola Cabang" },
@@ -20,6 +21,7 @@ const MENU_ITEMS = [
   { path: "/hrd/laporan", icon: iconLaporan, text: "Laporan" },
 ];
 
+// Komponen ikon mata coret yang digunakan untuk fitur menyembunyikan password atau elemen visual lainnya
 const EyeOffIcon = () => (
   <svg
     width="16"
@@ -35,7 +37,7 @@ const EyeOffIcon = () => (
     <line x1="1" y1="1" x2="23" y2="23"></line>
   </svg>
 );
-
+// Komponen utama untuk mengelola data karyawan, mencakup daftar karyawan, filter cabang, dan penambahan data baru
 const DataKaryawanHRD = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -62,7 +64,7 @@ const DataKaryawanHRD = () => {
     divisi: "",
     no_telp: "",
   });
-
+  // Fungsi untuk mengambil data terbaru dari API (cabang dan karyawan) agar tampilan selalu sinkron dengan database
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -81,22 +83,23 @@ const DataKaryawanHRD = () => {
   useEffect(() => {
     fetchData();
   }, []);
-
+  // Fungsi untuk menghapus data login dan mengarahkan kembali ke halaman masuk utama
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     navigate("/auth/login");
   };
-
+  // Fungsi untuk berpindah halaman dan otomatis menutup sidebar (khusus untuk tampilan mobile)
   const handleNav = (path) => {
     closeSidebar();
     navigate(path);
   };
-
+  // Mengirim data karyawan terpilih ke halaman detail saat baris pada tabel diklik
   const handleRowClick = (karyawan) => {
     navigate("/hrd/detailkaryawan", { state: { employee: karyawan } });
   };
-
+  
+  // Mengirim data karyawan baru ke server setelah memvalidasi bahwa cabang sudah dipilih dan NIK tepat 8 digit angka
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!formData.cabang_id) return alert("Pilih cabang terlebih dahulu!");
@@ -122,7 +125,7 @@ const DataKaryawanHRD = () => {
       alert("Kesalahan jaringan.");
     }
   };
-
+  // Menyaring daftar karyawan yang ditampilkan berdasarkan cabang yang dipilih pada menu filter
   const filteredData = karyawanList.filter((k) => {
     return selectedCabang === "Semua Cabang" || k.cabang?.nama === selectedCabang;
   });

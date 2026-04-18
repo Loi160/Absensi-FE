@@ -12,6 +12,7 @@ import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 
+// Konfigurasi daftar menu navigasi di sidebar dengan menu Laporan dalam keadaan aktif
 const MENU_ITEMS = [
   { path: "/hrd/dashboard", icon: iconDashboard, text: "Dashboard" },
   { path: "/hrd/kelolacabang", icon: iconKelola, text: "Kelola Cabang" },
@@ -20,6 +21,7 @@ const MENU_ITEMS = [
   { path: "/hrd/laporan", icon: iconLaporan, text: "Laporan", active: true },
 ];
 
+// Mengubah format tanggal mentah dari JavaScript menjadi format YYYY-MM-DD yang standar untuk database
 const formatDate = (dateObj) => {
   const yyyy = dateObj.getFullYear();
   const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
@@ -27,6 +29,7 @@ const formatDate = (dateObj) => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
+// Menghitung otomatis rentang tanggal cut-off bulanan (tanggal 26 bulan lalu s.d 25 bulan ini)
 const getCutoffDates = () => {
   const d = new Date();
   const date = d.getDate();
@@ -41,6 +44,7 @@ const getCutoffDates = () => {
   return { start, end };
 };
 
+// Memberikan warna peringatan (kuning, oranye, merah) pada baris tabel berdasarkan jumlah keterlambatan karyawan
 const getRowTerlambatClass = (jumlahTerlambat) => {
   const angka = parseInt(jumlahTerlambat, 10);
   if (isNaN(angka)) return "";
@@ -50,27 +54,34 @@ const getRowTerlambatClass = (jumlahTerlambat) => {
   return "";
 };
 
+// Komponen utama untuk menampilkan dan merekap laporan kehadiran seluruh karyawan
 const Laporan = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  // State untuk mengontrol tampilan menu sidebar pada perangkat mobile (HP)
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const openSidebar = () => setSidebarOpen(true);
   const closeSidebar = () => setSidebarOpen(false);
 
+  // State untuk mengontrol tampilan menu pop-up (dropdown) filter cabang dan export file
   const [showFilter, setShowFilter] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
 
+  // State untuk menyimpan nilai filter dan pencarian yang sedang aktif
   const [selectedFilter, setSelectedFilter] = useState("Semua Cabang");
   const [searchTerm, setSearchTerm] = useState("");
   const [cabangList, setCabangList] = useState([]);
 
+  // State untuk menyimpan data laporan dari server beserta status loading-nya
   const [dataLaporan, setDataLaporan] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // State untuk mengatur rentang waktu laporan yang ditarik dari server (default: cut-off saat ini)
   const [startDate, setStartDate] = useState(() => formatDate(getCutoffDates().start));
   const [endDate, setEndDate] = useState(() => formatDate(getCutoffDates().end));
   
+  // State untuk mengatur jendela modal detail kehadiran (pop-up) saat angka di tabel diklik
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [modalInfo, setModalInfo] = useState({
     title: "",
@@ -79,8 +90,11 @@ const Laporan = () => {
     jenisData: "",
     data: [],
   });
+  
+  // State khusus untuk menampilkan foto bukti kehadiran dalam ukuran penuh di dalam modal
   const [previewImage, setPreviewImage] = useState(null);
 
+  // Menjalankan fungsi tarik data laporan dan cabang secara otomatis setiap kali tanggal filter diubah
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -103,23 +117,27 @@ const Laporan = () => {
     fetchData();
   }, [startDate, endDate]);
 
+  // Membersihkan sesi pengguna dan mengarahkan kembali ke halaman login
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     navigate("/auth/login");
   };
 
+  // Berpindah halaman menggunakan menu navigasi sekaligus menutup sidebar
   const handleNav = (path) => {
     closeSidebar();
     navigate(path);
   };
 
+  // Membuka atau menutup pilihan filter cabang serta mengatur cabang mana yang sedang dipilih
   const toggleFilter = () => setShowFilter(!showFilter);
   const handleSelectFilter = (val) => {
     setSelectedFilter(val);
     setShowFilter(false);
   };
 
+  // Menyaring data laporan berdasarkan nama yang dicari di kolom pencarian dan cabang yang dipilih
   const filteredData = dataLaporan.filter((item) => {
     const matchName = item.nama.toLowerCase().includes(searchTerm.toLowerCase());
     let matchBranch = true;
@@ -129,6 +147,7 @@ const Laporan = () => {
     return matchName && matchBranch;
   });
 
+  // Menjumlahkan seluruh data pada kolom tabel yang sedang difilter untuk ditampilkan di baris paling bawah
   const getTotals = () => {
     let t = { hadirApp: 0, hadirManual: 0, terlambat: 0, fimtk: 0, sakit: 0, izin: 0, cuti: 0, alpha: 0, lembur: 0 };
     filteredData.forEach((item) => {
@@ -145,6 +164,7 @@ const Laporan = () => {
     return t;
   };
 
+  // Menyusun ulang data yang ada di tabel ke format Excel (.xlsx) dan memicu proses unduhan
   const handleExportExcel = () => {
     const exportData = filteredData.map((item) => ({
       "Nama Karyawan": item.nama,
@@ -161,6 +181,7 @@ const Laporan = () => {
       "Lembur": item.lembur,
     }));
 
+    // Menyisipkan baris total keseluruhan di bagian paling bawah data Excel
     const totals = getTotals();
     exportData.push({
       "Nama Karyawan": "TOTAL KESELURUHAN",
@@ -177,6 +198,7 @@ const Laporan = () => {
       "Lembur": totals.lembur,
     });
 
+    // Mengkonversi format data ke worksheet dan mendownloadnya menggunakan library XLSX
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Kehadiran");
@@ -184,13 +206,16 @@ const Laporan = () => {
     XLSX.writeFile(workbook, `Rekap_Kehadiran_HRD_${startDate}_sd_${endDate}.xlsx`);
   };
 
+  // Menampilkan modal pop-up yang berisi rincian (history) dari angka yang diklik di tabel
   const openDetail = (item, jenis, jumlah) => {
+    // Mencegah modal terbuka jika data yang diklik kosong atau bernilai nol
     if (jumlah === "0" || jumlah === "-" || jumlah === "0 Jam") return;
 
     const { nama, nik, cabang, rawAbsensi = [], rawPerizinan = [], rawAlpha = [] } = item;
     let realData = [];
     let title = `Rincian ${jenis}`;
 
+    // Memfilter dan menyusun format data log absensi mandiri karyawan lewat aplikasi
     if (jenis === "Hadir via App") {
       title = "Log Absensi Mandiri (Karyawan)";
       const dataApp = rawAbsensi.filter((a) => !a.is_manual_masuk);
@@ -199,6 +224,8 @@ const Laporan = () => {
         masuk: { jam: a.waktu_masuk || "-", isManual: false, foto: a.foto_masuk || null, keterangan: "", admin: "" },
         pulang: { jam: a.waktu_pulang || "-", isManual: false, foto: a.foto_pulang || null, keterangan: "", admin: "" },
       }));
+    
+    // Memfilter dan menyusun format data log absensi yang diinputkan secara manual oleh HRD/Admin
     } else if (jenis === "Hadir Manual") {
       title = "Log Rekapitulasi Manual (Admin HRD)";
       const dataManual = rawAbsensi.filter((a) => a.is_manual_masuk);
@@ -207,41 +234,55 @@ const Laporan = () => {
         masuk: { jam: a.waktu_masuk || "-", isManual: true, foto: null, keterangan: a.keterangan_manual || "-", admin: "HRD" },
         pulang: { jam: a.waktu_pulang || "-", isManual: true, foto: null, keterangan: a.keterangan_manual || "-", admin: "HRD" },
       }));
+    
+    // Memfilter daftar hari di mana karyawan masuk kerja tapi melewati batas jam masuk (keterlambatan)
     } else if (jenis === "Terlambat") {
       title = "Rincian Keterlambatan";
       const dataTelat = rawAbsensi.filter((a) => a.menit_terlambat > 0);
       realData = dataTelat.map((a) => ({
         tipe: "terlambat", tanggal: a.tanggal, cabang: cabang, jamMasuk: a.waktu_masuk || "-", menitTelat: a.menit_terlambat, isManual: a.is_manual_masuk,
       }));
+    
+    // Memfilter data perizinan yang disetujui dengan kategori sakit
     } else if (jenis === "Sakit") {
       title = `Log Perizinan (Sakit)`;
       const dataSakit = rawPerizinan.filter((p) => p.kategori === "Izin" && p.jenis_izin === "Sakit");
       realData = dataSakit.map((p) => ({
         tipe: "izin_sakit", jenisIzin: "Sakit", tanggalMulai: p.tanggal_mulai, tanggalAkhir: p.tanggal_selesai, keterangan: p.keterangan || "-", foto: p.bukti_foto || null,
       }));
+    
+    // Memfilter data perizinan di luar sakit (seperti izin acara keluarga, menikah, dll)
     } else if (jenis === "Izin") {
       title = `Log Perizinan (Izin)`;
       const dataIzin = rawPerizinan.filter((p) => p.kategori === "Izin" && p.jenis_izin !== "Sakit");
       realData = dataIzin.map((p) => ({
         tipe: "izin_sakit", jenisIzin: p.jenis_izin || "Lainnya", tanggalMulai: p.tanggal_mulai, tanggalAkhir: p.tanggal_selesai, keterangan: p.keterangan || p.keperluan || "-", foto: p.bukti_foto || null,
       }));
+    
+    // Memfilter data khusus perizinan cuti tahunan/panjang
     } else if (jenis === "Cuti") {
       title = `Log Perizinan (Cuti)`;
       const dataCuti = rawPerizinan.filter((p) => p.kategori === "Cuti");
       realData = dataCuti.map((p) => ({
         tipe: "cuti", cabang: cabang, jabatan: item.jabatan || "-", divisi: item.divisi || "-", jenisCuti: p.jenis_izin || "Cuti Tahunan", tanggalMulai: p.tanggal_mulai, tanggalAkhir: p.tanggal_selesai, keterangan: p.keterangan || p.keperluan || "-", noTelp: item.noTelp || "-",
       }));
+    
+    // Memfilter Form Izin Meninggalkan Tempat Kerja (FIMTK)
     } else if (jenis === "FIMTK") {
       title = `Log Perizinan (FIMTK)`;
       const dataFimtk = rawPerizinan.filter((p) => p.kategori === "FIMTK");
       realData = dataFimtk.map((p) => ({
         tipe: "fimtk", cabang: cabang, jabatan: item.jabatan || "-", divisi: item.divisi || "-", izinMTK: p.jenis_izin || "FIMTK", tanggal: p.tanggal_mulai, jamMulai: p.jam_mulai || "-", jamAkhir: p.jam_selesai || "-", keperluan: p.keperluan || "-", kendaraan: p.kendaraan || "-", alasan: p.keterangan || "-",
       }));
+    
+    // Mengambil data ketidakhadiran tanpa keterangan (Alpha)
     } else if (jenis === "Alpha") {
       title = "Rincian Alpha";
       realData = rawAlpha.map((a) => ({
         tipe: "alpha", tanggal: a.tanggal, cabang: cabang, jadwal: "Sesuai Jam Operasional", status: "ALPHA", keterangan: a.keterangan,
       }));
+    
+    // Mengambil rincian menit lembur dan mendeteksi alasan lembur (reguler atau akibat tidak istirahat)
     } else if (jenis === "Lembur") {
       title = "Rincian Lembur";
       const dataLembur = rawAbsensi.filter((a) => a.menit_lembur > 0);
@@ -257,12 +298,14 @@ const Laporan = () => {
       });
     }
 
+    // Mengurutkan data di dalam modal agar yang terbaru selalu berada di paling atas
     realData.sort((a, b) => {
       const dateA = new Date(a.tanggal || a.tanggalMulai).getTime();
       const dateB = new Date(b.tanggal || b.tanggalMulai).getTime();
       return dateB - dateA;
     });
 
+    // Menampung semua data yang sudah diproses ke state untuk ditampilkan di layar
     setModalInfo({ title, nama, nik, jenisData: jenis, data: realData });
     setShowDetailModal(true);
   };

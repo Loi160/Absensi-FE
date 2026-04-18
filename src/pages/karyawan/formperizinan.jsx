@@ -10,10 +10,12 @@ import logoPersegi from "../../assets/logopersegi.svg";
 import profileImg from "../../assets/profile.svg";
 import cameraIcon from "../../assets/camera.svg";
 
+// Setup koneksi ke Supabase untuk menyimpan file foto bukti perizinan (misal surat dokter)
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Fungsi untuk mengambil tanggal hari ini secara otomatis dengan format YYYY-MM-DD
 const getTodayDate = () => {
   const today = new Date();
   const yyyy = today.getFullYear();
@@ -22,6 +24,7 @@ const getTodayDate = () => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
+// Objek untuk mengatur perubahan teks judul otomatis sesuai tab yang dipilih karyawan
 const TAB_CONTENT = {
   Izin: {
     title: "Form Perizinan",
@@ -37,40 +40,50 @@ const TAB_CONTENT = {
   },
 };
 
+// Komponen utama untuk halaman Pengajuan Izin/Cuti
 const FormPerizinan = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  // State untuk melacak form apa yang sedang aktif dan kontrol tanggal/loading
   const [activeTab, setActiveTab] = useState("Izin");
   const [tanggalMulai, setTanggalMulai] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // State dan referensi khusus untuk menangani proses upload foto bukti izin
   const [fileBukti, setFileBukti] = useState(null);
   const [fileName, setFileName] = useState("");
   const fileInputRef = useRef(null);
 
+  // Mengambil judul/teks untuk di-render berdasarkan state tab saat ini
   const currentTabInfo = TAB_CONTENT[activeTab];
 
+  // Memaksa browser untuk membuka jendela pemilihan file (File Explorer/Galeri)
   const handleBukaFile = () => {
     if (fileInputRef.current) fileInputRef.current.click();
   };
 
+  // Validasi otomatis saat karyawan selesai memilih foto bukti dari galerinya
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Tolak file jika ukurannya lebih dari 2MB biar database gak cepat penuh
       if (file.size > 2 * 1024 * 1024) {
         alert("Ukuran file terlalu besar! Maksimal 2MB.");
-        e.target.value = null;
+        e.target.value = null; // Reset nilai input
         return;
       }
+      // Jika lolos validasi, simpan file ke dalam state sementara
       setFileBukti(file);
       setFileName(file.name);
     }
   };
 
+  // Logika untuk mengirim foto bukti langsung ke Cloud Storage Supabase
   const uploadBuktiKeSupabase = async () => {
     if (!fileBukti) return null;
     try {
+      // Bikin nama file baru yang unik (menggabungkan NIK + Tanggal + Ekstensi Asli)
       const fileExt = fileBukti.name.split(".").pop();
       const safeName = `${user.nik}_bukti_${Date.now()}.${fileExt}`;
 
@@ -80,6 +93,7 @@ const FormPerizinan = () => {
 
       if (uploadError) throw uploadError;
 
+      // Ambil link publik agar HRD bisa melihat fotonya tanpa perlu login ke Supabase
       const { data: publicUrlData } = supabase.storage
         .from("bukti_perizinan")
         .getPublicUrl(safeName);
@@ -93,32 +107,38 @@ const FormPerizinan = () => {
     }
   };
 
+  // Fungsi utama saat tombol "Ajukan" dipencet
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Cegah halaman reload
     if (!user) return alert("Sesi login berakhir. Silahkan login kembali.");
 
     setLoading(true);
+    
+    // Ambil seluruh data input yang diketik/dipilih oleh karyawan di form
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
 
     try {
       let urlBukti = null;
+      // Khusus tab "Izin" biasa, sistem wajib upload foto bukti dulu (jika ada) sebelum lanjut
       if (activeTab === "Izin" && fileBukti) {
         urlBukti = await uploadBuktiKeSupabase();
       }
 
+      // Susun kerangka data (payload) yang akan dilempar ke Backend/Database MySQL
       let payload = {
         user_id: user.id,
         kategori: activeTab,
-        status_approval: "Pending",
+        status_approval: "Pending", // Status otomatis diset "Menunggu Persetujuan HRD"
       };
 
+      // Pisahkan logika pengisian data berdasarkan Tab apa yang dipilih
       if (activeTab === "Izin") {
         payload.jenis_izin = data.jenis_izin;
         payload.keterangan = data.keterangan;
         payload.tanggal_mulai = data.tanggal_mulai;
         payload.tanggal_selesai = data.tanggal_selesai;
-        payload.bukti_foto = urlBukti;
+        payload.bukti_foto = urlBukti; // Tempelkan URL gambar Supabase
       } else if (activeTab === "Cuti") {
         payload.jenis_izin = data.jenis_izin;
         payload.tanggal_mulai = data.tanggal_mulai;
@@ -126,7 +146,7 @@ const FormPerizinan = () => {
         payload.keterangan = data.keterangan;
       } else if (activeTab === "FIMTK") {
         payload.jenis_izin = data.jenis_izin;
-        payload.tanggal_mulai = data.tanggal;
+        payload.tanggal_mulai = data.tanggal; // FIMTK biasanya izin sebentar, tgl mulai = tgl selesai
         payload.tanggal_selesai = data.tanggal;
         payload.jam_mulai = data.jam_mulai;
         payload.jam_selesai = data.jam_selesai;
@@ -135,6 +155,7 @@ const FormPerizinan = () => {
         payload.keterangan = data.alasan;
       }
 
+      // Lempar seluruh data tadi ke backend API menggunakan perintah POST
       const response = await fetch(import.meta.env.VITE_API_URL + "/api/perizinan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -143,6 +164,7 @@ const FormPerizinan = () => {
 
       const result = await response.json();
 
+      // Cek respon server, kalau sukses arahkan karyawan ke halaman riwayat
       if (response.ok) {
         alert("Pengajuan Berhasil Dikirim!");
         navigate("/karyawan/riwayat");
@@ -153,10 +175,11 @@ const FormPerizinan = () => {
       console.error(error);
       alert(error.message || "Terjadi kesalahan jaringan.");
     } finally {
+      // Apapun hasilnya (sukses/gagal), matikan animasi loading form-nya
       setLoading(false);
     }
   };
-
+  
   return (
     <div className="fp-wrapper">
       <div className="fp-container">

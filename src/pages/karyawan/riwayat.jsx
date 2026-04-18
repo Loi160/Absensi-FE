@@ -10,10 +10,11 @@ import kalenderIcon from "../../assets/kalender.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 import profileImg from "../../assets/profile.svg";
 
+// Fungsi untuk mengubah format tanggal sistem (ISO) ke format cantik Bahasa Indonesia
 const formatDateIndo = (dateString) => {
   if (!dateString) return "-";
   const date = new Date(dateString);
-  if (isNaN(date)) return dateString;
+  if (isNaN(date)) return dateString; // Jika bukan format tanggal, kembalikan teks aslinya
   return date.toLocaleDateString("id-ID", {
     day: "numeric",
     month: "short",
@@ -21,34 +22,41 @@ const formatDateIndo = (dateString) => {
   });
 };
 
+// Mengambil 5 karakter pertama dari string waktu (contoh: 08:30:00 menjadi 08:30)
 const getJam = (waktu) => {
   if (!waktu) return "--:--";
   return String(waktu).substring(0, 5);
 };
 
+// Menentukan warna label (badge) berdasarkan status persetujuan dari HRD
 const getBadgeStatusClass = (statusApp) => {
   if (statusApp === "Disetujui") return "badge-status-disetujui";
   if (statusApp === "Ditolak") return "badge-status-ditolak";
-  return "badge-status-pending";
+  return "badge-status-pending"; // Default jika masih menunggu (pending)
 };
 
+// Menentukan gaya tampilan kartu berdasarkan jenis datanya (Hadir, Alpha, atau Izin)
 const getBadgeTypeClass = (item) => {
   if (item.type === "Absensi") {
     if (item.status === "ALPHA") return "badge-alpha";
+    // Cek apakah baru absen masuk saja (partial) atau sudah absen masuk-pulang (full)
     return item.isPartial ? "badge-hadir-partial" : "badge-hadir-full";
   }
-  return "badge-izin-kuning";
+  return "badge-izin-kuning"; // Gaya untuk data perizinan
 };
 
 const Riwayat = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  
+  // State untuk kontrol detail modal, loading, dan penyimpanan data riwayat
   const [selectedItem, setSelectedItem] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [historyList, setHistoryList] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Fungsi utama untuk mengambil data gabungan (Absensi & Perizinan) dari Backend
   const fetchRiwayat = async () => {
     if (!user || !user.id) {
       setErrorMessage("Sesi login tidak valid. Silakan login ulang.");
@@ -70,9 +78,11 @@ const Riwayat = () => {
       const absensiData = data.absensi || [];
       const perizinanData = data.perizinan || [];
 
+      // Proses normalisasi data Absensi agar seragam
       const formatAbsensi = absensiData.map((a) => {
         const rawTS = a.tanggal ? new Date(a.tanggal).getTime() : 0;
         const isAlpha = a.status_kehadiran === "ALPHA";
+        // Dianggap parsial jika hadir tapi belum melakukan salah satu (masuk/pulang)
         const isPartial = !isAlpha && !(a.waktu_masuk && a.waktu_pulang);
 
         let noteText = a.waktu_pulang ? "Absen Selesai" : "Belum Absen Pulang";
@@ -88,6 +98,7 @@ const Riwayat = () => {
           branch: user.cabangUtama || "-",
           date: formatDateIndo(a.tanggal),
           rawDate: rawTS,
+          // Ambil waktu terakhir kali user melakukan aksi (pulang dulu, baru masuk)
           timeUpdate: isAlpha ? "--:--" : (getJam(a.waktu_pulang) !== "--:--" ? getJam(a.waktu_pulang) : getJam(a.waktu_masuk)),
           note: noteText,
           isPartial: isPartial,
@@ -100,6 +111,7 @@ const Riwayat = () => {
         };
       });
 
+      // Proses normalisasi data Perizinan agar seragam dengan data absensi
       const formatPerizinan = perizinanData.map((p) => {
         const tglAcuan = p.created_at || p.tanggal_mulai || new Date();
         const rawTS = new Date(tglAcuan).getTime();
@@ -127,6 +139,7 @@ const Riwayat = () => {
         };
       });
 
+      // Gabungkan kedua data dan urutkan berdasarkan tanggal terbaru (descending)
       const combined = [...formatAbsensi, ...formatPerizinan].sort((a, b) => {
         const dateA = a.rawDate || 0;
         const dateB = b.rawDate || 0;
@@ -142,16 +155,19 @@ const Riwayat = () => {
     }
   };
 
+  // Panggil data saat halaman pertama kali dibuka atau user berubah
   useEffect(() => {
     fetchRiwayat();
   }, [user]);
 
+  // Fungsi saat kartu riwayat diklik untuk menampilkan modal detail
   const handleItemClick = (item) => {
     setSelectedItem(item);
   };
 
+  // Fungsi khusus untuk membatalkan/menghapus pengajuan izin yang masih pending
   const handleDelete = async (e, id, realId) => {
-    e.stopPropagation();
+    e.stopPropagation(); // Biar modal detail tidak ikut terbuka saat klik hapus
     if (window.confirm("Apakah Anda yakin ingin menghapus data perizinan ini?")) {
       try {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/perizinan/${realId}`, { method: "DELETE" });
@@ -169,6 +185,7 @@ const Riwayat = () => {
     }
   };
 
+  // Logout dan bersihkan data sesi dari penyimpanan lokal
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");

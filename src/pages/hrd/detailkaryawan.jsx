@@ -11,10 +11,12 @@ import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 
+// Inisialisasi koneksi ke layanan Supabase untuk manajemen penyimpanan dokumen
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Ikon mata terbuka untuk fitur toggle tampilan kata sandi
 const EyeOpenIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -22,6 +24,7 @@ const EyeOpenIcon = () => (
   </svg>
 );
 
+// Ikon mata tertutup untuk fitur toggle tampilan kata sandi
 const EyeOffIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
@@ -29,6 +32,7 @@ const EyeOffIcon = () => (
   </svg>
 );
 
+// Komponen utama untuk menampilkan dan mengedit detail data karyawan serta berkas pendukungnya
 const DetailKaryawan = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -44,15 +48,18 @@ const DetailKaryawan = () => {
   const openSidebar = () => setSidebarOpen(true);
   const closeSidebar = () => setSidebarOpen(false);
 
+  // Mengambil data pengguna dari penyimpanan lokal untuk menentukan hak akses navigasi
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
   const isManager = storedUser.role === "managerCabang";
   const basePath = isManager ? "/managerCabang" : "/hrd";
 
+  // Menutup sidebar otomatis saat berpindah halaman melalui menu navigasi
   const handleNav = (path) => {
     closeSidebar();
     navigate(path);
   };
 
+  // Konfigurasi item menu yang ditampilkan di sidebar berdasarkan peran pengguna
   const MENU_ITEMS = [
     { path: `${basePath}/dashboard`, icon: iconDashboard, text: "Dashboard", show: true },
     { path: `${basePath}/kelolacabang`, icon: iconKelola, text: "Kelola Cabang", show: !isManager },
@@ -61,6 +68,7 @@ const DetailKaryawan = () => {
     { path: `${basePath}/laporan`, icon: iconLaporan, text: "Laporan", show: true },
   ];
 
+  // Memuat daftar cabang dari server untuk keperluan pemilihan lokasi kerja karyawan
   useEffect(() => {
     const fetchCabang = async () => {
       try {
@@ -73,17 +81,20 @@ const DetailKaryawan = () => {
     fetchCabang();
   }, []);
 
+  // Menghapus data sesi dan mengarahkan pengguna kembali ke halaman login
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     navigate("/auth/login");
   };
 
+  // Memperbarui state data formulir secara dinamis saat ada perubahan pada input
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Melakukan validasi berkas dan mengunggahnya ke penyimpanan cloud Supabase
   const handleFileUpload = async (event, dbColumnName) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -101,6 +112,7 @@ const DetailKaryawan = () => {
       return;
     }
 
+    // Mengatur status sedang mengunggah, membuat nama file unik, dan mengirim file ke storage Supabase agar mendapatkan link publiknya
     try {
       setUploadingState(`Sedang mengunggah file untuk ${dbColumnName}...`);
 
@@ -130,6 +142,7 @@ const DetailKaryawan = () => {
     }
   };
 
+  // Memvalidasi NIK harus 8 digit sebelum mengirim data terbaru karyawan ke server untuk disimpan
   const handleSaveEdit = async (e) => {
     e.preventDefault();
     
@@ -156,6 +169,7 @@ const DetailKaryawan = () => {
     }
   };
 
+  // Menampilkan pesan darurat jika data karyawan tidak ditemukan saat halaman dibuka
   if (!employee) {
     return (
       <div style={{ padding: 40, textAlign: "center", fontFamily: "Inter" }}>
@@ -172,6 +186,7 @@ const DetailKaryawan = () => {
     );
   }
 
+  // Daftar label dan kunci database untuk mempermudah pemetaan dokumen karyawan di bagian lampiran
   const dokumenList = [
     { label: "Foto Profil Karyawan", dbKey: "foto_karyawan" },
     { label: "Kartu Tanda Penduduk (KTP)", dbKey: "ktp" },

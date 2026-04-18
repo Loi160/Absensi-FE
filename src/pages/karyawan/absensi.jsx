@@ -10,12 +10,14 @@ import logoPersegi from "../../assets/logopersegi.svg";
 import profileImg from "../../assets/profile.svg";
 import cameraIcon from "../../assets/camera.svg";
 
+// Setup koneksi ke database Supabase untuk penyimpanan foto absensi
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Rumus Haversine untuk menghitung jarak lurus (meter) antara 2 titik koordinat GPS
 const hitungJarak = (lat1, lon1, lat2, lon2) => {
-  const R = 6371e3;
+  const R = 6371e3; // Radius bumi dalam meter
   const p1 = (lat1 * Math.PI) / 180;
   const p2 = (lat2 * Math.PI) / 180;
   const dp = ((lat2 - lat1) * Math.PI) / 180;
@@ -28,6 +30,7 @@ const hitungJarak = (lat1, lon1, lat2, lon2) => {
   return R * c;
 };
 
+// Mengubah format gambar dari Base64 (canvas) menjadi format File agar bisa di-upload
 const dataURLtoFile = (dataurl, filename) => {
   const arr = dataurl.split(",");
   const mime = arr[0].match(/:(.*?);/)[1];
@@ -40,11 +43,13 @@ const dataURLtoFile = (dataurl, filename) => {
   return new File([u8arr], filename, { type: mime });
 };
 
+// Mengambil waktu saat ini dalam format JJ:MM:DD untuk pencatatan absen
 const getCurrentTimeStr = () => {
   const now = new Date();
   return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
 };
 
+// Mengambil tanggal saat ini dengan format lokal Indonesia (contoh: Senin, 1 Januari 2024)
 const getFormatDateIndo = () => {
   return new Date().toLocaleDateString("id-ID", {
     weekday: "long",
@@ -58,64 +63,79 @@ const Absensi = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // State untuk mengontrol tab aktif (Masuk/Pulang/Istirahat) dan jam real-time
   const [activeTab, setActiveTab] = useState("Masuk");
   const [currentTime, setCurrentTime] = useState(new Date());
   const [breakStartTime, setBreakStartTime] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // State untuk mengontrol kamera HP/Laptop dan menyimpan hasil jepretan foto
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [capturedPhoto, setCapturedPhoto] = useState(null);
 
+  // State untuk melacak posisi GPS karyawan dan memvalidasinya dengan lokasi kantor
   const [currentLocation, setCurrentLocation] = useState(null);
   const [locationError, setLocationError] = useState("");
   const [jarakDariKantor, setJarakDariKantor] = useState(null);
   const [isLocationValid, setIsLocationValid] = useState(false);
 
+  // Referensi elemen DOM untuk memutar stream video kamera dan menggambar foto (canvas)
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
 
+  // Efek samping: Update jam digital di layar setiap 1 detik
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
+  // Efek samping: Matikan akses kamera secara paksa jika komponen ditutup/pindah halaman
   useEffect(() => {
     return () => tutupKamera();
   }, []);
 
+  // Efek samping: Cek lokasi GPS karyawan setiap kali pindah tab (kecuali tab Istirahat)
   useEffect(() => {
     if (activeTab !== "Istirahat") {
       cekLokasiKaryawan();
     }
   }, [activeTab]);
 
+  // Validasi input waktu mulai istirahat: Tidak boleh memilih jam yang sudah berlalu
   const handleStartTimeChange = (e) => {
     const selectedTime = e.target.value;
-    const nowStr = getCurrentTimeStr().substring(0, 5);
+    const nowStr = getCurrentTimeStr().substring(0, 5); // Ambil format Jam:Menit saja
+    
     if (selectedTime < nowStr) {
       alert("Waktu sudah terlewat! Silakan pilih jam sekarang atau kedepan.");
-      setBreakStartTime(nowStr);
+      setBreakStartTime(nowStr); // Reset paksa ke jam sekarang
     } else {
       setBreakStartTime(selectedTime);
     }
   };
 
+  // Menghitung otomatis jam selesai istirahat (otomatis ditambah 3 jam dari jam mulai)
   const getEndTimeStr = () => {
     if (!breakStartTime) return "--:--";
     const [hh, mm] = breakStartTime.split(":").map(Number);
     let endHh = hh + 3;
+    
+    // Mencegah format jam melebihi 24 (misal: 25:00 diubah menjadi 01:00)
     if (endHh >= 24) endHh -= 24;
     return `${String(endHh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
   };
 
+  // Menghapus data sesi pengguna saat ini dan mengembalikannya ke halaman login
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     navigate("/auth/login");
   };
 
+  // Meminta akses GPS dari browser/HP untuk mendeteksi posisi karyawan secara akurat
   const cekLokasiKaryawan = () => {
+    // Memastikan perangkat atau browser mendukung fitur Geolokasi
     if (!navigator.geolocation) {
       setLocationError("Browser Anda tidak mendukung GPS");
       return;
@@ -123,26 +143,31 @@ const Absensi = () => {
 
     setLocationError("Sedang mencari lokasi Anda");
 
+    // Mengambil titik koordinat (Latitude & Longitude) karyawan saat ini
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const userLat = position.coords.latitude;
         const userLon = position.coords.longitude;
         setCurrentLocation({ lat: userLat, lon: userLon });
 
+        // Mengambil titik koordinat pusat cabang dan radius toleransi dari data user
         const cabangKoordinatStr = user?.titik_koordinat;
         const radiusToleransi = user?.radius_toleransi || 20;
 
+        // Cegah proses absen jika HRD belum mengatur titik koordinat untuk cabang tersebut
         if (!cabangKoordinatStr) {
           setLocationError("Cabang Anda belum memiliki titik koordinat. Hubungi HRD.");
           setIsLocationValid(false);
           return;
         }
 
+        // Memecah koordinat cabang dan menghitung jaraknya (dalam meter) dengan koordinat HP karyawan
         const [cabangLat, cabangLon] = cabangKoordinatStr.split(",").map((coord) => parseFloat(coord.trim()));
         const jarakMeter = Math.round(hitungJarak(userLat, userLon, cabangLat, cabangLon));
         
         setJarakDariKantor(jarakMeter);
 
+        // Jika jarak masih masuk toleransi, izinkan absen. Jika tidak, blokir dan tampilkan pesan error
         if (jarakMeter <= radiusToleransi) {
           setLocationError("");
           setIsLocationValid(true);
@@ -151,6 +176,7 @@ const Absensi = () => {
           setIsLocationValid(false);
         }
       },
+      // Penanganan error jika akses GPS ditolak, HP tidak ada sinyal, atau timeout
       (err) => {
         setIsLocationValid(false);
         if (err.code === 1) {
@@ -159,11 +185,14 @@ const Absensi = () => {
           setLocationError("Sinyal GPS lemah atau tidak ditemukan.");
         }
       },
+      // Konfigurasi GPS: Paksa minta akurasi tinggi dan jangan pakai cache lokasi lama
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
+  // Fungsi untuk menyalakan kamera depan HP/Laptop
   const bukaKamera = async () => {
+    // Tolak buka kamera kalau karyawan masih berada di luar area kantor
     if (!isLocationValid) {
       alert("Lokasi Anda tidak valid atau akses GPS ditolak! Silakan cek peringatan di layar.");
       cekLokasiKaryawan();
@@ -174,6 +203,7 @@ const Absensi = () => {
     setIsCameraOpen(true);
 
     try {
+      // Meminta akses khusus kamera depan (facingMode: "user") tanpa audio
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "user" },
         audio: false,
@@ -189,6 +219,7 @@ const Absensi = () => {
     }
   };
 
+  // Mematikan aliran (stream) data dari kamera agar hardware tidak terus menyala
   const tutupKamera = () => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
@@ -197,6 +228,7 @@ const Absensi = () => {
     setIsCameraOpen(false);
   };
 
+  // Menangkap *frame* video saat ini dan menempelkan teks (watermark) ke atas fotonya
   const ambilFoto = () => {
     if (!videoRef.current || !canvasRef.current) return;
 
@@ -204,16 +236,20 @@ const Absensi = () => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
+    // Sesuaikan ukuran canvas dengan resolusi asli video dari kamera
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
+    // Menggambar foto jepretan kamera ke atas canvas
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
+    // Membuat kotak hitam transparan di bagian bawah foto untuk alas watermark
     const padding = 20;
     const boxHeight = 120;
     ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     ctx.fillRect(0, canvas.height - boxHeight, canvas.width, boxHeight);
 
+    // Konfigurasi font untuk watermark nama karyawan
     ctx.font = "bold 26px Arial";
     ctx.fillStyle = "#ffffff";
 
@@ -224,22 +260,26 @@ const Absensi = () => {
     const cabangTeks = `Lokasi: Cabang ${user?.cabangUtama || "-"} (${jarakDariKantor}m)`;
     const waktuTeks = `${getFormatDateIndo()} - ${getCurrentTimeStr()}`;
 
+    // Menuliskan Nama, Lokasi Cabang (beserta jarak GPS), dan Jam Real-time ke atas foto
     ctx.fillText(namaTeks, marginX, startY);
     ctx.font = "20px Arial";
-    ctx.fillStyle = "#ffdd57";
+    ctx.fillStyle = "#ffdd57"; // Warna kuning untuk teks lokasi
     ctx.fillText(cabangTeks, marginX, startY + 30);
     ctx.fillStyle = "#ffffff";
     ctx.fillText(waktuTeks, marginX, startY + 60);
 
+    // Menyimpan hasil akhir (foto + watermark) dalam format gambar Base64
     const dataURL = canvas.toDataURL("image/jpeg", 0.9);
     setCapturedPhoto(dataURL);
     tutupKamera();
   };
 
+  // Reset foto lama dan nyalakan kamera kembali
   const fotoUlang = () => {
     bukaKamera();
   };
 
+  // Mengubah Base64 jadi File, lalu mengirimkannya ke Storage Supabase
   const uploadFotoKeSupabase = async () => {
     if (!capturedPhoto) return null;
     try {
@@ -254,6 +294,7 @@ const Absensi = () => {
 
       if (uploadError) throw uploadError;
 
+      // Mengambil link publik agar foto bisa dilihat lewat browser
       const { data: publicUrlData } = supabase.storage
         .from("foto_absensi")
         .getPublicUrl(fileToUpload.name);
@@ -265,12 +306,14 @@ const Absensi = () => {
     }
   };
 
+  // Proses validasi dan pengiriman data absen (Masuk/Pulang/Istirahat) ke database internal
   const handleAbsen = async () => {
     if (!user) {
       alert("Sesi anda telah habis. Silahkan login kembali.");
       return navigate("/auth/login");
     }
 
+    // Syarat absen Masuk/Pulang: GPS harus valid dan foto sudah diambil
     if (activeTab !== "Istirahat") {
       if (!isLocationValid) {
         alert("Lokasi GPS Anda di luar batas toleransi! Silakan mendekat ke area absen.");
@@ -282,6 +325,7 @@ const Absensi = () => {
       }
     }
 
+    // Syarat absen Istirahat: Karyawan harus menentukan jam mulainya
     if (activeTab === "Istirahat" && !breakStartTime) {
       alert("Mohon tentukan jam mulai istirahat!");
       return;
@@ -290,10 +334,12 @@ const Absensi = () => {
     setLoading(true);
     try {
       let urlFoto = null;
+      // Khusus Masuk dan Pulang, jalankan fungsi upload foto ke Supabase dulu
       if (activeTab !== "Istirahat") {
         urlFoto = await uploadFotoKeSupabase();
       }
 
+      // Menyusun struktur data (payload) absensi yang akan dikirim ke database backend
       const payload = {
         user_id: user.id,
         tipe_absen: activeTab,
@@ -303,6 +349,7 @@ const Absensi = () => {
         waktu_istirahat_selesai: activeTab === "Istirahat" ? `${getEndTimeStr()}:00` : null,
       };
 
+      // Mengirimkan data absen lewat API dan memproses respon berhasil/gagal dari server
       const response = await fetch(import.meta.env.VITE_API_URL + "/api/absensi", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -317,6 +364,8 @@ const Absensi = () => {
       } else {
         alert(`Gagal: ${data.message}`);
       }
+      
+    // Menangkap error jika proses upload foto atau koneksi ke server terputus di tengah jalan
     } catch (error) {
       console.error("Error absensi:", error);
       alert(error.message || "Gagal terhubung ke server backend.");
@@ -328,6 +377,8 @@ const Absensi = () => {
   return (
     <div className="main-wrapper">
       <div className="card-container">
+        
+        {/* Bagian header/kepala halaman dengan tombol kembali (khusus tampilan mobile) */}
         <div className="header-section">
           <button className="btn-back mobile-only" onClick={() => navigate("/karyawan/dashboard")}>
             <ArrowLeft size={24} color="white" />

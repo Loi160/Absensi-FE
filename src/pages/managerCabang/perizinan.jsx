@@ -10,6 +10,7 @@ import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 
+/* Menyimpan daftar menu sidebar manager cabang */
 const MENU_ITEMS = [
   { path: "/managerCabang/dashboard", icon: iconDashboard, text: "Dashboard" },
   { path: "/managerCabang/datakaryawan", icon: iconKaryawan, text: "Data Karyawan" },
@@ -17,6 +18,7 @@ const MENU_ITEMS = [
   { path: "/managerCabang/laporan", icon: iconLaporan, text: "Laporan" },
 ];
 
+/* Mengubah format tanggal ke format Indonesia */
 const formatDateIndo = (dateString) => {
   if (!dateString) return "-";
   const date = new Date(dateString);
@@ -27,6 +29,7 @@ const formatDateIndo = (dateString) => {
   });
 };
 
+/* Mengurutkan data berdasarkan status dan tanggal */
 const sortData = (data) =>
   [...data].sort((a, b) => {
     if (a.status === "Pending" && b.status !== "Pending") return -1;
@@ -34,11 +37,13 @@ const sortData = (data) =>
     return b.rawDate - a.rawDate;
   });
 
+/* Menyaring data berdasarkan cabang yang dipilih */
 const filterByCabang = (dataArray, selectedFilter) => {
   if (selectedFilter === "Semua Sub-Cabang") return dataArray;
   return dataArray.filter((item) => item.cabang === selectedFilter);
 };
 
+/* Menentukan class badge berdasarkan jenis izin */
 const getBadgeClass = (tipe) => {
   if (!tipe) return "lainnya";
   const lower = tipe.toLowerCase();
@@ -51,12 +56,17 @@ const getBadgeClass = (tipe) => {
   return "lainnya";
 };
 
+/* Komponen utama halaman perizinan manager cabang */
 const PerizinanManagerCabang = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  /* Membuka sidebar */
   const openSidebar = () => setSidebarOpen(true);
+
+  /* Menutup sidebar */
   const closeSidebar = () => setSidebarOpen(false);
 
   const [showFilter, setShowFilter] = useState(false);
@@ -72,6 +82,7 @@ const PerizinanManagerCabang = () => {
   const [selectedData, setSelectedData] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
 
+  /* Mengambil data perizinan dari API berdasarkan cabang manager */
   const fetchData = async () => {
     if (!user?.cabang_id) return;
     try {
@@ -120,27 +131,32 @@ const PerizinanManagerCabang = () => {
     }
   };
 
+  /* Menjalankan fetch data saat user berubah */
   useEffect(() => {
     fetchData();
   }, [user]);
 
+  /* Navigasi ke halaman lain melalui sidebar */
   const handleNav = (path) => {
     closeSidebar();
     navigate(path);
   };
 
+  /* Membuka modal detail data yang dipilih */
   const handleRowClick = (item, type) => {
     setSelectedData(item);
     setModalType(type);
     setShowModal(true);
   };
 
+  /* Menutup modal dan reset data */
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedData(null);
     setModalType("");
   };
 
+  /* Mengupdate status perizinan (approve / reject) */
   const handleUpdateStatus = async (id, newStatus) => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/perizinan/${id}/status`, {

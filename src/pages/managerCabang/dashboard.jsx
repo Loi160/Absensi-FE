@@ -32,6 +32,7 @@ ChartJS.register(
   Legend,
 );
 
+/* Menyimpan daftar menu sidebar manager cabang */
 const MENU_ITEMS = [
   { path: "/managerCabang/dashboard", icon: iconDashboard, text: "Dashboard", active: true },
   { path: "/managerCabang/datakaryawan", icon: iconKaryawan, text: "Data Karyawan" },
@@ -39,6 +40,7 @@ const MENU_ITEMS = [
   { path: "/managerCabang/laporan", icon: iconLaporan, text: "Laporan" },
 ];
 
+/* Mengatur tampilan dan konfigurasi grafik dashboard */
 const optionsGrafik = {
   responsive: true,
   maintainAspectRatio: false,
@@ -67,12 +69,17 @@ const optionsGrafik = {
   },
 };
 
+/* Komponen utama halaman dashboard manager cabang */
 const DashboardManagerCabang = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  /* Membuka sidebar */
   const openSidebar = () => setSidebarOpen(true);
+
+  /* Menutup sidebar */
   const closeSidebar = () => setSidebarOpen(false);
 
   const [userData, setUserData] = useState({
@@ -102,6 +109,7 @@ const DashboardManagerCabang = () => {
     alpha: [],
   });
 
+  /* Mengisi data user dari AuthContext */
   useEffect(() => {
     if (user) {
       setUserData({
@@ -112,6 +120,7 @@ const DashboardManagerCabang = () => {
     }
   }, [user]);
 
+  /* Mengambil data statistik dashboard berdasarkan filter sub cabang */
   useEffect(() => {
     if (user) {
       const fetchStats = async () => {
@@ -130,19 +139,23 @@ const DashboardManagerCabang = () => {
     }
   }, [user, selectedFilter]);
 
+  /* Mengecek apakah manager memiliki sub cabang */
   const hasSubCabang = userData.subCabang.length > 0;
 
+  /* Menghapus data login dan mengarahkan user ke halaman login */
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     navigate("/auth/login");
   };
 
+  /* Mengarahkan user ke halaman yang dipilih dari sidebar */
   const handleNav = (path) => {
     setSidebarOpen(false);
     navigate(path);
   };
 
+  /* Menyimpan data card statistik dashboard */
   const statsCards = [
     {
       label: "Hadir",
@@ -182,6 +195,7 @@ const DashboardManagerCabang = () => {
     },
   ];
 
+  /* Menyimpan data yang akan ditampilkan pada grafik */
   const dataGrafik = {
     labels: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"],
     datasets: [
@@ -235,7 +249,7 @@ const DashboardManagerCabang = () => {
       },
     ],
   };
-
+  
   return (
     <div className="hrd-container">
       <div className="mobile-topbar">

@@ -15,6 +15,7 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
+
 import iconDashboard from "../../assets/dashboard.svg";
 import iconKelola from "../../assets/kelola.svg";
 import iconKaryawan from "../../assets/datakaryawan.svg";
@@ -23,6 +24,7 @@ import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 
+// Mendaftarkan elemen-elemen yang dibutuhkan oleh library Chart.js untuk menggambar grafik
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -33,6 +35,7 @@ ChartJS.register(
   Legend,
 );
 
+// Daftar menu navigasi yang akan ditampilkan pada sidebar (panel samping)
 const MENU_ITEMS = [
   { path: "/hrd/dashboard", icon: iconDashboard, text: "Dashboard", active: true },
   { path: "/hrd/kelolacabang", icon: iconKelola, text: "Kelola Cabang" },
@@ -41,6 +44,7 @@ const MENU_ITEMS = [
   { path: "/hrd/laporan", icon: iconLaporan, text: "Laporan" },
 ];
 
+// Konfigurasi tampilan untuk grafik kehadiran (seperti posisi legenda, warna garis, dan ukuran font)
 const optionsGrafik = {
   responsive: true,
   maintainAspectRatio: false,
@@ -69,6 +73,7 @@ const optionsGrafik = {
   },
 };
 
+// Komponen utama halaman Dashboard HRD untuk menampilkan ringkasan data, grafik, dan mengelola state (data sementara)
 const DashboardHRD = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -95,7 +100,7 @@ const DashboardHRD = () => {
     terlambat: [],
     alpha: [],
   });
-
+  // Mengambil daftar nama cabang dari backend (API) saat user berhasil login, lalu menyimpannya ke state 'cabangList'
   useEffect(() => {
     if (user) {
       const fetchCabang = async () => {
@@ -110,7 +115,8 @@ const DashboardHRD = () => {
       fetchCabang();
     }
   }, [user]);
-
+  
+  // Mengambil data statistik kehadiran dan data grafik dari backend berdasarkan filter cabang yang dipilih
   useEffect(() => {
     if (user) {
       const fetchStats = async () => {
@@ -128,13 +134,14 @@ const DashboardHRD = () => {
       fetchStats();
     }
   }, [user, selectedFilter]);
-
+  
+  // Fungsi untuk mengeluarkan user dari sesi saat ini, menghapus data lokal, dan mengarahkannya kembali ke halaman login
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     navigate("/auth/login");
   };
-
+  // Konfigurasi tampilan untuk kotak-kotak ringkasan statistik (warna, bayangan, dan nilai yang diambil dari state 'stats')
   const statsCards = [
     {
       label: "Hadir",
@@ -173,7 +180,8 @@ const DashboardHRD = () => {
       shadow: "rgba(26, 188, 156, 0.3)",
     },
   ];
-
+  
+  // Menyusun struktur data dan warna garis untuk grafik kehadiran berdasarkan hari dalam seminggu
   const dataGrafik = {
     labels: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"],
     datasets: [

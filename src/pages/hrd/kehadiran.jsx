@@ -12,6 +12,7 @@ import logoPersegi from "../../assets/logopersegi.svg";
 import iconAbsen from "../../assets/tambah.svg";
 import iconIzin from "../../assets/perizinan.svg";
 
+// Mengubah format tanggal standar menjadi tampilan bahasa Indonesia (misal: 18 Apr 2026)
 const formatDateIndo = (dateString) => {
   if (!dateString) return "-";
   const date = new Date(dateString);
@@ -22,6 +23,7 @@ const formatDateIndo = (dateString) => {
   });
 };
 
+// Mengurutkan data agar status 'Pending' muncul paling atas, sisanya diurutkan berdasarkan tanggal terbaru
 const sortData = (dataArray) => {
   return [...dataArray].sort((a, b) => {
     if (a.status === "Pending" && b.status !== "Pending") return -1;
@@ -30,6 +32,7 @@ const sortData = (dataArray) => {
   });
 };
 
+// Menentukan nama class CSS untuk warna label/badge berdasarkan tipe izin yang diajukan
 const getBadgeClass = (tipe) => {
   if (!tipe) return "lainnya";
   const lower = tipe.toLowerCase();
@@ -42,6 +45,7 @@ const getBadgeClass = (tipe) => {
   return "lainnya";
 };
 
+// Komponen utama untuk mengelola data perizinan, cuti, dan input kehadiran manual karyawan
 const Kehadiran = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("perizinan");
@@ -65,6 +69,7 @@ const Kehadiran = () => {
   const [selectedKaryawanId, setSelectedKaryawanId] = useState("");
   const [karyawanDetail, setKaryawanDetail] = useState(null);
 
+  // Mengatur default tanggal absen manual ke hari ini saat halaman pertama kali dibuka
   const [tanggalAbsen, setTanggalAbsen] = useState(() => {
     const today = new Date();
     return today.toISOString().split("T")[0];
@@ -78,6 +83,7 @@ const Kehadiran = () => {
   const [selectedData, setSelectedData] = useState(null);
   const [previewImage, setPreviewImage] = useState(null); 
 
+  // Mengambil semua data yang dibutuhkan (cabang, karyawan, perizinan) secara bersamaan dari server
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -96,6 +102,7 @@ const Kehadiran = () => {
       const fimtk = [];
       const cuti = [];
 
+      // Memilah data dari server ke dalam kategori Izin, FIMTK, atau Cuti agar tampilan tabel tidak tercampur
       if (Array.isArray(allPerizinan)) {
         allPerizinan.forEach((p) => {
           const mappedData = {
@@ -136,10 +143,12 @@ const Kehadiran = () => {
     }
   };
 
+  // Menjalankan fungsi ambil data secara otomatis saat halaman pertama kali dibuka
   useEffect(() => {
     fetchData();
   }, []);
 
+  // Mencari detail info karyawan secara otomatis setiap kali ID karyawan dipilih di menu dropdown
   useEffect(() => {
     if (selectedKaryawanId) {
       const found = karyawanList.find((k) => String(k.id) === String(selectedKaryawanId));
@@ -149,6 +158,7 @@ const Kehadiran = () => {
     }
   }, [selectedKaryawanId, karyawanList]);
 
+  // Menyaring daftar karyawan berdasarkan nama atau NIK yang diketik di kolom pencarian
   const filteredKaryawanList = karyawanList.filter(
     (k) =>
       (k.nama.toLowerCase().includes(searchKaryawan.toLowerCase()) ||
@@ -156,24 +166,28 @@ const Kehadiran = () => {
       (k.status === "Aktif" || !k.status)
   );
 
+  // Menghapus data login dari memori browser dan mengembalikan user ke halaman depan (login)
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     navigate("/auth/login");
   };
 
+  // Menampilkan modal detail saat salah satu baris di tabel perizinan diklik
   const handleRowClick = (item, type) => {
     setSelectedData(item);
     setModalType(type);
     setShowModal(true);
   };
 
+  // Menutup jendela modal dan membersihkan data yang tadi sempat terpilih
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedData(null);
     setModalType("");
   };
 
+  // Mengirim pembaruan status (Disetujui/Ditolak) ke server untuk data perizinan tertentu
   const handleUpdateStatus = async (id, newStatus) => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/perizinan/${id}/status`, {
@@ -193,6 +207,7 @@ const Kehadiran = () => {
     }
   };
 
+  // Memproses pengiriman data absensi manual (Masuk/Pulang) yang diinput oleh admin/HRD
   const handleAbsenManualSubmit = async (e) => {
     e.preventDefault();
     if (!selectedKaryawanId) {
@@ -235,16 +250,19 @@ const Kehadiran = () => {
     }
   };
 
+  // Memfilter tampilan data di tabel berdasarkan cabang yang dipilih pada tombol filter
   const filterByCabang = (dataArray) => {
     if (selectedFilter === "Semua Cabang") return dataArray;
     return dataArray.filter((item) => item.cabang === selectedFilter);
   };
 
+  // Fungsi navigasi standar untuk berpindah halaman lewat menu sidebar
   const handleNav = (path) => {
     closeSidebar();
     navigate(path);
   };
 
+  // Mengganti tampilan antara tab Perizinan atau tab Absen Manual
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     closeSidebar();
