@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { getAuthHeaders } from "../../context/AuthHeaders";
 import "../hrd/kehadiran.css"; 
 
 import iconDashboard from "../../assets/dashboard.svg";
@@ -81,55 +82,94 @@ const PerizinanManagerCabang = () => {
   const [modalType, setModalType] = useState("");
   const [selectedData, setSelectedData] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const hasSubCabang = user?.subCabang && user.subCabang.length > 0;
 
   /* Mengambil data perizinan dari API berdasarkan cabang manager */
-  const fetchData = async () => {
-    if (!user?.cabang_id) return;
-    try {
-      setLoading(true);
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/manager/perizinan/${user.cabang_id}`);
-      const allPerizinan = await res.json();
+ const fetchData = async () => {
+  if (!user?.cabang_id) return;
 
-      const harian = [];
-      const fimtk = [];
-      const cuti = [];
+  try {
+    setLoading(true);
 
-      allPerizinan.forEach((p) => {
-        const mappedData = {
-          id: p.id,
-          nama: p.users?.nama || "Unknown",
-          cabang: p.users?.cabang?.nama || "-",
-          jabatan: p.users?.jabatan || "-",
-          divisi: p.users?.divisi || "-",
-          noTelp: p.users?.no_telp || "-",
-          tipeIzin: p.jenis_izin,
-          keterangan: p.keterangan || p.keperluan,
-          tglMulai: formatDateIndo(p.tanggal_mulai),
-          tglSelesai: formatDateIndo(p.tanggal_selesai),
-          tanggal: formatDateIndo(p.tanggal_mulai),
-          jamMulai: p.jam_mulai,
-          jamSelesai: p.jam_selesai,
-          keperluan: p.keperluan,
-          kendaraan: p.kendaraan,
-          alasan: p.keterangan,
-          status: p.status_approval,
-          foto: p.bukti_foto,
-          rawDate: new Date(p.created_at).getTime(),
-        };
-        if (p.kategori === "Izin") harian.push(mappedData);
-        else if (p.kategori === "FIMTK") fimtk.push(mappedData);
-        else if (p.kategori === "Cuti") cuti.push(mappedData);
-      });
+    const resCabang = await fetch(`${import.meta.env.VITE_API_URL}/api/cabang`, {
+      headers: getAuthHeaders(),
+    });
 
-      setDataIzinHarian(harian);
-      setDataIzinFIMTK(fimtk);
-      setDataCuti(cuti);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
+    const cabangList = await resCabang.json();
+
+    if (!resCabang.ok) {
+      alert(cabangList.message || "Gagal mengambil data cabang.");
+      return;
     }
-  };
+
+    const allowedCabang = Array.isArray(cabangList)
+      ? cabangList.filter(
+          (c) => c.id === user.cabang_id || c.parent_id === user.cabang_id
+        )
+      : [];
+
+    const perizinanResults = await Promise.all(
+      allowedCabang.map(async (cabang) => {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/manager/perizinan/${cabang.id}`,
+          { headers: getAuthHeaders() }
+        );
+
+        const result = await res.json();
+
+        if (!res.ok) {
+          console.error(result);
+          return [];
+        }
+
+        return Array.isArray(result) ? result : [];
+      })
+    );
+
+    const allPerizinan = perizinanResults.flat();
+
+    const harian = [];
+    const fimtk = [];
+    const cuti = [];
+
+    allPerizinan.forEach((p) => {
+      const mappedData = {
+        id: p.id,
+        nama: p.users?.nama || "Unknown",
+        cabang: p.users?.cabang?.nama || "-",
+        jabatan: p.users?.jabatan || "-",
+        divisi: p.users?.divisi || "-",
+        noTelp: p.users?.no_telp || "-",
+        tipeIzin: p.jenis_izin,
+        keterangan: p.keterangan || p.keperluan,
+        tglMulai: formatDateIndo(p.tanggal_mulai),
+        tglSelesai: formatDateIndo(p.tanggal_selesai),
+        tanggal: formatDateIndo(p.tanggal_mulai),
+        jamMulai: p.jam_mulai,
+        jamSelesai: p.jam_selesai,
+        keperluan: p.keperluan,
+        kendaraan: p.kendaraan,
+        alasan: p.keterangan,
+        status: p.status_approval,
+        foto: p.bukti_foto,
+        rawDate: new Date(p.created_at).getTime(),
+      };
+
+      if (p.kategori === "Izin") harian.push(mappedData);
+      else if (p.kategori === "FIMTK") fimtk.push(mappedData);
+      else if (p.kategori === "Cuti") cuti.push(mappedData);
+    });
+
+    setDataIzinHarian(harian);
+    setDataIzinFIMTK(fimtk);
+    setDataCuti(cuti);
+  } catch (error) {
+    console.error(error);
+    alert("Gagal mengambil data perizinan.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   /* Menjalankan fetch data saat user berubah */
   useEffect(() => {
@@ -158,21 +198,26 @@ const PerizinanManagerCabang = () => {
 
   /* Mengupdate status perizinan (approve / reject) */
   const handleUpdateStatus = async (id, newStatus) => {
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/perizinan/${id}/status`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status_approval: newStatus }),
-      });
-      if (res.ok) {
-        alert(`Berhasil di-${newStatus}`);
-        fetchData();
-        handleCloseModal();
-      }
-    } catch (err) {
-      alert("Gagal update");
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/perizinan/${id}/status`, {
+      method: "PUT",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ status_approval: newStatus }),
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
+      alert(`Berhasil di-${newStatus}`);
+      fetchData();
+      handleCloseModal();
+    } else {
+      alert(result.message || "Gagal mengupdate status.");
     }
-  };
+  } catch (err) {
+    alert("Terjadi kesalahan jaringan.");
+  }
+};
 
   return (
     <div className="hrd-container">
@@ -211,7 +256,7 @@ const PerizinanManagerCabang = () => {
         <div className="sidebar-footer">
           <button className="btn-logout" onClick={() => {
             localStorage.removeItem("user");
-            localStorage.removeItem("token");
+            localStorage.removeItem("session_token");
             navigate("/auth/login");
           }}>
             Log Out
@@ -227,7 +272,12 @@ const PerizinanManagerCabang = () => {
 
         <div className="action-row-perizinan">
           <div className="filter-wrapper">
-            <button className="btn-filter-green" onClick={() => setShowFilter(!showFilter)}>
+            <button
+  className="btn-filter-green"
+  onClick={() => {
+    if (hasSubCabang) setShowFilter(!showFilter);
+  }}
+>
               {selectedFilter} <img src={iconBawah} alt="v" className={`filter-arrow ${showFilter ? "rotate" : ""}`} />
             </button>
             {showFilter && (

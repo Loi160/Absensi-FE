@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { getAuthHeaders } from "../../context/AuthHeaders";
 import * as XLSX from "xlsx"; 
 import "../hrd/laporan.css";
 
@@ -96,30 +97,51 @@ const LaporanManagerCabang = () => {
   });
   const [previewImage, setPreviewImage] = useState(null);
 
-  /* Mengambil data laporan berdasarkan cabang dan rentang tanggal */
-  useEffect(() => {
-    const fetchLaporan = async () => {
-      if (!user?.cabang_id) return;
-      try {
-        setLoading(true);
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/laporan?role=managerCabang&cabang_id=${user.cabang_id}&start_date=${startDate}&end_date=${endDate}`
-        );
-        const data = await res.json();
-        setDataLaporan(data || []);
-      } catch (err) {
-        console.error("Gagal mengambil data:", err);
-      } finally {
-        setLoading(false);
+useEffect(() => {
+  const fetchLaporan = async () => {
+    if (!user?.cabang_id) return;
+
+    try {
+      setLoading(true);
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/laporan?start_date=${startDate}&end_date=${endDate}`,
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Gagal mengambil laporan. Silakan login ulang.");
+        setDataLaporan([]);
+
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem("user");
+          localStorage.removeItem("session_token");
+          navigate("/auth/login");
+        }
+
+        return;
       }
-    };
-    fetchLaporan();
-  }, [user, startDate, endDate]);
+
+      setDataLaporan(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Gagal mengambil data:", err);
+      setDataLaporan([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchLaporan();
+}, [user, startDate, endDate, navigate]);
 
   /* Menghapus data login dan mengarahkan user ke halaman login */
   const handleLogout = () => {
     localStorage.removeItem("user");
-    localStorage.removeItem("token");
+    localStorage.removeItem("session_token");
     navigate("/auth/login");
   };
 

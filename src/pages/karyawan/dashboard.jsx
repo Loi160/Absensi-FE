@@ -57,7 +57,7 @@ const MENU_ITEMS = [
 // Komponen utama untuk kerangka halaman Dashboard
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   
   // State khusus untuk menyimpan waktu saat ini agar jam digital bisa berjalan
   const [dateTime, setDateTime] = useState(new Date());
@@ -72,10 +72,9 @@ const Dashboard = () => {
 
   // Fungsi untuk menghapus sesi login dan melempar user kembali ke halaman login
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    navigate("/auth/login");
-  };
+  logout();
+  navigate("/auth/login");
+};
 
   // Menyiapkan sapaan nama pengguna, kalau data kosong maka dipanggil "Karyawan"
   const namaPanggilan = user?.nama || "Karyawan";

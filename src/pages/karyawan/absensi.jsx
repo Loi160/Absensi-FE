@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { getAuthHeaders } from "../../context/AuthHeaders";
 import { createClient } from "@supabase/supabase-js";
 import "./absensi.css";
 import { ChevronDown, ArrowLeft } from "lucide-react";
@@ -128,10 +129,10 @@ const Absensi = () => {
 
   // Menghapus data sesi pengguna saat ini dan mengembalikannya ke halaman login
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    navigate("/auth/login");
-  };
+  localStorage.removeItem("user");
+  localStorage.removeItem("session_token");
+  navigate("/auth/login");
+};
 
   // Meminta akses GPS dari browser/HP untuk mendeteksi posisi karyawan secara akurat
   const cekLokasiKaryawan = () => {
@@ -341,29 +342,36 @@ const Absensi = () => {
 
       // Menyusun struktur data (payload) absensi yang akan dikirim ke database backend
       const payload = {
-        user_id: user.id,
-        tipe_absen: activeTab,
-        waktu: getCurrentTimeStr(),
-        foto: urlFoto,
-        waktu_istirahat_mulai: activeTab === "Istirahat" ? `${breakStartTime}:00` : null,
-        waktu_istirahat_selesai: activeTab === "Istirahat" ? `${getEndTimeStr()}:00` : null,
-      };
+  tipe_absen: activeTab,
+  waktu: getCurrentTimeStr(),
+  foto: urlFoto,
+  waktu_istirahat_mulai: activeTab === "Istirahat" ? `${breakStartTime}:00` : null,
+  waktu_istirahat_selesai: activeTab === "Istirahat" ? `${getEndTimeStr()}:00` : null,
+};
 
       // Mengirimkan data absen lewat API dan memproses respon berhasil/gagal dari server
       const response = await fetch(import.meta.env.VITE_API_URL + "/api/absensi", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify(payload),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        alert(data.message);
-        navigate("/karyawan/dashboard");
-      } else {
-        alert(`Gagal: ${data.message}`);
-      }
+  alert(data.message);
+  navigate("/karyawan/dashboard");
+} else {
+  if (response.status === 401) {
+    localStorage.removeItem("user");
+    localStorage.removeItem("session_token");
+    alert(data.message || "Session tidak valid. Silakan login ulang.");
+    navigate("/auth/login");
+    return;
+  }
+
+  alert(`Gagal: ${data.message}`);
+}
       
     // Menangkap error jika proses upload foto atau koneksi ke server terputus di tengah jalan
     } catch (error) {
@@ -519,7 +527,11 @@ const Absensi = () => {
           <button
             className="btn-submit-primary"
             onClick={handleAbsen}
-            disabled={loading || !isLocationValid || (activeTab !== "Istirahat" && isCameraOpen)}
+            disabled={
+  loading ||
+  (activeTab !== "Istirahat" && !isLocationValid) ||
+  (activeTab !== "Istirahat" && isCameraOpen)
+}
           >
             {loading ? "Menyimpan Data" : `Simpan Absen ${activeTab}`}
           </button>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { getAuthHeaders } from "../../context/AuthHeaders";
 import "../hrd/datakaryawan.css";
 
 import iconDashboard from "../../assets/dashboard.svg";
@@ -71,7 +72,9 @@ const DataKaryawanManagerCabang = () => {
       const fetchAllData = async () => {
         try {
           setLoading(true);
-          const res = await fetch(import.meta.env.VITE_API_URL + "/api/karyawan");
+          const res = await fetch(import.meta.env.VITE_API_URL + "/api/karyawan", {
+            headers: getAuthHeaders(),
+          });
           const data = await res.json();
           
           const allMyBranches = [user.cabangUtama, ...(user.subCabang || [])];
@@ -96,7 +99,7 @@ const DataKaryawanManagerCabang = () => {
   /* Menghapus data login dan mengarahkan user ke halaman login */
   const handleLogout = () => {
     localStorage.removeItem("user");
-    localStorage.removeItem("token");
+    localStorage.removeItem("session_token");
     navigate("/auth/login");
   };
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import "./datakaryawan.css";
+import { getAuthHeaders } from "../../context/AuthHeaders";
 
 import iconDashboard from "../../assets/dashboard.svg";
 import iconKelola from "../../assets/kelola.svg";
@@ -72,7 +73,9 @@ const DetailKaryawan = () => {
   useEffect(() => {
     const fetchCabang = async () => {
       try {
-        const res = await fetch(import.meta.env.VITE_API_URL + "/api/cabang");
+        const res = await fetch(import.meta.env.VITE_API_URL + "/api/cabang", {
+          headers: getAuthHeaders(),
+        });
         setCabangList((await res.json()) || []);
       } catch (err) {
         console.error(err);
@@ -84,7 +87,7 @@ const DetailKaryawan = () => {
   // Menghapus data sesi dan mengarahkan pengguna kembali ke halaman login
   const handleLogout = () => {
     localStorage.removeItem("user");
-    localStorage.removeItem("token");
+    localStorage.removeItem("session_token");
     navigate("/auth/login");
   };
 
@@ -153,7 +156,7 @@ const DetailKaryawan = () => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/karyawan/${formData.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify(formData),
       });
 

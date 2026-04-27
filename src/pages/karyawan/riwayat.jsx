@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { getAuthHeaders } from "../../context/AuthHeaders";
 import "./riwayat.css";
-import { ArrowLeft, Trash2, X, ZoomIn, Clock } from "lucide-react";
+import { ArrowLeft, X, ZoomIn, Clock } from "lucide-react";
 
 import perizinanIcon from "../../assets/perizinan.svg";
 import lokasiIcon from "../../assets/lokasi.svg";
@@ -47,7 +48,7 @@ const getBadgeTypeClass = (item) => {
 
 const Riwayat = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   
   // State untuk kontrol detail modal, loading, dan penyimpanan data riwayat
   const [selectedItem, setSelectedItem] = useState(null);
@@ -68,11 +69,21 @@ const Riwayat = () => {
       setLoading(true);
       setErrorMessage("");
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/riwayat/${user.id}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/riwayat/${user.id}`, {
+  headers: getAuthHeaders(),
+});
 
       if (!res.ok) {
-        throw new Error(`Server Error: ${res.status} - Pastikan Backend sudah direstart.`);
-      }
+  const errorData = await res.json().catch(() => ({}));
+
+  if (res.status === 401 || res.status === 403) {
+    logout();
+    navigate("/auth/login");
+    return;
+  }
+
+  throw new Error(errorData.message || `Server Error: ${res.status}`);
+}
 
       const data = await res.json();
       const absensiData = data.absensi || [];
@@ -165,32 +176,11 @@ const Riwayat = () => {
     setSelectedItem(item);
   };
 
-  // Fungsi khusus untuk membatalkan/menghapus pengajuan izin yang masih pending
-  const handleDelete = async (e, id, realId) => {
-    e.stopPropagation(); // Biar modal detail tidak ikut terbuka saat klik hapus
-    if (window.confirm("Apakah Anda yakin ingin menghapus data perizinan ini?")) {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/perizinan/${realId}`, { method: "DELETE" });
-        if (res.ok) {
-          setHistoryList((prev) => prev.filter((item) => item.id !== id));
-          alert("Pengajuan berhasil dibatalkan");
-          setSelectedItem(null);
-        } else {
-          alert("Gagal menghapus data");
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Terjadi kesalahan jaringan");
-      }
-    }
-  };
-
   // Logout dan bersihkan data sesi dari penyimpanan lokal
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    navigate("/auth/login");
-  };
+  logout();
+  navigate("/auth/login");
+};
 
   return (
     <div className="rw-wrapper">
@@ -289,11 +279,6 @@ const Riwayat = () => {
                     <p className="rw-note">{item.note}</p>
                   </div>
 
-                  {item.type === "Perizinan" && item.statusApproval === "Pending" && (
-                    <button className="rw-btn-delete" onClick={(e) => handleDelete(e, item.id, item.realId)}>
-                      <Trash2 size={18} />
-                    </button>
-                  )}
                 </div>
               ))
             )}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./kelolacabang.css";
+import { getAuthHeaders } from "../../context/AuthHeaders";
 
 import iconDashboard from "../../assets/dashboard.svg";
 import iconKelola from "../../assets/kelola.svg";
@@ -44,7 +45,9 @@ const KelolaCabang = () => {
   const fetchCabang = async () => {
     try {
       setLoading(true);
-      const response = await fetch(import.meta.env.VITE_API_URL + "/api/cabang");
+      const response = await fetch(import.meta.env.VITE_API_URL + "/api/cabang", {
+        headers: getAuthHeaders(),
+      });
       const data = await response.json();
 
       const parents = data.filter((c) => !c.parent_id);
@@ -145,7 +148,7 @@ const KelolaCabang = () => {
 
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify(data),
       });
 
@@ -179,7 +182,7 @@ const KelolaCabang = () => {
         `${import.meta.env.VITE_API_URL}/api/cabang/${confirmData.id}/status`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders(),
           body: JSON.stringify({ is_active: !confirmData.is_active }),
         }
       );
@@ -198,7 +201,7 @@ const KelolaCabang = () => {
   // Menghapus data akun dan mengarahkan kembali ke halaman masuk
   const handleLogout = () => {
     localStorage.removeItem("user");
-    localStorage.removeItem("token");
+    localStorage.removeItem("session_token");
     navigate("/auth/login");
   };
 

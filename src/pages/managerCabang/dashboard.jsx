@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { getAuthHeaders } from "../../context/AuthHeaders";
 import "../hrd/dashboard.css";
 
 import {
@@ -72,7 +73,7 @@ const optionsGrafik = {
 /* Komponen utama halaman dashboard manager cabang */
 const DashboardManagerCabang = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -126,7 +127,10 @@ const DashboardManagerCabang = () => {
       const fetchStats = async () => {
         try {
           const res = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/dashboard/stats?role=managerCabang&cabang_id=${user.cabang_id}&sub_cabang=${selectedFilter}`,
+            `${import.meta.env.VITE_API_URL}/api/dashboard/stats?sub_cabang=${selectedFilter}`,
+            {
+              headers: getAuthHeaders(),
+            }
           );
           const data = await res.json();
           if (data.totals) setStats(data.totals);
@@ -144,10 +148,9 @@ const DashboardManagerCabang = () => {
 
   /* Menghapus data login dan mengarahkan user ke halaman login */
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    navigate("/auth/login");
-  };
+  logout();
+  navigate("/auth/login");
+};
 
   /* Mengarahkan user ke halaman yang dipilih dari sidebar */
   const handleNav = (path) => {

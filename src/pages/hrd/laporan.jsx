@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { getAuthHeaders } from "../../context/AuthHeaders";
 import * as XLSX from "xlsx";
 import "./laporan.css";
 
@@ -57,7 +58,6 @@ const getRowTerlambatClass = (jumlahTerlambat) => {
 // Komponen utama untuk menampilkan dan merekap laporan kehadiran seluruh karyawan
 const Laporan = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   // State untuk mengontrol tampilan menu sidebar pada perangkat mobile (HP)
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -99,12 +99,17 @@ const Laporan = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const resCabang = await fetch(`${import.meta.env.VITE_API_URL}/api/cabang`);
+        const resCabang = await fetch(`${import.meta.env.VITE_API_URL}/api/cabang`, {
+          headers: getAuthHeaders(),
+        });
         const listC = await resCabang.json();
         setCabangList(listC.map((c) => c.nama));
 
         const resLaporan = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/laporan?role=hrd&start_date=${startDate}&end_date=${endDate}`,
+          `${import.meta.env.VITE_API_URL}/api/laporan?start_date=${startDate}&end_date=${endDate}`,
+          {
+            headers: getAuthHeaders(),
+          }
         );
         const dataLap = await resLaporan.json();
         setDataLaporan(dataLap);
@@ -120,7 +125,7 @@ const Laporan = () => {
   // Membersihkan sesi pengguna dan mengarahkan kembali ke halaman login
   const handleLogout = () => {
     localStorage.removeItem("user");
-    localStorage.removeItem("token");
+    localStorage.removeItem("session_token");
     navigate("/auth/login");
   };
 

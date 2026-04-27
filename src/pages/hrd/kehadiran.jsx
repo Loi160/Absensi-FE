@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./kehadiran.css";
+import { getAuthHeaders } from "../../context/AuthHeaders";
 
 import iconDashboard from "../../assets/dashboard.svg";
 import iconKelola from "../../assets/kelola.svg";
@@ -87,15 +88,21 @@ const Kehadiran = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const resCabang = await fetch(import.meta.env.VITE_API_URL + "/api/cabang");
+      const resCabang = await fetch(import.meta.env.VITE_API_URL + "/api/cabang", {
+        headers: getAuthHeaders(),
+      });
       const listCabang = await resCabang.json();
       setCabangList(Array.isArray(listCabang) ? listCabang.map((c) => c.nama) : []);
 
-      const resKaryawan = await fetch(import.meta.env.VITE_API_URL + "/api/karyawan");
+      const resKaryawan = await fetch(import.meta.env.VITE_API_URL + "/api/karyawan", {
+        headers: getAuthHeaders(),
+      });
       const listKaryawan = await resKaryawan.json();
       setKaryawanList(Array.isArray(listKaryawan) ? listKaryawan : []);
 
-      const resPerizinan = await fetch(import.meta.env.VITE_API_URL + "/api/perizinan/all");
+      const resPerizinan = await fetch(import.meta.env.VITE_API_URL + "/api/perizinan/all", {
+        headers: getAuthHeaders(),
+      });
       const allPerizinan = await resPerizinan.json();
 
       const harian = [];
@@ -169,7 +176,7 @@ const Kehadiran = () => {
   // Menghapus data login dari memori browser dan mengembalikan user ke halaman depan (login)
   const handleLogout = () => {
     localStorage.removeItem("user");
-    localStorage.removeItem("token");
+    localStorage.removeItem("session_token");
     navigate("/auth/login");
   };
 
@@ -192,7 +199,7 @@ const Kehadiran = () => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/perizinan/${id}/status`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ status_approval: newStatus }),
       });
       if (res.ok) {
@@ -230,7 +237,7 @@ const Kehadiran = () => {
     try {
       const res = await fetch(import.meta.env.VITE_API_URL + "/api/absensi/manual", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify(payload),
       });
       const result = await res.json();

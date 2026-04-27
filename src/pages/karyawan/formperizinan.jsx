@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { getAuthHeaders } from "../../context/AuthHeaders";
 import { createClient } from "@supabase/supabase-js";
 import "./formperizinan.css";
 import { ChevronDown, ArrowLeft } from "lucide-react";
@@ -125,12 +126,10 @@ const FormPerizinan = () => {
         urlBukti = await uploadBuktiKeSupabase();
       }
 
-      // Susun kerangka data (payload) yang akan dilempar ke Backend/Database MySQL
+      // Susun data yang akan dikirim ke Backend dan disimpan ke Supabase
       let payload = {
-        user_id: user.id,
-        kategori: activeTab,
-        status_approval: "Pending", // Status otomatis diset "Menunggu Persetujuan HRD"
-      };
+  kategori: activeTab,
+};
 
       // Pisahkan logika pengisian data berdasarkan Tab apa yang dipilih
       if (activeTab === "Izin") {
@@ -158,7 +157,7 @@ const FormPerizinan = () => {
       // Lempar seluruh data tadi ke backend API menggunakan perintah POST
       const response = await fetch(import.meta.env.VITE_API_URL + "/api/perizinan", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify(payload),
       });
 
