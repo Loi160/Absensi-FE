@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { getAuthHeaders } from "../../context/AuthHeaders";
 import "./dashboard.css";
 
 import {
@@ -76,7 +77,7 @@ const optionsGrafik = {
 // Komponen utama halaman Dashboard HRD untuk menampilkan ringkasan data, grafik, dan mengelola state (data sementara)
 const DashboardHRD = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [showFilter, setShowFilter] = useState(false);
@@ -105,9 +106,17 @@ const DashboardHRD = () => {
     if (user) {
       const fetchCabang = async () => {
         try {
-          const res = await fetch(import.meta.env.VITE_API_URL + "/api/cabang");
-          const data = await res.json();
-          setCabangList(data.map((c) => c.nama));
+          const res = await fetch(
+            `${import.meta.env.VITE_API_URL}/api/cabang`,
+            { 
+              headers: getAuthHeaders(),
+            }
+          );
+
+const data = await res.json();
+if (Array.isArray(data)) {
+  setCabangList(data.map((c) => c.nama));
+}
         } catch (err) {
           console.error(err);
         }
@@ -122,11 +131,15 @@ const DashboardHRD = () => {
       const fetchStats = async () => {
         try {
           const res = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/dashboard/stats?role=hrd&sub_cabang=${selectedFilter}`,
+            `${import.meta.env.VITE_API_URL}/api/dashboard/stats?sub_cabang=${selectedFilter}`,
+            { 
+              headers: getAuthHeaders(),
+            }
           );
           const data = await res.json();
-          if (data.totals) setStats(data.totals);
-          if (data.chart) setChartData(data.chart);
+          
+          if (data && data.totals) setStats(data.totals);
+          if (data && data.chart) setChartData(data.chart);
         } catch (err) {
           console.error(err);
         }
@@ -137,10 +150,9 @@ const DashboardHRD = () => {
   
   // Fungsi untuk mengeluarkan user dari sesi saat ini, menghapus data lokal, dan mengarahkannya kembali ke halaman login
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    navigate("/auth/login");
-  };
+  logout();
+  navigate("/auth/login");
+};
   // Konfigurasi tampilan untuk kotak-kotak ringkasan statistik (warna, bayangan, dan nilai yang diambil dari state 'stats')
   const statsCards = [
     {

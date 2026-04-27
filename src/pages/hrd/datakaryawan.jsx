@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { getAuthHeaders } from "../../context/AuthHeaders";
 import "./datakaryawan.css";
 
 import iconDashboard from "../../assets/dashboard.svg";
@@ -68,11 +69,22 @@ const DataKaryawanHRD = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const resCabang = await fetch(import.meta.env.VITE_API_URL + "/api/cabang");
-      setCabangList(await resCabang.json());
-
-      const resKaryawan = await fetch(import.meta.env.VITE_API_URL + "/api/karyawan");
-      setKaryawanList(await resKaryawan.json());
+      const resCabang = await fetch(import.meta.env.VITE_API_URL + "/api/cabang", {
+        headers: getAuthHeaders(),
+      });
+      const dataCabang = await resCabang.json();
+      if (!resCabang.ok) {
+        throw new Error(dataCabang.message || "Gagal mengambil data cabang");
+      }
+      setCabangList(dataCabang);
+      const resKaryawan = await fetch(import.meta.env.VITE_API_URL + "/api/karyawan", {
+        headers: getAuthHeaders(),
+      });
+      const dataKaryawan = await resKaryawan.json();
+      if (!resKaryawan.ok) {
+        throw new Error(dataKaryawan.message || "Gagal mengambil data karyawan");
+      }
+      setKaryawanList(dataKaryawan);
     } catch (err) {
       console.error("Error fetching data:", err);
     } finally {
@@ -84,9 +96,9 @@ const DataKaryawanHRD = () => {
     fetchData();
   }, []);
   // Fungsi untuk menghapus data login dan mengarahkan kembali ke halaman masuk utama
+  const { logout } = useAuth();
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
+    logout();
     navigate("/auth/login");
   };
   // Fungsi untuk berpindah halaman dan otomatis menutup sidebar (khusus untuk tampilan mobile)
@@ -111,7 +123,7 @@ const DataKaryawanHRD = () => {
     try {
       const res = await fetch(import.meta.env.VITE_API_URL + "/api/karyawan", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify(formData),
       });
       if (res.ok) {

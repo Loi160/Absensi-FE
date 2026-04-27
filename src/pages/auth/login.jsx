@@ -35,8 +35,7 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Simpan data user ke Global State (AuthContext)
-        login(data.user);
+        login(data);
 
         // ARAHKAN DASHBOARD BERDASARKAN ROLE DARI DATABASE
         if (data.user.role === "hrd") {

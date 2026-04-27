@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, } from 'react';
 
 const AuthContext = createContext(null);
 
@@ -9,16 +9,17 @@ export const AuthProvider = ({ children }) => {
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  const login = (userData) => {
-    setUser(userData); 
-    // Simpan data user ke localStorage agar tidak hilang saat refresh
-    localStorage.setItem('user', JSON.stringify(userData));
+  const login = (data) => {
+  setUser(data.user);
+
+  localStorage.setItem('user', JSON.stringify(data.user));
+  localStorage.setItem('session_token', data.session_token);
   };
 
   const logout = () => {
     setUser(null); 
     localStorage.removeItem('user');
-    localStorage.removeItem('token');
+    localStorage.removeItem('session_token');
   };
 
   return (
