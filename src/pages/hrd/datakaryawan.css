@@ -1,483 +1,576 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
-/* Pengaturan dasar untuk menghapus margin/padding bawaan dan menetapkan font Inter ke seluruh elemen */
-* { 
-  margin: 0; 
-  padding: 0; 
-  box-sizing: border-box; 
-  font-family: 'Inter', sans-serif; 
+/* ============================================================================
+// RESET & GLOBAL STYLES
+// ============================================================================ */
+
+/* Menghapus jarak bawaan browser dan menerapkan font utama pada seluruh elemen */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
 }
-/* Mengatur pembungkus utama halaman HRD dengan latar belakang gradasi hijau yang memenuhi layar */
+
+/* ============================================================================
+// LAYOUT UTAMA
+// ============================================================================ */
+
+/* Pembungkus utama halaman HRD dengan latar belakang gradasi hijau */
 .hrd-container {
-  display: flex; 
-  width: 100vw; 
-  height: 100vh; 
-  overflow: hidden;
+  display: flex;
+  width: 100vw;
+  height: 100vh;
   background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
-}
-/* Mengatur lebar, jarak, dan tata letak panel navigasi samping (sidebar) */
-.sidebar { 
-  width: 300px; 
-  padding: 25px; 
-  color: white; 
-  display: flex; 
-  flex-direction: column; 
-  flex-shrink: 0; 
-}
-/* Mengatur posisi logo di dalam sidebar dan mengubah warnanya menjadi putih bersih menggunakan filter */
-.logo-area { 
-  margin-top: 40px; 
-  margin-bottom: 26px !important; 
-  padding-left: 10px; 
+  overflow: hidden;
 }
 
-.logo-img { 
-  width: 100%; 
-  max-width: 250px; 
-  display: block; 
-  filter: grayscale(100%) brightness(0) invert(1) contrast(1000%) !important; 
-}
-/* Mengatur daftar item menu navigasi agar tersusun secara vertikal dengan jarak yang rapi */
-.menu-nav { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 18px; 
-}
-/* Mendesain tampilan dasar setiap item menu, termasuk animasi transisi saat kursor diarahkan ke menu tersebut */
-.menu-item { 
-  display: flex; 
-  align-items: center; 
-  justify-content: space-between; 
-  padding: 12px 20px; 
-  border-radius: 10px; 
-  cursor: pointer; 
-  transition: 0.3s; 
-  color: #fff; 
-}
-
-.menu-left { 
-  display: flex; 
-  align-items: center; 
-  gap: 15px; 
-}
-/* Mengatur ukuran ikon utama dan teks menu agar terlihat proporsional di dalam sidebar */
-.menu-icon-main { 
-  width: 28px; 
-  height: 28px; 
-  filter: brightness(0) invert(1); 
-  transition: 0.3s; 
-}
-
-.menu-text-main { 
-  font-size: 18px; 
-  font-weight: 600; 
-  transition: 0.3s; 
-}
-
-.arrow-icon-main { 
-  width: 20px; 
-  height: 20px; 
-  filter: brightness(0) invert(1); 
-  opacity: 0.8; 
-}
-/* Mengatur gaya visual khusus untuk menu yang sedang aktif, mengubah latar belakang menjadi putih dan teks menjadi hijau */
-.menu-item.active { 
-  background-color: #ffffff !important; 
-  color: #2fb800 !important; 
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
-}
-/* Mengubah warna ikon menjadi hijau menggunakan filter khusus saat menu tersebut berada dalam posisi aktif */
-.menu-item.active .menu-icon-main, 
-.menu-item.active .arrow-icon-main { 
-  filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg) brightness(95%) contrast(105%) !important; 
-  opacity: 1; 
-}
-
-.menu-item.active .menu-text-main { 
-  color: #2fb800 !important; 
-}
-/* Memberikan efek warna latar transparan tipis saat kursor diarahkan ke menu yang sedang tidak aktif */
-.menu-item:hover:not(.active) { 
-  background-color: rgba(255, 255, 255, 0.15); 
-}
-/* Mengatur area bawah sidebar untuk tombol logout, lengkap dengan garis pembatas transparan */
-.sidebar-footer { 
-  margin-top: auto; 
-  padding-top: 25px; 
-  border-top: 1px solid rgba(255,255,255,0.2); 
-  text-align: center; 
-  padding-bottom: 15px; 
-}
-/* Mendesain tombol logout agar transparan dengan garis tepi, dan berubah menjadi putih saat kursor diarahkan (hover) */
-.btn-logout { 
-  background: transparent; 
-  border: 1px solid rgba(255,255,255,0.7); 
-  color: #fff; 
-  font-size: 20px; 
-  font-weight: 700; 
-  cursor: pointer; 
-  transition: 0.3s; 
-  padding: 12px 0; 
-  width: 100%; 
-  border-radius: 50px; 
-}
-
-.btn-logout:hover { 
-  background-color: #ffffff !important; 
-  color: #2fb800 !important; 
-  border-color: #ffffff !important; 
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important; 
-}
-/* Mengatur area konten utama (kanan) sebagai kotak putih besar dengan sudut melengkung dan bayangan halus */
+/* Panel utama konten data karyawan */
 .main-content {
-  flex: 1; 
-  background-color: #fdfdfd; 
-  margin: 25px 35px 30px 0; 
-  border-radius: 40px; 
-  padding: 40px; 
-  display: flex; 
-  flex-direction: column; 
-  box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
-  overflow-y: auto; 
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  margin: 25px 35px 30px 0;
+  padding: 40px;
+  background-color: #fdfdfd;
+  border-radius: 40px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
   overflow-x: hidden;
 }
-/* Mengatur desain batang gulir (scrollbar) agar terlihat lebih minimalis dan modern */
-::-webkit-scrollbar { 
-  width: 8px; 
-  height: 8px; 
+
+/* ============================================================================
+// SIDEBAR & NAVIGATION
+// ============================================================================ */
+
+/* Kolom navigasi samping utama */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 300px;
+  padding: 25px;
+  color: #ffffff;
 }
 
-::-webkit-scrollbar-thumb { 
-  background-color: #d1d1d1; 
-  border-radius: 10px; 
+/* Area logo pada sidebar */
+.logo-area {
+  margin-top: 40px;
+  margin-bottom: 26px !important;
+  padding-left: 10px;
 }
 
-::-webkit-scrollbar-thumb:hover { 
-  background-color: #8dae12; 
-}
-/* Mengatur tata letak bagian judul dan subjudul di dalam halaman data karyawan */
-.dk-header-area { 
-  display: flex; 
-  flex-direction: column; 
-  align-items: flex-start; 
-  margin-bottom: 20px; 
-  flex-shrink: 0; 
+/* Menjaga logo tetap berwarna putih menggunakan filter CSS */
+.logo-img {
+  display: block;
+  width: 100%;
+  max-width: 250px;
+  filter: grayscale(100%) brightness(0) invert(1) contrast(1000%) !important;
 }
 
-.dk-title { 
-  font-size: 32px; 
-  font-weight: 700; 
-  color: #111; 
-  margin: 0 0 5px 0; 
-  letter-spacing: -0.5px; 
+/* Grup menu navigasi utama */
+.menu-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
-.dk-subtitle { 
-  font-size: 15px; 
-  color: #666; 
-  margin: 0; 
+/* Item menu navigasi */
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  color: #ffffff;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
 }
-/* Mengatur posisi baris tombol aksi (filter & tambah) agar berada di sisi kanan halaman */
+
+/* Efek hover untuk menu yang tidak sedang aktif */
+.menu-item:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Area kiri menu yang berisi ikon dan teks */
+.menu-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Ikon utama pada setiap item menu */
+.menu-icon-main {
+  width: 28px;
+  height: 28px;
+  filter: brightness(0) invert(1);
+  transition: 0.3s;
+}
+
+/* Teks menu utama */
+.menu-text-main {
+  font-size: 18px;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+/* Ikon panah pada item menu */
+.arrow-icon-main {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) invert(1);
+  opacity: 0.8;
+}
+
+/* Status aktif menu pada tampilan desktop */
+.menu-item.active {
+  background-color: #ffffff !important;
+  color: #2fb800 !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.menu-item.active .menu-icon-main,
+.menu-item.active .arrow-icon-main {
+  filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg)
+    brightness(95%) contrast(105%) !important;
+  opacity: 1;
+}
+
+.menu-item.active .menu-text-main {
+  color: #2fb800 !important;
+}
+
+/* Area bawah sidebar untuk tombol logout */
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 25px;
+  padding-bottom: 15px;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Tombol keluar dari sistem */
+.btn-logout {
+  width: 100%;
+  padding: 12px 0;
+  background: transparent;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 50px;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-logout:hover {
+  background-color: #ffffff !important;
+  color: #2fb800 !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ============================================================================
+// MOBILE NAVIGATION DEFAULT STATE
+// ============================================================================ */
+
+/* Elemen khusus mobile disembunyikan secara default pada desktop */
+.mobile-topbar,
+.btn-sidebar-close,
+.sidebar-overlay {
+  display: none;
+}
+
+/* ============================================================================
+// SCROLLBAR
+// ============================================================================ */
+
+/* Mengatur tampilan scrollbar agar tetap minimalis */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #d1d1d1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #8dae12;
+}
+
+/* ============================================================================
+// HEADER DATA KARYAWAN
+// ============================================================================ */
+
+/* Area judul dan subjudul halaman data karyawan */
+.dk-header-area {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+/* Judul utama halaman */
+.dk-title {
+  margin: 0 0 5px 0;
+  color: #111111;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+/* Subjudul halaman */
+.dk-subtitle {
+  margin: 0;
+  color: #666666;
+  font-size: 15px;
+}
+
+/* ============================================================================
+// ACTION BUTTONS
+// ============================================================================ */
+
+/* Baris aksi filter dan tambah karyawan */
 .dk-action-row {
+  position: relative;
+  z-index: 20;
   display: flex;
   justify-content: flex-end;
   margin-bottom: 15px;
+}
+
+/* Grup tombol aksi */
+.dk-action-group {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Tombol filter data karyawan */
+.btn-dk-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #8dae12;
+  color: #ffffff;
+  border: none;
+  border-radius: 50px;
+  box-shadow: 0 4px 10px rgba(141, 174, 18, 0.3);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-dk-filter:hover {
+  background: #7a9610;
+}
+
+/* Tombol tambah karyawan */
+.btn-dk-tambah {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #8dae12;
+  color: #ffffff;
+  border: none;
+  border-radius: 50px;
+  box-shadow: 0 4px 10px rgba(141, 174, 18, 0.3);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-dk-tambah:hover {
+  background: #7a9610;
+}
+
+/* Ikon pada tombol tambah karyawan */
+.btn-dk-tambah img {
+  width: 14px;
+  filter: brightness(0) invert(1);
+}
+
+/* Tombol edit bergaya outline */
+.btn-edit-outline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: transparent;
+  color: #8dae12;
+  border: 1.5px solid #8dae12;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-edit-outline:hover {
+  background: #8dae12;
+  color: #ffffff;
+}
+
+/* ============================================================================
+// TABLE: DATA KARYAWAN
+// ============================================================================ */
+
+/* Wadah utama tabel data karyawan */
+.dk-table-container {
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+  max-height: 100%;
+  background: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+
+/* Header judul tabel */
+.dk-table-header-title {
+  flex-shrink: 0;
+  padding: 15px 25px;
+  background-color: #8dae12;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* Pembungkus tabel agar dapat discroll */
+.dk-table-wrapper {
+  overflow: auto;
+}
+
+/* Tabel utama data karyawan */
+.dk-table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+}
+
+.dk-table th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 14px 20px;
+  background: #f9f9f9;
+  color: #333333;
+  border-bottom: 2px solid #eeeeee;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.dk-table td {
+  padding: 14px 20px;
+  color: #444444;
+  border-bottom: 1px solid #eeeeee;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.dk-table tbody tr {
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dk-table tbody tr:hover {
+  background: #fdfdfd;
+}
+
+/* Teks nama karyawan pada tabel */
+.dk-td-name {
+  color: #111111;
+  font-weight: 600;
+}
+
+/* Tampilan password dalam bentuk mask */
+.dk-pwd-mask {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #888888;
+  font-size: 18px;
+  letter-spacing: 2px;
+}
+
+/* Indikator status aktif atau nonaktif */
+.status-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.status-dot.active {
+  background-color: #2fb800;
+}
+
+.status-dot.inactive {
+  background-color: #e74c3c;
+}
+
+/* ============================================================================
+// FORM DETAIL KARYAWAN
+// ============================================================================ */
+
+/* Grid form detail karyawan */
+.detail-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+/* Grup label dan input */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: #222222;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Input mode baca */
+.input-read {
+  width: 100%;
+  padding: 12px 16px;
+  background: #ffffff;
+  color: #555555;
+  border: 1px solid #eeeeee;
+  border-radius: 8px;
+  outline: none;
+  font-size: 14px;
+}
+
+/* Input mode edit */
+.input-edit {
+  width: 100%;
+  padding: 12px 16px;
+  background: #f5f5f5;
+  color: #111111;
+  border: 1px solid #cccccc;
+  border-radius: 8px;
+  outline: none;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.input-edit:focus {
+  background: #ffffff;
+  border-color: #8dae12;
+}
+
+/* Pembungkus input password agar tombol mata berada di sisi kanan */
+.pwd-wrapper {
   position: relative;
-  z-index: 20;
+  display: flex;
+  align-items: center;
 }
 
-.dk-action-group { 
-  display: flex; 
-  align-items: center; 
-  gap: 15px; 
-}
-/* Mendesain tombol filter dan tombol tambah karyawan dengan warna hijau zaitun, sudut melengkung, dan efek bayangan */
-.btn-dk-filter { 
-  background: #8dae12; 
-  color: white; 
-  border: none; 
-  padding: 10px 20px; 
-  border-radius: 50px; 
-  font-weight: 700; 
-  font-size: 14px; 
-  display: flex; 
-  align-items: center; 
-  gap: 8px; 
-  cursor: pointer; 
-  box-shadow: 0 4px 10px rgba(141,174,18,0.3); 
-  transition: 0.2s; 
+.pwd-wrapper input {
+  padding-right: 45px;
 }
 
-.btn-dk-filter:hover { 
-  background: #7a9610; 
+/* Tombol lihat atau sembunyikan password */
+.btn-eye {
+  position: absolute;
+  right: 15px;
+  display: flex;
+  background: transparent;
+  color: #888888;
+  border: none;
+  cursor: pointer;
 }
 
-.btn-dk-tambah { 
-  background: #8dae12; 
-  color: white; 
-  border: none; 
-  padding: 10px 20px; 
-  border-radius: 50px; 
-  font-weight: 700; 
-  font-size: 14px; 
-  display: flex; 
-  align-items: center; 
-  gap: 8px; 
-  cursor: pointer; 
-  box-shadow: 0 4px 10px rgba(141,174,18,0.3); 
-  transition: 0.2s; 
+/* ============================================================================
+// DOCUMENT ATTACHMENTS
+// ============================================================================ */
+
+/* Section lampiran dokumen karyawan */
+.docs-section {
+  margin-top: 20px;
+  padding-top: 25px;
+  border-top: 1px solid #eeeeee;
 }
 
-/* Mengatur efek hover pada tombol tambah dan memberikan warna putih pada ikon di dalamnya */
-.btn-dk-tambah:hover { 
-  background: #7a9610; 
+/* Judul lampiran dokumen */
+.docs-title {
+  margin-bottom: 20px;
+  color: #111111;
+  font-size: 20px;
+  font-weight: 800;
 }
 
-.btn-dk-tambah img { 
-  width: 14px; 
-  filter: brightness(0) invert(1); 
-}
-/* Mendesain tombol edit dengan gaya garis tepi (outline) yang akan berubah menjadi penuh warna saat disorot */
-.btn-edit-outline { 
-  background: transparent; 
-  border: 1.5px solid #8dae12; 
-  color: #8dae12; 
-  padding: 10px 20px; 
-  border-radius: 50px; 
-  font-weight: 700; 
-  font-size: 14px; 
-  display: flex; 
-  align-items: center; 
-  gap: 8px; 
-  cursor: pointer; 
-  transition: 0.2s; 
+/* Grid dokumen karyawan */
+.docs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
 }
 
-.btn-edit-outline:hover { 
-  background: #8dae12; 
-  color: white; 
-}
-/* Mengatur wadah utama tabel agar memiliki sudut melengkung, bayangan halus, dan batas tinggi maksimal agar tetap rapi */
-.dk-table-container { 
-  background: white; 
-  border: 1px solid #ddd; 
-  border-radius: 12px; 
-  overflow: hidden; 
-  box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
-  display: flex; 
-  flex-direction: column; 
-  height: fit-content; 
-  max-height: 100%; 
-}
-/* Mengatur judul di atas tabel dengan latar belakang hijau zaitun */
-.dk-table-header-title { 
-  background-color: #8dae12; 
-  color: white; 
-  padding: 15px 25px; 
-  font-weight: 700; 
-  font-size: 15px; 
-  flex-shrink: 0; 
-}
-/* Mengatur area tabel agar bisa digulir (scroll) dan menetapkan gaya sel tabel beserta barisnya */
-.dk-table-wrapper { 
-  overflow: auto; 
+/* Pembungkus setiap dokumen */
+.doc-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.dk-table { 
-  width: 100%; 
-  border-collapse: collapse; 
-  min-width: 900px; 
+/* Label dokumen */
+.doc-label {
+  color: #333333;
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.dk-table th { 
-  padding: 14px 20px; 
-  text-align: left; 
-  font-size: 13px; 
-  font-weight: 700; 
-  color: #333; 
-  background: #f9f9f9; 
-  border-bottom: 2px solid #eee; 
-  position: sticky; 
-  top: 0; 
-  z-index: 10; 
-  white-space: nowrap; 
-}
-
-.dk-table td { 
-  padding: 14px 20px; 
-  font-size: 13px; 
-  color: #444; 
-  border-bottom: 1px solid #eee; 
-  white-space: nowrap; 
-}
-
-.dk-table tbody tr { 
-  transition: background 0.2s; 
-  cursor: pointer; 
-}
-
-.dk-table tbody tr:hover { 
-  background: #fdfdfd; 
-}
-/* Mengatur gaya teks nama di tabel dan masker tampilan password (titik-titik) */
-.dk-td-name { 
-  font-weight: 600; 
-  color: #111; 
-}
-
-.dk-pwd-mask { 
-  display: flex; 
-  align-items: center; 
-  gap: 8px; 
-  color: #888; 
-  font-size: 18px; 
-  letter-spacing: 2px; 
-}
-/* Mengatur indikator status berupa titik kecil berwarna hijau (aktif) atau merah (tidak aktif) */
-.status-dot { 
-  width: 10px; 
-  height: 10px; 
-  border-radius: 50%; 
-  display: inline-block; 
-}
-
-.status-dot.active { 
-  background-color: #2fb800; 
-}
-
-.status-dot.inactive { 
-  background-color: #e74c3c; 
-}
-/* Mengatur tata letak kotak input pada halaman detail menjadi 3 kolom yang sejajar */
-.detail-form-grid { 
-  display: grid; 
-  grid-template-columns: repeat(3, 1fr); 
-  gap: 20px; 
-  margin-bottom: 30px; 
-}
-
-.form-group { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 8px; 
-}
-
-.form-group label { 
-  font-size: 14px; 
-  font-weight: 700; 
-  color: #222; 
-}
-/* Mengatur gaya kotak input untuk mode baca saja (putih bersih) dan mode edit (abu-abu saat belum diketik) */
-.input-read { 
-  background: #ffffff; 
-  border: 1px solid #eee; 
-  padding: 12px 16px; 
-  border-radius: 8px; 
-  font-size: 14px; 
-  color: #555; 
-  width: 100%; 
-  outline: none; 
-}
-
-.input-edit { 
-  background: #f5f5f5; 
-  border: 1px solid #ccc; 
-  padding: 12px 16px; 
-  border-radius: 8px; 
-  font-size: 14px; 
-  color: #111; 
-  width: 100%; 
-  outline: none; 
-  transition: 0.2s; 
-}
-
-.input-edit:focus { 
-  background: #fff; 
-  border-color: #8dae12; 
-}
-/* Mengatur pembungkus input password agar tombol ikon mata bisa diletakkan di sisi kanan dalam kotak */
-.pwd-wrapper { 
-  position: relative; 
-  display: flex; 
-  align-items: center; 
-}
-
-.pwd-wrapper input { 
-  padding-right: 45px; 
-}
-
-.btn-eye { 
-  position: absolute; 
-  right: 15px; 
-  background: transparent; 
-  border: none; 
-  cursor: pointer; 
-  color: #888; 
-  display: flex; 
-}
-/* Mengatur bagian lampiran dokumen (KTP, Ijazah, dsb) dengan tata letak grid yang rapi */
-.docs-section { 
-  margin-top: 20px; 
-  border-top: 1px solid #eee; 
-  padding-top: 25px; 
-}
-
-.docs-title { 
-  font-size: 20px; 
-  font-weight: 800; 
-  color: #111; 
-  margin-bottom: 20px; 
-}
-
-.docs-grid { 
-  display: grid; 
-  grid-template-columns: repeat(3, 1fr); 
-  gap: 20px; 
-}
-
-.doc-box { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 10px; 
-}
-
-.doc-label { 
-  font-size: 14px; 
-  font-weight: 600; 
-  color: #333; 
-}
-/* Mengatur desain kotak lampiran dokumen (seperti kartu kecil) yang memiliki efek perubahan warna saat disentuh kursor */
-.doc-card { 
-  background: #fff; 
-  border: 1px solid #ddd; 
-  border-radius: 10px; 
-  min-height: 90px; 
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
-  text-align: center;
-  cursor: pointer; 
-  transition: 0.2s; 
+/* Kartu lampiran dokumen */
+.doc-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 90px;
   padding: 12px;
+  background: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-.doc-card:hover { 
-  border-color: #8dae12; 
-  background: #fafafa; 
+.doc-card:hover {
+  background: #fafafa;
+  border-color: #8dae12;
 }
 
+/* Kartu dokumen yang dapat diganti ketika mode edit aktif */
 .doc-card-editable {
   cursor: pointer;
 }
 
+/* Area upload file dokumen */
 .doc-upload-area {
-  width: 100%;
-  min-height: 66px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 6px;
+  width: 100%;
+  min-height: 66px;
   text-align: center;
   cursor: pointer;
 }
@@ -487,7 +580,7 @@
 }
 
 .doc-upload-placeholder {
-  color: #333;
+  color: #333333;
   font-size: 13px;
   font-weight: 700;
 }
@@ -499,278 +592,311 @@
 }
 
 .doc-upload-note {
+  color: #888888;
   font-size: 11px;
-  color: #888;
   text-align: center;
 }
 
 .doc-link {
   color: #2980b9;
   font-weight: 700;
-  text-decoration: none;
   text-align: center;
+  text-decoration: none;
 }
 
 .doc-empty-text {
-  color: #aaa;
+  color: #aaaaaa;
   font-style: italic;
   text-align: center;
 }
 
-/* Mengatur warna dan gaya teks label di dalam kartu dokumen */
-.doc-text { 
-  color: #8dae12; 
-  font-size: 13px; 
-  font-weight: 700; 
-}
-/* Mengatur posisi tombol simpan dan batal agar berada di pojok kanan bawah halaman detail */
-.detail-footer { 
-  display: flex; 
-  justify-content: flex-end; 
-  gap: 15px; 
-  margin-top: 40px; 
-  padding-bottom: 20px; 
-}
-/* Mendesain tombol 'Batal' dengan warna putih netral dan tombol 'Simpan' dengan warna hijau zaitun yang mencolok */
-.btn-batal { 
-  padding: 12px 25px; 
-  border-radius: 10px; 
-  background: white; 
-  border: 1px solid #ccc; 
-  color: #333; 
-  font-weight: 700; 
-  cursor: pointer; 
-  transition: 0.2s; 
+/* Teks label di dalam kartu dokumen */
+.doc-text {
+  color: #8dae12;
+  font-size: 13px;
+  font-weight: 700;
 }
 
-.btn-batal:hover { 
-  background: #f5f5f5; 
+/* ============================================================================
+// DETAIL FOOTER ACTIONS
+// ============================================================================ */
+
+/* Area tombol simpan dan batal pada halaman detail */
+.detail-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 40px;
+  padding-bottom: 20px;
 }
 
-.btn-simpan { 
-  padding: 12px 30px; 
-  border-radius: 10px; 
-  background: #8dae12; 
-  border: none; 
-  color: white; 
-  font-weight: 700; 
-  cursor: pointer; 
-  transition: 0.2s; 
+/* Tombol batal */
+.btn-batal {
+  padding: 12px 25px;
+  background: #ffffff;
+  color: #333333;
+  border: 1px solid #cccccc;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-.btn-simpan:hover { 
-  background: #7a9610; 
-}
-/* Mengatur posisi dan tampilan kotak pilihan (dropdown) filter agar muncul tepat di bawah tombolnya dengan efek bayangan */
-.filter-wrapper { 
-  position: relative; 
+.btn-batal:hover {
+  background: #f5f5f5;
 }
 
-.filter-dropdown { 
-  position: absolute; 
-  top: 120%; 
-  right: 0; 
-  background: white; 
-  border: 1px solid #eee; 
-  border-radius: 12px; 
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-  padding: 5px; 
-  min-width: 160px; 
-  z-index: 100; 
-}
-/* Mengatur gaya setiap item di dalam dropdown, termasuk efek warna latar saat kursor diarahkan ke pilihan tersebut */
-.dropdown-item { 
-  padding: 10px 15px; 
-  font-size: 13px; 
-  font-weight: 600; 
-  cursor: pointer; 
-  border-radius: 8px; 
-  color: #444; 
-  transition: 0.2s; 
+/* Tombol simpan */
+.btn-simpan {
+  padding: 12px 30px;
+  background: #8dae12;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-.dropdown-item:hover { 
-  background: #f5f5f5; 
-  color: #111; 
-}
-/* Mengatur latar belakang gelap transparan yang menutupi seluruh layar saat jendela modal (tambah data) muncul */
-.modal-overlay-clean { 
-  position: fixed; 
-  top: 0; 
-  left: 0; 
-  width: 100vw; 
-  height: 100vh; 
-  background: rgba(0,0,0,0.45); 
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
-  z-index: 10000; 
-  padding: 20px; 
-}
-/* Mengatur desain kotak jendela modal, termasuk ukuran maksimal, jarak dalam (padding), dan kemampuan gulir jika kontennya panjang */
-.modal-card { 
-  background: white; 
-  width: 700px; 
-  max-width: 95%; 
-  max-height: 90vh; 
-  overflow-y: auto; 
-  padding: 40px; 
-  border-radius: 16px; 
-  box-shadow: 0 20px 50px rgba(0,0,0,0.2); 
-}
-/* Mengatur gaya tulisan judul modal dan membagi tata letak input di dalamnya menjadi dua kolom yang sejajar */
-.modal-title { 
-  font-size: 24px; 
-  font-weight: 800; 
-  margin-bottom: 25px; 
-  color: #111; 
+.btn-simpan:hover {
+  background: #7a9610;
 }
 
-.modal-grid-2 { 
-  display: grid; 
-  grid-template-columns: 1fr 1fr; 
-  gap: 20px; 
-  margin-bottom: 25px; 
+/* ============================================================================
+// FILTER DROPDOWN
+// ============================================================================ */
+
+/* Pembungkus dropdown filter */
+.filter-wrapper {
+  position: relative;
 }
-/* Menyembunyikan elemen-elemen khusus navigasi mobile agar tidak muncul di layar besar (Desktop) */
-.mobile-topbar, 
-.btn-sidebar-close, 
-.sidebar-overlay { 
-  display: none; 
+
+/* Dropdown pilihan filter */
+.filter-dropdown {
+  position: absolute;
+  top: 120%;
+  right: 0;
+  z-index: 100;
+  min-width: 160px;
+  padding: 5px;
+  background: #ffffff;
+  border: 1px solid #eeeeee;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
-/* Mengatur tata letak grid form dan dokumen menjadi 2 kolom saat dibuka di layar Tablet atau layar berukuran menengah */
+
+/* Item pilihan pada dropdown filter */
+.dropdown-item {
+  padding: 10px 15px;
+  color: #444444;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.dropdown-item:hover {
+  background: #f5f5f5;
+  color: #111111;
+}
+
+/* ============================================================================
+// MODAL: TAMBAH DATA
+// ============================================================================ */
+
+/* Overlay gelap transparan saat modal aktif */
+.modal-overlay-clean {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+/* Kartu modal utama */
+.modal-card {
+  width: 700px;
+  max-width: 95%;
+  max-height: 90vh;
+  padding: 40px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+}
+
+/* Judul modal */
+.modal-title {
+  margin-bottom: 25px;
+  color: #111111;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+/* Grid input dua kolom pada modal */
+.modal-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+/* ============================================================================
+// RESPONSIVE: TABLET
+// ============================================================================ */
+
 @media (max-width: 1024px) {
-  .detail-form-grid, 
-  .docs-grid { 
-    grid-template-columns: repeat(2, 1fr); 
+  /* Mengubah form detail dan dokumen menjadi 2 kolom pada layar sedang */
+  .detail-form-grid,
+  .docs-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
-/* Mengatur tampilan khusus HP: mengubah susunan menjadi vertikal, mengaktifkan navigasi atas (topbar), dan menyesuaikan ukuran elemen agar pas di layar kecil */
+
+/* ============================================================================
+// RESPONSIVE: MOBILE
+// ============================================================================ */
+
 @media (max-width: 768px) {
-  .hrd-container { 
-    flex-direction: column; 
-    background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%); 
+  /* Mengubah layout utama menjadi vertikal untuk perangkat mobile */
+  .hrd-container {
+    flex-direction: column;
+    background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%);
   }
-  /* Memunculkan bar atas yang berisi logo dan tombol menu hamburger di perangkat mobile */
-  .mobile-topbar { 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between; 
-    padding: 16px 20px; 
-    z-index: 200; 
+
+  /* Bar navigasi atas khusus mobile */
+  .mobile-topbar {
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
   }
-  
-  .mobile-topbar-logo { 
-    width: 130px; 
-    filter: grayscale(100%) brightness(0) invert(1); 
+
+  .mobile-topbar-logo {
+    width: 130px;
+    filter: grayscale(100%) brightness(0) invert(1);
   }
-  
-  .btn-hamburger { 
-    background: transparent; 
-    border: none; 
-    cursor: pointer; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 5px; 
+
+  /* Tombol hamburger untuk membuka sidebar mobile */
+  .btn-hamburger {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
   }
-  
-  .btn-hamburger span { 
-    width: 26px; 
-    height: 3px; 
-    background-color: #fff; 
-    border-radius: 3px; 
+
+  .btn-hamburger span {
+    width: 26px;
+    height: 3px;
+    background-color: #ffffff;
+    border-radius: 3px;
   }
-  /* Mengatur layar gelap (overlay) dan posisi sidebar yang bisa muncul/sembunyi dengan animasi geser di HP */
-  .sidebar-overlay { 
-    display: block; 
-    position: fixed; 
-    inset: 0; 
-    background: rgba(0,0,0,0.45); 
-    z-index: 300; 
-    opacity: 0; 
-    pointer-events: none; 
-    transition: 0.3s; 
+
+  /* Overlay untuk menutup area belakang saat sidebar mobile terbuka */
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: block;
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.3s;
   }
-  
-  .sidebar-overlay.active { 
-    opacity: 1; 
-    pointer-events: all; 
+
+  .sidebar-overlay.active {
+    opacity: 1;
+    pointer-events: all;
   }
-  
-  .sidebar { 
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 280px; 
-    height: 100vh; 
-    z-index: 400; 
-    padding: 25px 20px; 
-    transform: translateX(-100%); 
-    transition: 0.3s; 
-    background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%); 
+
+  /* Sidebar mobile tersembunyi di sisi kiri secara default */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 400;
+    width: 280px;
+    height: 100vh;
+    padding: 25px 20px;
+    background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%);
+    transform: translateX(-100%);
+    transition: 0.3s;
   }
-  
-  .sidebar.open { 
-    transform: translateX(0); 
+
+  .sidebar.open {
+    transform: translateX(0);
   }
-  
-  .btn-sidebar-close { 
-    display: flex; 
-    align-self: flex-end; 
-    background: transparent; 
-    border: none; 
-    color: #fff; 
-    font-size: 28px; 
-    cursor: pointer; 
+
+  /* Tombol untuk menutup sidebar mobile */
+  .btn-sidebar-close {
+    display: flex;
+    align-self: flex-end;
+    background: transparent;
+    color: #ffffff;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
   }
-  /* Menyesuaikan kotak konten utama, judul, dan tombol-tombol agar ukurannya lebih proporsional untuk jari pengguna HP */
-  .main-content { 
-    position: static; 
-    flex: 1; 
-    margin: 0; 
-    border-radius: 28px 28px 0 0; 
-    padding: 25px 20px; 
+
+  /* Konten utama mobile dibuat memenuhi sisa layar dengan sudut atas melengkung */
+  .main-content {
+    position: static;
+    flex: 1;
+    margin: 0;
+    padding: 25px 20px;
+    border-radius: 28px 28px 0 0;
   }
-  
-  .dk-header-area { 
-    margin-bottom: 15px; 
+
+  .dk-header-area {
+    margin-bottom: 15px;
   }
-  
-  .dk-title { 
-    font-size: 24px; 
-    margin-bottom: 4px; 
+
+  .dk-title {
+    margin-bottom: 4px;
+    font-size: 24px;
   }
-  
-  .dk-subtitle { 
-    font-size: 13px; 
-    margin-bottom: 0; 
+
+  .dk-subtitle {
+    margin-bottom: 0;
+    font-size: 13px;
   }
-  
-  .dk-action-row { 
-    margin-bottom: 15px; 
+
+  .dk-action-row {
+    margin-bottom: 15px;
   }
-  
-  .dk-action-group { 
-    width: 100%; 
-    justify-content: flex-end; 
-    gap: 10px; 
-    flex-wrap: wrap; 
+
+  .dk-action-group {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
   }
-  
-  .btn-dk-filter, 
-  .btn-dk-tambah { 
-    padding: 8px 16px; 
-    font-size: 12px; 
+
+  .btn-dk-filter,
+  .btn-dk-tambah {
+    padding: 8px 16px;
+    font-size: 12px;
   }
-  /* Mengubah semua tata letak grid (form, dokumen, dan modal) menjadi 1 kolom saja agar tidak berhimpitan di layar HP */
-  .detail-form-grid, 
-  .docs-grid, 
-  .modal-grid-2 { 
-    grid-template-columns: 1fr; 
-    gap: 15px; 
+
+  /* Semua grid dibuat satu kolom agar nyaman dibaca pada layar kecil */
+  .detail-form-grid,
+  .docs-grid,
+  .modal-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 15px;
   }
-  
-  .modal-card { 
-    padding: 25px 20px; 
+
+  .modal-card {
+    padding: 25px 20px;
   }
 }

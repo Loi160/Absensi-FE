@@ -1,56 +1,51 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ChevronDown, ArrowLeft } from "lucide-react";
+import { createClient } from "@supabase/supabase-js";
+
 import { useAuth } from "../../context/AuthContext";
 import { getAuthHeaders } from "../../context/AuthHeaders";
-import { createClient } from "@supabase/supabase-js";
+
 import "./absensi.css";
-import { ChevronDown, ArrowLeft } from "lucide-react";
 
 import logoAmaga from "../../assets/logoamaga.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 import profileImg from "../../assets/profile.svg";
 import cameraIcon from "../../assets/camera.svg";
 
-// Setup koneksi ke database Supabase untuk penyimpanan foto absensi
+// ============================================================================
+// CONFIG: SUPABASE
+// ============================================================================
+
+// Menginisialisasi koneksi Supabase untuk penyimpanan foto absensi
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Rumus Haversine untuk menghitung jarak lurus (meter) antara 2 titik koordinat GPS
-const hitungJarak = (lat1, lon1, lat2, lon2) => {
-  const R = 6371e3; // Radius bumi dalam meter
-  const p1 = (lat1 * Math.PI) / 180;
-  const p2 = (lat2 * Math.PI) / 180;
-  const dp = ((lat2 - lat1) * Math.PI) / 180;
-  const dl = ((lon2 - lon1) * Math.PI) / 180;
+// ============================================================================
+// CONSTANTS
+// ============================================================================
 
-  const a =
-    Math.sin(dp / 2) * Math.sin(dp / 2) +
-    Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) * Math.sin(dl / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-};
+const ABSENSI_TABS = ["Masuk", "Istirahat", "Pulang"];
+const EARTH_RADIUS_IN_METERS = 6371e3;
+const BREAK_DURATION_IN_HOURS = 3;
 
-// Mengubah format gambar dari Base64 (canvas) menjadi format File agar bisa di-upload
-const dataURLtoFile = (dataurl, filename) => {
-  const arr = dataurl.split(",");
-  const mime = arr[0].match(/:(.*?);/)[1];
-  const bstr = atob(arr[1]);
-  let n = bstr.length;
-  const u8arr = new Uint8Array(n);
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n);
-  }
-  return new File([u8arr], filename, { type: mime });
-};
+// ============================================================================
+// HELPERS: DATE & TIME
+// ============================================================================
 
-// Mengambil waktu saat ini dalam format JJ:MM:DD untuk pencatatan absen
+// Mengambil waktu saat ini dalam format HH:MM:SS
 const getCurrentTimeStr = () => {
   const now = new Date();
-  return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+
+  return `${hours}:${minutes}:${seconds}`;
 };
 
-// Mengambil tanggal saat ini dengan format lokal Indonesia (contoh: Senin, 1 Januari 2024)
+// Mengambil tanggal saat ini dalam format lokal Indonesia
 const getFormatDateIndo = () => {
   return new Date().toLocaleDateString("id-ID", {
     weekday: "long",
@@ -60,140 +55,100 @@ const getFormatDateIndo = () => {
   });
 };
 
+// ============================================================================
+// HELPERS: FILE & LOCATION
+// ============================================================================
+
+// Mengubah gambar Base64 dari canvas menjadi File agar dapat diunggah
+const dataURLtoFile = (dataUrl, filename) => {
+  const dataParts = dataUrl.split(",");
+  const mimeType = dataParts[0].match(/:(.*?);/)[1];
+  const binaryString = atob(dataParts[1]);
+
+  let binaryLength = binaryString.length;
+  const bytes = new Uint8Array(binaryLength);
+
+  while (binaryLength--) {
+    bytes[binaryLength] = binaryString.charCodeAt(binaryLength);
+  }
+
+  return new File([bytes], filename, {
+    type: mimeType,
+  });
+};
+
+// Menghitung jarak dalam meter antara dua titik koordinat GPS menggunakan rumus Haversine
+const hitungJarak = (lat1, lon1, lat2, lon2) => {
+  const point1 = (lat1 * Math.PI) / 180;
+  const point2 = (lat2 * Math.PI) / 180;
+  const deltaLat = ((lat2 - lat1) * Math.PI) / 180;
+  const deltaLon = ((lon2 - lon1) * Math.PI) / 180;
+
+  const haversineValue =
+    Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+    Math.cos(point1) *
+      Math.cos(point2) *
+      Math.sin(deltaLon / 2) *
+      Math.sin(deltaLon / 2);
+
+  const centralAngle =
+    2 * Math.atan2(Math.sqrt(haversineValue), Math.sqrt(1 - haversineValue));
+
+  return EARTH_RADIUS_IN_METERS * centralAngle;
+};
+
+// ============================================================================
+// COMPONENT: ABSENSI
+// ============================================================================
+
 const Absensi = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // State untuk mengontrol tab aktif (Masuk/Pulang/Istirahat) dan jam real-time
   const [activeTab, setActiveTab] = useState("Masuk");
   const [currentTime, setCurrentTime] = useState(new Date());
   const [breakStartTime, setBreakStartTime] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // State untuk mengontrol kamera HP/Laptop dan menyimpan hasil jepretan foto
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [capturedPhoto, setCapturedPhoto] = useState(null);
 
-  // State untuk melacak posisi GPS karyawan dan memvalidasinya dengan lokasi kantor
   const [currentLocation, setCurrentLocation] = useState(null);
   const [locationError, setLocationError] = useState("");
   const [jarakDariKantor, setJarakDariKantor] = useState(null);
   const [isLocationValid, setIsLocationValid] = useState(false);
 
-  // Referensi elemen DOM untuk memutar stream video kamera dan menggambar foto (canvas)
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
 
-  // Efek samping: Update jam digital di layar setiap 1 detik
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+  // ==========================================================================
+  // HANDLERS: SESSION
+  // ==========================================================================
 
-  // Efek samping: Matikan akses kamera secara paksa jika komponen ditutup/pindah halaman
-  useEffect(() => {
-    return () => tutupKamera();
-  }, []);
-
-  // Efek samping: Cek lokasi GPS karyawan setiap kali pindah tab (kecuali tab Istirahat)
-  useEffect(() => {
-    if (activeTab !== "Istirahat") {
-      cekLokasiKaryawan();
-    }
-  }, [activeTab]);
-
-  // Validasi input waktu mulai istirahat: Tidak boleh memilih jam yang sudah berlalu
-  const handleStartTimeChange = (e) => {
-    const selectedTime = e.target.value;
-    const nowStr = getCurrentTimeStr().substring(0, 5); // Ambil format Jam:Menit saja
-    
-    if (selectedTime < nowStr) {
-      alert("Waktu sudah terlewat! Silakan pilih jam sekarang atau kedepan.");
-      setBreakStartTime(nowStr); // Reset paksa ke jam sekarang
-    } else {
-      setBreakStartTime(selectedTime);
-    }
-  };
-
-  // Menghitung otomatis jam selesai istirahat (otomatis ditambah 3 jam dari jam mulai)
-  const getEndTimeStr = () => {
-    if (!breakStartTime) return "--:--";
-    const [hh, mm] = breakStartTime.split(":").map(Number);
-    let endHh = hh + 3;
-    
-    // Mencegah format jam melebihi 24 (misal: 25:00 diubah menjadi 01:00)
-    if (endHh >= 24) endHh -= 24;
-    return `${String(endHh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
-  };
-
-  // Menghapus data sesi pengguna saat ini dan mengembalikannya ke halaman login
+  // Menghapus data sesi pengguna dan mengarahkan kembali ke halaman login
   const handleLogout = () => {
-  localStorage.removeItem("user");
-  localStorage.removeItem("session_token");
-  navigate("/auth/login");
-};
-
-  // Meminta akses GPS dari browser/HP untuk mendeteksi posisi karyawan secara akurat
-  const cekLokasiKaryawan = () => {
-    // Memastikan perangkat atau browser mendukung fitur Geolokasi
-    if (!navigator.geolocation) {
-      setLocationError("Browser Anda tidak mendukung GPS");
-      return;
-    }
-
-    setLocationError("Sedang mencari lokasi Anda");
-
-    // Mengambil titik koordinat (Latitude & Longitude) karyawan saat ini
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const userLat = position.coords.latitude;
-        const userLon = position.coords.longitude;
-        setCurrentLocation({ lat: userLat, lon: userLon });
-
-        // Mengambil titik koordinat pusat cabang dan radius toleransi dari data user
-        const cabangKoordinatStr = user?.titik_koordinat;
-        const radiusToleransi = user?.radius_toleransi || 20;
-
-        // Cegah proses absen jika HRD belum mengatur titik koordinat untuk cabang tersebut
-        if (!cabangKoordinatStr) {
-          setLocationError("Cabang Anda belum memiliki titik koordinat. Hubungi HRD.");
-          setIsLocationValid(false);
-          return;
-        }
-
-        // Memecah koordinat cabang dan menghitung jaraknya (dalam meter) dengan koordinat HP karyawan
-        const [cabangLat, cabangLon] = cabangKoordinatStr.split(",").map((coord) => parseFloat(coord.trim()));
-        const jarakMeter = Math.round(hitungJarak(userLat, userLon, cabangLat, cabangLon));
-        
-        setJarakDariKantor(jarakMeter);
-
-        // Jika jarak masih masuk toleransi, izinkan absen. Jika tidak, blokir dan tampilkan pesan error
-        if (jarakMeter <= radiusToleransi) {
-          setLocationError("");
-          setIsLocationValid(true);
-        } else {
-          setLocationError(`Anda berada ${jarakMeter} meter dari cabang. Maksimal toleransi adalah ${radiusToleransi} meter. Harap mendekat ke lokasi!`);
-          setIsLocationValid(false);
-        }
-      },
-      // Penanganan error jika akses GPS ditolak, HP tidak ada sinyal, atau timeout
-      (err) => {
-        setIsLocationValid(false);
-        if (err.code === 1) {
-          setLocationError("Akses GPS ditolak! Izinkan akses lokasi di browser HP Anda.");
-        } else {
-          setLocationError("Sinyal GPS lemah atau tidak ditemukan.");
-        }
-      },
-      // Konfigurasi GPS: Paksa minta akurasi tinggi dan jangan pakai cache lokasi lama
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
+    localStorage.removeItem("user");
+    localStorage.removeItem("session_token");
+    navigate("/auth/login");
   };
 
-  // Fungsi untuk menyalakan kamera depan HP/Laptop
+  // ==========================================================================
+  // HANDLERS: CAMERA
+  // ==========================================================================
+
+  // Mematikan stream kamera agar perangkat tidak terus menggunakan kamera
+  const tutupKamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+
+    setIsCameraOpen(false);
+  };
+
+  // Membuka kamera depan setelah lokasi karyawan dinyatakan valid
   const bukaKamera = async () => {
-    // Tolak buka kamera kalau karyawan masih berada di luar area kantor
     if (!isLocationValid) {
       alert("Lokasi Anda tidak valid atau akses GPS ditolak! Silakan cek peringatan di layar.");
       cekLokasiKaryawan();
@@ -204,12 +159,15 @@ const Absensi = () => {
     setIsCameraOpen(true);
 
     try {
-      // Meminta akses khusus kamera depan (facingMode: "user") tanpa audio
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user" },
+        video: {
+          facingMode: "user",
+        },
         audio: false,
       });
+
       streamRef.current = stream;
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
@@ -220,69 +178,170 @@ const Absensi = () => {
     }
   };
 
-  // Mematikan aliran (stream) data dari kamera agar hardware tidak terus menyala
-  const tutupKamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
-    setIsCameraOpen(false);
-  };
-
-  // Menangkap *frame* video saat ini dan menempelkan teks (watermark) ke atas fotonya
+  // Mengambil gambar dari video kamera dan menambahkan watermark informasi absensi
   const ambilFoto = () => {
-    if (!videoRef.current || !canvasRef.current) return;
+    if (!videoRef.current || !canvasRef.current) {
+      return;
+    }
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
+    const context = canvas.getContext("2d");
 
-    // Sesuaikan ukuran canvas dengan resolusi asli video dari kamera
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
-    // Menggambar foto jepretan kamera ke atas canvas
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Membuat kotak hitam transparan di bagian bawah foto untuk alas watermark
     const padding = 20;
     const boxHeight = 120;
-    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-    ctx.fillRect(0, canvas.height - boxHeight, canvas.width, boxHeight);
-
-    // Konfigurasi font untuk watermark nama karyawan
-    ctx.font = "bold 26px Arial";
-    ctx.fillStyle = "#ffffff";
-
     const marginX = 25;
     const startY = canvas.height - 80;
+
+    context.fillStyle = "rgba(0, 0, 0, 0.5)";
+    context.fillRect(0, canvas.height - boxHeight, canvas.width, boxHeight);
 
     const namaTeks = user?.nama || "Unknown User";
     const cabangTeks = `Lokasi: Cabang ${user?.cabangUtama || "-"} (${jarakDariKantor}m)`;
     const waktuTeks = `${getFormatDateIndo()} - ${getCurrentTimeStr()}`;
 
-    // Menuliskan Nama, Lokasi Cabang (beserta jarak GPS), dan Jam Real-time ke atas foto
-    ctx.fillText(namaTeks, marginX, startY);
-    ctx.font = "20px Arial";
-    ctx.fillStyle = "#ffdd57"; // Warna kuning untuk teks lokasi
-    ctx.fillText(cabangTeks, marginX, startY + 30);
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText(waktuTeks, marginX, startY + 60);
+    context.font = "bold 26px Arial";
+    context.fillStyle = "#ffffff";
+    context.fillText(namaTeks, marginX, startY);
 
-    // Menyimpan hasil akhir (foto + watermark) dalam format gambar Base64
-    const dataURL = canvas.toDataURL("image/jpeg", 0.9);
-    setCapturedPhoto(dataURL);
+    context.font = "20px Arial";
+    context.fillStyle = "#ffdd57";
+    context.fillText(cabangTeks, marginX, startY + 30);
+
+    context.fillStyle = "#ffffff";
+    context.fillText(waktuTeks, marginX, startY + 60);
+
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+
+    setCapturedPhoto(dataUrl);
     tutupKamera();
   };
 
-  // Reset foto lama dan nyalakan kamera kembali
+  // Mengulang proses pengambilan foto dari awal
   const fotoUlang = () => {
     bukaKamera();
   };
 
-  // Mengubah Base64 jadi File, lalu mengirimkannya ke Storage Supabase
+  // ==========================================================================
+  // HANDLERS: LOCATION
+  // ==========================================================================
+
+  // Mengecek lokasi GPS karyawan dan membandingkannya dengan titik koordinat cabang
+  const cekLokasiKaryawan = () => {
+    if (!navigator.geolocation) {
+      setLocationError("Browser Anda tidak mendukung GPS");
+      return;
+    }
+
+    setLocationError("Sedang mencari lokasi Anda");
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const userLat = position.coords.latitude;
+        const userLon = position.coords.longitude;
+
+        setCurrentLocation({
+          lat: userLat,
+          lon: userLon,
+        });
+
+        const cabangKoordinatStr = user?.titik_koordinat;
+        const radiusToleransi = user?.radius_toleransi || 20;
+
+        if (!cabangKoordinatStr) {
+          setLocationError("Cabang Anda belum memiliki titik koordinat. Hubungi HRD.");
+          setIsLocationValid(false);
+          return;
+        }
+
+        const [cabangLat, cabangLon] = cabangKoordinatStr
+          .split(",")
+          .map((coord) => parseFloat(coord.trim()));
+
+        const jarakMeter = Math.round(
+          hitungJarak(userLat, userLon, cabangLat, cabangLon)
+        );
+
+        setJarakDariKantor(jarakMeter);
+
+        if (jarakMeter <= radiusToleransi) {
+          setLocationError("");
+          setIsLocationValid(true);
+          return;
+        }
+
+        setLocationError(
+          `Anda berada ${jarakMeter} meter dari cabang. Maksimal toleransi adalah ${radiusToleransi} meter. Harap mendekat ke lokasi!`
+        );
+        setIsLocationValid(false);
+      },
+      (err) => {
+        setIsLocationValid(false);
+
+        if (err.code === 1) {
+          setLocationError("Akses GPS ditolak! Izinkan akses lokasi di browser HP Anda.");
+          return;
+        }
+
+        setLocationError("Sinyal GPS lemah atau tidak ditemukan.");
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  };
+
+  // ==========================================================================
+  // HANDLERS: BREAK TIME
+  // ==========================================================================
+
+  // Memvalidasi jam mulai istirahat agar tidak menggunakan waktu yang sudah berlalu
+  const handleStartTimeChange = (event) => {
+    const selectedTime = event.target.value;
+    const currentTimeStr = getCurrentTimeStr().substring(0, 5);
+
+    if (selectedTime < currentTimeStr) {
+      alert("Waktu sudah terlewat! Silakan pilih jam sekarang atau kedepan.");
+      setBreakStartTime(currentTimeStr);
+      return;
+    }
+
+    setBreakStartTime(selectedTime);
+  };
+
+  // Menghitung jam selesai istirahat berdasarkan durasi istirahat yang ditentukan
+  const getEndTimeStr = () => {
+    if (!breakStartTime) {
+      return "--:--";
+    }
+
+    const [startHour, startMinute] = breakStartTime.split(":").map(Number);
+    let endHour = startHour + BREAK_DURATION_IN_HOURS;
+
+    if (endHour >= 24) {
+      endHour -= 24;
+    }
+
+    return `${String(endHour).padStart(2, "0")}:${String(startMinute).padStart(2, "0")}`;
+  };
+
+  // ==========================================================================
+  // API: UPLOAD FOTO
+  // ==========================================================================
+
+  // Mengunggah foto absensi ke Supabase Storage dan mengembalikan public URL
   const uploadFotoKeSupabase = async () => {
-    if (!capturedPhoto) return null;
+    if (!capturedPhoto) {
+      return null;
+    }
+
     try {
       const fileToUpload = dataURLtoFile(
         capturedPhoto,
@@ -293,9 +352,10 @@ const Absensi = () => {
         .from("foto_absensi")
         .upload(fileToUpload.name, fileToUpload);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        throw uploadError;
+      }
 
-      // Mengambil link publik agar foto bisa dilihat lewat browser
       const { data: publicUrlData } = supabase.storage
         .from("foto_absensi")
         .getPublicUrl(fileToUpload.name);
@@ -307,50 +367,54 @@ const Absensi = () => {
     }
   };
 
-  // Proses validasi dan pengiriman data absen (Masuk/Pulang/Istirahat) ke database internal
+  // ==========================================================================
+  // HANDLERS: ABSENSI
+  // ==========================================================================
+
+  // Memvalidasi data absensi, mengunggah foto jika diperlukan, lalu mengirim payload ke backend
   const handleAbsen = async () => {
     if (!user) {
       alert("Sesi anda telah habis. Silahkan login kembali.");
       return navigate("/auth/login");
     }
 
-    // Syarat absen Masuk/Pulang: GPS harus valid dan foto sudah diambil
     if (activeTab !== "Istirahat") {
       if (!isLocationValid) {
         alert("Lokasi GPS Anda di luar batas toleransi! Silakan mendekat ke area absen.");
         return;
       }
+
       if (!capturedPhoto) {
         alert(`Mohon ambil foto bukti absen ${activeTab} terlebih dahulu!`);
         return;
       }
     }
 
-    // Syarat absen Istirahat: Karyawan harus menentukan jam mulainya
     if (activeTab === "Istirahat" && !breakStartTime) {
       alert("Mohon tentukan jam mulai istirahat!");
       return;
     }
 
     setLoading(true);
+
     try {
       let urlFoto = null;
-      // Khusus Masuk dan Pulang, jalankan fungsi upload foto ke Supabase dulu
+
       if (activeTab !== "Istirahat") {
         urlFoto = await uploadFotoKeSupabase();
       }
 
-      // Menyusun struktur data (payload) absensi yang akan dikirim ke database backend
       const payload = {
-  tipe_absen: activeTab,
-  waktu: getCurrentTimeStr(),
-  foto: urlFoto,
-  waktu_istirahat_mulai: activeTab === "Istirahat" ? `${breakStartTime}:00` : null,
-  waktu_istirahat_selesai: activeTab === "Istirahat" ? `${getEndTimeStr()}:00` : null,
-};
+        tipe_absen: activeTab,
+        waktu: getCurrentTimeStr(),
+        foto: urlFoto,
+        waktu_istirahat_mulai:
+          activeTab === "Istirahat" ? `${breakStartTime}:00` : null,
+        waktu_istirahat_selesai:
+          activeTab === "Istirahat" ? `${getEndTimeStr()}:00` : null,
+      };
 
-      // Mengirimkan data absen lewat API dan memproses respon berhasil/gagal dari server
-      const response = await fetch(import.meta.env.VITE_API_URL + "/api/absensi", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/absensi`, {
         method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify(payload),
@@ -359,21 +423,20 @@ const Absensi = () => {
       const data = await response.json();
 
       if (response.ok) {
-  alert(data.message);
-  navigate("/karyawan/dashboard");
-} else {
-  if (response.status === 401) {
-    localStorage.removeItem("user");
-    localStorage.removeItem("session_token");
-    alert(data.message || "Session tidak valid. Silakan login ulang.");
-    navigate("/auth/login");
-    return;
-  }
+        alert(data.message);
+        navigate("/karyawan/dashboard");
+        return;
+      }
 
-  alert(`Gagal: ${data.message}`);
-}
-      
-    // Menangkap error jika proses upload foto atau koneksi ke server terputus di tengah jalan
+      if (response.status === 401) {
+        localStorage.removeItem("user");
+        localStorage.removeItem("session_token");
+        alert(data.message || "Session tidak valid. Silakan login ulang.");
+        navigate("/auth/login");
+        return;
+      }
+
+      alert(`Gagal: ${data.message}`);
     } catch (error) {
       console.error("Error absensi:", error);
       alert(error.message || "Gagal terhubung ke server backend.");
@@ -382,13 +445,169 @@ const Absensi = () => {
     }
   };
 
+  // ==========================================================================
+  // EFFECTS
+  // ==========================================================================
+
+  // Memperbarui jam real-time setiap detik
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Membersihkan stream kamera saat komponen ditutup atau halaman berpindah
+  useEffect(() => {
+    return () => tutupKamera();
+  }, []);
+
+  // Mengecek ulang lokasi setiap tab berubah, kecuali pada tab Istirahat
+  useEffect(() => {
+    if (activeTab !== "Istirahat") {
+      cekLokasiKaryawan();
+    }
+  }, [activeTab]);
+
+  // ==========================================================================
+  // RENDER HELPERS
+  // ==========================================================================
+
+  const isPhotoRequired = activeTab !== "Istirahat";
+  const isSubmitDisabled =
+    loading ||
+    (isPhotoRequired && !isLocationValid) ||
+    (isPhotoRequired && isCameraOpen);
+
+  const locationStatusStyle = {
+    padding: "10px",
+    marginBottom: "10px",
+    borderRadius: "8px",
+    fontSize: "12px",
+    fontWeight: "bold",
+    backgroundColor: isLocationValid ? "#eaf4d1" : "#ffebee",
+    color: isLocationValid ? "#2fb800" : "#d32f2f",
+    border: `1px solid ${isLocationValid ? "#2fb800" : "#ef5350"}`,
+  };
+
+  const cameraPreviewStyle = {
+    position: "relative",
+    width: "100%",
+    backgroundColor: "#000",
+    borderRadius: "10px",
+    overflow: "hidden",
+  };
+
+  const videoStyle = {
+    width: "100%",
+    maxHeight: "350px",
+    objectFit: "cover",
+    display: "block",
+  };
+
+  const cameraActionWrapperStyle = {
+    position: "absolute",
+    bottom: "0",
+    width: "100%",
+    padding: "15px",
+    background: "rgba(0,0,0,0.5)",
+    display: "flex",
+    justifyContent: "center",
+    gap: "15px",
+  };
+
+  const cancelCameraButtonStyle = {
+    padding: "10px 20px",
+    background: "#ff1744",
+    color: "white",
+    border: "none",
+    borderRadius: "30px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  };
+
+  const captureButtonStyle = {
+    padding: "10px 20px",
+    background: "#2fb800",
+    color: "white",
+    border: "none",
+    borderRadius: "30px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
+  };
+
+  const capturedPhotoWrapperStyle = {
+    position: "relative",
+    width: "100%",
+    borderRadius: "10px",
+    overflow: "hidden",
+    border: "2px solid #2fb800",
+  };
+
+  const capturedPhotoStyle = {
+    width: "100%",
+    display: "block",
+  };
+
+  const retakePhotoButtonStyle = {
+    position: "absolute",
+    top: "10px",
+    right: "10px",
+    padding: "8px 15px",
+    background: "rgba(0,0,0,0.6)",
+    color: "white",
+    border: "none",
+    borderRadius: "20px",
+    cursor: "pointer",
+    fontSize: "12px",
+    fontWeight: "bold",
+  };
+
+  const refreshGpsButtonStyle = {
+    background: "none",
+    border: "none",
+    color: "#2fb800",
+    cursor: "pointer",
+    fontSize: "12px",
+    fontWeight: "bold",
+  };
+
+  const photoLabelStyle = {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  };
+
+  const disabledTimeDisplayStyle = {
+    backgroundColor: "#eee",
+    color: "#888",
+  };
+
+  const breakStartInputStyle = {
+    cursor: "pointer",
+    fontFamily: "Inter",
+  };
+
+  const openCameraButtonStyle = {
+    opacity: isLocationValid ? 1 : 0.5,
+    cursor: isLocationValid ? "pointer" : "not-allowed",
+  };
+
+  // ==========================================================================
+  // RENDER
+  // ==========================================================================
+
   return (
     <div className="main-wrapper">
       <div className="card-container">
-        
-        {/* Bagian header/kepala halaman dengan tombol kembali (khusus tampilan mobile) */}
+        {/* Header utama halaman absensi */}
         <div className="header-section">
-          <button className="btn-back mobile-only" onClick={() => navigate("/karyawan/dashboard")}>
+          <button
+            className="btn-back mobile-only"
+            onClick={() => navigate("/karyawan/dashboard")}
+          >
             <ArrowLeft size={24} color="white" />
           </button>
 
@@ -397,30 +616,47 @@ const Absensi = () => {
           </div>
 
           <div className="logo-center-area">
-            <img src={logoAmaga} alt="Logo Amaga" className="img-circle-content mobile-only" />
-            <img src={profileImg} alt="Profile User" className="img-circle-content desktop-only" />
+            <img
+              src={logoAmaga}
+              alt="Logo Amaga"
+              className="img-circle-content mobile-only"
+            />
+
+            <img
+              src={profileImg}
+              alt="Profile User"
+              className="img-circle-content desktop-only"
+            />
           </div>
 
           <h2 className="title-form">Absensi</h2>
           <p className="subtitle-form">Silahkan Melakukan Absensi</p>
 
-          <button className="btn-logout-desktop desktop-only" onClick={handleLogout}>
+          <button
+            className="btn-logout-desktop desktop-only"
+            onClick={handleLogout}
+          >
             Log Out
           </button>
         </div>
 
         <div className="form-section">
           <div className="form-header-wrapper">
-            <button className="btn-back-desktop desktop-only" onClick={() => navigate("/karyawan/dashboard")}>
+            <button
+              className="btn-back-desktop desktop-only"
+              onClick={() => navigate("/karyawan/dashboard")}
+            >
               <ArrowLeft size={24} color="#333" strokeWidth={2.5} />
             </button>
+
             <h3 className="form-header-text">Form Absensi</h3>
           </div>
 
           <div className="input-group">
             <label>Absensi</label>
+
             <div className="tab-container">
-              {["Masuk", "Istirahat", "Pulang"].map((tab) => (
+              {ABSENSI_TABS.map((tab) => (
                 <button
                   key={tab}
                   className={`tab-item ${activeTab === tab ? "active" : ""}`}
@@ -438,10 +674,12 @@ const Absensi = () => {
 
           <div className="input-group">
             <label>Cabang Penempatan</label>
+
             <div className="select-wrapper">
               <select className="custom-select" disabled>
                 <option value="">{user?.cabangUtama || "Pilih cabang"}</option>
               </select>
+
               <ChevronDown className="select-icon" size={18} />
             </div>
           </div>
@@ -450,70 +688,93 @@ const Absensi = () => {
             <div className="time-row">
               <div className="input-group flex-1">
                 <label>Jam Mulai</label>
+
                 <input
                   type="time"
                   className="time-display"
                   value={breakStartTime}
                   onChange={handleStartTimeChange}
                   min={getCurrentTimeStr().substring(0, 5)}
-                  style={{ cursor: "pointer", fontFamily: "Inter" }}
+                  style={breakStartInputStyle}
                 />
               </div>
+
               <div className="input-group flex-1">
                 <label>Jam Selesai</label>
-                <div className="time-display" style={{ backgroundColor: "#eee", color: "#888" }}>
+
+                <div
+                  className="time-display"
+                  style={disabledTimeDisplayStyle}
+                >
                   {getEndTimeStr()}
                 </div>
               </div>
             </div>
           ) : (
             <div className="input-group">
-              <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <label style={photoLabelStyle}>
                 <span>Bukti Foto Wajah ({activeTab})</span>
+
                 <button
                   onClick={cekLokasiKaryawan}
-                  style={{ background: "none", border: "none", color: "#2fb800", cursor: "pointer", fontSize: "12px", fontWeight: "bold" }}
+                  style={refreshGpsButtonStyle}
                 >
                   Refresh GPS
                 </button>
               </label>
 
               {locationError && (
-                <div
-                  style={{
-                    padding: "10px",
-                    marginBottom: "10px",
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                    fontWeight: "bold",
-                    backgroundColor: isLocationValid ? "#eaf4d1" : "#ffebee",
-                    color: isLocationValid ? "#2fb800" : "#d32f2f",
-                    border: `1px solid ${isLocationValid ? "#2fb800" : "#ef5350"}`,
-                  }}
-                >
+                <div style={locationStatusStyle}>
                   {locationError}
                 </div>
               )}
 
               {isCameraOpen ? (
-                <div style={{ position: "relative", width: "100%", backgroundColor: "#000", borderRadius: "10px", overflow: "hidden" }}>
-                  <video ref={videoRef} autoPlay playsInline style={{ width: "100%", maxHeight: "350px", objectFit: "cover", display: "block" }} />
-                  <div style={{ position: "absolute", bottom: "0", width: "100%", padding: "15px", background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", gap: "15px" }}>
-                    <button onClick={tutupKamera} style={{ padding: "10px 20px", background: "#ff1744", color: "white", border: "none", borderRadius: "30px", cursor: "pointer", fontWeight: "bold" }}>Batal</button>
-                    <button onClick={ambilFoto} style={{ padding: "10px 20px", background: "#2fb800", color: "white", border: "none", borderRadius: "30px", fontWeight: "bold", cursor: "pointer", boxShadow: "0 4px 10px rgba(0,0,0,0.3)" }}>Ambil Foto</button>
+                <div style={cameraPreviewStyle}>
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    style={videoStyle}
+                  />
+
+                  <div style={cameraActionWrapperStyle}>
+                    <button
+                      onClick={tutupKamera}
+                      style={cancelCameraButtonStyle}
+                    >
+                      Batal
+                    </button>
+
+                    <button
+                      onClick={ambilFoto}
+                      style={captureButtonStyle}
+                    >
+                      Ambil Foto
+                    </button>
                   </div>
                 </div>
               ) : capturedPhoto ? (
-                <div style={{ position: "relative", width: "100%", borderRadius: "10px", overflow: "hidden", border: "2px solid #2fb800" }}>
-                  <img src={capturedPhoto} alt="Hasil Absen" style={{ width: "100%", display: "block" }} />
-                  <button onClick={fotoUlang} style={{ position: "absolute", top: "10px", right: "10px", padding: "8px 15px", background: "rgba(0,0,0,0.6)", color: "white", border: "none", borderRadius: "20px", cursor: "pointer", fontSize: "12px", fontWeight: "bold" }}>Ambil Ulang Foto</button>
+                <div style={capturedPhotoWrapperStyle}>
+                  <img
+                    src={capturedPhoto}
+                    alt="Hasil Absen"
+                    style={capturedPhotoStyle}
+                  />
+
+                  <button
+                    onClick={fotoUlang}
+                    style={retakePhotoButtonStyle}
+                  >
+                    Ambil Ulang Foto
+                  </button>
                 </div>
               ) : (
                 <button
                   className="btn-camera-open"
                   onClick={bukaKamera}
                   disabled={!isLocationValid}
-                  style={{ opacity: isLocationValid ? 1 : 0.5, cursor: isLocationValid ? "pointer" : "not-allowed" }}
+                  style={openCameraButtonStyle}
                 >
                   <img src={cameraIcon} alt="Cam" />
                   <span>Buka Kamera Depan</span>
@@ -527,15 +788,12 @@ const Absensi = () => {
           <button
             className="btn-submit-primary"
             onClick={handleAbsen}
-            disabled={
-  loading ||
-  (activeTab !== "Istirahat" && !isLocationValid) ||
-  (activeTab !== "Istirahat" && isCameraOpen)
-}
+            disabled={isSubmitDisabled}
           >
             {loading ? "Menyimpan Data" : `Simpan Absen ${activeTab}`}
           </button>
         </div>
+
         <div className="bottom-gap"></div>
       </div>
     </div>

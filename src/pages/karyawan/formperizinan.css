@@ -1,59 +1,117 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
-/* Reset dasar untuk memastikan font pakai Inter dan jarak bawaan browser dinolkan */
+/* ============================================================================
+// RESET & GLOBAL STYLES
+// ============================================================================ */
+
+/* Mengatur reset dasar agar tampilan konsisten di berbagai browser */
 * {
   box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   margin: 0;
   padding: 0;
 }
 
-/* Bungkus paling luar untuk memastikan seluruh halaman tertutup latar abu-abu terang */
+/* ============================================================================
+// LAYOUT UTAMA
+// ============================================================================ */
+
+/* Pembungkus utama halaman form perizinan */
 .fp-wrapper {
-  background-color: #d8d8d8; 
+  background-color: #d8d8d8;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  overflow: hidden; 
+  overflow: hidden;
 }
 
-/* Kotak utama pembungkus aplikasi dengan batas maksimal selebar layar HP (450px) */
+/* Kontainer utama aplikasi dengan tampilan dasar mobile */
 .fp-container {
   width: 100%;
   max-width: 450px;
-  height: 100vh; 
-  background-color: #d8d8d8; 
+  height: 100vh;
+  background-color: #d8d8d8;
   position: relative;
   display: flex;
   flex-direction: column;
 }
 
-/* Bagian header/atas aplikasi dengan gradasi hijau khas HRD */
+/* ============================================================================
+// HEADER MOBILE
+// ============================================================================ */
+
+/* Header utama dengan gradasi hijau pada tampilan mobile */
 .fp-header {
   background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
-  height: 40vh; 
+  height: 40vh;
   padding-top: 30px;
   text-align: center;
-  color: white;
+  color: #ffffff;
   position: relative;
-  border-bottom-left-radius: 0; 
-  border-bottom-right-radius: 0; 
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
   z-index: 1;
 }
 
-/* Kelas bantuan (utility) untuk menyembunyikan atau memunculkan elemen di HP/Laptop */
-.desktop-only { display: none; }
-.mobile-only { display: block; }
-button.mobile-only { display: flex; }
+/* Area tengah untuk logo perusahaan atau foto profil */
+.fp-logo-center-area {
+  margin: 10px auto 15px auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-/* Desain tombol kembali (Back) berbentuk bulat dengan garis putih di pojok kiri atas */
+/* Gambar/logo pada header agar tetap proporsional */
+.fp-img-circle-content {
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+}
+
+/* Judul utama pada header */
+.fp-title {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 4px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Subtitle pada header */
+.fp-subtitle {
+  font-size: 13px;
+  opacity: 0.9;
+  font-weight: 400;
+}
+
+/* ============================================================================
+// DISPLAY UTILITIES
+// ============================================================================ */
+
+/* Utility class untuk mengatur visibilitas elemen mobile dan desktop */
+.desktop-only {
+  display: none;
+}
+
+.mobile-only {
+  display: block;
+}
+
+button.mobile-only {
+  display: flex;
+}
+
+/* ============================================================================
+// BUTTONS
+// ============================================================================ */
+
+/* Tombol kembali versi mobile */
 .fp-btn-back {
   position: absolute;
   top: 30px;
   left: 25px;
   background: transparent;
-  border: 1.5px solid white; 
+  border: 1.5px solid #ffffff;
   border-radius: 50%;
   width: 35px;
   height: 35px;
@@ -64,181 +122,12 @@ button.mobile-only { display: flex; }
   z-index: 20;
 }
 
-/* Area khusus untuk memposisikan logo perusahaan atau foto profil pas di tengah header */
-.fp-logo-center-area {
-  margin: 10px auto 15px auto; 
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* Pengaturan ukuran logo/gambar agar proporsional dan tidak gepeng */
-.fp-img-circle-content { 
-  width: 160px; 
-  height: 160px;
-  object-fit: contain;
-}
-
-/* Gaya teks judul di header agar tebal, cukup besar, dan punya sedikit efek bayangan */
-.fp-title {
-  font-size: 22px;
-  font-weight: 800; 
-  margin-bottom: 4px;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-}
-
-/* Gaya teks penjelasan di bawah judul, dibuat agak transparan biar kalem */
-.fp-subtitle {
-  font-size: 13px;
-  opacity: 0.9;
-  font-weight: 400;
-}
-
-/* Pembungkus judul form (khusus untuk tampilan responsif ke Desktop nanti) */
-.fp-form-header-wrapper {
-  display: block; 
-}
-
-/* Sembunyikan tombol kembali versi Desktop secara default */
+/* Tombol kembali versi desktop disembunyikan secara default */
 .fp-btn-back-desktop {
   display: none;
 }
 
-/* Kotak putih tempat mengisi form izin, sengaja dinaikkan (margin min) agar menimpa header hijau */
-.fp-form-card {
-  background: white;
-  margin: -60px 20px 0 20px; 
-  padding: 25px 20px;
-  border-radius: 25px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  z-index: 10;
-  height: 60vh; 
-  overflow-y: auto; 
-  scrollbar-width: none; 
-  -ms-overflow-style: none;
-}
-
-/* Menyembunyikan garis scrollbar bawaan browser agar tampilan kotak form lebih bersih */
-.fp-form-card::-webkit-scrollbar {
-  display: none;
-}
-
-/* Judul kecil di dalam kotak putih form (misal: "Detail Izin") */
-.fp-card-title {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 15px;
-  color: black;
-}
-
-/* Wadah untuk menjejalkan tombol pilihan form (Izin / Cuti / FIMTK) agar sejajar ke samping */
-.fp-tab-container {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-/* Desain standar tombol tab form dengan latar putih dan garis tepi hitam */
-.fp-tab-btn {
-  flex: 1;
-  padding: 8px 0;
-  border: 1px solid #333; 
-  border-radius: 10px;
-  background: white;
-  color: #333;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 13px;
-  transition: all 0.2s;
-}
-
-/* Mengubah warna tombol tab menjadi hijau pekat kalau sedang dipilih (aktif) */
-.fp-tab-btn.active {
-  background-color: #007000; 
-  color: white;
-  border-color: #007000;
-}
-
-/* Memberi jarak bawah antar setiap isian input di dalam form */
-.fp-input-group {
-  margin-bottom: 12px;
-}
-
-/* Desain teks petunjuk (label) di atas kolom input form agar tebal dan tegas */
-.fp-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 700;
-  margin-bottom: 6px;
-  color: black;
-}
-
-/* Styling seragam untuk kotak input teks, dropdown, dan area ketik pesan */
-.fp-input, 
-.fp-select, 
-.fp-textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #555; 
-  border-radius: 8px;
-  font-size: 13px;
-  color: #333;
-  outline: none;
-  background: white;
-  font-family: 'Inter', sans-serif;
-}
-
-/* Mengatur warna teks bayangan (placeholder) agar tidak terlalu mencolok */
-.fp-input::placeholder,
-.fp-textarea::placeholder {
-  color: #888;
-}
-
-/* Khusus area teks (keterangan), tingginya bisa ditarik dan minimal 80px */
-.fp-textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-/* Mengatur agar dua kolom isian (misal tanggal mulai & selesai) berjejer ke samping */
-.fp-row-2 {
-  display: flex;
-  gap: 12px;
-}
-
-/* Memastikan setiap kolom dalam baris membagi ruang secara rata */
-.fp-col {
-  flex: 1; 
-}
-
-/* Bungkus untuk dropdown agar posisi ikon panahnya bisa diatur dengan presisi */
-.fp-select-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%; 
-}
-
-/* Menghilangkan gaya default dropdown bawaan browser agar bisa kita desain sendiri */
-.fp-select {
-  appearance: none; 
-  -webkit-appearance: none; 
-  background-color: white;
-}
-
-/* Posisi ikon panah kecil di pojok kanan kotak dropdown */
-.fp-select-icon {
-  position: absolute;
-  right: 12px;
-  pointer-events: none;
-  color: #aaa;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-}
-
-/* Desain tombol untuk buka galeri/kamera dengan latar biru muda yang kalem */
+/* Tombol untuk membuka kamera atau galeri */
 .btn-camera-open {
   width: 100%;
   padding: 12px;
@@ -252,102 +141,275 @@ button.mobile-only { display: flex; }
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
-  color: #333;
+  color: #333333;
 }
 
-/* Tombol submit utama (Ajukan) dengan warna hijau cerah dan teks tebal */
+/* Tombol utama untuk mengajukan perizinan */
 .btn-submit-green {
   width: 100%;
   padding: 12px;
-  background: #44bd32; 
-  color: white;
+  background: #44bd32;
+  color: #ffffff;
   border: none;
   border-radius: 10px;
   font-weight: 700;
   font-size: 14px;
   margin-top: 20px;
-  margin-bottom: 20px; 
+  margin-bottom: 20px;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* ==========================================================================
-   PENGATURAN KHUSUS LAYAR DESKTOP (Minimal 1024px)
-   ========================================================================== */
+/* ============================================================================
+// FORM CARD
+// ============================================================================ */
+
+/* Pembungkus judul form */
+.fp-form-header-wrapper {
+  display: block;
+}
+
+/* Kartu utama form perizinan */
+.fp-form-card {
+  background: #ffffff;
+  margin: -60px 20px 0 20px;
+  padding: 25px 20px;
+  border-radius: 25px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  height: 60vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Menyembunyikan scrollbar pada tampilan mobile */
+.fp-form-card::-webkit-scrollbar {
+  display: none;
+}
+
+/* Judul pada kartu form */
+.fp-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: #000000;
+}
+
+/* ============================================================================
+// FORM TABS
+// ============================================================================ */
+
+/* Kontainer pilihan jenis perizinan */
+.fp-tab-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+/* Tombol tab standar */
+.fp-tab-btn {
+  flex: 1;
+  padding: 8px 0;
+  border: 1px solid #333333;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #333333;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+/* Status aktif pada tombol tab */
+.fp-tab-btn.active {
+  background-color: #007000;
+  color: #ffffff;
+  border-color: #007000;
+}
+
+/* ============================================================================
+// FORM INPUTS
+// ============================================================================ */
+
+/* Grup input untuk menjaga jarak antar field */
+.fp-input-group {
+  margin-bottom: 12px;
+}
+
+/* Label input form */
+.fp-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #000000;
+}
+
+/* Styling umum untuk input, select, dan textarea */
+.fp-input,
+.fp-select,
+.fp-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #555555;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #333333;
+  outline: none;
+  background: #ffffff;
+  font-family: "Inter", sans-serif;
+}
+
+/* Warna placeholder pada input dan textarea */
+.fp-input::placeholder,
+.fp-textarea::placeholder {
+  color: #888888;
+}
+
+/* Area teks keterangan dengan tinggi minimum */
+.fp-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Baris input dua kolom */
+.fp-row-2 {
+  display: flex;
+  gap: 12px;
+}
+
+/* Kolom input agar membagi ruang secara rata */
+.fp-col {
+  flex: 1;
+}
+
+/* ============================================================================
+// SELECT INPUT
+// ============================================================================ */
+
+/* Pembungkus select agar ikon dropdown dapat diposisikan dengan tepat */
+.fp-select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* Menghilangkan style default select bawaan browser */
+.fp-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: #ffffff;
+}
+
+/* Ikon dropdown di sisi kanan select */
+.fp-select-icon {
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+  color: #aaaaaa;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+}
+
+/* ============================================================================
+// MEDIA QUERY: DESKTOP
+// ============================================================================ */
+
 @media (min-width: 1024px) {
-  /* Mengubah background jadi gradasi hijau penuh dan mengunci layar agar tidak scroll ke bawah */
+  /* Mengubah layout utama menjadi tampilan desktop dengan sidebar kiri */
   .fp-wrapper {
     background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
     height: 100vh;
     padding: 0;
-    overflow: hidden; 
+    overflow: hidden;
   }
 
-  /* Mengubah susunan yang tadinya bertumpuk (HP) jadi menyamping kiri-kanan (PC) */
   .fp-container {
     max-width: 100% !important;
     width: 100%;
     height: 100vh;
-    display: flex !important; 
+    display: flex !important;
     flex-direction: row;
     background-color: transparent !important;
   }
 
-  /* Memunculkan elemen desktop dan menyembunyikan elemen khusus HP */
-  .desktop-only { display: flex !important; }
-  button.desktop-only { display: flex !important; }
-  div.desktop-only { display: flex !important; }
-  .mobile-only { display: none !important; }
+  /* ==========================================================================
+  // DESKTOP DISPLAY UTILITIES
+  // ========================================================================== */
 
-  /* Menyulap header atas menjadi bilah samping (sidebar) yang elegan di sisi kiri */
+  /* Membalik visibilitas elemen khusus desktop dan mobile */
+  .desktop-only {
+    display: flex !important;
+  }
+
+  button.desktop-only {
+    display: flex !important;
+  }
+
+  div.desktop-only {
+    display: flex !important;
+  }
+
+  .mobile-only {
+    display: none !important;
+  }
+
+  /* ==========================================================================
+  // DESKTOP SIDEBAR
+  // ========================================================================== */
+
+  /* Header mobile diubah menjadi sidebar kiri pada tampilan desktop */
   .fp-header {
     position: relative;
-    width: 300px; 
+    width: 300px;
     flex-shrink: 0;
     height: 100vh;
     border-radius: 0;
-    padding: 25px !important; 
+    padding: 25px !important;
     display: flex !important;
     flex-direction: column !important;
-    justify-content: center !important; 
+    justify-content: center !important;
     align-items: center !important;
     background: transparent !important;
     z-index: 100;
-    text-shadow: none; 
+    text-shadow: none;
   }
 
-  /* Mengatur posisi profil agar naik sedikit ke atas supaya lebih pas di tengah sidebar */
+  /* Menyesuaikan posisi identitas pengguna agar berada di tengah sidebar */
   .fp-header > .fp-logo-center-area,
   .fp-header > .fp-title,
   .fp-header > .fp-subtitle {
     position: relative;
-    top: -40px; 
+    top: -40px;
   }
 
-  /* Posisi logo perusahaan di pojok kiri atas khusus untuk tampilan desktop */
+  /* Logo perusahaan pada sidebar desktop */
   .fp-sidebar-logo-desktop {
     position: absolute !important;
-    top: 60px !important; 
-    left: 35px !important; 
+    top: 60px !important;
+    left: 35px !important;
     width: auto !important;
     padding: 0 !important;
     display: flex !important;
     justify-content: flex-start !important;
     align-items: flex-start !important;
-    border-bottom: none !important; 
+    border-bottom: none !important;
   }
 
-  /* Memperbesar ukuran logo dan mengubah warnanya jadi putih solid (invert) */
   .fp-sidebar-logo-desktop img {
-    width: 260px !important; 
+    width: 260px !important;
     height: auto !important;
-    filter: brightness(0) invert(1) !important; 
+    filter: brightness(0) invert(1) !important;
     opacity: 1 !important;
   }
 
-  /* Menghilangkan margin bawaan agar logo profil berada tepat di tengah sidebar */
+  /* Area gambar profil pada sidebar desktop */
   .fp-logo-center-area {
     margin: 0 0 10px 0 !important;
     display: flex !important;
@@ -356,47 +418,48 @@ button.mobile-only { display: flex; }
     height: auto !important;
   }
 
-  /* Desain bingkai bulat untuk foto profil dengan garis luar (border) transparan */
   .fp-img-circle-content {
     width: 130px !important;
     height: 130px !important;
-    background: white !important;
+    background: #ffffff !important;
     border-radius: 50% !important;
     border: 5px solid rgba(255, 255, 255, 0.3) !important;
-    padding: 0 !important; 
-    object-fit: cover !important; 
+    padding: 0 !important;
+    object-fit: cover !important;
   }
 
-  /* Mengatur teks judul (nama karyawan) agar lebih besar dan tebal di desktop */
   .fp-title {
     font-size: 24px !important;
-    font-weight: 800 !important; 
-    color: white !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
     margin: 0 !important;
     text-align: center !important;
   }
 
-  /* Mengatur teks subtitle (jabatan) agar warnanya sedikit transparan dan lebih elegan */
   .fp-subtitle {
     font-size: 15px !important;
-    color: white !important;
+    color: #ffffff !important;
     opacity: 0.9 !important;
     margin-top: 5px !important;
     text-align: center !important;
   }
 
-  /* Desain tombol logout khusus desktop yang menetap di bagian bawah sidebar */
+  /* ==========================================================================
+  // DESKTOP LOGOUT BUTTON
+  // ========================================================================== */
+
+  /* Tombol logout desktop yang ditempatkan di bagian bawah sidebar */
   .fp-btn-logout-desktop {
     position: absolute !important;
     bottom: 40px !important;
-    left: 30px !important; 
-    width: calc(100% - 60px) !important; 
-    transform: none !important; 
+    left: 30px !important;
+    width: calc(100% - 60px) !important;
+    transform: none !important;
     padding: 12px 0 !important;
-    background: transparent !important; 
-    border: 1px solid rgba(255, 255, 255, 0.8) !important; 
-    border-radius: 50px !important; 
-    color: #fff !important; 
+    background: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.8) !important;
+    border-radius: 50px !important;
+    color: #ffffff !important;
     font-weight: 700 !important;
     font-size: 18px !important;
     cursor: pointer !important;
@@ -406,76 +469,78 @@ button.mobile-only { display: flex; }
     align-items: center !important;
   }
 
-  /* Garis pemisah tipis di atas tombol logout agar tidak terlihat menempel dengan profil */
   .fp-btn-logout-desktop::before {
     content: "";
     position: absolute;
-    top: -25px; 
+    top: -25px;
     left: 0;
     width: 100%;
     height: 1px;
-    background-color: rgba(255, 255, 255, 0.3); 
+    background-color: rgba(255, 255, 255, 0.3);
   }
 
-  /* Efek sorot (hover) tombol logout: berubah jadi putih solid dengan teks hijau */
   .fp-btn-logout-desktop:hover {
-    background-color: #ffffff !important; 
-    color: #2fb800 !important; 
-    border-color: #ffffff !important; 
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important; 
+    background-color: #ffffff !important;
+    color: #2fb800 !important;
+    border-color: #ffffff !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
   }
 
-  /* Mengatur area kartu form utama di desktop agar lebih luas dan mengisi ruang kanan */
+  /* ==========================================================================
+  // DESKTOP FORM CARD
+  // ========================================================================== */
+
+  /* Area form desktop dibuat luas dan mengisi ruang kanan sidebar */
   .fp-form-card {
-    flex: 1; 
-    background-color: #fdfdfd; 
-    margin: 30px 40px 30px 20px !important; 
-    padding: 50px 80px !important; 
-    border-radius: 40px !important; 
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-    height: calc(100vh - 60px) !important; 
+    flex: 1;
+    background-color: #fdfdfd;
+    margin: 30px 40px 30px 20px !important;
+    padding: 50px 80px !important;
+    border-radius: 40px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    height: calc(100vh - 60px) !important;
     max-height: none !important;
     max-width: none !important;
-    overflow-y: auto !important; 
+    overflow-y: auto !important;
   }
 
-  /* Mengaktifkan dan mengatur tampilan scrollbar di desktop agar tetap terlihat rapi */
+  /* Menampilkan kembali scrollbar pada desktop */
   .fp-form-card::-webkit-scrollbar {
-    display: block; 
+    display: block;
     width: 8px;
   }
-  
-  /* Latar belakang jalur scrollbar */
+
   .fp-form-card::-webkit-scrollbar-track {
-    background: #f1f1f1; 
+    background: #f1f1f1;
     border-radius: 10px;
-    margin: 40px 0; 
-  }
-  
-  /* Desain batang scrollbar (thumb) */
-  .fp-form-card::-webkit-scrollbar-thumb {
-    background: #ccc; 
-    border-radius: 10px;
-  }
-  
-  /* Warna batang scrollbar saat diarahkan kursor */
-  .fp-form-card::-webkit-scrollbar-thumb:hover {
-    background: #aaa; 
+    margin: 40px 0;
   }
 
-  /* Membuat baris judul form dan tombol kembali di desktop sejajar menyamping */
+  .fp-form-card::-webkit-scrollbar-thumb {
+    background: #cccccc;
+    border-radius: 10px;
+  }
+
+  .fp-form-card::-webkit-scrollbar-thumb:hover {
+    background: #aaaaaa;
+  }
+
+  /* ==========================================================================
+  // DESKTOP FORM HEADER
+  // ========================================================================== */
+
+  /* Header form desktop dibuat sejajar antara tombol kembali dan judul */
   .fp-form-header-wrapper {
     display: flex !important;
     align-items: center !important;
-    gap: 20px !important; 
+    gap: 20px !important;
     border-bottom: 2px solid #f8f8f8 !important;
     padding-bottom: 20px !important;
     margin-bottom: 30px !important;
   }
 
-  /* Desain tombol kembali versi desktop (bulat, putih, dengan garis tepi abu-abu) */
   .fp-btn-back-desktop {
-    background: white !important;
+    background: #ffffff !important;
     border: 1.5px solid #d1d1d1 !important;
     border-radius: 50% !important;
     width: 45px !important;
@@ -491,37 +556,40 @@ button.mobile-only { display: flex; }
     background: #f0f0f0 !important;
   }
 
-  /* Memperbesar ukuran teks judul form utama di layar desktop */
   .fp-card-title {
     font-size: 32px !important;
-    margin-bottom: 0 !important; 
+    margin-bottom: 0 !important;
   }
 
-  /* Memperbesar tombol pilihan tab agar lebih nyaman diklik di layar besar */
+  /* ==========================================================================
+  // DESKTOP FORM CONTROLS
+  // ========================================================================== */
+
+  /* Menyesuaikan ukuran kontrol form agar lebih nyaman digunakan di desktop */
   .fp-tab-btn {
-    font-size: 20px !important; 
-    padding: 15px 5px !important; 
+    font-size: 20px !important;
+    padding: 15px 5px !important;
     font-weight: 700 !important;
   }
 
-  /* Memperbesar ukuran font label (petunjuk input) */
   .fp-label {
     font-size: 18px !important;
     margin-bottom: 10px;
   }
 
-  /* Menyesuaikan semua kotak input agar ukurannya lebih lega di desktop */
-  .fp-input, .fp-select, .fp-textarea, .btn-camera-open {
+  .fp-input,
+  .fp-select,
+  .fp-textarea,
+  .btn-camera-open {
     padding: 18px;
     font-size: 16px;
     border-radius: 15px;
   }
 
-  /* Desain tombol ajukan izin versi desktop: lebih besar dan ada efek angkat (hover) */
   .btn-submit-green {
     padding: 20px;
     font-size: 20px;
-    margin-top: 30px; 
+    margin-top: 30px;
     border-radius: 18px;
     transition: all 0.3s ease;
   }

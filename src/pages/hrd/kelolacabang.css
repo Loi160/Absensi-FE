@@ -1,6 +1,10 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
-/* Reset dasar untuk memastikan margin dan padding konsisten di semua browser */
+/* ============================================================================
+// RESET & GLOBAL STYLES
+// ============================================================================ */
+
+/* Menghapus jarak bawaan browser dan menerapkan font utama pada seluruh elemen */
 * {
   margin: 0;
   padding: 0;
@@ -8,7 +12,11 @@
   font-family: "Inter", sans-serif;
 }
 
-/* Pembungkus utama dengan latar belakang gradasi hijau khas perusahaan */
+/* ============================================================================
+// LAYOUT UTAMA
+// ============================================================================ */
+
+/* Pembungkus utama halaman HRD dengan latar belakang gradasi hijau */
 .hrd-container {
   display: flex;
   width: 100vw;
@@ -17,58 +25,103 @@
   overflow: hidden;
 }
 
-/* Mengatur ukuran dan tata letak kolom navigasi samping */
+/* Panel utama konten dengan sudut melengkung dan bayangan halus */
+.main-content {
+  flex: 1;
+  display: block;
+  margin: 25px 35px 30px 0;
+  padding: 40px;
+  background-color: #fdfdfd;
+  border-radius: 40px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ============================================================================
+// SCROLLBAR
+// ============================================================================ */
+
+/* Mengatur tampilan scrollbar agar tetap minimalis dan konsisten */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 30px 0;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #d1d1d1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #8dae12;
+}
+
+/* ============================================================================
+// SIDEBAR & NAVIGATION
+// ============================================================================ */
+
+/* Kolom navigasi samping utama */
 .sidebar {
-  width: 300px;
-  padding: 25px 25px;
-  color: white;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  width: 300px;
+  padding: 25px;
+  color: #ffffff;
 }
 
-/* Area penempatan logo perusahaan dengan jarak yang proporsional */
+/* Area logo pada sidebar */
 .logo-area {
   margin-top: 40px;
   margin-bottom: 26px !important;
   padding-left: 10px;
 }
 
-/* Memastikan logo tetap putih bersih menggunakan filter CSS khusus */
+/* Menjaga logo tetap berwarna putih menggunakan filter CSS */
 .logo-img {
+  display: block;
   width: 100%;
   max-width: 250px;
   height: auto;
-  display: block;
   filter: grayscale(100%) brightness(0) invert(1) contrast(1000%) !important;
 }
 
-/* Mengatur daftar menu agar tersusun vertikal dengan jarak antar item yang rapi */
+/* Grup menu navigasi utama */
 .menu-nav {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
-/* Desain tombol menu navigasi lengkap dengan efek transisi halus */
+/* Item menu navigasi */
 .menu-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px 20px;
+  color: #ffffff;
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
-  color: #fff;
 }
 
+.menu-item:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Area kiri menu yang berisi ikon dan teks */
 .menu-left {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
-/* Mengatur ukuran ikon utama di setiap menu navigasi */
+/* Ikon utama pada setiap item menu */
 .menu-icon-main {
   width: 28px;
   height: 28px;
@@ -76,13 +129,14 @@
   transition: all 0.3s ease;
 }
 
+/* Teks menu utama */
 .menu-text-main {
   font-size: 18px;
   font-weight: 600;
   transition: all 0.3s ease;
 }
 
-/* Mengatur ukuran ikon panah penunjuk pada menu */
+/* Ikon panah pada item menu */
 .arrow-icon-main {
   width: 20px;
   height: 20px;
@@ -91,7 +145,7 @@
   transition: all 0.3s ease;
 }
 
-/* Gaya tampilan saat menu sedang diklik atau berada di halaman yang aktif */
+/* Status aktif menu pada tampilan desktop */
 .menu-item.active {
   background-color: #ffffff !important;
   color: #2fb800 !important;
@@ -99,7 +153,6 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Mengubah warna ikon menjadi hijau saat menu dalam status aktif */
 .menu-item.active .menu-icon-main,
 .menu-item.active .arrow-icon-main {
   filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg)
@@ -111,36 +164,30 @@
   color: #2fb800 !important;
 }
 
-/* Efek sorot (hover) untuk menu yang sedang tidak aktif */
-.menu-item:hover:not(.active) {
-  background-color: rgba(255, 255, 255, 0.15);
-}
-
-/* Mengatur area bawah sidebar untuk tombol logout */
+/* Area bawah sidebar untuk tombol logout */
 .sidebar-footer {
   margin-top: auto;
   padding-top: 25px;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  text-align: center;
   padding-bottom: 15px;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Desain tombol keluar dengan gaya minimalis dan melengkung (rounded) */
+/* Tombol keluar dari sistem */
 .btn-logout {
+  width: 100%;
+  padding: 12px 0;
   background: transparent;
+  color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.7);
-  color: #fff;
+  border-radius: 50px;
   font-family: "Inter", sans-serif;
   font-size: 20px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  padding: 12px 0;
-  width: 100%;
-  border-radius: 50px;
 }
 
-/* Perubahan warna tombol logout menjadi putih penuh saat disorot kursor */
 .btn-logout:hover {
   background-color: #ffffff !important;
   color: #2fb800 !important;
@@ -148,36 +195,22 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* Wadah utama konten dengan sudut melengkung dan bayangan halus agar terlihat modern */
-.main-content {
-  flex: 1;
-  background-color: #fdfdfd;
-  margin: 25px 35px 30px 0;
-  border-radius: 40px;
-  padding: 40px;
-  display: block;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  overflow-y: auto;
-  overflow-x: hidden;
+/* ============================================================================
+// MOBILE NAVIGATION DEFAULT STATE
+// ============================================================================ */
+
+/* Elemen khusus mobile disembunyikan secara default pada desktop */
+.mobile-topbar,
+.btn-sidebar-close,
+.sidebar-overlay {
+  display: none;
 }
 
-/* Mengatur tampilan batang penggulung (scrollbar) agar terlihat minimalis dan modern */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-  margin: 30px 0;
-}
-::-webkit-scrollbar-thumb {
-  background-color: #d1d1d1;
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background-color: #8dae12;
-}
+/* ============================================================================
+// HEADER HALAMAN KELOLA CABANG
+// ============================================================================ */
 
-/* Mengatur tata letak bagian judul halaman kelola cabang agar tersusun vertikal */
+/* Area judul halaman kelola cabang */
 .header-cabang-area {
   display: flex;
   flex-direction: column;
@@ -185,82 +218,90 @@
   margin-bottom: 25px;
 }
 
-/* Desain judul utama dengan teks yang tebal, gelap, dan jarak antar huruf yang rapat */
+/* Judul utama halaman */
 .cabang-title {
+  margin: 0 0 5px 0;
+  color: #111111;
   font-size: 32px;
   font-weight: 700;
-  color: #111;
-  margin: 0 0 5px 0;
   letter-spacing: -0.5px;
 }
 
-/* Mengatur gaya tulisan sub-judul atau deskripsi singkat di bawah judul utama */
+/* Deskripsi singkat di bawah judul */
 .cabang-subtitle {
-  color: #666;
-  font-size: 15px;
   margin: 0;
+  color: #666666;
+  font-size: 15px;
 }
 
-/* Mengatur posisi baris tombol aksi agar berada di sisi kanan atas tabel */
+/* ============================================================================
+// ACTION BUTTON: TAMBAH CABANG
+// ============================================================================ */
+
+/* Baris aksi untuk menempatkan tombol tambah cabang di sisi kanan */
 .action-row-cabang {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 14px;
   position: relative;
   z-index: 2;
+  margin-bottom: 14px;
 }
 
-/* Desain tombol tambah cabang dengan warna hijau zaitun, bentuk kapsul, dan bayangan halus */
+/* Tombol tambah cabang baru */
 .btn-tambah-cabang-baru {
-  background-color: #8dae12;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 50px;
-  font-weight: 700;
-  font-size: 14px;
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 10px 20px;
+  background-color: #8dae12;
+  color: #ffffff;
+  border: none;
+  border-radius: 50px;
+  box-shadow: 0 4px 10px rgba(141, 174, 18, 0.3);
+  font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
   transition: background-color 0.2s;
-  box-shadow: 0 4px 10px rgba(141, 174, 18, 0.3);
 }
 
 .btn-tambah-cabang-baru:hover {
   background-color: #7a9610;
 }
 
-/* Memastikan ikon di dalam tombol tambah berwarna putih bersih */
+/* Ikon di dalam tombol tambah cabang */
 .btn-tambah-cabang-baru img {
   width: 14px;
   filter: brightness(0) invert(1);
 }
 
-/* Wadah pembungkus tabel cabang dengan sudut melengkung dan garis tepi yang rapi */
+/* ============================================================================
+// TABLE: KELOLA CABANG
+// ============================================================================ */
+
+/* Wadah utama tabel cabang */
 .table-cabang-container {
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   max-height: 430px;
   margin-bottom: 40px;
+  background: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
 }
 
-/* Mengatur bagian kepala tabel dengan warna hijau zaitun dan teks putih yang tebal */
+/* Kepala tabel cabang */
 .table-cabang-header {
-  background-color: #8dae12;
-  color: white;
-  padding: 15px 25px;
-  font-weight: 700;
-  font-size: 16px;
   flex-shrink: 0;
+  padding: 15px 25px;
+  background-color: #8dae12;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
 }
 
-/* Mengatur area badan tabel agar tingginya menyesuaikan dengan jumlah data */
+/* Area isi tabel dengan scroll vertikal */
 .table-cabang-body {
   max-height: 370px;
   overflow-y: auto;
@@ -272,8 +313,8 @@
 }
 
 .table-cabang-body::-webkit-scrollbar-track {
-  background: #f1f1f1;
   margin: 0;
+  background: #f1f1f1;
 }
 
 .table-cabang-body::-webkit-scrollbar-thumb {
@@ -285,172 +326,171 @@
   background-color: #8dae12;
 }
 
-/* Tampilan khusus saat tabel kosong agar tetap terlihat rapi dan informatif */
+/* Tampilan saat tabel tidak memiliki data */
 .table-empty-state {
   padding: 40px 30px;
-  text-align: center;
-  color: #888;
+  color: #888888;
   font-size: 14px;
   font-style: italic;
+  text-align: center;
 }
 
-/* Desain baris tabel utama dengan efek transisi warna saat disorot kursor */
+/* Baris data utama pada tabel cabang */
 .table-cabang-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   padding: 16px 25px;
-  border-bottom: 1px solid #eee;
-  transition: 0.2s;
+  border-bottom: 1px solid #eeeeee;
   cursor: pointer;
+  transition: 0.2s;
 }
 
 .table-cabang-row:hover {
   background-color: #fdfdfd;
 }
 
-/* Mengatur gaya teks nama cabang agar terlihat menonjol dan mudah dibaca */
+/* Nama cabang pada baris tabel */
 .cabang-name {
-  font-weight: 600;
-  color: #111;
   display: flex;
   align-items: center;
   gap: 10px;
+  color: #111111;
   font-size: 15px;
+  font-weight: 600;
 }
 
-/* Wadah untuk baris anak (sub-cabang) dengan warna latar yang sedikit berbeda agar mudah dibedakan */
+/* Pembungkus baris sub-cabang */
 .sub-rows-wrapper {
   background-color: #fafafa;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #eeeeee;
 }
 
-/* Memberikan jarak kiri tambahan pada baris sub-cabang untuk mempertegas struktur hirarki */
+/* Baris sub-cabang untuk memperlihatkan struktur hirarki */
 .sub-row {
   padding-left: 60px !important;
   border-bottom: 1px solid #f0f0f0 !important;
 }
 
-/* Mengatur tata letak tombol aksi di sisi kanan baris tabel agar sejajar rapi */
+/* Area tombol aksi pada setiap baris tabel */
 .table-cabang-actions {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
-/* Desain tombol aksi berupa teks dengan garis tepi (outline) hijau zaitun */
+/* Tombol aksi berbentuk teks dengan outline */
 .btn-action-text {
+  padding: 6px 14px;
   background: transparent;
+  color: #8dae12;
   border: 1.5px solid #8dae12;
   border-radius: 20px;
-  padding: 6px 14px;
   font-size: 12px;
   font-weight: 700;
-  color: #8dae12;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-/* Efek saat tombol teks disorot kursor: latar belakang berubah jadi hijau penuh */
 .btn-action-text:hover {
   background-color: #8dae12;
   color: #ffffff;
 }
 
-/* Desain dasar tombol berupa ikon tanpa garis tepi untuk aksi yang lebih ringkas */
+/* Tombol aksi berbasis ikon */
 .btn-icon-action {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: #888;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: 0.2s;
   padding: 4px;
+  background: transparent;
+  color: #888888;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-/* Memberikan efek warna hijau dan sedikit pembesaran saat ikon disorot kursor */
 .btn-icon-action:hover {
   color: #8dae12;
   transform: scale(1.1);
 }
 
-/* Mengatur tombol untuk mengubah status cabang dengan efek transisi halus */
+/* Tombol untuk mengubah status cabang */
 .btn-status-toggle {
-  background: transparent;
-  border: none;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 5px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
   transition: 0.2s;
 }
 
-/* Memberikan efek pembesaran yang lebih tegas saat tombol toggle status disorot */
 .btn-status-toggle:hover {
   transform: scale(1.15);
 }
 
-/* Desain lingkaran kecil (dot) sebagai penanda status aktif atau non-aktif */
+/* Indikator status aktif atau nonaktif */
 .status-dot {
+  display: inline-block;
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  display: inline-block;
   transition: background-color 0.3s ease;
 }
 
-/* Memberikan warna hijau cerah dan efek cahaya (glow) jika status cabang sedang aktif */
 .status-dot.active {
   background-color: #2fb800;
   box-shadow: 0 0 6px rgba(47, 184, 0, 0.4);
 }
 
-/* Memberikan warna merah cerah dan efek cahaya (glow) jika status cabang sedang non-aktif */
 .status-dot.inactive {
   background-color: #ff1744;
   box-shadow: 0 0 6px rgba(255, 23, 68, 0.4);
 }
 
-/* Mengatur latar belakang gelap transparan yang menutupi seluruh layar saat modal muncul */
+/* ============================================================================
+// MODAL: FORM EDIT / TAMBAH CABANG
+// ============================================================================ */
+
+/* Overlay gelap transparan saat modal aktif */
 .modal-overlay-clean {
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.45);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10000;
   padding: 20px;
+  background: rgba(0, 0, 0, 0.45);
 }
 
-/* Desain kotak modal utama dengan fitur scroll otomatis jika kontennya melebihi tinggi layar */
+/* Kartu modal utama untuk form */
 .modal-card-edit {
-  background: white;
   width: 700px;
   max-width: 95%;
   max-height: 90vh;
-  overflow-y: auto;
   padding: 40px;
+  background: #ffffff;
   border-radius: 15px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
   animation: zoomIn 0.2s ease;
 }
 
-/* Desain judul di dalam modal dengan ukuran teks besar dan sangat tebal */
+/* Judul modal form */
 .modal-title {
+  margin-bottom: 30px;
+  color: #000000;
   font-size: 28px;
   font-weight: 800;
-  margin-bottom: 30px;
-  color: #000;
 }
 
-/* Mengatur tata letak input di dalam modal menjadi dua kolom yang sejajar */
+/* Grid input pada modal */
 .modal-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -458,89 +498,86 @@
   margin-bottom: 30px;
 }
 
-/* Mengatur jarak antara label petunjuk dan kotak input di setiap grup */
+/* Grup label dan input */
 .input-block {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-/* Desain teks label agar terlihat tegas dan mudah dibaca */
 .input-block label {
+  color: #333333;
   font-size: 13px;
-  color: #333;
   font-weight: 700;
 }
 
-/* Desain kotak input modal dengan warna latar abu-abu muda tanpa garis tepi */
+/* Input utama pada modal */
 .modal-input {
-  background: #f0f0f0;
-  border: none;
+  width: 100%;
   padding: 14px;
+  background: #f0f0f0;
+  color: #333333;
+  border: none;
   border-radius: 8px;
   outline: none;
-  width: 100%;
   font-size: 14px;
-  color: #333;
   transition: background 0.2s;
 }
 
-/* Memberikan sedikit perubahan warna pada kotak input saat sedang diklik (fokus) */
 .modal-input:focus {
   background: #e4e4e4;
 }
 
-/* Mengatur posisi ikon mata di dalam input password agar berada di sisi kanan */
+/* Pembungkus input password agar ikon mata berada di sisi kanan */
 .password-wrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-/* Memberikan ruang kosong di sisi kanan input agar teks tidak tertutup ikon mata */
 .password-wrapper .modal-input {
   padding-right: 45px;
 }
 
-/* Mendesain tombol ikon mata untuk fitur lihat/sembunyi password */
+/* Tombol ikon mata untuk melihat atau menyembunyikan password */
 .btn-eye {
   position: absolute;
   right: 15px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #777;
   padding: 0;
+  background: transparent;
+  color: #777777;
+  border: none;
+  cursor: pointer;
   transition: color 0.2s;
 }
 
 .btn-eye:hover {
-  color: #333;
+  color: #333333;
 }
 
-/* Mengatur baris tombol aksi di bagian bawah modal (Simpan/Batal) */
+/* Area tombol aksi bagian bawah modal */
 .modal-footer-actions {
   display: flex;
-  gap: 15px;
   align-items: center;
+  gap: 15px;
   margin-top: 10px;
 }
 
-/* Desain tombol batal di modal dengan ukuran lebih kecil dan garis tepi abu-abu */
+/* Tombol batal pada modal form */
 .btn-cancel-mini {
   flex: 0.5;
-  background: white;
-  color: #333;
-  border: 1px solid #ccc;
-  padding: 12px;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 14px;
-  cursor: pointer;
   height: 48px;
+  padding: 12px;
+  background: #ffffff;
+  color: #333333;
+  border: 1px solid #cccccc;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
   transition: 0.3s;
 }
 
@@ -548,162 +585,161 @@
   background: #f9f9f9;
 }
 
-/* Desain tombol simpan yang lebarnya fleksibel dan berubah warna menjadi hijau saat siap diklik */
+/* Tombol simpan pada modal form */
 .btn-save-dynamic {
   flex: 3;
-  background: #e0e0e0;
-  color: #666;
-  border: none;
-  padding: 12px;
-  border-radius: 10px;
-  font-weight: 800;
-  font-size: 16px;
-  cursor: pointer;
   height: 48px;
+  padding: 12px;
+  background: #e0e0e0;
+  color: #666666;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .btn-save-dynamic:hover {
   background: #8dae12;
-  color: white;
+  color: #ffffff;
   box-shadow: 0 5px 15px rgba(141, 174, 18, 0.3);
 }
 
-/* Desain kotak modal kecil khusus untuk pesan konfirmasi agar terlihat fokus di tengah */
+/* ============================================================================
+// MODAL: KONFIRMASI
+// ============================================================================ */
+
+/* Kartu modal kecil untuk pesan konfirmasi */
 .modal-card-confirm {
-  background: white;
   width: 400px;
   max-width: 90%;
   padding: 35px 30px 30px;
+  background: #ffffff;
   border-radius: 16px;
   text-align: center;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
   animation: zoomIn 0.2s ease;
 }
 
-/* Mengatur gaya judul pada pesan konfirmasi agar terlihat tegas */
 .modal-card-confirm h3 {
+  margin-bottom: 12px;
+  color: #111111;
   font-size: 20px;
   font-weight: 800;
-  color: #111;
-  margin-bottom: 12px;
 }
 
-/* Mengatur teks penjelasan pada pesan konfirmasi dengan jarak antar baris yang nyaman */
 .modal-card-confirm p {
-  font-size: 14px;
-  color: #555;
   margin-bottom: 30px;
+  color: #555555;
+  font-size: 14px;
   line-height: 1.5;
 }
 
-/* Mengatur tata letak tombol pilihan (Batal/Yakin) di dalam kotak konfirmasi */
+/* Grup tombol pilihan pada modal konfirmasi */
 .confirm-btn-group {
   display: flex;
   justify-content: center;
   gap: 12px;
 }
 
-/* Desain tombol batal di dalam modal konfirmasi */
+/* Tombol batal pada modal konfirmasi */
 .btn-konfirm-batal {
+  flex: 1;
   padding: 10px 20px;
+  background: #ffffff;
+  color: #444444;
+  border: 1px solid #cccccc;
   border-radius: 8px;
-  border: 1px solid #ccc;
-  background: white;
-  color: #444;
-  font-weight: 600;
   font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
   transition: 0.2s;
-  flex: 1;
 }
 
-/* Desain tombol yakin/setuju di dalam modal konfirmasi dengan warna hijau zaitun */
+/* Tombol yakin pada modal konfirmasi */
 .btn-konfirm-yakin {
+  flex: 1;
   padding: 10px 20px;
-  border-radius: 8px;
-  border: none;
   background: #8dae12;
-  color: white;
-  font-weight: 600;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
   font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
   transition: 0.2s;
-  flex: 1;
 }
 
 .btn-konfirm-yakin:hover {
   background: #7a9610;
 }
 
-/* Animasi munculnya modal agar terlihat lebih halus dari kecil ke ukuran asli */
+/* ============================================================================
+// ANIMATION
+// ============================================================================ */
+
+/* Animasi masuk modal dari skala kecil ke ukuran normal */
 @keyframes zoomIn {
   from {
     transform: scale(0.95);
     opacity: 0;
   }
+
   to {
     transform: scale(1);
     opacity: 1;
   }
 }
 
-/* Menyembunyikan elemen navigasi khusus mobile secara default pada tampilan desktop */
-.mobile-topbar {
-  display: none;
-}
-.btn-sidebar-close {
-  display: none;
-}
-.sidebar-overlay {
-  display: none;
-}
+/* ============================================================================
+// RESPONSIVE: MOBILE
+// ============================================================================ */
 
-/* Pengaturan khusus saat aplikasi dibuka melalui perangkat dengan layar maksimal 768px */
 @media (max-width: 768px) {
-  /* Mengubah susunan container menjadi vertikal dan menyesuaikan latar belakang gradasi */
+  /* Mengubah layout utama menjadi vertikal untuk perangkat mobile */
   .hrd-container {
+    position: relative;
     flex-direction: column;
     height: 100vh;
-    overflow: hidden;
-    position: relative;
     background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%);
+    overflow: hidden;
   }
 
-  /* Menampilkan bar navigasi atas agar admin bisa mengakses menu di layar kecil */
+  /* Bar navigasi atas khusus mobile */
   .mobile-topbar {
+    position: relative;
+    z-index: 200;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-shrink: 0;
     padding: 16px 20px;
     background: transparent;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 200;
   }
 
-  /* Memastikan logo pada topbar mobile berwarna putih bersih */
+  /* Logo pada topbar mobile */
   .mobile-topbar-logo {
+    display: block;
     width: 130px;
     height: auto;
-    display: block;
     filter: grayscale(100%) brightness(0) invert(1) contrast(1000%);
   }
 
-  /* Desain tombol menu hamburger (tiga garis) untuk navigasi mobile */
+  /* Tombol hamburger untuk membuka sidebar mobile */
   .btn-hamburger {
-    background: transparent;
-    border: none;
-    cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 5px;
+    margin: 0;
     padding: 4px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
   }
 
-  /* Mengatur tampilan garis putih pada tombol hamburger */
   .btn-hamburger span {
     display: block;
     width: 26px;
@@ -712,68 +748,66 @@
     border-radius: 3px;
   }
 
-  /* Mengatur lapisan gelap transparan yang muncul saat sidebar sedang terbuka di HP */
+  /* Overlay untuk menutup area belakang saat sidebar mobile terbuka */
   .sidebar-overlay {
-    display: block;
     position: fixed;
     inset: 0;
-    background-color: rgba(0, 0, 0, 0.45);
     z-index: 300;
+    display: block;
+    background-color: rgba(0, 0, 0, 0.45);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
   }
 
-  /* Memunculkan overlay saat sidebar dalam status aktif */
   .sidebar-overlay.active {
     opacity: 1;
     pointer-events: all;
   }
 
-  /* Mengatur sidebar agar tersembunyi di sisi kiri dan muncul dengan animasi geser */
+  /* Sidebar mobile tersembunyi di sisi kiri secara default */
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
+    z-index: 400;
     width: 280px;
     height: 100vh;
-    z-index: 400;
     padding: 25px 20px;
+    background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%);
     transform: translateX(-100%);
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%);
   }
 
-  /* Menampilkan sidebar sepenuhnya saat class 'open' ditambahkan */
   .sidebar.open {
     transform: translateX(0);
   }
 
-  /* Desain tombol silang (X) untuk menutup sidebar di layar mobile */
+  /* Tombol untuk menutup sidebar mobile */
   .btn-sidebar-close {
     display: flex;
     align-self: flex-end;
+    margin-bottom: 10px;
+    padding: 0 4px;
     background: transparent;
-    border: none;
     color: #ffffff;
+    border: none;
     font-size: 28px;
     font-weight: 300;
-    cursor: pointer;
     line-height: 1;
-    padding: 0 4px;
-    margin-bottom: 10px;
+    cursor: pointer;
   }
 
-  /* Menyesuaikan ukuran area logo dan gambar logo agar lebih proporsional di HP */
   .logo-area {
     margin-top: 10px;
     margin-bottom: 20px !important;
   }
+
   .logo-img {
     max-width: 180px;
   }
 
-  /* Mengatur tampilan item menu di HP agar tetap bersih tanpa bayangan dan garis tepi */
+  /* Menjaga menu mobile tetap bersih tanpa border dan shadow default */
   .menu-item {
     background-color: transparent;
     color: #ffffff;
@@ -781,118 +815,117 @@
     box-shadow: none;
   }
 
-  /* Memberikan penanda warna hijau yang lebih tegas saat menu sedang aktif di sidebar HP */
+  /* Status aktif menu pada tampilan mobile */
   .menu-item.active {
     background-color: #2fb800 !important;
     color: #ffffff !important;
     border: 1px solid #2fb800;
     box-shadow: 0 4px 15px rgba(47, 184, 0, 0.35);
   }
+
   .menu-item.active .menu-icon-main,
   .menu-item.active .arrow-icon-main {
     filter: brightness(0) invert(1) !important;
     opacity: 1;
   }
+
   .menu-item.active .menu-text-main {
     color: #ffffff !important;
   }
 
-  /* Mengatur area konten utama di HP agar melengkung di bagian atas dan mengisi sisa ruang layar */
+  /* Konten utama mobile dibuat memenuhi sisa layar dengan sudut atas melengkung */
   .main-content {
     position: static;
     flex: 1;
     margin: 0;
-    border-radius: 28px 28px 0 0;
     padding: 25px 20px;
     background-color: #fdfdfd;
+    border-radius: 28px 28px 0 0;
   }
 
-  /* Mengurangi jarak bawah pada area judul halaman agar tidak terlalu memakan tempat di layar HP */
   .header-cabang-area {
     margin-bottom: 15px;
   }
 
-  /* Mengecilkan ukuran teks judul dan sub-judul cabang untuk tampilan mobile */
   .cabang-title {
-    font-size: 24px;
     margin-bottom: 4px;
-  }
-  .cabang-subtitle {
-    font-size: 13px;
-    margin-bottom: 0;
+    font-size: 24px;
   }
 
-  /* Menyesuaikan jarak tombol aksi dan ukuran tombol tambah cabang agar pas untuk jempol pengguna */
+  .cabang-subtitle {
+    margin-bottom: 0;
+    font-size: 13px;
+  }
+
   .action-row-cabang {
     margin-bottom: 14px;
   }
+
   .btn-tambah-cabang-baru {
     padding: 8px 16px;
     font-size: 12px;
   }
 
-  /* Mengatur tinggi minimal dan jarak bawah kotak tabel pada tampilan mobile */
-.table-cabang-container {
-  max-height: 360px;
-  min-height: 80px;
-  margin-bottom: 20px;
-}
+  /* Ukuran tabel disesuaikan agar nyaman digunakan pada layar mobile */
+  .table-cabang-container {
+    min-height: 80px;
+    max-height: 360px;
+    margin-bottom: 20px;
+  }
 
-.table-cabang-body {
-  max-height: 305px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
+  .table-cabang-body {
+    max-height: 305px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
 
-  /* Mengecilkan ruang dalam (padding) baris tabel dan ukuran teks nama cabang */
   .table-cabang-row {
     padding: 12px 15px;
   }
+
   .cabang-name {
     font-size: 14px;
   }
 
-  /* Menyesuaikan jarak kiri untuk sub-cabang agar hirarki tetap terlihat meski di layar sempit */
   .sub-row {
     padding-left: 35px !important;
   }
 
-  /* Memperkecil jarak antar tombol aksi dan ukuran teks tombol di dalam tabel */
   .table-cabang-actions {
     gap: 8px;
   }
+
   .btn-action-text {
     padding: 4px 10px;
     font-size: 10px;
   }
 
-  /* Mengatur jarak bawah pada bagian footer sidebar untuk layar HP */
   .sidebar-footer {
     margin-top: auto;
     padding-bottom: 30px;
   }
 
-  /* Menyesuaikan desain modal edit agar lebih ringkas, melengkung, dan nyaman dilihat di HP */
+  /* Modal form dibuat satu kolom agar tidak sempit di layar kecil */
   .modal-card-edit {
     padding: 25px 20px;
     border-radius: 16px;
   }
+
   .modal-title {
-    font-size: 22px;
     margin-bottom: 20px;
+    font-size: 22px;
   }
 
-  /* Mengubah tata letak input modal menjadi satu kolom saja agar tidak sempit di layar HP */
   .modal-grid {
     grid-template-columns: 1fr;
     gap: 15px;
     margin-bottom: 20px;
   }
 
-  /* Menyesuaikan ukuran kotak konfirmasi dan judulnya untuk tampilan mobile */
   .modal-card-confirm {
     padding: 25px 20px 20px;
   }
+
   .modal-card-confirm h3 {
     font-size: 18px;
   }

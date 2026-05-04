@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { getAuthHeaders } from "../../context/AuthHeaders";
@@ -10,6 +10,10 @@ import iconIzin from "../../assets/perizinan.svg";
 import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
+
+// ============================================================================
+// KONSTANTA: MENU SIDEBAR
+// ============================================================================
 
 const MENU_ITEMS = [
   {
@@ -35,12 +39,132 @@ const MENU_ITEMS = [
   },
 ];
 
+// ============================================================================
+// KONSTANTA: FILTER DAN TIPE PERIZINAN
+// ============================================================================
+
+const ALL_BRANCH_FILTER = "Semua Cabang Saya";
+
+const PERMISSION_CATEGORY = {
+  IZIN: "Izin",
+  FIMTK: "FIMTK",
+  CUTI: "Cuti",
+};
+
+const MODAL_TYPE = {
+  HARIAN: "harian",
+  FIMTK: "fimtk",
+  CUTI: "cuti",
+};
+
+const APPROVAL_STATUS = {
+  PENDING: "Pending",
+  APPROVED: "Disetujui",
+  REJECTED: "Ditolak",
+};
+
+// ============================================================================
+// KONSTANTA: STYLE INLINE
+// ============================================================================
+
+const LOADING_TEXT_STYLE = {
+  textAlign: "center",
+  marginTop: "50px",
+};
+
+const MODAL_TEXTAREA_STYLE = {
+  minHeight: "60px",
+};
+
+const MODAL_IMAGE_BOX_STYLE = {
+  position: "relative",
+};
+
+const PROOF_IMAGE_STYLE = {
+  maxWidth: "100%",
+  maxHeight: "100%",
+  cursor: "pointer",
+  objectFit: "contain",
+};
+
+const IMAGE_PREVIEW_BUTTON_STYLE = {
+  position: "absolute",
+  bottom: "10px",
+  right: "10px",
+  background: "rgba(0,0,0,0.5)",
+  color: "white",
+  border: "none",
+  borderRadius: "50%",
+  width: "35px",
+  height: "35px",
+  cursor: "pointer",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+};
+
+const IMAGE_PREVIEW_OVERLAY_STYLE = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100vw",
+  height: "100vh",
+  backgroundColor: "rgba(0,0,0,0.85)",
+  zIndex: 99999,
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+};
+
+const IMAGE_PREVIEW_CLOSE_BUTTON_STYLE = {
+  position: "absolute",
+  top: "20px",
+  right: "30px",
+  background: "none",
+  border: "none",
+  color: "#fff",
+  fontSize: "40px",
+  cursor: "pointer",
+};
+
+const IMAGE_PREVIEW_STYLE = {
+  maxWidth: "90%",
+  maxHeight: "90%",
+  borderRadius: "8px",
+  objectFit: "contain",
+  boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
+};
+
+const TABLE_COLUMN_WIDTHS = {
+  name: {
+    width: "20%",
+  },
+  medium: {
+    width: "15%",
+  },
+  status: {
+    width: "10%",
+  },
+  action: {
+    width: "25%",
+  },
+};
+
+// ============================================================================
+// HELPER: FORMAT DAN TRANSFORMASI DATA
+// ============================================================================
+
+// Mengubah format tanggal dari API menjadi format tanggal Indonesia.
 const formatDateIndo = (dateString) => {
-  if (!dateString) return "-";
+  if (!dateString) {
+    return "-";
+  }
 
   const date = new Date(dateString);
 
-  if (isNaN(date)) return dateString;
+  if (Number.isNaN(date.getTime())) {
+    return dateString;
+  }
 
   return date.toLocaleDateString("id-ID", {
     day: "2-digit",
@@ -49,222 +173,373 @@ const formatDateIndo = (dateString) => {
   });
 };
 
-const sortData = (data) =>
-  [...data].sort((a, b) => {
-    if (a.status === "Pending" && b.status !== "Pending") return -1;
-    if (a.status !== "Pending" && b.status === "Pending") return 1;
-    return b.rawDate - a.rawDate;
+// Mengurutkan data agar status pending berada di atas, lalu diikuti data terbaru.
+const sortPermissionData = (data) =>
+  [...data].sort((firstItem, secondItem) => {
+    if (
+      firstItem.status === APPROVAL_STATUS.PENDING &&
+      secondItem.status !== APPROVAL_STATUS.PENDING
+    ) {
+      return -1;
+    }
+
+    if (
+      firstItem.status !== APPROVAL_STATUS.PENDING &&
+      secondItem.status === APPROVAL_STATUS.PENDING
+    ) {
+      return 1;
+    }
+
+    return secondItem.rawDate - firstItem.rawDate;
   });
 
-const filterByCabang = (dataArray, selectedFilter) => {
-  if (selectedFilter === "Semua Cabang Saya") return dataArray;
+// Menyaring data berdasarkan cabang yang dipilih pada dropdown filter.
+const filterByBranch = (dataArray, selectedFilter) => {
+  if (selectedFilter === ALL_BRANCH_FILTER) {
+    return dataArray;
+  }
+
   return dataArray.filter((item) => item.cabang === selectedFilter);
 };
 
-const getBadgeClass = (tipe) => {
-  if (!tipe) return "lainnya";
+// Menentukan class badge berdasarkan jenis izin.
+const getBadgeClass = (permissionType) => {
+  if (!permissionType) {
+    return "lainnya";
+  }
 
-  const lower = tipe.toLowerCase();
+  const normalizedType = permissionType.toLowerCase();
 
-  if (lower.includes("sakit")) return "sakit";
-  if (lower.includes("pribadi")) return "pribadi";
-  if (lower.includes("keluar")) return "keluar";
-  if (lower.includes("pulang")) return "pulang";
-  if (lower.includes("khusus")) return "khusus";
-  if (lower.includes("tahunan")) return "tahunan";
+  if (normalizedType.includes("sakit")) {
+    return "sakit";
+  }
+
+  if (normalizedType.includes("pribadi")) {
+    return "pribadi";
+  }
+
+  if (normalizedType.includes("keluar")) {
+    return "keluar";
+  }
+
+  if (normalizedType.includes("pulang")) {
+    return "pulang";
+  }
+
+  if (normalizedType.includes("khusus")) {
+    return "khusus";
+  }
+
+  if (normalizedType.includes("tahunan")) {
+    return "tahunan";
+  }
 
   return "lainnya";
 };
+
+// Mengubah data perizinan dari API menjadi format yang digunakan oleh tabel dan modal.
+const mapPermissionData = (permission) => ({
+  id: permission.id,
+  nama: permission.users?.nama || "Unknown",
+  cabang: permission.users?.cabang?.nama || "-",
+  jabatan: permission.users?.jabatan || "-",
+  divisi: permission.users?.divisi || "-",
+  noTelp: permission.users?.no_telp || "-",
+  tipeIzin: permission.jenis_izin || permission.kategori || "-",
+  keterangan: permission.keterangan || permission.keperluan || "-",
+  tglMulai: formatDateIndo(permission.tanggal_mulai),
+  tglSelesai: formatDateIndo(permission.tanggal_selesai),
+  tanggal: formatDateIndo(permission.tanggal_mulai),
+  jamMulai: permission.jam_mulai || "-",
+  jamSelesai: permission.jam_selesai || "-",
+  keperluan: permission.keperluan || "-",
+  kendaraan: permission.kendaraan || "-",
+  alasan: permission.keterangan || "-",
+  status: permission.status_approval || APPROVAL_STATUS.PENDING,
+  foto: permission.bukti_foto || null,
+  rawDate: new Date(
+    permission.created_at || permission.tanggal_mulai,
+  ).getTime(),
+});
+
+// ============================================================================
+// KOMPONEN: ICON
+// ============================================================================
+
+const ZoomIcon = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle
+      cx="11"
+      cy="11"
+      r="8"
+    ></circle>
+    <line
+      x1="21"
+      y1="21"
+      x2="16.65"
+      y2="16.65"
+    ></line>
+  </svg>
+);
+
+// ============================================================================
+// KOMPONEN: PERIZINAN MANAGER CABANG
+// ============================================================================
 
 const PerizinanManagerCabang = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const openSidebar = () => setSidebarOpen(true);
-  const closeSidebar = () => setSidebarOpen(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [showFilter, setShowFilter] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState("Semua Cabang Saya");
-  const [cabangList, setCabangList] = useState([]);
+  const [selectedFilter, setSelectedFilter] = useState(ALL_BRANCH_FILTER);
+  const [branchList, setBranchList] = useState([]);
 
-  const [dataIzinHarian, setDataIzinHarian] = useState([]);
-  const [dataIzinFIMTK, setDataIzinFIMTK] = useState([]);
-  const [dataCuti, setDataCuti] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [dailyPermissionData, setDailyPermissionData] = useState([]);
+  const [fimtkPermissionData, setFimtkPermissionData] = useState([]);
+  const [leavePermissionData, setLeavePermissionData] = useState([]);
 
-  const [showModal, setShowModal] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalType, setModalType] = useState("");
   const [selectedData, setSelectedData] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
+  // Menyaring dan mengurutkan data izin harian sesuai filter cabang aktif.
+  const filteredDailyPermissions = useMemo(
+    () =>
+      filterByBranch(
+        sortPermissionData(dailyPermissionData),
+        selectedFilter,
+      ),
+    [dailyPermissionData, selectedFilter],
+  );
 
-      const resCabang = await fetch(
+  // Menyaring dan mengurutkan data FIMTK sesuai filter cabang aktif.
+  const filteredFimtkPermissions = useMemo(
+    () =>
+      filterByBranch(
+        sortPermissionData(fimtkPermissionData),
+        selectedFilter,
+      ),
+    [fimtkPermissionData, selectedFilter],
+  );
+
+  // Menyaring dan mengurutkan data cuti sesuai filter cabang aktif.
+  const filteredLeavePermissions = useMemo(
+    () =>
+      filterByBranch(
+        sortPermissionData(leavePermissionData),
+        selectedFilter,
+      ),
+    [leavePermissionData, selectedFilter],
+  );
+
+  const openSidebar = () => {
+    setIsSidebarOpen(true);
+  };
+
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
+
+  // Menghapus sesi login dan mengarahkan pengguna ke halaman login.
+  const handleLogout = () => {
+    logout();
+    navigate("/auth/login");
+  };
+
+  // Menutup sidebar mobile sebelum berpindah ke halaman yang dipilih.
+  const handleNavigation = (path) => {
+    closeSidebar();
+    navigate(path);
+  };
+
+  const toggleFilterVisibility = () => {
+    setIsFilterVisible((currentValue) => !currentValue);
+  };
+
+  // Mengubah filter cabang lalu menutup dropdown filter.
+  const handleFilterSelection = (branchName) => {
+    setSelectedFilter(branchName);
+    setIsFilterVisible(false);
+  };
+
+  // Membuka modal detail sesuai jenis data perizinan yang dipilih.
+  const handleRowClick = (item, type) => {
+    setSelectedData(item);
+    setModalType(type);
+    setIsModalVisible(true);
+  };
+
+  // Menutup modal dan menghapus data detail yang sedang dipilih.
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+    setSelectedData(null);
+    setModalType("");
+  };
+
+  const handleClosePreviewImage = () => {
+    setPreviewImage(null);
+  };
+
+  // Mengelompokkan data perizinan berdasarkan kategori dari API.
+  const groupPermissionDataByCategory = (permissionList) => {
+    const groupedData = {
+      daily: [],
+      fimtk: [],
+      leave: [],
+    };
+
+    if (!Array.isArray(permissionList)) {
+      return groupedData;
+    }
+
+    permissionList.forEach((permission) => {
+      const mappedData = mapPermissionData(permission);
+
+      if (permission.kategori === PERMISSION_CATEGORY.IZIN) {
+        groupedData.daily.push(mappedData);
+      } else if (permission.kategori === PERMISSION_CATEGORY.FIMTK) {
+        groupedData.fimtk.push(mappedData);
+      } else if (permission.kategori === PERMISSION_CATEGORY.CUTI) {
+        groupedData.leave.push(mappedData);
+      }
+    });
+
+    return groupedData;
+  };
+
+  // Mengambil data cabang dan seluruh data perizinan yang dapat diakses manager.
+  const fetchPermissionData = async () => {
+    try {
+      setIsLoading(true);
+
+      const branchResponse = await fetch(
         `${import.meta.env.VITE_API_URL}/api/cabang`,
         {
           headers: getAuthHeaders(),
         },
       );
 
-      const listCabang = await resCabang.json();
+      const branchData = await branchResponse.json();
 
-      if (resCabang.status === 401 || resCabang.status === 403) {
+      if (branchResponse.status === 401 || branchResponse.status === 403) {
         logout();
         navigate("/auth/login");
         return;
       }
 
-      if (!resCabang.ok) {
-        alert(listCabang.message || "Gagal mengambil data cabang.");
+      if (!branchResponse.ok) {
+        alert(branchData.message || "Gagal mengambil data cabang.");
         return;
       }
 
-      setCabangList(
-        Array.isArray(listCabang) ? listCabang.map((c) => c.nama) : [],
+      setBranchList(
+        Array.isArray(branchData)
+          ? branchData.map((branch) => branch.nama)
+          : [],
       );
 
-      const resPerizinan = await fetch(
+      const permissionResponse = await fetch(
         `${import.meta.env.VITE_API_URL}/api/perizinan/all`,
         {
           headers: getAuthHeaders(),
         },
       );
 
-      const allPerizinan = await resPerizinan.json();
+      const permissionData = await permissionResponse.json();
 
-      if (resPerizinan.status === 401 || resPerizinan.status === 403) {
+      if (
+        permissionResponse.status === 401 ||
+        permissionResponse.status === 403
+      ) {
         logout();
         navigate("/auth/login");
         return;
       }
 
-      if (!resPerizinan.ok) {
-        alert(allPerizinan.message || "Gagal mengambil data perizinan.");
+      if (!permissionResponse.ok) {
+        alert(permissionData.message || "Gagal mengambil data perizinan.");
         return;
       }
 
-      const harian = [];
-      const fimtk = [];
-      const cuti = [];
+      const groupedPermissionData =
+        groupPermissionDataByCategory(permissionData);
 
-      if (Array.isArray(allPerizinan)) {
-        allPerizinan.forEach((p) => {
-          const mappedData = {
-            id: p.id,
-            nama: p.users?.nama || "Unknown",
-            cabang: p.users?.cabang?.nama || "-",
-            jabatan: p.users?.jabatan || "-",
-            divisi: p.users?.divisi || "-",
-            noTelp: p.users?.no_telp || "-",
-            tipeIzin: p.jenis_izin || p.kategori || "-",
-            keterangan: p.keterangan || p.keperluan || "-",
-            tglMulai: formatDateIndo(p.tanggal_mulai),
-            tglSelesai: formatDateIndo(p.tanggal_selesai),
-            tanggal: formatDateIndo(p.tanggal_mulai),
-            jamMulai: p.jam_mulai || "-",
-            jamSelesai: p.jam_selesai || "-",
-            keperluan: p.keperluan || "-",
-            kendaraan: p.kendaraan || "-",
-            alasan: p.keterangan || "-",
-            status: p.status_approval || "Pending",
-            foto: p.bukti_foto || null,
-            rawDate: new Date(p.created_at || p.tanggal_mulai).getTime(),
-          };
-
-          if (p.kategori === "Izin") {
-            harian.push(mappedData);
-          } else if (p.kategori === "FIMTK") {
-            fimtk.push(mappedData);
-          } else if (p.kategori === "Cuti") {
-            cuti.push(mappedData);
-          }
-        });
-      }
-
-      setDataIzinHarian(harian);
-      setDataIzinFIMTK(fimtk);
-      setDataCuti(cuti);
+      setDailyPermissionData(groupedPermissionData.daily);
+      setFimtkPermissionData(groupedPermissionData.fimtk);
+      setLeavePermissionData(groupedPermissionData.leave);
     } catch (error) {
       console.error("Gagal mengambil data perizinan:", error);
       alert("Gagal mengambil data perizinan.");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
+    }
+  };
+
+  // Mengubah status approval perizinan menjadi disetujui atau ditolak.
+  const handleUpdateStatus = async (id, newStatus) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/perizinan/${id}/status`,
+        {
+          method: "PUT",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({
+            status_approval: newStatus,
+          }),
+        },
+      );
+
+      const result = await response.json();
+
+      if (response.status === 401 || response.status === 403) {
+        logout();
+        navigate("/auth/login");
+        return;
+      }
+
+      if (response.ok) {
+        alert(result.message || `Berhasil di-${newStatus}`);
+        fetchPermissionData();
+        handleCloseModal();
+        return;
+      }
+
+      alert(
+        `Gagal: ${result.message || "Gagal mengupdate status."}${
+          result.detail ? `\nDetail: ${result.detail}` : ""
+        }`,
+      );
+    } catch (error) {
+      console.error("Gagal update status:", error);
+      alert("Terjadi kesalahan jaringan.");
     }
   };
 
   useEffect(() => {
     if (user) {
-      fetchData();
+      fetchPermissionData();
     }
   }, [user]);
-
-  const handleNav = (path) => {
-    closeSidebar();
-    navigate(path);
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate("/auth/login");
-  };
-
-  const handleRowClick = (item, type) => {
-    setSelectedData(item);
-    setModalType(type);
-    setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setSelectedData(null);
-    setModalType("");
-  };
-
-  const handleUpdateStatus = async (id, newStatus) => {
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/perizinan/${id}/status`,
-        {
-          method: "PUT",
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ status_approval: newStatus }),
-        },
-      );
-
-      const result = await res.json();
-
-      if (res.status === 401 || res.status === 403) {
-        logout();
-        navigate("/auth/login");
-        return;
-      }
-
-      if (res.ok) {
-        alert(result.message || `Berhasil di-${newStatus}`);
-        fetchData();
-        handleCloseModal();
-      } else {
-        alert(
-          `Gagal: ${result.message || "Gagal mengupdate status."}${
-            result.detail ? `\nDetail: ${result.detail}` : ""
-          }`,
-        );
-      }
-    } catch (err) {
-      console.error("Gagal update status:", err);
-      alert("Terjadi kesalahan jaringan.");
-    }
-  };
 
   const renderStatusBadge = (status) => (
     <span
       className={`badge-status ${
-        status === "Disetujui"
+        status === APPROVAL_STATUS.APPROVED
           ? "approve"
-          : status === "Ditolak"
+          : status === APPROVAL_STATUS.REJECTED
             ? "reject"
             : "pending"
       }`}
@@ -274,45 +549,565 @@ const PerizinanManagerCabang = () => {
   );
 
   const renderActionButtons = (item) => (
-    <td className="text-center" onClick={(e) => e.stopPropagation()}>
-      {item.status === "Pending" ? (
+    <td
+      className="text-center"
+      onClick={(event) => event.stopPropagation()}
+    >
+      {item.status === APPROVAL_STATUS.PENDING ? (
         <div className="action-buttons">
           <button
+            type="button"
             className="btn-approve"
-            onClick={() => handleUpdateStatus(item.id, "Disetujui")}
+            onClick={() =>
+              handleUpdateStatus(
+                item.id,
+                APPROVAL_STATUS.APPROVED,
+              )
+            }
           >
             Setujui
           </button>
+
           <button
+            type="button"
             className="btn-reject"
-            onClick={() => handleUpdateStatus(item.id, "Ditolak")}
+            onClick={() =>
+              handleUpdateStatus(
+                item.id,
+                APPROVAL_STATUS.REJECTED,
+              )
+            }
           >
             Tolak
           </button>
         </div>
       ) : (
-        <span className="text-selesai">- Selesai -</span>
+        <span className="text-selesai">
+          - Selesai -
+        </span>
       )}
     </td>
   );
 
-  const filteredIzinHarian = filterByCabang(
-    sortData(dataIzinHarian),
-    selectedFilter,
+  const renderEmptyTableRow = (message) => (
+    <tr>
+      <td
+        colSpan="6"
+        className="empty-state-cell"
+      >
+        {message}
+      </td>
+    </tr>
   );
 
-  const filteredIzinFIMTK = filterByCabang(
-    sortData(dataIzinFIMTK),
-    selectedFilter,
+  const renderPermissionTypeBadge = (permissionType) => (
+    <span className={`badge-jenis ${getBadgeClass(permissionType)}`}>
+      {permissionType}
+    </span>
   );
 
-  const filteredCuti = filterByCabang(sortData(dataCuti), selectedFilter);
+  const renderDailyPermissionRows = () => {
+    if (filteredDailyPermissions.length === 0) {
+      return renderEmptyTableRow("Belum ada data izin harian.");
+    }
+
+    return filteredDailyPermissions.map((item) => (
+      <tr
+        key={item.id}
+        className="clickable-row"
+        onClick={() => handleRowClick(item, MODAL_TYPE.HARIAN)}
+      >
+        <td className="clickable-name">
+          {item.nama}
+        </td>
+
+        <td>
+          {item.tglMulai}
+        </td>
+
+        <td>
+          {item.tglSelesai}
+        </td>
+
+        <td>
+          {renderPermissionTypeBadge(item.tipeIzin)}
+        </td>
+
+        <td className="text-center">
+          {renderStatusBadge(item.status)}
+        </td>
+
+        {renderActionButtons(item)}
+      </tr>
+    ));
+  };
+
+  const renderFimtkPermissionRows = () => {
+    if (filteredFimtkPermissions.length === 0) {
+      return renderEmptyTableRow("Belum ada data izin FIMTK.");
+    }
+
+    return filteredFimtkPermissions.map((item) => (
+      <tr
+        key={item.id}
+        className="clickable-row"
+        onClick={() => handleRowClick(item, MODAL_TYPE.FIMTK)}
+      >
+        <td className="clickable-name">
+          {item.nama}
+        </td>
+
+        <td>
+          {item.jabatan}
+        </td>
+
+        <td>
+          {renderPermissionTypeBadge(item.tipeIzin)}
+        </td>
+
+        <td>
+          {item.tanggal}
+        </td>
+
+        <td className="text-center">
+          {renderStatusBadge(item.status)}
+        </td>
+
+        {renderActionButtons(item)}
+      </tr>
+    ));
+  };
+
+  const renderLeavePermissionRows = () => {
+    if (filteredLeavePermissions.length === 0) {
+      return renderEmptyTableRow("Belum ada data izin Cuti.");
+    }
+
+    return filteredLeavePermissions.map((item) => (
+      <tr
+        key={item.id}
+        className="clickable-row"
+        onClick={() => handleRowClick(item, MODAL_TYPE.CUTI)}
+      >
+        <td className="clickable-name">
+          {item.nama}
+        </td>
+
+        <td>
+          {item.jabatan}
+        </td>
+
+        <td>
+          {renderPermissionTypeBadge(item.tipeIzin)}
+        </td>
+
+        <td>
+          {item.tglMulai}
+        </td>
+
+        <td className="text-center">
+          {renderStatusBadge(item.status)}
+        </td>
+
+        {renderActionButtons(item)}
+      </tr>
+    ));
+  };
+
+  const renderTableHeader = (columns) => (
+    <thead>
+      <tr>
+        {columns.map((column) => (
+          <th
+            key={column.label}
+            style={column.style}
+            className={column.className}
+          >
+            {column.label}
+          </th>
+        ))}
+      </tr>
+    </thead>
+  );
+
+  const renderPermissionTable = ({
+    sectionTitle,
+    columns,
+    renderRows,
+  }) => (
+    <>
+      <h3 className="section-title">
+        {sectionTitle}
+      </h3>
+
+      <div className="perizinan-card">
+        <div className="card-header-green">
+          Permintaan Menunggu Approval
+        </div>
+
+        <table className="table-izin">
+          {renderTableHeader(columns)}
+
+          <tbody>
+            {renderRows()}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+
+  const renderModalField = ({
+    label,
+    value,
+    style,
+  }) => (
+    <div className="modal-field-group">
+      <label className="modal-field-label">
+        {label}
+      </label>
+
+      <div
+        className="modal-field-value"
+        style={style}
+      >
+        {value}
+      </div>
+    </div>
+  );
+
+  const renderModalFieldRow = (fields) => (
+    <div className="modal-row-split">
+      {fields.map((field) => (
+        <div
+          key={field.label}
+          className="modal-field-group"
+        >
+          <label className="modal-field-label">
+            {field.label}
+          </label>
+
+          <div className="modal-field-value">
+            {field.value}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderProofPhoto = () => (
+    <div className="modal-field-group">
+      <label className="modal-field-label">
+        Bukti Foto
+      </label>
+
+      <div
+        className="modal-foto-box"
+        style={MODAL_IMAGE_BOX_STYLE}
+      >
+        {selectedData.foto ? (
+          <>
+            <img
+              src={selectedData.foto}
+              alt="Bukti"
+              style={PROOF_IMAGE_STYLE}
+              onClick={() => setPreviewImage(selectedData.foto)}
+            />
+
+            <button
+              type="button"
+              onClick={() => setPreviewImage(selectedData.foto)}
+              style={IMAGE_PREVIEW_BUTTON_STYLE}
+              aria-label="Perbesar bukti foto"
+            >
+              <ZoomIcon />
+            </button>
+          </>
+        ) : (
+          "Gambar: Belum ada bukti terlampir"
+        )}
+      </div>
+    </div>
+  );
+
+  const renderDailyPermissionDetail = () => (
+    <>
+      {renderModalFieldRow([
+        {
+          label: "Nama",
+          value: selectedData.nama,
+        },
+        {
+          label: "Cabang",
+          value: selectedData.cabang,
+        },
+      ])}
+
+      {renderModalField({
+        label: "Tipe Izin",
+        value: selectedData.tipeIzin,
+      })}
+
+      {renderModalFieldRow([
+        {
+          label: "Tanggal Mulai",
+          value: selectedData.tglMulai,
+        },
+        {
+          label: "Tanggal Selesai",
+          value: selectedData.tglSelesai,
+        },
+      ])}
+
+      {renderModalField({
+        label: "Keterangan / Alasan",
+        value: selectedData.keterangan,
+        style: MODAL_TEXTAREA_STYLE,
+      })}
+
+      {renderProofPhoto()}
+    </>
+  );
+
+  const renderFimtkPermissionDetail = () => (
+    <>
+      {renderModalFieldRow([
+        {
+          label: "Nama",
+          value: selectedData.nama,
+        },
+        {
+          label: "Cabang",
+          value: selectedData.cabang,
+        },
+      ])}
+
+      {renderModalField({
+        label: "Tipe Izin",
+        value: selectedData.tipeIzin,
+      })}
+
+      {renderModalFieldRow([
+        {
+          label: "Jabatan",
+          value: selectedData.jabatan,
+        },
+        {
+          label: "Divisi",
+          value: selectedData.divisi,
+        },
+      ])}
+
+      {renderModalFieldRow([
+        {
+          label: "Tanggal",
+          value: selectedData.tanggal,
+        },
+        {
+          label: "Jam Izin",
+          value: `${selectedData.jamMulai} - ${selectedData.jamSelesai}`,
+        },
+      ])}
+
+      {renderModalFieldRow([
+        {
+          label: "Keperluan",
+          value: selectedData.keperluan,
+        },
+        {
+          label: "Kendaraan",
+          value: selectedData.kendaraan,
+        },
+      ])}
+
+      {renderModalField({
+        label: "Keterangan / Alasan",
+        value: selectedData.keterangan,
+        style: MODAL_TEXTAREA_STYLE,
+      })}
+    </>
+  );
+
+  const renderLeavePermissionDetail = () => (
+    <>
+      {renderModalFieldRow([
+        {
+          label: "Nama",
+          value: selectedData.nama,
+        },
+        {
+          label: "Cabang",
+          value: selectedData.cabang,
+        },
+      ])}
+
+      {renderModalField({
+        label: "Tipe Izin",
+        value: selectedData.tipeIzin,
+      })}
+
+      {renderModalFieldRow([
+        {
+          label: "Tanggal Mulai",
+          value: selectedData.tglMulai,
+        },
+        {
+          label: "Tanggal Selesai",
+          value: selectedData.tglSelesai,
+        },
+      ])}
+
+      {renderModalFieldRow([
+        {
+          label: "Jabatan & Divisi",
+          value: `${selectedData.jabatan} - ${selectedData.divisi}`,
+        },
+        {
+          label: "No. Telepon",
+          value: selectedData.noTelp,
+        },
+      ])}
+
+      {renderModalField({
+        label: "Keterangan / Alasan",
+        value: selectedData.keterangan,
+        style: MODAL_TEXTAREA_STYLE,
+      })}
+    </>
+  );
+
+  const renderModalContent = () => {
+    if (modalType === MODAL_TYPE.HARIAN) {
+      return renderDailyPermissionDetail();
+    }
+
+    if (modalType === MODAL_TYPE.FIMTK) {
+      return renderFimtkPermissionDetail();
+    }
+
+    if (modalType === MODAL_TYPE.CUTI) {
+      return renderLeavePermissionDetail();
+    }
+
+    return null;
+  };
+
+  const renderModalTitle = () => {
+    if (modalType === MODAL_TYPE.HARIAN) {
+      return "Detail Izin Harian";
+    }
+
+    if (modalType === MODAL_TYPE.FIMTK) {
+      return "Detail Izin FIMTK";
+    }
+
+    if (modalType === MODAL_TYPE.CUTI) {
+      return "Detail Izin Cuti";
+    }
+
+    return "";
+  };
+
+  const dailyTableColumns = [
+    {
+      label: "NAMA",
+      style: TABLE_COLUMN_WIDTHS.name,
+    },
+    {
+      label: "MULAI",
+      style: TABLE_COLUMN_WIDTHS.medium,
+    },
+    {
+      label: "SELESAI",
+      style: TABLE_COLUMN_WIDTHS.medium,
+    },
+    {
+      label: "TIPE IZIN",
+      style: TABLE_COLUMN_WIDTHS.medium,
+    },
+    {
+      label: "STATUS",
+      style: TABLE_COLUMN_WIDTHS.status,
+      className: "text-center",
+    },
+    {
+      label: "AKSI",
+      style: TABLE_COLUMN_WIDTHS.action,
+      className: "text-center",
+    },
+  ];
+
+  const fimtkTableColumns = [
+    {
+      label: "NAMA",
+      style: TABLE_COLUMN_WIDTHS.name,
+    },
+    {
+      label: "JABATAN",
+      style: TABLE_COLUMN_WIDTHS.medium,
+    },
+    {
+      label: "TIPE IZIN",
+      style: TABLE_COLUMN_WIDTHS.medium,
+    },
+    {
+      label: "TANGGAL",
+      style: TABLE_COLUMN_WIDTHS.medium,
+    },
+    {
+      label: "STATUS",
+      style: TABLE_COLUMN_WIDTHS.status,
+      className: "text-center",
+    },
+    {
+      label: "AKSI",
+      style: TABLE_COLUMN_WIDTHS.action,
+      className: "text-center",
+    },
+  ];
+
+  const leaveTableColumns = [
+    {
+      label: "NAMA",
+      style: TABLE_COLUMN_WIDTHS.name,
+    },
+    {
+      label: "JABATAN",
+      style: TABLE_COLUMN_WIDTHS.medium,
+    },
+    {
+      label: "TIPE IZIN",
+      style: TABLE_COLUMN_WIDTHS.medium,
+    },
+    {
+      label: "MULAI CUTI",
+      style: TABLE_COLUMN_WIDTHS.medium,
+    },
+    {
+      label: "STATUS",
+      style: TABLE_COLUMN_WIDTHS.status,
+      className: "text-center",
+    },
+    {
+      label: "AKSI",
+      style: TABLE_COLUMN_WIDTHS.action,
+      className: "text-center",
+    },
+  ];
 
   return (
     <div className="hrd-container">
       <div className="mobile-topbar">
-        <img src={logoPersegi} alt="AMAGACORP" className="mobile-topbar-logo" />
-        <button className="btn-hamburger" onClick={openSidebar}>
+        <img
+          src={logoPersegi}
+          alt="AMAGACORP"
+          className="mobile-topbar-logo"
+        />
+
+        <button
+          type="button"
+          className="btn-hamburger"
+          onClick={openSidebar}
+        >
           <span></span>
           <span></span>
           <span></span>
@@ -320,36 +1115,55 @@ const PerizinanManagerCabang = () => {
       </div>
 
       <div
-        className={`sidebar-overlay ${sidebarOpen ? "active" : ""}`}
+        className={`sidebar-overlay ${isSidebarOpen ? "active" : ""}`}
         onClick={closeSidebar}
       />
 
-      <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
-        <button className="btn-sidebar-close" onClick={closeSidebar}>
+      <aside className={`sidebar ${isSidebarOpen ? "open" : ""}`}>
+        <button
+          type="button"
+          className="btn-sidebar-close"
+          onClick={closeSidebar}
+        >
           &times;
         </button>
 
         <div className="logo-area">
-          <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
+          <img
+            src={logoPersegi}
+            alt="AMAGACORP"
+            className="logo-img"
+          />
         </div>
 
         <nav className="menu-nav">
-          {MENU_ITEMS.map((item, index) => (
+          {MENU_ITEMS.map((item) => (
             <div
-              key={index}
+              key={item.path}
               className={`menu-item ${item.active ? "active" : ""}`}
-              onClick={() => handleNav(item.path)}
+              onClick={() => handleNavigation(item.path)}
             >
               <div className="menu-left">
-                <img src={item.icon} alt="" className="menu-icon-main" />
-                <span className="menu-text-main">{item.text}</span>
+                <img
+                  src={item.icon}
+                  alt=""
+                  className="menu-icon-main"
+                />
+
+                <span className="menu-text-main">
+                  {item.text}
+                </span>
               </div>
             </div>
           ))}
         </nav>
 
         <div className="sidebar-footer">
-          <button className="btn-logout" onClick={handleLogout}>
+          <button
+            type="button"
+            className="btn-logout"
+            onClick={handleLogout}
+          >
             Log Out
           </button>
         </div>
@@ -357,46 +1171,51 @@ const PerizinanManagerCabang = () => {
 
       <main className="main-content">
         <div className="header-titles">
-          <h1>Perizinan Cabang - {user?.cabangUtama || "-"}</h1>
-          <p>Kelola permohonan izin karyawan di wilayah kerja Anda</p>
+          <h1>
+            Perizinan Cabang - {user?.cabangUtama || "-"}
+          </h1>
+
+          <p>
+            Kelola permohonan izin karyawan di wilayah kerja Anda
+          </p>
         </div>
 
         <div className="action-row-perizinan">
           <div className="filter-wrapper">
             <button
+              type="button"
               className="btn-filter-green"
-              onClick={() => setShowFilter(!showFilter)}
+              onClick={toggleFilterVisibility}
             >
               {selectedFilter}{" "}
+
               <img
                 src={iconBawah}
                 alt="v"
-                className={`filter-arrow ${showFilter ? "rotate" : ""}`}
+                className={`filter-arrow ${
+                  isFilterVisible ? "rotate" : ""
+                }`}
               />
             </button>
 
-            {showFilter && (
+            {isFilterVisible && (
               <div className="filter-dropdown">
                 <div
                   className="dropdown-item"
-                  onClick={() => {
-                    setSelectedFilter("Semua Cabang Saya");
-                    setShowFilter(false);
-                  }}
+                  onClick={() =>
+                    handleFilterSelection(ALL_BRANCH_FILTER)
+                  }
                 >
                   Semua Cabang Saya
                 </div>
 
-                {cabangList.map((c) => (
+                {branchList.map((branchName) => (
                   <div
-                    key={c}
+                    key={branchName}
                     className="dropdown-item"
-                    onClick={() => {
-                      setSelectedFilter(c);
-                      setShowFilter(false);
-                    }}
+                    onClick={() => handleFilterSelection(branchName)}
                   >
-                    {c}
+                    {branchName}
                   </div>
                 ))}
               </div>
@@ -404,488 +1223,84 @@ const PerizinanManagerCabang = () => {
           </div>
         </div>
 
-        {loading ? (
-          <p style={{ textAlign: "center", marginTop: "50px" }}>Memuat...</p>
+        {isLoading ? (
+          <p style={LOADING_TEXT_STYLE}>
+            Memuat...
+          </p>
         ) : (
           <>
-            <h3 className="section-title">Permohonan Izin Harian</h3>
-            <div className="perizinan-card">
-              <div className="card-header-green">
-                Permintaan Menunggu Approval
-              </div>
+            {renderPermissionTable({
+              sectionTitle: "Permohonan Izin Harian",
+              columns: dailyTableColumns,
+              renderRows: renderDailyPermissionRows,
+            })}
 
-              <table className="table-izin">
-                <thead>
-                  <tr>
-                    <th style={{ width: "20%" }}>NAMA</th>
-                    <th style={{ width: "15%" }}>MULAI</th>
-                    <th style={{ width: "15%" }}>SELESAI</th>
-                    <th style={{ width: "15%" }}>TIPE IZIN</th>
-                    <th style={{ width: "10%" }} className="text-center">
-                      STATUS
-                    </th>
-                    <th style={{ width: "25%" }} className="text-center">
-                      AKSI
-                    </th>
-                  </tr>
-                </thead>
+            {renderPermissionTable({
+              sectionTitle:
+                "Permohonan Izin Meninggalkan Tempat Kerja",
+              columns: fimtkTableColumns,
+              renderRows: renderFimtkPermissionRows,
+            })}
 
-                <tbody>
-                  {filteredIzinHarian.length > 0 ? (
-                    filteredIzinHarian.map((item) => (
-                      <tr
-                        key={item.id}
-                        className="clickable-row"
-                        onClick={() => handleRowClick(item, "harian")}
-                      >
-                        <td className="clickable-name">{item.nama}</td>
-                        <td>{item.tglMulai}</td>
-                        <td>{item.tglSelesai}</td>
-                        <td>
-                          <span
-                            className={`badge-jenis ${getBadgeClass(
-                              item.tipeIzin,
-                            )}`}
-                          >
-                            {item.tipeIzin}
-                          </span>
-                        </td>
-                        <td className="text-center">
-                          {renderStatusBadge(item.status)}
-                        </td>
-                        {renderActionButtons(item)}
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="6" className="empty-state-cell">
-                        Belum ada data izin harian.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            <h3 className="section-title">
-              Permohonan Izin Meninggalkan Tempat Kerja
-            </h3>
-            <div className="perizinan-card">
-              <div className="card-header-green">
-                Permintaan Menunggu Approval
-              </div>
-
-              <table className="table-izin">
-                <thead>
-                  <tr>
-                    <th style={{ width: "20%" }}>NAMA</th>
-                    <th style={{ width: "15%" }}>JABATAN</th>
-                    <th style={{ width: "15%" }}>TIPE IZIN</th>
-                    <th style={{ width: "15%" }}>TANGGAL</th>
-                    <th style={{ width: "10%" }} className="text-center">
-                      STATUS
-                    </th>
-                    <th style={{ width: "25%" }} className="text-center">
-                      AKSI
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {filteredIzinFIMTK.length > 0 ? (
-                    filteredIzinFIMTK.map((item) => (
-                      <tr
-                        key={item.id}
-                        className="clickable-row"
-                        onClick={() => handleRowClick(item, "fimtk")}
-                      >
-                        <td className="clickable-name">{item.nama}</td>
-                        <td>{item.jabatan}</td>
-                        <td>
-                          <span
-                            className={`badge-jenis ${getBadgeClass(
-                              item.tipeIzin,
-                            )}`}
-                          >
-                            {item.tipeIzin}
-                          </span>
-                        </td>
-                        <td>{item.tanggal}</td>
-                        <td className="text-center">
-                          {renderStatusBadge(item.status)}
-                        </td>
-                        {renderActionButtons(item)}
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="6" className="empty-state-cell">
-                        Belum ada data izin FIMTK.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            <h3 className="section-title">Permohonan Izin Cuti Karyawan</h3>
-            <div className="perizinan-card">
-              <div className="card-header-green">
-                Permintaan Menunggu Approval
-              </div>
-
-              <table className="table-izin">
-                <thead>
-                  <tr>
-                    <th style={{ width: "20%" }}>NAMA</th>
-                    <th style={{ width: "15%" }}>JABATAN</th>
-                    <th style={{ width: "15%" }}>TIPE IZIN</th>
-                    <th style={{ width: "15%" }}>MULAI CUTI</th>
-                    <th style={{ width: "10%" }} className="text-center">
-                      STATUS
-                    </th>
-                    <th style={{ width: "25%" }} className="text-center">
-                      AKSI
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {filteredCuti.length > 0 ? (
-                    filteredCuti.map((item) => (
-                      <tr
-                        key={item.id}
-                        className="clickable-row"
-                        onClick={() => handleRowClick(item, "cuti")}
-                      >
-                        <td className="clickable-name">{item.nama}</td>
-                        <td>{item.jabatan}</td>
-                        <td>
-                          <span
-                            className={`badge-jenis ${getBadgeClass(
-                              item.tipeIzin,
-                            )}`}
-                          >
-                            {item.tipeIzin}
-                          </span>
-                        </td>
-                        <td>{item.tglMulai}</td>
-                        <td className="text-center">
-                          {renderStatusBadge(item.status)}
-                        </td>
-                        {renderActionButtons(item)}
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="6" className="empty-state-cell">
-                        Belum ada data izin Cuti.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+            {renderPermissionTable({
+              sectionTitle: "Permohonan Izin Cuti Karyawan",
+              columns: leaveTableColumns,
+              renderRows: renderLeavePermissionRows,
+            })}
           </>
         )}
       </main>
 
-      {showModal && selectedData && (
-        <div className="modal-overlay" onClick={handleCloseModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      {isModalVisible && selectedData && (
+        <div
+          className="modal-overlay"
+          onClick={handleCloseModal}
+        >
+          <div
+            className="modal-content"
+            onClick={(event) => event.stopPropagation()}
+          >
             <div className="modal-header-modern">
               <h2>
-                {modalType === "harian" && "Detail Izin Harian"}
-                {modalType === "fimtk" && "Detail Izin FIMTK"}
-                {modalType === "cuti" && "Detail Izin Cuti"}
+                {renderModalTitle()}
               </h2>
-              <button className="modal-close-icon" onClick={handleCloseModal}>
+
+              <button
+                type="button"
+                className="modal-close-icon"
+                onClick={handleCloseModal}
+              >
                 &times;
               </button>
             </div>
 
             <div className="modal-body-modern">
-              {modalType === "harian" && (
-                <>
-                  <div className="modal-row-split">
-                    <div className="modal-field-group">
-                      <label className="modal-field-label">Nama</label>
-                      <div className="modal-field-value">
-                        {selectedData.nama}
-                      </div>
-                    </div>
-
-                    <div className="modal-field-group">
-                      <label className="modal-field-label">Cabang</label>
-                      <div className="modal-field-value">
-                        {selectedData.cabang}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="modal-field-group">
-                    <label className="modal-field-label">Tipe Izin</label>
-                    <div className="modal-field-value">
-                      {selectedData.tipeIzin}
-                    </div>
-                  </div>
-
-                  <div className="modal-row-split">
-                    <div className="modal-field-group">
-                      <label className="modal-field-label">Tanggal Mulai</label>
-                      <div className="modal-field-value">
-                        {selectedData.tglMulai}
-                      </div>
-                    </div>
-
-                    <div className="modal-field-group">
-                      <label className="modal-field-label">
-                        Tanggal Selesai
-                      </label>
-                      <div className="modal-field-value">
-                        {selectedData.tglSelesai}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="modal-field-group">
-                    <label className="modal-field-label">
-                      Keterangan / Alasan
-                    </label>
-                    <div
-                      className="modal-field-value"
-                      style={{ minHeight: "60px" }}
-                    >
-                      {selectedData.keterangan}
-                    </div>
-                  </div>
-
-                  <div className="modal-field-group">
-                    <label className="modal-field-label">Bukti Foto</label>
-                    <div
-                      className="modal-foto-box"
-                      style={{ position: "relative" }}
-                    >
-                      {selectedData.foto ? (
-                        <>
-                          <img
-                            src={selectedData.foto}
-                            alt="Bukti"
-                            style={{
-                              maxWidth: "100%",
-                              maxHeight: "100%",
-                              cursor: "pointer",
-                              objectFit: "contain",
-                            }}
-                            onClick={() => setPreviewImage(selectedData.foto)}
-                          />
-
-                          <button
-                            type="button"
-                            onClick={() => setPreviewImage(selectedData.foto)}
-                            style={{
-                              position: "absolute",
-                              bottom: "10px",
-                              right: "10px",
-                              background: "rgba(0,0,0,0.5)",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "50%",
-                              width: "35px",
-                              height: "35px",
-                              cursor: "pointer",
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                            }}
-                          >
-                            🔍
-                          </button>
-                        </>
-                      ) : (
-                        "Gambar: Belum ada bukti terlampir"
-                      )}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {modalType === "fimtk" && (
-                <>
-                  <div className="modal-row-split">
-                    <div className="modal-field-group">
-                      <label className="modal-field-label">Nama</label>
-                      <div className="modal-field-value">
-                        {selectedData.nama}
-                      </div>
-                    </div>
-
-                    <div className="modal-field-group">
-                      <label className="modal-field-label">Cabang</label>
-                      <div className="modal-field-value">
-                        {selectedData.cabang}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="modal-field-group">
-                    <label className="modal-field-label">Tipe Izin</label>
-                    <div className="modal-field-value">
-                      {selectedData.tipeIzin}
-                    </div>
-                  </div>
-
-                  <div className="modal-row-split">
-                    <div className="modal-field-group">
-                      <label className="modal-field-label">Jabatan</label>
-                      <div className="modal-field-value">
-                        {selectedData.jabatan}
-                      </div>
-                    </div>
-
-                    <div className="modal-field-group">
-                      <label className="modal-field-label">Divisi</label>
-                      <div className="modal-field-value">
-                        {selectedData.divisi}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="modal-row-split">
-                    <div className="modal-field-group">
-                      <label className="modal-field-label">Tanggal</label>
-                      <div className="modal-field-value">
-                        {selectedData.tanggal}
-                      </div>
-                    </div>
-
-                    <div className="modal-field-group">
-                      <label className="modal-field-label">Jam Izin</label>
-                      <div className="modal-field-value">
-                        {selectedData.jamMulai} - {selectedData.jamSelesai}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="modal-row-split">
-                    <div className="modal-field-group">
-                      <label className="modal-field-label">Keperluan</label>
-                      <div className="modal-field-value">
-                        {selectedData.keperluan}
-                      </div>
-                    </div>
-
-                    <div className="modal-field-group">
-                      <label className="modal-field-label">Kendaraan</label>
-                      <div className="modal-field-value">
-                        {selectedData.kendaraan}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="modal-field-group">
-                    <label className="modal-field-label">
-                      Keterangan / Alasan
-                    </label>
-                    <div
-                      className="modal-field-value"
-                      style={{ minHeight: "60px" }}
-                    >
-                      {selectedData.keterangan}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {modalType === "cuti" && (
-                <>
-                  <div className="modal-row-split">
-                    <div className="modal-field-group">
-                      <label className="modal-field-label">Nama</label>
-                      <div className="modal-field-value">
-                        {selectedData.nama}
-                      </div>
-                    </div>
-
-                    <div className="modal-field-group">
-                      <label className="modal-field-label">Cabang</label>
-                      <div className="modal-field-value">
-                        {selectedData.cabang}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="modal-field-group">
-                    <label className="modal-field-label">Tipe Izin</label>
-                    <div className="modal-field-value">
-                      {selectedData.tipeIzin}
-                    </div>
-                  </div>
-
-                  <div className="modal-row-split">
-                    <div className="modal-field-group">
-                      <label className="modal-field-label">Tanggal Mulai</label>
-                      <div className="modal-field-value">
-                        {selectedData.tglMulai}
-                      </div>
-                    </div>
-
-                    <div className="modal-field-group">
-                      <label className="modal-field-label">
-                        Tanggal Selesai
-                      </label>
-                      <div className="modal-field-value">
-                        {selectedData.tglSelesai}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="modal-row-split">
-                    <div className="modal-field-group">
-                      <label className="modal-field-label">
-                        Jabatan & Divisi
-                      </label>
-                      <div className="modal-field-value">
-                        {selectedData.jabatan} - {selectedData.divisi}
-                      </div>
-                    </div>
-
-                    <div className="modal-field-group">
-                      <label className="modal-field-label">No. Telepon</label>
-                      <div className="modal-field-value">
-                        {selectedData.noTelp}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="modal-field-group">
-                    <label className="modal-field-label">
-                      Keterangan / Alasan
-                    </label>
-                    <div
-                      className="modal-field-value"
-                      style={{ minHeight: "60px" }}
-                    >
-                      {selectedData.keterangan}
-                    </div>
-                  </div>
-                </>
-              )}
+              {renderModalContent()}
             </div>
 
-            {selectedData.status === "Pending" && (
+            {selectedData.status === APPROVAL_STATUS.PENDING && (
               <div className="modal-footer-modern">
                 <button
+                  type="button"
                   className="btn-reject-modern"
-                  onClick={() => handleUpdateStatus(selectedData.id, "Ditolak")}
+                  onClick={() =>
+                    handleUpdateStatus(
+                      selectedData.id,
+                      APPROVAL_STATUS.REJECTED,
+                    )
+                  }
                 >
                   Tolak
                 </button>
 
                 <button
+                  type="button"
                   className="btn-approve-modern"
                   onClick={() =>
-                    handleUpdateStatus(selectedData.id, "Disetujui")
+                    handleUpdateStatus(
+                      selectedData.id,
+                      APPROVAL_STATUS.APPROVED,
+                    )
                   }
                 >
                   Setujui
@@ -898,32 +1313,13 @@ const PerizinanManagerCabang = () => {
 
       {previewImage && (
         <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: "rgba(0,0,0,0.85)",
-            zIndex: 99999,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          onClick={() => setPreviewImage(null)}
+          style={IMAGE_PREVIEW_OVERLAY_STYLE}
+          onClick={handleClosePreviewImage}
         >
           <button
-            style={{
-              position: "absolute",
-              top: "20px",
-              right: "30px",
-              background: "none",
-              border: "none",
-              color: "#fff",
-              fontSize: "40px",
-              cursor: "pointer",
-            }}
-            onClick={() => setPreviewImage(null)}
+            type="button"
+            style={IMAGE_PREVIEW_CLOSE_BUTTON_STYLE}
+            onClick={handleClosePreviewImage}
           >
             &times;
           </button>
@@ -931,14 +1327,8 @@ const PerizinanManagerCabang = () => {
           <img
             src={previewImage}
             alt="Preview Zoom"
-            style={{
-              maxWidth: "90%",
-              maxHeight: "90%",
-              borderRadius: "8px",
-              objectFit: "contain",
-              boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
-            }}
-            onClick={(e) => e.stopPropagation()}
+            style={IMAGE_PREVIEW_STYLE}
+            onClick={(event) => event.stopPropagation()}
           />
         </div>
       )}

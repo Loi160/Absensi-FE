@@ -1,13 +1,33 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { useAuth } from "../../context/AuthContext";
 import "./login.css";
 
-// Assets
+// ============================================================================
+// IMPORT: ASSETS
+// ============================================================================
+
 import logoAmaga from "../../assets/logoamaga.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 import profileIcon from "../../assets/profile.svg";
 import passwordIcon from "../../assets/password.svg";
+
+// ============================================================================
+// KONSTANTA: API & ROUTE
+// ============================================================================
+
+const LOGIN_ENDPOINT = `${import.meta.env.VITE_API_URL}/api/login`;
+
+const DASHBOARD_ROUTES_BY_ROLE = {
+  hrd: "/hrd/dashboard",
+  karyawan: "/karyawan/dashboard",
+  managerCabang: "/managerCabang/dashboard",
+};
+
+// ============================================================================
+// COMPONENT: LOGIN
+// ============================================================================
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -17,42 +37,49 @@ const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  // Mengarahkan pengguna ke dashboard sesuai role yang diterima dari backend.
+  const navigateToDashboard = (role) => {
+    const dashboardRoute = DASHBOARD_ROUTES_BY_ROLE[role];
+
+    if (dashboardRoute) {
+      navigate(dashboardRoute);
+    }
+  };
+
+  // Memproses autentikasi pengguna melalui API backend.
+  const handleLogin = async (event) => {
+    event.preventDefault();
     setLoading(true);
 
     try {
-      // MEMANGGIL BACKEND NODE.JS (PORT 3000)
       const response = await fetch(
-        import.meta.env.VITE_API_URL + "/api/login",
+        LOGIN_ENDPOINT,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password }),
-        },
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username,
+            password,
+          }),
+        }
       );
 
       const data = await response.json();
 
-      if (response.ok) {
-        login(data);
-
-        // ARAHKAN DASHBOARD BERDASARKAN ROLE DARI DATABASE
-        if (data.user.role === "hrd") {
-          navigate("/hrd/dashboard");
-        } else if (data.user.role === "karyawan") {
-          navigate("/karyawan/dashboard");
-        } else if (data.user.role === "managerCabang") {
-          navigate("/managerCabang/dashboard");
-        }
-      } else {
-        // Tampilkan error dari backend (misal: "Username tidak ditemukan")
+      if (!response.ok) {
         alert(data.message || "Login Gagal");
+        return;
       }
+
+      login(data);
+      navigateToDashboard(data.user.role);
     } catch (error) {
       console.error("Connection Error:", error);
+
       alert(
-        "Gagal terhubung ke server backend! Pastikan Backend (npm run dev) sudah jalan.",
+        "Gagal terhubung ke server backend! Pastikan Backend (npm run dev) sudah jalan."
       );
     } finally {
       setLoading(false);
@@ -62,19 +89,26 @@ const Login = () => {
   return (
     <div className="login-wrapper">
       <div className="login-split-container">
-        {/* BRAND PANEL */}
+        {/* ====================================================================
+        // PANEL: BRAND
+        // ==================================================================== */}
+
         <div className="login-brand-section">
           <div className="brand-dot-grid" />
+
           <div className="brand-content-centered">
             <img
               src={logoPersegi}
               alt="Amaga Corp"
               className="login-logo-desktop desktop-only"
             />
+
             <span className="brand-logo-divider desktop-only" />
+
             <div className="brand-text-desktop desktop-only">
               <p>Platform absensi modern untuk Anda</p>
             </div>
+
             <div className="logo-mobile-wrapper mobile-only">
               <img
                 src={logoAmaga}
@@ -82,46 +116,75 @@ const Login = () => {
                 className="login-logo-mobile"
               />
             </div>
-            <h1 className="login-brand-title mobile-only">Sistem Absensi</h1>
+
+            <h1 className="login-brand-title mobile-only">
+              Sistem Absensi
+            </h1>
+
             <p className="login-brand-subtitle mobile-only">
               Masuk ke akun anda
             </p>
           </div>
         </div>
 
-        {/* FORM PANEL */}
+        {/* ====================================================================
+        // PANEL: FORM LOGIN
+        // ==================================================================== */}
+
         <div className="login-form-section">
           <div className="login-form-box">
             <div className="desktop-form-header desktop-only">
-              <span className="desktop-brand-name">Amaga Corporation</span>
-              <h2>Sistem Absensi</h2>
+              <span className="desktop-brand-name">
+                Amaga Corporation
+              </span>
+
+              <h2>
+                Sistem Absensi
+              </h2>
+
               <span className="form-divider" />
             </div>
 
             <form onSubmit={handleLogin}>
               <div className="login-field-group">
-                <label>Username (NIK)</label>
+                <label>
+                  Username (NIK)
+                </label>
+
                 <div className="login-input-wrapper">
-                  <img src={profileIcon} alt="" className="login-field-icon" />
+                  <img
+                    src={profileIcon}
+                    alt=""
+                    className="login-field-icon"
+                  />
+
                   <input
                     type="text"
                     placeholder="Masukkan NIK"
                     value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    onChange={(event) => setUsername(event.target.value)}
                     required
                   />
                 </div>
               </div>
 
               <div className="login-field-group">
-                <label>Password</label>
+                <label>
+                  Password
+                </label>
+
                 <div className="login-input-wrapper">
-                  <img src={passwordIcon} alt="" className="login-field-icon" />
+                  <img
+                    src={passwordIcon}
+                    alt=""
+                    className="login-field-icon"
+                  />
+
                   <input
                     type="password"
                     placeholder="Masukkan Password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(event) => setPassword(event.target.value)}
                     required
                   />
                 </div>
@@ -135,6 +198,7 @@ const Login = () => {
                 {loading ? "Memproses..." : "Masuk Absensi"}
               </button>
             </form>
+
             <p className="login-help-text">
               Jika terjadi masalah hubungi 0123456789
             </p>

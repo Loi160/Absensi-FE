@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { getAuthHeaders } from "../../context/AuthHeaders";
@@ -13,71 +13,206 @@ import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 import iconTambah from "../../assets/tambah.svg";
 
-// Daftar menu navigasi sidebar dengan status aktif pada menu Kelola Cabang
+// ============================================================================
+// CONSTANTS: NAVIGATION
+// ============================================================================
+
 const MENU_ITEMS = [
-  { path: "/hrd/dashboard", icon: iconDashboard, text: "Dashboard" },
+  {
+    path: "/hrd/dashboard",
+    icon: iconDashboard,
+    text: "Dashboard",
+  },
   {
     path: "/hrd/kelolacabang",
     icon: iconKelola,
     text: "Kelola Cabang",
     active: true,
   },
-  { path: "/hrd/datakaryawan", icon: iconKaryawan, text: "Data Karyawan" },
+  {
+    path: "/hrd/datakaryawan",
+    icon: iconKaryawan,
+    text: "Data Karyawan",
+  },
   {
     path: "/hrd/kehadiran",
     icon: iconKehadiran,
     text: "Kehadiran",
     hasArrow: true,
   },
-  { path: "/hrd/laporan", icon: iconLaporan, text: "Laporan" },
+  {
+    path: "/hrd/laporan",
+    icon: iconLaporan,
+    text: "Laporan",
+  },
 ];
 
-// Mengurutkan data cabang berdasarkan nama dari A-Z
-const sortByNama = (a, b) =>
-  (a.nama || "").localeCompare(b.nama || "", "id", {
+// ============================================================================
+// CONSTANTS: FORM VALIDATION
+// ============================================================================
+
+const REQUIRED_FIELDS = [
+  "nama",
+  "alamat",
+  "titik_koordinat",
+  "radius_toleransi",
+  "jam_masuk_weekday",
+  "jam_keluar_weekday",
+  "jam_masuk_weekend",
+  "jam_keluar_weekend",
+  "jam_mulai_lembur",
+  "jam_selesai_lembur",
+  "keterlambatan",
+];
+
+const TIME_FIELDS = [
+  "jam_masuk_weekday",
+  "jam_keluar_weekday",
+  "jam_masuk_weekend",
+  "jam_keluar_weekend",
+  "jam_mulai_lembur",
+  "jam_selesai_lembur",
+];
+
+const AUTH_ERROR_STATUSES = [401, 403];
+
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+
+// Mengurutkan data cabang berdasarkan nama dari A-Z.
+const sortByNama = (a, b) => {
+  return (a.nama || "").localeCompare(b.nama || "", "id", {
     sensitivity: "base",
   });
+};
 
-// Komponen utama untuk mengelola data operasional cabang dan sub-cabang
+// Mengecek apakah request ditolak karena sesi pengguna tidak valid.
+const isAuthError = (status) => {
+  return AUTH_ERROR_STATUSES.includes(status);
+};
+
+// Memastikan input wajib sudah terisi sebelum dikirim ke server.
+const hasEmptyRequiredField = (data) => {
+  return REQUIRED_FIELDS.some((field) => {
+    return (
+      data[field] === undefined ||
+      data[field] === null ||
+      String(data[field]).trim() === ""
+    );
+  });
+};
+
+// Mengubah format waktu dari HH:mm menjadi HH:mm:ss agar sesuai kebutuhan backend.
+const normalizeTimeFields = (data) => {
+  TIME_FIELDS.forEach((field) => {
+    if (data[field] && data[field].length === 5) {
+      data[field] = `${data[field]}:00`;
+    }
+  });
+};
+
+// Mengambil nilai waktu dalam format HH:mm untuk input bertipe time.
+const getTimeValue = (value, fallback) => {
+  return value?.substring(0, 5) || fallback;
+};
+
+// Menyusun data cabang menjadi struktur parent-child untuk kebutuhan tampilan tabel.
+const buildStructuredCabang = (listCabang) => {
+  const parents = listCabang.filter((cabang) => !cabang.parent_id).sort(sortByNama);
+  const children = listCabang.filter((cabang) => cabang.parent_id).sort(sortByNama);
+
+  return parents.map((parent) => ({
+    ...parent,
+    subCabang: children
+      .filter((child) => Number(child.parent_id) === Number(parent.id))
+      .sort(sortByNama),
+  }));
+};
+
+// ============================================================================
+// COMPONENTS: SHARED ICON
+// ============================================================================
+
+const EditIcon = () => {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+    </svg>
+  );
+};
+
+// ============================================================================
+// COMPONENT: KELOLA CABANG
+// ============================================================================
+
 const KelolaCabang = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
 
-  // State untuk manajemen jendela pop-up (modal) tambah/edit dan data yang sedang diproses
   const [showModal, setShowModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [editData, setEditData] = useState(null);
   const [parentId, setParentId] = useState(null);
-  const [expandedRows, setExpandedRows] = useState({});
 
-  // State untuk modal konfirmasi perubahan status cabang (aktif/non-aktif)
+  const [expandedRows, setExpandedRows] = useState({});
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmData, setConfirmData] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // State untuk menyimpan daftar cabang hasil sinkronisasi dengan database
   const [dataCabang, setDataCabang] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Menghapus data akun dan mengarahkan kembali ke halaman masuk
+  // ============================================================================
+  // HANDLERS: AUTH & NAVIGATION
+  // ============================================================================
+
+  // Menghapus sesi pengguna dan mengarahkan kembali ke halaman login.
   const handleLogout = () => {
     logout();
     navigate("/auth/login");
   };
 
-  // Mengambil data dari server dan menyusunnya menjadi struktur pohon (parent-child)
+  const openSidebar = () => {
+    setSidebarOpen(true);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
+  // Mengarahkan pengguna ke halaman yang dipilih dan menutup sidebar mobile.
+  const handleNav = (path) => {
+    closeSidebar();
+    navigate(path);
+  };
+
+  // ============================================================================
+  // HANDLERS: DATA FETCHING
+  // ============================================================================
+
+  // Mengambil data cabang dari server lalu menyusunnya menjadi struktur parent-child.
   const fetchCabang = async () => {
     try {
       setLoading(true);
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/cabang`,
-        {
-          headers: getAuthHeaders(),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/cabang`, {
+        headers: getAuthHeaders(),
+      });
 
-      if (response.status === 401 || response.status === 403) {
+      if (isAuthError(response.status)) {
         handleLogout();
         return;
       }
@@ -90,18 +225,8 @@ const KelolaCabang = () => {
       }
 
       const listCabang = Array.isArray(data) ? data : [];
+      const structuredData = buildStructuredCabang(listCabang);
 
-      const parents = listCabang.filter((c) => !c.parent_id).sort(sortByNama);
-      const children = listCabang.filter((c) => c.parent_id).sort(sortByNama);
-
-      const structuredData = parents.map((parent) => ({
-        ...parent,
-        subCabang: children
-          .filter((child) => Number(child.parent_id) === Number(parent.id))
-          .sort(sortByNama),
-      }));
-
-      // Sub-cabang dibuat tertutup setiap kali data selesai dimuat ulang
       setExpandedRows({});
       setDataCabang(structuredData);
     } catch (error) {
@@ -112,26 +237,33 @@ const KelolaCabang = () => {
     }
   };
 
-  // Memicu pengambilan data cabang saat halaman pertama kali dimuat
   useEffect(() => {
     fetchCabang();
   }, []);
 
-  const openSidebar = () => setSidebarOpen(true);
-  const closeSidebar = () => setSidebarOpen(false);
+  // ============================================================================
+  // HANDLERS: TABLE INTERACTION
+  // ============================================================================
 
-  // Berpindah halaman navigasi dan otomatis menutup menu sidebar mobile
-  const handleNav = (path) => {
-    closeSidebar();
-    navigate(path);
-  };
-
-  // Membuka atau menutup baris sub-cabang pada tabel (fitur accordion)
+  // Membuka atau menutup daftar sub-cabang pada baris cabang utama.
   const toggleRow = (id) => {
-    setExpandedRows((prev) => ({ ...prev, [id]: !prev[id] }));
+    setExpandedRows((previousRows) => ({
+      ...previousRows,
+      [id]: !previousRows[id],
+    }));
   };
 
-  // Menyiapkan modal untuk memperbarui informasi cabang yang sudah ada
+  // ============================================================================
+  // HANDLERS: MODAL FORM
+  // ============================================================================
+
+  const closeFormModal = () => {
+    setShowModal(false);
+    setEditData(null);
+    setParentId(null);
+  };
+
+  // Menyiapkan modal untuk memperbarui data cabang atau sub-cabang.
   const handleOpenEdit = (item) => {
     setModalTitle("Edit Cabang");
     setEditData(item);
@@ -139,7 +271,7 @@ const KelolaCabang = () => {
     setShowModal(true);
   };
 
-  // Menyiapkan modal untuk menambah cabang baru di bawah naungan cabang tertentu
+  // Menyiapkan modal untuk menambahkan sub-cabang pada cabang utama.
   const handleOpenTambahSub = (parentItem) => {
     setModalTitle(`Tambah Sub-Cabang untuk ${parentItem.nama}`);
     setEditData(null);
@@ -147,7 +279,7 @@ const KelolaCabang = () => {
     setShowModal(true);
   };
 
-  // Menyiapkan modal kosong untuk membuat cabang utama baru
+  // Menyiapkan modal untuk membuat cabang utama baru.
   const handleOpenTambah = () => {
     setModalTitle("Tambah Cabang Baru");
     setEditData(null);
@@ -155,39 +287,10 @@ const KelolaCabang = () => {
     setShowModal(true);
   };
 
-  // Menyimpan data tambah/edit cabang ke database melalui backend
-  const handleSaveData = async (e) => {
-    e.preventDefault();
-
-    const formData = new FormData(e.target);
+  // Menyiapkan data form sebelum dikirim ke backend.
+  const preparePayload = (formElement) => {
+    const formData = new FormData(formElement);
     const data = Object.fromEntries(formData.entries());
-
-    const requiredFields = [
-      "nama",
-      "alamat",
-      "titik_koordinat",
-      "radius_toleransi",
-      "jam_masuk_weekday",
-      "jam_keluar_weekday",
-      "jam_masuk_weekend",
-      "jam_keluar_weekend",
-      "jam_mulai_lembur",
-      "jam_selesai_lembur",
-      "keterlambatan",
-    ];
-
-    const emptyField = requiredFields.find((field) => {
-      return (
-        data[field] === undefined ||
-        data[field] === null ||
-        String(data[field]).trim() === ""
-      );
-    });
-
-    if (emptyField) {
-      alert("Semua isian cabang wajib diisi. Tidak boleh ada yang kosong.");
-      return;
-    }
 
     data.nama = String(data.nama || "").trim();
     data.alamat = String(data.alamat || "").trim();
@@ -196,41 +299,51 @@ const KelolaCabang = () => {
     data.keterlambatan = parseInt(data.keterlambatan, 10);
     data.radius_toleransi = parseInt(data.radius_toleransi, 10);
 
-    if (isNaN(data.keterlambatan) || data.keterlambatan < 0) {
-      alert("Keterlambatan harus berupa angka dan tidak boleh kurang dari 0.");
-      return;
-    }
-
-    if (isNaN(data.radius_toleransi) || data.radius_toleransi <= 0) {
-      alert("Toleransi titik koordinat harus berupa angka dan lebih dari 0.");
-      return;
-    }
-
-    const timeFields = [
-      "jam_masuk_weekday",
-      "jam_keluar_weekday",
-      "jam_masuk_weekend",
-      "jam_keluar_weekend",
-      "jam_mulai_lembur",
-      "jam_selesai_lembur",
-    ];
-
-    timeFields.forEach((field) => {
-      if (data[field] && data[field].length === 5) {
-        data[field] = `${data[field]}:00`;
-      }
-    });
+    normalizeTimeFields(data);
 
     if (parentId) {
       data.parent_id = parentId;
     }
 
+    return data;
+  };
+
+  // Memvalidasi data cabang agar tidak ada nilai penting yang kosong atau tidak valid.
+  const validatePayload = (data) => {
+    if (hasEmptyRequiredField(data)) {
+      alert("Semua isian cabang wajib diisi. Tidak boleh ada yang kosong.");
+      return false;
+    }
+
+    if (isNaN(data.keterlambatan) || data.keterlambatan < 0) {
+      alert("Keterlambatan harus berupa angka dan tidak boleh kurang dari 0.");
+      return false;
+    }
+
+    if (isNaN(data.radius_toleransi) || data.radius_toleransi <= 0) {
+      alert("Toleransi titik koordinat harus berupa angka dan lebih dari 0.");
+      return false;
+    }
+
+    return true;
+  };
+
+  // Menyimpan data tambah atau edit cabang ke server.
+  const handleSaveData = async (event) => {
+    event.preventDefault();
+
+    const data = preparePayload(event.target);
+
+    if (!validatePayload(data)) {
+      return;
+    }
+
     try {
-      let url = `${import.meta.env.VITE_API_URL}/api/cabang`;
+      let url = `${API_BASE_URL}/api/cabang`;
       let method = "POST";
 
       if (editData) {
-        url = `${import.meta.env.VITE_API_URL}/api/cabang/${editData.id}`;
+        url = `${API_BASE_URL}/api/cabang/${editData.id}`;
         method = "PUT";
       }
 
@@ -240,7 +353,7 @@ const KelolaCabang = () => {
         body: JSON.stringify(data),
       });
 
-      if (response.status === 401 || response.status === 403) {
+      if (isAuthError(response.status)) {
         handleLogout();
         return;
       }
@@ -248,14 +361,16 @@ const KelolaCabang = () => {
       const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        alert(`Gagal menyimpan data: ${result.detail || result.message || "Terjadi kesalahan."}`);
+        alert(
+          `Gagal menyimpan data: ${
+            result.detail || result.message || "Terjadi kesalahan."
+          }`
+        );
         return;
       }
 
       alert(`${modalTitle} berhasil disimpan!`);
-      setShowModal(false);
-      setEditData(null);
-      setParentId(null);
+      closeFormModal();
       fetchCabang();
     } catch (error) {
       console.error("Error saving:", error);
@@ -263,28 +378,41 @@ const KelolaCabang = () => {
     }
   };
 
-  // Menampilkan modal konfirmasi sebelum mengubah status aktif/non-aktif sebuah cabang
-  const handleToggleStatusClick = (e, item) => {
-    e.stopPropagation();
+  // ============================================================================
+  // HANDLERS: STATUS CABANG
+  // ============================================================================
+
+  // Menampilkan modal konfirmasi sebelum status cabang diubah.
+  const handleToggleStatusClick = (event, item) => {
+    event.stopPropagation();
     setConfirmData(item);
     setShowConfirmModal(true);
   };
 
-  // Mengeksekusi perintah perubahan status cabang ke server
+  const closeConfirmModal = () => {
+    setShowConfirmModal(false);
+    setConfirmData(null);
+  };
+
+  // Mengirim perubahan status aktif atau nonaktif cabang ke server.
   const executeToggleStatus = async () => {
-    if (!confirmData) return;
+    if (!confirmData) {
+      return;
+    }
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/cabang/${confirmData.id}/status`,
+        `${API_BASE_URL}/api/cabang/${confirmData.id}/status`,
         {
           method: "PUT",
           headers: getAuthHeaders(),
-          body: JSON.stringify({ is_active: !confirmData.is_active }),
+          body: JSON.stringify({
+            is_active: !confirmData.is_active,
+          }),
         }
       );
 
-      if (response.status === 401 || response.status === 403) {
+      if (isAuthError(response.status)) {
         handleLogout();
         return;
       }
@@ -296,8 +424,7 @@ const KelolaCabang = () => {
         return;
       }
 
-      setShowConfirmModal(false);
-      setConfirmData(null);
+      closeConfirmModal();
       fetchCabang();
     } catch (error) {
       console.error("Error update status:", error);
@@ -305,11 +432,139 @@ const KelolaCabang = () => {
     }
   };
 
+  // ============================================================================
+  // RENDER HELPERS
+  // ============================================================================
+
+  const renderMenuItems = () => {
+    return MENU_ITEMS.map((item) => (
+      <div
+        key={item.path}
+        className={`menu-item ${item.active ? "active" : ""} ${
+          item.hasArrow ? "has-arrow" : ""
+        }`}
+        onClick={() => handleNav(item.path)}
+      >
+        <div className="menu-left">
+          <img src={item.icon} alt="" className="menu-icon-main" />
+          <span className="menu-text-main">{item.text}</span>
+        </div>
+
+        {item.hasArrow && (
+          <img src={iconBawah} alt="down" className="arrow-icon-main" />
+        )}
+      </div>
+    ));
+  };
+
+  const renderStatusButton = (item) => {
+    return (
+      <button
+        className="btn-status-toggle"
+        onClick={(event) => handleToggleStatusClick(event, item)}
+        title="Ubah Status"
+      >
+        <span
+          className={`status-dot ${item.is_active ? "active" : "inactive"}`}
+        ></span>
+      </button>
+    );
+  };
+
+  const renderEditButton = (item, title) => {
+    return (
+      <button
+        className="btn-icon-action"
+        onClick={(event) => {
+          event.stopPropagation();
+          handleOpenEdit(item);
+        }}
+        title={title}
+      >
+        <EditIcon />
+      </button>
+    );
+  };
+
+  const renderSubCabangRows = (item) => {
+    if (!item.subCabang || item.subCabang.length === 0 || !expandedRows[item.id]) {
+      return null;
+    }
+
+    return (
+      <div className="sub-rows-wrapper">
+        {item.subCabang.map((sub) => (
+          <div className="table-cabang-row sub-row" key={sub.id}>
+            <span className="cabang-name">{sub.nama}</span>
+
+            <div className="table-cabang-actions">
+              {renderEditButton(sub, "Edit Sub-Cabang")}
+              {renderStatusButton(sub)}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const renderCabangRow = (item) => {
+    const hasSubCabang = item.subCabang && item.subCabang.length > 0;
+    const isExpanded = expandedRows[item.id];
+
+    return (
+      <React.Fragment key={item.id}>
+        <div className="table-cabang-row" onClick={() => toggleRow(item.id)}>
+          <span className="cabang-name">
+            {item.nama} {hasSubCabang && (isExpanded ? "▲" : "▼")}
+          </span>
+
+          <div className="table-cabang-actions">
+            <button
+              className="btn-action-text"
+              onClick={(event) => {
+                event.stopPropagation();
+                handleOpenTambahSub(item);
+              }}
+            >
+              + Sub-Cabang
+            </button>
+
+            {renderEditButton(item, "Edit Cabang")}
+            {renderStatusButton(item)}
+          </div>
+        </div>
+
+        {renderSubCabangRows(item)}
+      </React.Fragment>
+    );
+  };
+
+  const renderTableContent = () => {
+    if (loading) {
+      return <div className="table-empty-state">Memuat data dari server...</div>;
+    }
+
+    if (dataCabang.length === 0) {
+      return <div className="table-empty-state">Belum ada data cabang.</div>;
+    }
+
+    return dataCabang.map((item) => renderCabangRow(item));
+  };
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
+
   return (
     <div className="hrd-container">
       <div className="mobile-topbar">
         <img src={logoPersegi} alt="AMAGACORP" className="mobile-topbar-logo" />
-        <button className="btn-hamburger" onClick={openSidebar} aria-label="Buka menu">
+
+        <button
+          className="btn-hamburger"
+          onClick={openSidebar}
+          aria-label="Buka menu"
+        >
           <span></span>
           <span></span>
           <span></span>
@@ -322,7 +577,11 @@ const KelolaCabang = () => {
       />
 
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
-        <button className="btn-sidebar-close" onClick={closeSidebar} aria-label="Tutup menu">
+        <button
+          className="btn-sidebar-close"
+          onClick={closeSidebar}
+          aria-label="Tutup menu"
+        >
           ✕
         </button>
 
@@ -330,26 +589,7 @@ const KelolaCabang = () => {
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
 
-        <nav className="menu-nav">
-          {MENU_ITEMS.map((item, index) => (
-            <div
-              key={index}
-              className={`menu-item ${item.active ? "active" : ""} ${
-                item.hasArrow ? "has-arrow" : ""
-              }`}
-              onClick={() => handleNav(item.path)}
-            >
-              <div className="menu-left">
-                <img src={item.icon} alt="" className="menu-icon-main" />
-                <span className="menu-text-main">{item.text}</span>
-              </div>
-
-              {item.hasArrow && (
-                <img src={iconBawah} alt="down" className="arrow-icon-main" />
-              )}
-            </div>
-          ))}
-        </nav>
+        <nav className="menu-nav">{renderMenuItems()}</nav>
 
         <div className="sidebar-footer">
           <button className="btn-logout" onClick={handleLogout}>
@@ -361,7 +601,9 @@ const KelolaCabang = () => {
       <main className="main-content">
         <header className="header-cabang-area">
           <h1 className="cabang-title">Kelola Cabang</h1>
-          <p className="cabang-subtitle">Manajemen lokasi dan unit operasional</p>
+          <p className="cabang-subtitle">
+            Manajemen lokasi dan unit operasional
+          </p>
         </header>
 
         <div className="action-row-cabang">
@@ -373,140 +615,15 @@ const KelolaCabang = () => {
         <div className="table-cabang-container">
           <div className="table-cabang-header">Nama Cabang</div>
 
-          <div className="table-cabang-body">
-            {loading ? (
-              <div className="table-empty-state">Memuat data dari server...</div>
-            ) : dataCabang.length === 0 ? (
-              <div className="table-empty-state">Belum ada data cabang.</div>
-            ) : (
-              dataCabang.map((item) => (
-                <React.Fragment key={item.id}>
-                  <div
-                    className="table-cabang-row"
-                    onClick={() => toggleRow(item.id)}
-                  >
-                    <span className="cabang-name">
-                      {item.nama}{" "}
-                      {item.subCabang &&
-                        item.subCabang.length > 0 &&
-                        (expandedRows[item.id] ? "▲" : "▼")}
-                    </span>
-
-                    <div className="table-cabang-actions">
-                      <button
-                        className="btn-action-text"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenTambahSub(item);
-                        }}
-                      >
-                        + Sub-Cabang
-                      </button>
-
-                      <button
-                        className="btn-icon-action"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenEdit(item);
-                        }}
-                        title="Edit Cabang"
-                      >
-                        <svg
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                        </svg>
-                      </button>
-
-                      <button
-                        className="btn-status-toggle"
-                        onClick={(e) => handleToggleStatusClick(e, item)}
-                        title="Ubah Status"
-                      >
-                        <span
-                          className={`status-dot ${
-                            item.is_active ? "active" : "inactive"
-                          }`}
-                        ></span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {item.subCabang &&
-                    item.subCabang.length > 0 &&
-                    expandedRows[item.id] && (
-                      <div className="sub-rows-wrapper">
-                        {item.subCabang.map((sub) => (
-                          <div className="table-cabang-row sub-row" key={sub.id}>
-                            <span className="cabang-name">{sub.nama}</span>
-
-                            <div className="table-cabang-actions">
-                              <button
-                                className="btn-icon-action"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenEdit(sub);
-                                }}
-                                title="Edit Sub-Cabang"
-                              >
-                                <svg
-                                  width="18"
-                                  height="18"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                </svg>
-                              </button>
-
-                              <button
-                                className="btn-status-toggle"
-                                onClick={(e) => handleToggleStatusClick(e, sub)}
-                                title="Ubah Status"
-                              >
-                                <span
-                                  className={`status-dot ${
-                                    sub.is_active ? "active" : "inactive"
-                                  }`}
-                                ></span>
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                </React.Fragment>
-              ))
-            )}
-          </div>
+          <div className="table-cabang-body">{renderTableContent()}</div>
         </div>
       </main>
 
       {showModal && (
-        <div
-          className="modal-overlay-clean"
-          onClick={() => {
-            setShowModal(false);
-            setEditData(null);
-            setParentId(null);
-          }}
-        >
+        <div className="modal-overlay-clean" onClick={closeFormModal}>
           <div
             className="modal-card-edit"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
             style={{ maxWidth: "650px" }}
           >
             <h2 className="modal-title">{modalTitle}</h2>
@@ -581,16 +698,19 @@ const KelolaCabang = () => {
 
                 <div
                   className="modal-grid"
-                  style={{ gridTemplateColumns: "1fr 1fr" }}
+                  style={{
+                    gridTemplateColumns: "1fr 1fr",
+                  }}
                 >
                   <div className="input-block">
                     <label>Jam Masuk</label>
                     <input
                       type="time"
                       name="jam_masuk_weekday"
-                      defaultValue={
-                        editData?.jam_masuk_weekday?.substring(0, 5) || "08:00"
-                      }
+                      defaultValue={getTimeValue(
+                        editData?.jam_masuk_weekday,
+                        "08:00"
+                      )}
                       className="modal-input"
                       required
                     />
@@ -601,9 +721,10 @@ const KelolaCabang = () => {
                     <input
                       type="time"
                       name="jam_keluar_weekday"
-                      defaultValue={
-                        editData?.jam_keluar_weekday?.substring(0, 5) || "17:00"
-                      }
+                      defaultValue={getTimeValue(
+                        editData?.jam_keluar_weekday,
+                        "17:00"
+                      )}
                       className="modal-input"
                       required
                     />
@@ -630,16 +751,19 @@ const KelolaCabang = () => {
 
                 <div
                   className="modal-grid"
-                  style={{ gridTemplateColumns: "1fr 1fr" }}
+                  style={{
+                    gridTemplateColumns: "1fr 1fr",
+                  }}
                 >
                   <div className="input-block">
                     <label>Jam Masuk</label>
                     <input
                       type="time"
                       name="jam_masuk_weekend"
-                      defaultValue={
-                        editData?.jam_masuk_weekend?.substring(0, 5) || "08:00"
-                      }
+                      defaultValue={getTimeValue(
+                        editData?.jam_masuk_weekend,
+                        "08:00"
+                      )}
                       className="modal-input"
                       required
                     />
@@ -650,9 +774,10 @@ const KelolaCabang = () => {
                     <input
                       type="time"
                       name="jam_keluar_weekend"
-                      defaultValue={
-                        editData?.jam_keluar_weekend?.substring(0, 5) || "15:00"
-                      }
+                      defaultValue={getTimeValue(
+                        editData?.jam_keluar_weekend,
+                        "15:00"
+                      )}
                       className="modal-input"
                       required
                     />
@@ -679,16 +804,19 @@ const KelolaCabang = () => {
 
                 <div
                   className="modal-grid"
-                  style={{ gridTemplateColumns: "1fr 1fr 1fr" }}
+                  style={{
+                    gridTemplateColumns: "1fr 1fr 1fr",
+                  }}
                 >
                   <div className="input-block">
                     <label>Mulai Lembur</label>
                     <input
                       type="time"
                       name="jam_mulai_lembur"
-                      defaultValue={
-                        editData?.jam_mulai_lembur?.substring(0, 5) || "18:00"
-                      }
+                      defaultValue={getTimeValue(
+                        editData?.jam_mulai_lembur,
+                        "18:00"
+                      )}
                       className="modal-input"
                       required
                     />
@@ -699,9 +827,10 @@ const KelolaCabang = () => {
                     <input
                       type="time"
                       name="jam_selesai_lembur"
-                      defaultValue={
-                        editData?.jam_selesai_lembur?.substring(0, 5) || "20:00"
-                      }
+                      defaultValue={getTimeValue(
+                        editData?.jam_selesai_lembur,
+                        "20:00"
+                      )}
                       className="modal-input"
                       required
                     />
@@ -726,11 +855,7 @@ const KelolaCabang = () => {
                 <button
                   type="button"
                   className="btn-cancel-mini"
-                  onClick={() => {
-                    setShowModal(false);
-                    setEditData(null);
-                    setParentId(null);
-                  }}
+                  onClick={closeFormModal}
                 >
                   Batal
                 </button>
@@ -745,13 +870,10 @@ const KelolaCabang = () => {
       )}
 
       {showConfirmModal && (
-        <div
-          className="modal-overlay-clean"
-          onClick={() => setShowConfirmModal(false)}
-        >
+        <div className="modal-overlay-clean" onClick={closeConfirmModal}>
           <div
             className="modal-card-confirm"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
           >
             <h3>Konfirmasi Perubahan</h3>
             <p>
@@ -760,13 +882,7 @@ const KelolaCabang = () => {
             </p>
 
             <div className="confirm-btn-group">
-              <button
-                className="btn-konfirm-batal"
-                onClick={() => {
-                  setShowConfirmModal(false);
-                  setConfirmData(null);
-                }}
-              >
+              <button className="btn-konfirm-batal" onClick={closeConfirmModal}>
                 Batal
               </button>
 

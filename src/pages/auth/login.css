@@ -1,64 +1,88 @@
-/* PENGATURAN GAYA (CSS) TAMPILAN MOBILE UNTUK HALAMAN LOGIN
-   Berfungsi mengatur font utama, menyembunyikan elemen desktop, serta merapikan tata letak background, logo, dan form login agar responsif di HP. */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
-/* Mengatur font utama dan menghapus jarak (margin/padding) bawaan browser */
+/* ============================================================================
+// RESET & GLOBAL STYLES
+// ============================================================================ */
+
+/* Mengatur font utama dan menghapus jarak bawaan browser */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
-/* Mengatur elemen mana yang disembunyikan atau ditampilkan khusus HP atau Desktop */
-.desktop-only { display: none !important; }
-.mobile-only  { display: block !important; }
+/* ============================================================================
+// VISIBILITY UTILITIES
+// ============================================================================ */
 
-/* Membungkus seluruh halaman login agar posisinya terpusat di layar */
+/* Mengatur visibilitas elemen berdasarkan kebutuhan tampilan mobile dan desktop */
+.desktop-only {
+  display: none !important;
+}
+
+.mobile-only {
+  display: block !important;
+}
+
+/* ============================================================================
+// LAYOUT UTAMA LOGIN
+// ============================================================================ */
+
+/* Membungkus seluruh halaman login agar konten berada di area tengah layar */
 .login-wrapper {
-  background-color: #f0f2f5;
-  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-}
-/* Membatasi lebar maksimal konten agar pas seperti ukuran layar HP */
-.login-split-container {
-  width: 100%;
-  max-width: 450px;
   min-height: 100vh;
+  background-color: #f0f2f5;
+}
+
+/* Membatasi lebar konten agar sesuai dengan ukuran layar mobile */
+.login-split-container {
   display: flex;
   flex-direction: column;
   position: relative;
+  width: 100%;
+  max-width: 450px;
+  min-height: 100vh;
 }
 
-/* Mengatur area atas (banner) dengan background warna gradient hijau */
+/* ============================================================================
+// BRAND SECTION: MOBILE
+// ============================================================================ */
+
+/* Area banner utama dengan background gradasi hijau */
 .login-brand-section {
-  background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
-  height: 48vh;
-  min-height: 300px;
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  text-align: center;
-  color: white;
-  z-index: 1;
-  position: relative;
+  height: 48vh;
+  min-height: 300px;
   overflow: hidden;
+  color: #ffffff;
+  text-align: center;
+  background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
 }
 
-/* Membuat efek background titik-titik transparan di area banner */
+/* Memberikan efek pola titik transparan pada background banner */
 .login-brand-section .brand-dot-grid {
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
-  background-size: 24px 24px;
-  pointer-events: none;
   z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.12) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
 }
 
-/* Memastikan konten di dalam banner (seperti logo dan teks) berada tepat di tengah */
+/* Memastikan logo dan teks brand berada di atas layer background */
 .brand-content-centered {
   position: relative;
   z-index: 2;
@@ -68,192 +92,306 @@
   padding: 0 24px;
 }
 
-/* Mengatur posisi dan ukuran gambar logo untuk tampilan mobile */
+/* ============================================================================
+// LOGO & BRAND TEXT: MOBILE
+// ============================================================================ */
+
 .logo-mobile-wrapper {
-  margin-bottom: 0px; 
-  display: flex; 
+  display: flex;
   justify-content: center;
   align-items: center;
-}
-.login-logo-mobile {
-  width: 210px; 
-  height: auto;
-  object-fit: contain; 
+  margin-bottom: 0;
 }
 
-/* Mengatur ukuran font, ketebalan, dan jarak untuk teks judul dan subjudul */
+.login-logo-mobile {
+  width: 210px;
+  height: auto;
+  object-fit: contain;
+}
+
 .login-brand-title {
+  margin-bottom: 0;
+  color: #ffffff;
   font-size: 26px;
   font-weight: 800;
-  margin-bottom: 0px;
   letter-spacing: -0.4px;
 }
+
 .login-brand-subtitle {
+  color: #ffffff;
   font-size: 13px;
-  opacity: 0.85;
   font-weight: 400;
+  opacity: 0.85;
 }
 
-/* Membungkus area form login (input dan tombol) dengan margin dan padding */
+/* ============================================================================
+// FORM SECTION: MOBILE
+// ============================================================================ */
+
+/* Membungkus area form login agar memiliki jarak aman dari sisi layar */
 .login-form-section {
-  padding: 0 20px 40px;
   z-index: 10;
+  padding: 0 20px 40px;
 }
 
-/* Membuat kotak form berwarna putih, ujung melengkung, dengan efek bayangan */
+/* Kotak form utama dengan sudut melengkung dan efek bayangan */
 .login-form-box {
-  background: #ffffff;
   margin-top: -40px;
   padding: 36px 28px 32px;
   border-radius: 28px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+  background: #ffffff;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
 }
-/* Mengatur jarak dan gaya teks (ukuran, ketebalan, warna) untuk bagian judul form di tampilan HP */
+
 .mobile-form-header {
   margin-bottom: 28px;
 }
+
 .mobile-brand-name {
+  margin-bottom: 4px;
+  color: #22a800;
   font-size: 15px;
   font-weight: 800;
-  color: #22a800;
   letter-spacing: 0.2px;
-  margin-bottom: 4px;
 }
+
 .mobile-form-title {
+  margin-bottom: 4px;
+  color: #111111;
   font-size: 22px;
   font-weight: 800;
-  color: #111;
   letter-spacing: -0.5px;
-  margin-bottom: 4px;
 }
+
 .mobile-form-subtitle {
+  color: #aaaaaa;
   font-size: 13px;
-  color: #aaa;
   font-weight: 400;
 }
 
-/* Mengatur desain kotak input (username/password), teks label, tata letak ikon, serta efek warna saat kotak input sedang diklik/diketik (focus) */
-.login-field-group                { margin-bottom: 18px; }
-.login-field-group label          { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px; color: #777; }
-.login-input-wrapper              { position: relative; display: flex; align-items: center; }
-.login-input-wrapper input        { width: 100%; padding: 13px 14px 13px 44px; border: 1.5px solid #ebebeb; border-radius: 12px; font-size: 14px; outline: none; background: #fafafa; color: #111; transition: border-color 0.25s, box-shadow 0.25s; }
-.login-input-wrapper input::placeholder { color: #ccc; }
-.login-input-wrapper input:focus { border-color: #2fb800; background: #fff; box-shadow: 0 0 0 4px rgba(47,184,0,0.09); }
-.login-field-icon                 { position: absolute; left: 14px; width: 18px; height: 18px; opacity: 0.35; filter: grayscale(100%); }
+/* ============================================================================
+// FORM INPUT
+// ============================================================================ */
 
-/* Mengatur tampilan tombol login utama, termasuk warna gradient hijau, bayangan, dan efek animasi saat tombol disorot (hover) atau diklik (active) */
-.login-btn-green {
+/* Mengatur jarak antar grup input */
+.login-field-group {
+  margin-bottom: 18px;
+}
+
+.login-field-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #777777;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Menjaga ikon dan input berada dalam satu container */
+.login-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.login-input-wrapper input {
   width: 100%;
+  padding: 13px 14px 13px 44px;
+  border: 1.5px solid #ebebeb;
+  border-radius: 12px;
+  outline: none;
+  background: #fafafa;
+  color: #111111;
+  font-size: 14px;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.login-input-wrapper input::placeholder {
+  color: #cccccc;
+}
+
+/* Memberikan feedback visual saat input aktif */
+.login-input-wrapper input:focus {
+  border-color: #2fb800;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(47, 184, 0, 0.09);
+}
+
+.login-field-icon {
+  position: absolute;
+  left: 14px;
+  width: 18px;
+  height: 18px;
+  opacity: 0.35;
+  filter: grayscale(100%);
+}
+
+/* ============================================================================
+// BUTTON & HELP TEXT
+// ============================================================================ */
+
+/* Tombol login utama dengan gradasi hijau dan efek interaksi */
+.login-btn-green {
+  position: relative;
+  width: 100%;
+  margin-top: 22px;
   padding: 15px;
-  background: linear-gradient(135deg, #4cff00 0%, #1faa00 100%);
-  color: white;
+  overflow: hidden;
   border: none;
   border-radius: 12px;
-  font-weight: 700;
+  background: linear-gradient(135deg, #4cff00 0%, #1faa00 100%);
+  color: #ffffff;
   font-size: 15px;
-  margin-top: 22px;
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(50,180,0,0.30);
+  box-shadow: 0 8px 24px rgba(50, 180, 0, 0.3);
   transition: transform 0.2s, box-shadow 0.2s;
-  position: relative;
-  overflow: hidden;
 }
+
 .login-btn-green::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 55%);
   border-radius: inherit;
   pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    transparent 55%
+  );
 }
-.login-btn-green:hover  { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(50,180,0,0.38); }
-.login-btn-green:active { transform: translateY(0); }
 
-/* Mengatur gaya teks bantuan kecil yang letaknya ada di bawah tombol login */
-.login-help-text { text-align: center; font-size: 11px; color: #ccc; margin-top: 22px; }
+.login-btn-green:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(50, 180, 0, 0.38);
+}
 
-/* Mengatur tampilan khusus untuk perangkat Tablet (ukuran layar menengah), menyesuaikan ukuran kotak login, tata letak, dan mengecilkan ukuran logo agar pas. */
+.login-btn-green:active {
+  transform: translateY(0);
+}
+
+.login-help-text {
+  margin-top: 22px;
+  color: #cccccc;
+  font-size: 11px;
+  text-align: center;
+}
+
+/* ============================================================================
+// MEDIA QUERIES: TABLET
+// ============================================================================ */
+
 @media (min-width: 641px) and (max-width: 1023px) {
   .login-wrapper {
     align-items: center;
     padding: 40px 24px;
     background: #eef4eb;
   }
+
   .login-split-container {
     max-width: 480px;
     min-height: unset;
-    border-radius: 28px;
     overflow: hidden;
-    box-shadow: 0 24px 60px rgba(0,0,0,0.13);
+    border-radius: 28px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.13);
   }
+
   .login-brand-section {
     height: 220px;
     min-height: unset;
   }
-  
-  /* Update logo behavior for tablet too, consistent with mobile change */
+
   .logo-mobile-wrapper {
-    margin-bottom: 16px; /* Keep gap */
     display: flex;
     justify-content: center;
     align-items: center;
-    /* Removed fixed width, overflow, position */
+    margin-bottom: 16px;
   }
+
   .login-logo-mobile {
-    width: 110px; /* Slightly smaller for tablet layout might be good, or same as mobile. Let's make it slightly smaller to be proportional. The original conflicting CSS had 120px. */
+    width: 110px;
     height: auto;
     object-fit: contain;
-    /* Removed all old position, width: 115% width/height, object-fit: cover, and transform redefinitions. Conflicting CSS redefinition is removed. */
   }
-  
-  .login-brand-title   { font-size: 24px; }
-  .login-form-section  { padding: 0 28px 32px; }
-  .login-form-box      { margin-top: -50px; padding: 32px 28px; border-radius: 22px; }
-}
-/* Mengatur tata letak utama khusus untuk layar Komputer/Laptop (Desktop). Tampilan berubah dari memanjang ke bawah menjadi dua sisi menyamping (kiri dan kanan). */
-@media (min-width: 1024px) {
 
-  .desktop-only { display: flex !important; }
-  .mobile-only  { display: none  !important; }
+  .login-brand-title {
+    font-size: 24px;
+  }
+
+  .login-form-section {
+    padding: 0 28px 32px;
+  }
+
+  .login-form-box {
+    margin-top: -50px;
+    padding: 32px 28px;
+    border-radius: 22px;
+  }
+}
+
+/* ============================================================================
+// MEDIA QUERIES: DESKTOP
+// ============================================================================ */
+
+@media (min-width: 1024px) {
+  .desktop-only {
+    display: flex !important;
+  }
+
+  .mobile-only {
+    display: none !important;
+  }
 
   .login-wrapper {
-    background: #f4f6f2;
-    padding: 0;
-    overflow: hidden;
     align-items: stretch;
+    overflow: hidden;
+    padding: 0;
+    background: #f4f6f2;
   }
 
   .login-split-container {
-    max-width: 100%;
-    width: 100%;
-    height: 100vh;
     flex-direction: row !important;
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
   }
 
-  /* Mengatur panel bagian kiri (area form login) pada desktop, menghilangkan efek bayangan kotak putih, dan menambah garis pemisah tipis di sisi kanannya. */
+  /* ========================================================================
+  // FORM SECTION: DESKTOP
+  // ======================================================================== */
+
   .login-form-section {
-    flex: none;
-    width: 44%;
-    max-width: 580px;
-    min-width: 420px;
-    height: 100vh;
-    padding: 0 6%;
+    position: relative;
+    z-index: 10;
     display: flex !important;
+    flex: none;
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
+    width: 44%;
+    min-width: 420px;
+    max-width: 580px;
+    height: 100vh;
+    padding: 0 6%;
     background: #ffffff;
-    position: relative;
-    z-index: 10;
     box-shadow: none;
   }
 
   .login-form-section::after {
-    content: '';
+    content: "";
     position: absolute;
-    right: 0; top: 8%; bottom: 8%;
+    top: 8%;
+    right: 0;
+    bottom: 8%;
     width: 1px;
-    background: linear-gradient(to bottom, transparent, #e8e8e8 25%, #e8e8e8 75%, transparent);
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      #e8e8e8 25%,
+      #e8e8e8 75%,
+      transparent
+    );
   }
 
   .login-form-box {
@@ -262,122 +400,168 @@
     margin: 0;
     padding: 0;
     border-radius: 0;
-    box-shadow: none;
     background: transparent;
+    box-shadow: none;
   }
 
-  /* Mengatur tata letak, jarak, dan gaya tulisan judul (Amaga Corporation & Sistem Absensi) khusus pada area form desktop. */
   .desktop-form-header {
-    margin-bottom: 40px;
     display: flex !important;
     flex-direction: column !important;
     align-items: flex-start !important;
     gap: 0;
+    margin-bottom: 40px;
   }
 
   .desktop-brand-name {
     display: inline-block;
+    margin-bottom: 10px;
+    color: #22a800;
     font-size: 20px;
     font-weight: 800;
-    color: #22a800;
-    letter-spacing: 0.3px;
-    margin-bottom: 10px;
-    text-transform: uppercase;
     letter-spacing: 1px;
+    text-transform: uppercase;
   }
-  /* Mengatur gaya tulisan (ukuran, warna, jarak) untuk judul utama dan subjudul pada area form di tampilan Desktop, serta menambahkan garis pemisah bergradasi di bawahnya. */
+
   .desktop-form-header h2 {
+    margin-bottom: 4px;
+    color: #0d0d0d;
     font-size: 38px;
     font-weight: 800;
-    color: #0d0d0d;
-    letter-spacing: -1px;
     line-height: 1.1;
-    margin-bottom: 4px;
+    letter-spacing: -1px;
   }
 
   .desktop-form-header p {
-    font-size: 14px;
-    color: #201f1f;
-    font-weight: 800;
     margin: 0;
+    color: #201f1f;
+    font-size: 14px;
+    font-weight: 800;
   }
 
   .form-divider {
     display: block;
     width: 420px;
     height: 4px;
+    margin-top: 18px;
     border-radius: 99px;
     background: linear-gradient(90deg, #4cff00, #22a800);
-    margin-top: 18px;
   }
 
-  /* Mengatur desain kotak input (username/password) khusus Desktop, termasuk teks label, posisi ikon, dan efek perubahan warna/bayangan saat kotak sedang diklik (focus). */
-  .login-field-group       { margin-bottom: 20px; }
-  .login-field-group label { font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #1c1b1b; margin-bottom: 6px; }
+  /* ========================================================================
+  // FORM INPUT: DESKTOP
+  // ======================================================================== */
+
+  .login-field-group {
+    margin-bottom: 20px;
+  }
+
+  .login-field-group label {
+    margin-bottom: 6px;
+    color: #1c1b1b;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
 
   .login-input-wrapper input {
     padding: 14px 16px 14px 48px;
-    font-size: 14px;
     border: 1.5px solid #ebebeb;
     border-radius: 12px;
     background: #fafafa;
-    color: #111;
+    color: #111111;
+    font-size: 14px;
     transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
   }
-  .login-input-wrapper input::placeholder { color: #ccc; }
+
+  .login-input-wrapper input::placeholder {
+    color: #cccccc;
+  }
+
   .login-input-wrapper input:focus {
     border-color: #3ecb00;
-    background: #fff;
-    box-shadow: 0 0 0 4px rgba(62,203,0,0.09);
     outline: none;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(62, 203, 0, 0.09);
   }
-  .login-field-icon { width: 18px; height: 18px; left: 16px; opacity: 0.30; filter: grayscale(100%); }
-  
-  /* Mengatur ukuran, warna gradasi hijau, bayangan, dan efek animasi (bergerak naik sedikit) pada tombol login utama khusus untuk tampilan Desktop. */
+
+  .login-field-icon {
+    left: 16px;
+    width: 18px;
+    height: 18px;
+    opacity: 0.3;
+    filter: grayscale(100%);
+  }
+
+  /* ========================================================================
+  // BUTTON & HELP TEXT: DESKTOP
+  // ======================================================================== */
+
   .login-btn-green {
+    position: relative;
     width: 100%;
-    padding: 15px 0;
     margin-top: 28px;
+    padding: 15px 0;
+    overflow: hidden;
     border: none;
     border-radius: 12px;
+    background: linear-gradient(135deg, #4cff00 0%, #1faa00 100%);
+    color: #ffffff;
     font-size: 15px;
     font-weight: 700;
     letter-spacing: 0.2px;
-    color: #fff;
     cursor: pointer;
-    background: linear-gradient(135deg, #4cff00 0%, #1faa00 100%);
-    box-shadow: 0 8px 28px rgba(50,180,0,0.30);
+    box-shadow: 0 8px 28px rgba(50, 180, 0, 0.3);
     transition: transform 0.18s ease, box-shadow 0.18s ease;
-    position: relative;
-    overflow: hidden;
   }
+
   .login-btn-green::before {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.16) 0%, transparent 55%);
     border-radius: inherit;
     pointer-events: none;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.16) 0%,
+      transparent 55%
+    );
   }
-  .login-btn-green:hover  { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(50,180,0,0.40); }
-  .login-btn-green:active { transform: translateY(0); }
-  /* Memperbesar ukuran teks bantuan dan mengubah posisinya menjadi rata kiri (text-align: left) khusus di Desktop. */
-  .login-help-text { font-size: 14px; color: #252323; margin-top: 22px; text-align: left; }
 
-  /* Mengatur panel bagian kanan (area banner) pada desktop, membuatnya mengisi sisa layar, dan memberikan warna latar berupa gradasi hijau yang lebih kompleks. */
+  .login-btn-green:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(50, 180, 0, 0.4);
+  }
+
+  .login-btn-green:active {
+    transform: translateY(0);
+  }
+
+  .login-help-text {
+    margin-top: 22px;
+    color: #252323;
+    font-size: 14px;
+    text-align: left;
+  }
+
+  /* ========================================================================
+  // BRAND SECTION: DESKTOP
+  // ======================================================================== */
+
   .login-brand-section {
-    flex: 1;
-    height: 100vh;
-    min-height: unset;
-    padding: 0;
-    border-radius: 0;
+    position: relative;
     display: flex !important;
+    flex: 1;
     flex-direction: column !important;
     justify-content: center;
     align-items: center;
-    position: relative;
+    height: 100vh;
+    min-height: unset;
     overflow: hidden;
-    background: linear-gradient(150deg,
+    padding: 0;
+    border-radius: 0;
+    background: linear-gradient(
+      150deg,
       #60ff18 0%,
       #36d400 25%,
       #20aa00 55%,
@@ -385,122 +569,156 @@
     );
   }
 
-  /* Menambahkan efek hiasan berupa lingkaran cahaya putih yang blur di pojok kiri atas dan lingkaran bergaris tipis di pojok kanan bawah banner. */
   .login-brand-section::before {
-    content: '';
+    content: "";
     position: absolute;
-    top: -140px; left: -140px;
-    width: 500px; height: 500px;
+    top: -140px;
+    left: -140px;
+    z-index: 0;
+    width: 500px;
+    height: 500px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.10);
+    pointer-events: none;
+    background: rgba(255, 255, 255, 0.1);
     filter: blur(70px);
-    pointer-events: none;
-    z-index: 0;
-  }
-  .login-brand-section::after {
-    content: '';
-    position: absolute;
-    bottom: -120px; right: -120px;
-    width: 420px; height: 420px;
-    border-radius: 50%;
-    border: 1.5px solid rgba(255,255,255,0.14);
-    pointer-events: none;
-    z-index: 0;
   }
 
-  /* Membuat pola titik-titik transparan berulang yang melapisi seluruh area banner desktop. */
+  .login-brand-section::after {
+    content: "";
+    position: absolute;
+    right: -120px;
+    bottom: -120px;
+    z-index: 0;
+    width: 420px;
+    height: 420px;
+    border: 1.5px solid rgba(255, 255, 255, 0.14);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
   .brand-dot-grid {
     position: absolute !important;
+    z-index: 1;
     display: block !important;
     inset: 0;
-    background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1.2px, transparent 1.2px);
-    background-size: 28px 28px;
-    z-index: 1;
     pointer-events: none;
+    background-image: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.12) 1.2px,
+      transparent 1.2px
+    );
+    background-size: 28px 28px;
   }
 
-  /* Mengatur konten di dalam banner (seperti logo dan teks) agar posisinya berada di atas efek background dan tersusun rapi di tengah. */
   .brand-content-centered {
     position: relative;
     z-index: 5;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    text-align: center;
-    padding: 48px 40px;
     gap: 0;
+    padding: 48px 40px;
+    text-align: center;
   }
 
-  /* Mengatur ukuran logo desktop agar berwarna putih (menggunakan filter), serta menambahkan garis pemisah tipis transparan di bawahnya. */
+  /* ========================================================================
+  // LOGO & BRAND TEXT: DESKTOP
+  // ======================================================================== */
+
   .login-logo-desktop {
     display: block !important;
     width: 400px !important;
     height: auto;
-    filter: brightness(0) invert(1);
     margin-bottom: 32px;
+    filter: brightness(0) invert(1);
   }
+
   .brand-logo-divider {
     display: block !important;
     width: 500px;
     height: 2px;
-    background: rgba(255,255,255,0.35);
-    border-radius: 99px;
     margin-bottom: 18px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.35);
   }
 
-  /* Mengatur tata letak, ukuran font, bayangan, dan warna teks untuk deskripsi atau slogan yang berada di area banner. */
   .brand-text-desktop {
     display: flex !important;
     flex-direction: column !important;
     align-items: center;
     gap: 10px;
   }
+
   .brand-text-desktop h2 {
+    margin: 0;
+    color: #ffffff;
     font-size: 28px;
     font-weight: 800;
-    color: #fff;
     letter-spacing: -0.4px;
-    margin: 0;
-    text-shadow: 0 2px 12px rgba(0,0,0,0.08);
-  }
-  .brand-text-desktop p {
-    font-size: 20px;
-    color: rgb(255, 255, 255);
-    font-weight: 600;
-    margin: 0;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   }
 
-  /* Mendesain elemen berbentuk kapsul (label/tag) berisi info tambahan, dibuat berderet dengan efek latar belakang seperti kaca (blur). */
+  .brand-text-desktop p {
+    margin: 0;
+    color: rgb(255, 255, 255);
+    font-size: 20px;
+    font-weight: 600;
+  }
+
   .brand-pills {
     display: flex !important;
-    gap: 8px;
-    margin-top: 20px;
     flex-wrap: wrap;
     justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
   }
+
   .brand-pill {
     display: inline-flex;
     align-items: center;
     gap: 5px;
     padding: 10px 20px;
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.20);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.9);
     font-size: 16px;
     font-weight: 600;
-    color: rgba(255,255,255,0.90);
     white-space: nowrap;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
   }
-  .brand-pill svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+  .brand-pill svg {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+  }
 }
 
-/* Mengatur penyesuaian khusus untuk layar monitor yang sangat besar (Ultra Wide/Layar Lebar). Bagian ini memastikan form tidak terlihat terlalu kecil dan font judul diperbesar agar tetap proporsional. */
+/* ============================================================================
+// MEDIA QUERIES: ULTRA WIDE
+// ============================================================================ */
+
 @media (min-width: 1440px) {
-  .login-form-section     { width: 40%; padding: 0 5%; }
-  .login-form-box         { max-width: 420px; }
-  .desktop-form-header h2 { font-size: 44px; }
-  .login-logo-desktop     { width: 300px; }
-  .brand-text-desktop h2  { font-size: 32px; }
+  .login-form-section {
+    width: 40%;
+    padding: 0 5%;
+  }
+
+  .login-form-box {
+    max-width: 420px;
+  }
+
+  .desktop-form-header h2 {
+    font-size: 44px;
+  }
+
+  .login-logo-desktop {
+    width: 300px;
+  }
+
+  .brand-text-desktop h2 {
+    font-size: 32px;
+  }
 }

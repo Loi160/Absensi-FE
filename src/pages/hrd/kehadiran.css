@@ -1,6 +1,10 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
-/* Reset standar untuk memastikan semua elemen memiliki margin, padding, dan font yang konsisten */
+/* ============================================================================
+// RESET & GLOBAL STYLES
+// ============================================================================ */
+
+/* Menghapus jarak bawaan browser dan menerapkan font utama pada seluruh elemen */
 * {
   margin: 0;
   padding: 0;
@@ -8,68 +12,99 @@
   font-family: "Inter", sans-serif;
 }
 
-/* Pembungkus utama halaman dengan latar belakang gradasi hijau khas perusahaan dan ukuran satu layar penuh */
+/* ============================================================================
+// LAYOUT UTAMA
+// ============================================================================ */
+
+/* Pembungkus utama halaman HRD dengan latar belakang gradasi hijau */
 .hrd-container {
+  position: relative;
   display: flex;
   width: 100vw;
   height: 100vh;
   background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
   overflow: hidden;
-  position: relative;
 }
 
-/* Mengatur ukuran dan tata letak kolom navigasi di sisi kiri halaman */
+/* Panel utama tempat konten kehadiran ditampilkan */
+.main-content {
+  position: absolute;
+  top: 25px;
+  right: 35px;
+  bottom: 25px;
+  left: 310px;
+  display: block;
+  padding: 40px;
+  padding-bottom: 80px;
+  background-color: #fdfdfd;
+  border-radius: 40px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ============================================================================
+// SIDEBAR & NAVIGATION
+// ============================================================================ */
+
+/* Kolom navigasi samping utama */
 .sidebar {
-  width: 300px;
-  padding: 25px 25px;
-  color: white;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  width: 300px;
+  padding: 25px;
+  color: #ffffff;
 }
 
-/* Area penempatan logo perusahaan dengan sedikit jarak di bagian atas agar tidak terlalu mepet */
+/* Area logo pada sidebar */
 .logo-area {
   margin-top: 38px;
   margin-bottom: 26px !important;
   padding-left: 10px;
 }
 
-/* Memaksa logo menjadi putih bersih menggunakan filter CSS agar terlihat jelas di atas background gelap */
+/* Menjaga logo tetap berwarna putih menggunakan filter CSS */
 .logo-img {
+  display: block;
   width: 100%;
   max-width: 250px;
   height: auto;
-  display: block;
   filter: grayscale(100%) brightness(0) invert(1) contrast(1000%) !important;
 }
 
-/* Mengatur daftar menu navigasi utama agar tersusun secara vertikal dengan jarak antar menu yang rapi */
+/* Grup menu navigasi utama */
 .menu-nav {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
-/* Desain tombol menu utama, lengkap dengan animasi transisi saat kursor diarahkan atau diklik */
+/* Item menu navigasi */
 .menu-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px 20px;
+  color: #ffffff;
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
-  color: #fff;
 }
 
+/* Efek hover untuk menu yang tidak sedang aktif */
+.menu-item:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Area kiri menu yang berisi ikon dan teks */
 .menu-left {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
-/* Mengatur ukuran ikon menu dan mengubah warnanya menjadi putih agar senada dengan teks */
+/* Ikon utama pada setiap item menu */
 .menu-icon-main {
   width: 28px;
   height: 28px;
@@ -77,13 +112,14 @@
   transition: all 0.3s ease;
 }
 
+/* Teks menu utama */
 .menu-text-main {
   font-size: 18px;
   font-weight: 600;
   transition: all 0.3s ease;
 }
 
-/* Mengatur ikon panah dropdown pada menu navigasi */
+/* Ikon panah pada menu dropdown */
 .arrow-icon-main {
   width: 20px;
   height: 20px;
@@ -92,12 +128,11 @@
   transition: all 0.3s ease;
 }
 
-/* Efek putar panah saat submenu atau tab sedang terbuka */
 .arrow-icon-main.rotate-up {
   transform: rotate(180deg);
 }
 
-/* Mengubah tampilan menu menjadi putih dengan teks hijau saat sedang aktif/dipilih */
+/* Status aktif menu pada tampilan desktop */
 .menu-item.active {
   background-color: #ffffff !important;
   color: #2fb800 !important;
@@ -105,24 +140,22 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Mengatur filter warna ikon agar berubah menjadi hijau mengikuti warna teks saat menu aktif */
 .menu-item.active .menu-icon-main,
 .menu-item.active .arrow-icon-main {
-  filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg) brightness(95%) contrast(105%) !important;
+  filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg)
+    brightness(95%) contrast(105%) !important;
   opacity: 1;
 }
 
-/* Memastikan warna teks menu utama berubah menjadi hijau saat menu tersebut sedang dibuka */
 .menu-item.active .menu-text-main {
   color: #2fb800 !important;
 }
 
-/* Memberikan efek warna putih transparan saat kursor diarahkan ke menu yang tidak sedang aktif */
-.menu-item:hover:not(.active) {
-  background-color: rgba(255, 255, 255, 0.15);
-}
+/* ============================================================================
+// SIDEBAR SUBMENU
+// ============================================================================ */
 
-/* Mengatur wadah pembungkus untuk anak menu (submenu) agar menjorok ke dalam */
+/* Pembungkus submenu agar posisinya menjorok dari menu utama */
 .submenu-container {
   display: flex;
   flex-direction: column;
@@ -131,21 +164,26 @@
   padding-left: 20px;
 }
 
-/* Mengatur tampilan dasar setiap pilihan di dalam anak menu (submenu) */
+/* Item submenu */
 .submenu-item {
   display: flex;
   align-items: center;
   gap: 15px;
   padding: 10px 20px;
-  cursor: pointer;
-  color: #fff;
+  color: #ffffff;
   border-radius: 10px;
   font-size: 16px;
   font-weight: 500;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
-/* Memberikan warna putih pada ikon di dalam submenu menggunakan filter */
+/* Efek hover untuk submenu yang tidak sedang aktif */
+.submenu-item:hover:not(.active-sub) {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Ikon submenu */
 .submenu-icon {
   width: 20px;
   height: 20px;
@@ -153,48 +191,46 @@
   transition: all 0.3s ease;
 }
 
-/* Mengubah gaya tampilan submenu saat sedang dipilih (aktif) menjadi putih dengan teks hijau */
+/* Status aktif submenu */
 .submenu-item.active-sub {
   background-color: #ffffff !important;
   color: #2fb800 !important;
-  font-weight: 700;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  font-weight: 700;
 }
 
-/* Mengatur filter warna ikon submenu menjadi hijau agar senada dengan teks saat aktif */
 .submenu-item.active-sub .submenu-icon {
-  filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg) brightness(95%) contrast(105%) !important;
+  filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg)
+    brightness(95%) contrast(105%) !important;
 }
 
-/* Efek sorot (hover) untuk submenu yang sedang tidak aktif */
-.submenu-item:hover:not(.active-sub) {
-  background-color: rgba(255, 255, 255, 0.15);
-}
+/* ============================================================================
+// SIDEBAR FOOTER
+// ============================================================================ */
 
-/* Mengatur area bawah sidebar untuk tombol keluar, lengkap dengan garis pembatas */
+/* Area bawah sidebar untuk tombol logout */
 .sidebar-footer {
   margin-top: auto;
   padding-top: 25px;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  text-align: center;
   padding-bottom: 15px;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Desain tombol Log Out berbentuk kapsul dengan garis tepi putih transparan */
+/* Tombol keluar dari sistem */
 .btn-logout {
+  width: 100%;
+  padding: 12px 0;
   background: transparent;
+  color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.7);
-  color: #fff;
+  border-radius: 50px;
   font-size: 20px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  padding: 12px 0;
-  width: 100%;
-  border-radius: 50px;
 }
 
-/* Perubahan warna tombol Log Out menjadi putih penuh saat disorot kursor */
 .btn-logout:hover {
   background-color: #ffffff !important;
   color: #2fb800 !important;
@@ -202,61 +238,80 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* Mengatur area utama tempat konten ditampilkan, lengkap dengan sudut bulat dan bayangan halus */
-.main-content {
-  position: absolute;
-  top: 25px;
-  bottom: 25px;
-  left: 310px;
-  right: 35px;
-  background-color: #fdfdfd;
-  border-radius: 40px;
-  padding: 40px;
-  padding-bottom: 80px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  display: block;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+/* ============================================================================
+// MOBILE NAVIGATION DEFAULT STATE
+// ============================================================================ */
+
+/* Elemen khusus mobile disembunyikan secara default pada desktop */
+.mobile-topbar,
+.btn-sidebar-close,
+.sidebar-overlay {
+  display: none;
 }
 
-/* Mengatur tampilan batang penggulung (scrollbar) agar minimalis dan berubah warna saat disentuh kursor */
-.main-content::-webkit-scrollbar { width: 8px; }
-.main-content::-webkit-scrollbar-track { background: transparent; margin: 30px 0; }
-.main-content::-webkit-scrollbar-thumb { background-color: #d1d1d1; border-radius: 10px; }
-.main-content::-webkit-scrollbar-thumb:hover { background-color: #8dae12; }
+/* ============================================================================
+// SCROLLBAR: MAIN CONTENT
+// ============================================================================ */
 
-/* Mengatur tata letak judul halaman agar tersusun rapi secara vertikal */
+/* Mengatur tampilan scrollbar pada area konten utama */
+.main-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.main-content::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 30px 0;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+  background-color: #d1d1d1;
+  border-radius: 10px;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+  background-color: #8dae12;
+}
+
+/* ============================================================================
+// HEADER HALAMAN
+// ============================================================================ */
+
+/* Area judul halaman */
 .header-titles {
   display: flex;
   flex-direction: column;
   margin-bottom: 25px;
 }
 
-/* Desain judul utama (h1) dengan ukuran besar, tebal, dan warna gelap yang elegan */
+/* Judul utama halaman */
 .page-header h1,
 .header-titles h1 {
+  margin-bottom: 5px;
+  color: #111111 !important;
   font-size: 32px !important;
   font-weight: 700 !important;
-  color: #111 !important;
-  margin-bottom: 5px;
-  letter-spacing: -0.5px;
   line-height: 1.2;
+  letter-spacing: -0.5px;
 }
 
-/* Mengatur gaya tulisan keterangan atau sub-judul di bawah judul utama */
+/* Subjudul halaman */
 .page-header p,
 .header-titles p {
-  color: #666 !important;
   margin-bottom: 2px;
+  color: #666666 !important;
   font-size: 16px !important;
 }
 
-/* Memberikan jarak atas untuk kotak pembungkus formulir absensi */
+/* ============================================================================
+// FORM: ABSENSI MANUAL
+// ============================================================================ */
+
+/* Pembungkus form absensi */
 .absen-form-wrapper {
   margin-top: 20px;
 }
 
-/* Mengatur tata letak input formulir menjadi dua kolom sejajar agar terlihat lebih profesional */
+/* Grid form absensi dua kolom */
 .absen-form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -264,401 +319,517 @@
   row-gap: 25px;
 }
 
-/* Mengatur jarak antara label petunjuk dan kotak input di setiap grup form */
+/* Grup label dan input */
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-/* Desain tulisan label agar terlihat tegas dan mudah dibaca oleh admin/HRD */
 .form-group label {
+  color: #000000;
   font-size: 14px;
   font-weight: 700;
-  color: #000;
 }
 
-/* Desain kotak input standar dengan sudut melengkung dan animasi halus saat aktif */
+/* Input standar pada form */
 .input-field {
-  border: 1px solid #ccc;
-  border-radius: 8px;
   padding: 12px 15px;
-  font-size: 14px;
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 8px;
   outline: none;
-  background-color: #fff;
+  font-size: 14px;
   transition: 0.2s;
 }
 
-/* Memberikan warna hijau zaitun pada garis tepi kotak input saat sedang diketik (fokus) */
-.input-field:focus { border-color: #8dae12; }
+.input-field:focus {
+  border-color: #8dae12;
+}
 
-/* Mengatur elemen agar memanjang penuh melewati dua kolom grid */
-.full-width { grid-column: span 2; }
-
-/* Mengatur posisi tombol simpan dan batal di bagian bawah formulir agar rapi di sebelah kanan */
-.form-actions-bottom {
+/* Elemen form yang perlu melebar penuh pada grid */
+.full-width {
   grid-column: span 2;
+}
+
+/* Area tombol simpan dan batal pada form */
+.form-actions-bottom {
   display: flex;
+  grid-column: span 2;
   justify-content: flex-end;
   gap: 15px;
   margin-top: 20px;
 }
 
-/* Desain tombol simpan dengan warna hijau cerah dan teks tebal agar terlihat sebagai aksi utama */
+/* Tombol simpan form */
 .btn-simpan-green {
-  background-color: #2fb800 !important;
-  color: white !important;
   padding: 12px 30px;
+  background-color: #2fb800 !important;
+  color: #ffffff !important;
   border: none;
   border-radius: 10px;
   font-weight: 700;
   cursor: pointer;
   transition: 0.2s;
 }
-.btn-simpan-green:hover { background-color: #269c00 !important; }
 
-/* Desain tombol batal dengan warna netral untuk membedakannya dari tombol simpan */
+.btn-simpan-green:hover {
+  background-color: #269c00 !important;
+}
+
+/* Tombol batal form */
 .btn-batal-red {
-  background-color: #fff !important;
-  color: #333 !important;
-  border: 1px solid #ccc !important;
   padding: 12px 30px;
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  border: 1px solid #cccccc !important;
   border-radius: 10px;
   font-weight: 700;
   cursor: pointer;
   transition: 0.2s;
 }
-.btn-batal-red:hover { background-color: #f5f5f5 !important; }
 
-/* Mengatur baris aksi pada tabel perizinan agar berada di posisi kanan atas */
+.btn-batal-red:hover {
+  background-color: #f5f5f5 !important;
+}
+
+/* ============================================================================
+// FILTER PERIZINAN
+// ============================================================================ */
+
+/* Baris aksi filter pada tabel perizinan */
 .action-row-perizinan {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 0px; 
   position: relative;
   z-index: 20;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0;
 }
 
-/* Memastikan posisi dropdown filter tetap berada di dekat tombol pemicunya */
-.filter-wrapper { position: relative; }
+/* Pembungkus dropdown filter */
+.filter-wrapper {
+  position: relative;
+}
 
-/* Desain tombol filter berwarna hijau zaitun lengkap dengan efek bayangan (shadow) halus */
+/* Tombol filter hijau */
 .btn-filter-green {
-  background: #8dae12;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 50px;
-  font-weight: 700;
-  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  padding: 10px 20px;
+  background: #8dae12;
+  color: #ffffff;
+  border: none;
+  border-radius: 50px;
   box-shadow: 0 4px 10px rgba(141, 174, 18, 0.3);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
   transition: 0.2s;
 }
 
-.btn-filter-green:hover { background: #7a9610; }
+.btn-filter-green:hover {
+  background: #7a9610;
+}
 
-/* Mengatur ikon panah kecil pada tombol filter agar berwarna putih */
+/* Ikon panah pada tombol filter */
 .filter-arrow {
   width: 10px;
   filter: brightness(0) invert(1);
   transition: transform 0.2s ease;
 }
 
-/* Memberikan efek putar pada panah saat menu filter sedang terbuka */
-.filter-arrow.rotate { transform: rotate(180deg); }
+.filter-arrow.rotate {
+  transform: rotate(180deg);
+}
 
-/* Desain kotak melayang (dropdown) untuk pilihan filter cabang */
+/* Dropdown pilihan filter */
 .filter-dropdown {
   position: absolute;
   top: 120%;
   right: 0;
-  background-color: #ffffff;
-  border-radius: 12px;
-  padding: 5px;
   z-index: 1000;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  border: 1px solid #eee;
-  min-width: 160px;
   display: flex;
   flex-direction: column;
+  min-width: 160px;
+  padding: 5px;
+  background-color: #ffffff;
+  border: 1px solid #eeeeee;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
-/* Mengatur tampilan setiap pilihan di dalam menu filter cabang */
+/* Item pilihan pada dropdown filter */
 .dropdown-item {
   padding: 10px 15px;
+  background-color: transparent;
+  color: #444444;
   border-radius: 8px;
-  cursor: pointer;
   font-size: 13px;
   font-weight: 600;
-  background-color: transparent;
-  color: #444;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
-/* Memberikan warna latar abu-abu muda saat pilihan di dropdown filter disorot kursor */
-.dropdown-item:hover { background-color: #f5f5f5; color: #111; }
+.dropdown-item:hover {
+  background-color: #f5f5f5;
+  color: #111111;
+}
 
-/* Mengatur gaya tulisan judul bagian (seperti judul tabel) agar terlihat tebal dan tegas */
+/* ============================================================================
+// SECTION & TABLE CARD
+// ============================================================================ */
+
+/* Judul section seperti tabel perizinan atau daftar pengajuan */
 .section-title {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #111111;
   font-size: 20px;
   font-weight: 800;
-  margin-top: 0; 
-  margin-bottom: 15px;
-  color: #111;
 }
 
-/* Memberikan jarak ekstra jika ada judul bagian yang muncul tepat setelah kotak tabel sebelumnya */
+/* Jarak tambahan untuk section yang muncul setelah card sebelumnya */
 .perizinan-card + .section-title {
-  margin-top: 35px; 
+  margin-top: 35px;
 }
 
-/* Desain kotak pembungkus tabel (card) dengan sudut tumpul, garis tepi, dan bayangan tipis */
+/* Kartu pembungkus tabel perizinan */
 .perizinan-card {
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #ddd;
-  margin-bottom: 30px;
-  min-height: 150px;
-  height: fit-content; 
-  overflow-x: auto;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
   display: flex;
   flex-direction: column;
+  min-height: 150px;
+  height: fit-content;
+  margin-bottom: 30px;
+  background: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+  overflow-x: auto;
 }
 
-/* Mengatur area judul di dalam kotak tabel dengan latar belakang hijau zaitun khas admin */
+/* Header hijau pada card tabel */
 .card-header-green {
-  background-color: #8dae12;
-  color: white;
-  padding: 15px 25px;
-  font-weight: 700;
-  font-size: 15px;
   flex-shrink: 0;
+  padding: 15px 25px;
+  background-color: #8dae12;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
 }
 
-/* Mengatur tata letak tabel agar memenuhi lebar kotak dan tetap rapi saat kolomnya banyak */
+/* ============================================================================
+// TABLE: PERIZINAN
+// ============================================================================ */
+
+/* Tabel utama perizinan */
 .table-izin {
   width: 100%;
+  min-width: 800px;
   border-collapse: collapse;
   table-layout: auto;
-  min-width: 800px;
 }
 
-/* Memberikan efek transisi warna latar saat baris tabel disorot kursor */
-.table-izin tbody tr { transition: background-color 0.2s ease; }
-.clickable-row { cursor: pointer; }
-.clickable-row:hover { background-color: #fdfdfd; }
-
-/* Desain kepala tabel (header) dengan warna latar abu-abu sangat muda dan teks yang tebal */
+/* Header tabel */
 .table-izin th {
-  text-align: left;
   padding: 14px 20px;
   background-color: #f9f9f9;
-  border-bottom: 2px solid #eee;
+  color: #333333;
+  border-bottom: 2px solid #eeeeee;
   font-size: 13px;
   font-weight: 700;
-  color: #333;
+  text-align: left;
   white-space: nowrap;
 }
 
-/* Mengatur tampilan isi sel tabel agar teksnya mudah dibaca dan posisinya berada di tengah secara vertikal */
+/* Sel data tabel */
 .table-izin td {
   padding: 14px 20px;
-  border-bottom: 1px solid #eee;
+  color: #444444;
+  border-bottom: 1px solid #eeeeee;
   font-size: 13px;
-  color: #444;
   vertical-align: middle;
 }
 
-/* Class pembantu untuk memaksa posisi teks berada di tengah */
-.text-center { text-align: center !important; }
-
-/* Mengatur tampilan khusus jika tabel dalam keadaan kosong agar terlihat estetik */
-.empty-state-cell {
-  text-align: center;
-  padding: 40px 20px !important;
-  color: #888 !important;
-  font-style: italic;
+.table-izin tbody tr {
+  transition: background-color 0.2s ease;
 }
 
-/* Desain dasar label jenis izin (outline style) dengan sudut melengkung */
+.table-izin tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Baris tabel yang dapat diklik */
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:hover {
+  background-color: #fdfdfd;
+}
+
+/* Class bantuan untuk perataan teks tengah */
+.text-center {
+  text-align: center !important;
+}
+
+/* Tampilan saat tabel kosong */
+.empty-state-cell {
+  padding: 40px 20px !important;
+  color: #888888 !important;
+  font-style: italic;
+  text-align: center;
+}
+
+/* Nama yang dapat diklik pada tabel */
+.clickable-name {
+  color: #111111;
+  font-weight: 600;
+}
+
+/* Teks untuk data yang sudah selesai diproses */
+.text-selesai {
+  color: #aaaaaa;
+  font-size: 12px;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+/* ============================================================================
+// BADGES: JENIS IZIN & STATUS
+// ============================================================================ */
+
+/* Badge jenis izin dengan gaya outline */
 .badge-jenis {
+  display: inline-block;
   padding: 5px 12px;
+  background-color: transparent;
+  border: 1px solid #cccccc;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
-  display: inline-block;
-  background-color: transparent;
-  border: 1px solid #ccc;
   white-space: nowrap;
 }
 
-/* Memberikan warna yang berbeda-beda untuk setiap kategori izin agar HRD mudah membedakannya secara visual */
-.badge-jenis.sakit { color: #ff3d00; border-color: #ff3d00; }
-.badge-jenis.pribadi { color: #f39c12; border-color: #f39c12; }
-.badge-jenis.lainnya { color: #607d8b; border-color: #607d8b; }
-.badge-jenis.keluar { color: #3498db; border-color: #3498db; }
-.badge-jenis.pulang { color: #9b59b6; border-color: #9b59b6; }
-.badge-jenis.khusus { color: #e67e22; border-color: #e67e22; }
-.badge-jenis.tahunan { color: #2ecc71; border-color: #2ecc71; }
+.badge-jenis.sakit {
+  color: #ff3d00;
+  border-color: #ff3d00;
+}
 
-/* Desain label status persetujuan (solid style) dengan warna latar yang kontras */
+.badge-jenis.pribadi {
+  color: #f39c12;
+  border-color: #f39c12;
+}
+
+.badge-jenis.lainnya {
+  color: #607d8b;
+  border-color: #607d8b;
+}
+
+.badge-jenis.keluar {
+  color: #3498db;
+  border-color: #3498db;
+}
+
+.badge-jenis.pulang {
+  color: #9b59b6;
+  border-color: #9b59b6;
+}
+
+.badge-jenis.khusus {
+  color: #e67e22;
+  border-color: #e67e22;
+}
+
+.badge-jenis.tahunan {
+  color: #2ecc71;
+  border-color: #2ecc71;
+}
+
+/* Badge status persetujuan dengan gaya solid */
 .badge-status {
+  display: inline-block;
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 700;
-  display: inline-block;
   white-space: nowrap;
 }
 
-/* Mengatur warna status: Oranye untuk menunggu, Hijau untuk disetujui, dan Merah untuk ditolak */
-.badge-status.pending { background-color: #f39c12; color: white; }
-.badge-status.approve { background-color: #2fb800; color: white; }
-.badge-status.reject { background-color: #ff1744; color: white; }
+.badge-status.pending {
+  background-color: #f39c12;
+  color: #ffffff;
+}
 
-/* Mengatur tata letak tombol aksi di dalam tabel agar tetap berjajar rapi dalam satu baris */
+.badge-status.approve {
+  background-color: #2fb800;
+  color: #ffffff;
+}
+
+.badge-status.reject {
+  background-color: #ff1744;
+  color: #ffffff;
+}
+
+/* ============================================================================
+// ACTION BUTTONS
+// ============================================================================ */
+
+/* Pembungkus tombol aksi pada tabel */
 .action-buttons {
   display: flex;
-  gap: 8px;
   justify-content: center;
   flex-wrap: nowrap;
+  gap: 8px;
 }
 
-/* Mengatur gaya dasar tombol setuju dan tolak agar terlihat kompak dan profesional */
-.btn-approve, .btn-reject {
-  color: white;
-  border: none;
+/* Tombol setuju dan tolak pada tabel */
+.btn-approve,
+.btn-reject {
   padding: 6px 12px;
+  color: #ffffff;
+  border: none;
   border-radius: 6px;
-  cursor: pointer;
-  font-weight: 700;
   font-size: 12px;
-  transition: 0.2s;
+  font-weight: 700;
   white-space: nowrap;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-/* Memberikan warna hijau untuk tombol setuju dan merah untuk tombol tolak */
-.btn-approve { background-color: #2fb800; }
-.btn-reject { background-color: #ff1744; }
+.btn-approve {
+  background-color: #2fb800;
+}
 
-.btn-approve:hover { background-color: #269c00; }
-.btn-reject:hover { background-color: #d50000; }
+.btn-approve:hover {
+  background-color: #269c00;
+}
 
-/* Mengatur teks keterangan untuk baris yang sudah diproses agar tidak mencolok */
-.text-selesai { color: #aaa; font-size: 12px; font-style: italic; white-space: nowrap; }
-.clickable-name { color: #111; font-weight: 600; }
+.btn-reject {
+  background-color: #ff1744;
+}
 
-/* Menghilangkan garis pembawah pada baris terakhir tabel agar terlihat lebih bersih */
-.table-izin tbody tr:last-child td { border-bottom: none; }
+.btn-reject:hover {
+  background-color: #d50000;
+}
 
-/* Mengatur latar belakang gelap transparan saat jendela modal muncul di layar */
+/* ============================================================================
+// MODAL: DETAIL PERIZINAN
+// ============================================================================ */
+
+/* Overlay gelap transparan saat modal aktif */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.45);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
   padding: 20px;
+  background: rgba(0, 0, 0, 0.45);
 }
 
-/* Desain kotak modal utama dengan sudut melengkung dan bayangan yang halus */
+/* Konten utama modal */
 .modal-content {
-  background: white;
-  padding: 35px 40px;
-  border-radius: 20px;
   width: 600px;
   max-width: 100%;
   max-height: 90vh;
-  overflow-y: auto;
+  padding: 35px 40px;
+  background: #ffffff;
+  border-radius: 20px;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
 }
 
-/* Mengatur bagian atas modal yang berisi judul dan tombol tutup */
+/* Header modal */
 .modal-header-modern {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 25px;
 }
 
 .modal-header-modern h2 {
+  margin: 0;
+  color: #111111;
   font-size: 20px;
   font-weight: 800;
-  color: #111;
-  margin: 0;
 }
 
-/* Mengatur desain tombol silang (X) untuk menutup modal */
+/* Tombol tutup modal */
 .modal-close-icon {
   background: none;
+  color: #aaaaaa;
   border: none;
   font-size: 28px;
-  color: #aaa;
-  cursor: pointer;
   line-height: 1;
+  cursor: pointer;
   transition: color 0.2s;
 }
 
-.modal-close-icon:hover { color: #111; }
+.modal-close-icon:hover {
+  color: #111111;
+}
 
-/* Mengatur jarak antar konten di dalam badan modal */
+/* Badan modal */
 .modal-body-modern {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-/* Mengatur tata letak agar dua bidang input bisa berjajar dalam satu baris */
-.modal-row-split { display: flex; gap: 20px; }
-
-/* Mengatur grup label dan nilai data di dalam modal */
-.modal-field-group {
+/* Baris dua kolom di dalam modal */
+.modal-row-split {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1;
+  gap: 20px;
 }
 
-.modal-field-label { font-size: 13px; font-weight: 700; color: #111; }
+/* Grup label dan nilai pada modal */
+.modal-field-group {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+}
 
-/* Desain kotak tampilan nilai data (read-only) di dalam modal agar terlihat rapi */
+.modal-field-label {
+  color: #111111;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Kotak nilai read-only pada modal */
 .modal-field-value {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
   padding: 12px 15px;
   background-color: #fdfdfd;
+  color: #555555;
   border: 1px solid #ebebeb;
   border-radius: 10px;
   font-size: 14px;
-  color: #555;
-  min-height: 44px;
+}
+
+/* Kotak pratinjau foto pada modal */
+.modal-foto-box {
   display: flex;
   align-items: center;
-}
-/* Mengatur kotak pratinjau foto di dalam modal dengan garis tepi putus-putus jika foto belum tersedia */
-.modal-foto-box {
+  justify-content: center;
   width: 100%;
   height: 150px;
-  background-color: #eee;
+  background-color: #eeeeee;
+  color: #888888;
+  border: 1px dashed #cccccc;
   border-radius: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #888;
   font-size: 14px;
-  border: 1px dashed #ccc;
   overflow: hidden;
 }
 
-/* Mengatur posisi tombol aksi di bagian bawah modal agar rapi di sebelah kanan */
+/* Footer tombol aksi modal */
 .modal-footer-modern {
   display: flex;
   justify-content: flex-end;
@@ -666,71 +837,82 @@
   margin-top: 30px;
 }
 
-/* Desain tombol setuju dan tolak versi besar di dalam modal dengan efek transisi halus */
-.btn-approve-modern, .btn-reject-modern {
-  color: white;
+/* Tombol setuju dan tolak pada modal */
+.btn-approve-modern,
+.btn-reject-modern {
   padding: 12px 30px;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 14px;
+  color: #ffffff;
   border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s;
 }
 
-.btn-approve-modern { background: #2fb800; }
-.btn-approve-modern:hover { background: #269c00; }
+.btn-approve-modern {
+  background: #2fb800;
+}
 
-.btn-reject-modern { background: #ff1744; }
-.btn-reject-modern:hover { background: #d50000; }
+.btn-approve-modern:hover {
+  background: #269c00;
+}
 
-/* Menyembunyikan elemen navigasi mobile secara default pada tampilan layar besar (Desktop) */
-.mobile-topbar, .btn-sidebar-close, .sidebar-overlay { display: none; }
+.btn-reject-modern {
+  background: #ff1744;
+}
 
-/* Pengaturan khusus untuk layar HP: mengubah arah susunan halaman dan latar belakang */
+.btn-reject-modern:hover {
+  background: #d50000;
+}
+
+/* ============================================================================
+// RESPONSIVE: MOBILE
+// ============================================================================ */
+
 @media (max-width: 768px) {
+  /* Mengubah layout utama menjadi vertikal untuk perangkat mobile */
   .hrd-container {
+    position: relative;
     flex-direction: column;
     height: 100vh;
-    overflow: hidden;
-    position: relative;
     background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%);
+    overflow: hidden;
   }
 
-  /* Menampilkan bar navigasi atas khusus untuk pengguna HP agar bisa membuka menu */
+  /* Bar navigasi atas khusus mobile */
   .mobile-topbar {
+    position: relative;
+    z-index: 200;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-shrink: 0;
     padding: 16px 20px;
     background: transparent;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 200;
   }
 
-/* Mengatur tampilan logo di bar atas HP agar berwarna putih bersih */
+  /* Logo pada topbar mobile */
   .mobile-topbar-logo {
+    display: block;
     width: 130px;
     height: auto;
-    display: block;
     filter: grayscale(100%) brightness(0) invert(1) contrast(1000%);
   }
 
-  /* Mendesain tombol menu tiga garis (hamburger) agar mudah diklik di layar sentuh */
+  /* Tombol hamburger untuk membuka sidebar mobile */
   .btn-hamburger {
-    background: transparent;
-    border: none;
-    cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 5px;
     padding: 4px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
   }
 
-  /* Mengatur ukuran dan warna tiga garis putih pada tombol menu HP */
   .btn-hamburger span {
     display: block;
     width: 26px;
@@ -739,126 +921,228 @@
     border-radius: 3px;
   }
 
-  /* Mengatur lapisan latar belakang gelap (overlay) saat menu samping HP sedang terbuka */
+  /* Overlay untuk menutup area belakang saat sidebar mobile terbuka */
   .sidebar-overlay {
-    display: block;
     position: fixed;
     inset: 0;
-    background-color: rgba(0, 0, 0, 0.45);
     z-index: 300;
+    display: block;
+    background-color: rgba(0, 0, 0, 0.45);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
   }
-  
-  /* Memunculkan lapisan gelap saat status sidebar aktif */
-  .sidebar-overlay.active { opacity: 1; pointer-events: all; }
 
-  /* Mengatur posisi sidebar di HP agar tersembunyi di kiri dan muncul dengan animasi geser halus */
+  .sidebar-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* Sidebar mobile tersembunyi di sisi kiri secara default */
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
+    z-index: 400;
     width: 280px;
     height: 100vh;
-    z-index: 400;
     padding: 25px 20px;
+    background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%);
     transform: translateX(-100%);
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%);
   }
-  
-  /* Menampilkan sidebar saat status 'open' aktif */
-  .sidebar.open { transform: translateX(0); }
 
-  /* Mengatur tombol silang (tutup) di dalam sidebar agar posisinya berada di pojok kanan atas */
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* Tombol untuk menutup sidebar mobile */
   .btn-sidebar-close {
     display: flex;
     align-self: flex-end;
+    margin-bottom: 10px;
+    padding: 0 4px;
     background: transparent;
-    border: none;
     color: #ffffff;
+    border: none;
     font-size: 28px;
     font-weight: 300;
-    cursor: pointer;
     line-height: 1;
-    padding: 0 4px;
+    cursor: pointer;
+  }
+
+  .logo-area {
+    margin-top: 10px;
+    margin-bottom: 20px !important;
+  }
+
+  .logo-img {
+    max-width: 180px;
+  }
+
+  /* Menjaga menu mobile tetap putih dan bersih */
+  .menu-item {
+    background-color: transparent;
+    color: #ffffff;
+    border: none;
+    box-shadow: none;
+  }
+
+  .menu-item .menu-icon-main {
+    filter: brightness(0) invert(1);
+  }
+
+  .menu-item .menu-text-main {
+    color: #ffffff;
+  }
+
+  .menu-item .arrow-icon-main {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+  }
+
+  /* Status aktif menu pada tampilan mobile */
+  .menu-item.active {
+    background-color: #2fb800 !important;
+    color: #ffffff !important;
+    border: 1px solid #2fb800;
+    box-shadow: 0 4px 15px rgba(47, 184, 0, 0.35);
+  }
+
+  .menu-item.active .menu-icon-main,
+  .menu-item.active .arrow-icon-main {
+    filter: brightness(0) invert(1) !important;
+    opacity: 1;
+  }
+
+  .menu-item.active .menu-text-main {
+    color: #ffffff !important;
+  }
+
+  /* Menyesuaikan submenu pada tampilan mobile */
+  .submenu-container {
+    padding-left: 15px;
+  }
+
+  .submenu-item {
+    color: #ffffff;
+    font-size: 14px;
+  }
+
+  .submenu-item .submenu-icon {
+    filter: brightness(0) invert(1);
+  }
+
+  .submenu-item.active-sub {
+    background-color: #2fb800 !important;
+    color: #ffffff !important;
+  }
+
+  .submenu-item.active-sub .submenu-icon {
+    filter: brightness(0) invert(1) !important;
+  }
+
+  /* Konten utama mobile dibuat memenuhi sisa layar dengan sudut atas melengkung */
+  .main-content {
+    position: static;
+    display: block;
+    flex: 1;
+    margin: 0;
+    padding: 25px 20px;
+    background-color: #fdfdfd;
+    border-radius: 28px 28px 0 0;
+  }
+
+  .header-titles {
+    margin-bottom: 15px;
+  }
+
+  .header-titles h1 {
+    font-size: 24px !important;
+  }
+
+  .header-titles p {
+    font-size: 13px !important;
+  }
+
+  .action-row-perizinan {
+    justify-content: flex-end;
     margin-bottom: 10px;
   }
 
-  /* Mengatur ulang jarak area logo agar lebih pas di layar HP yang sempit */
-  .logo-area { margin-top: 10px; margin-bottom: 20px !important; }
-  .logo-img { max-width: 180px; }
-
-  /* Menyesuaikan warna menu di sidebar HP agar tetap konsisten menggunakan warna putih dan hijau terang */
-  .menu-item { background-color: transparent; color: #ffffff; border: none; box-shadow: none; }
-  .menu-item .menu-icon-main { filter: brightness(0) invert(1); }
-  .menu-item .menu-text-main { color: #ffffff; }
-  .menu-item .arrow-icon-main { filter: brightness(0) invert(1); opacity: 0.8; }
-  .menu-item.active { background-color: #2fb800 !important; color: #ffffff !important; border: 1px solid #2fb800; box-shadow: 0 4px 15px rgba(47, 184, 0, 0.35); }
-  .menu-item.active .menu-icon-main, .menu-item.active .arrow-icon-main { filter: brightness(0) invert(1) !important; opacity: 1; }
-  .menu-item.active .menu-text-main { color: #ffffff !important; }
-
-  /* Menyesuaikan tampilan anak menu (submenu) di HP agar tidak terlalu menjorok ke dalam */
-  .submenu-container { padding-left: 15px; }
-  .submenu-item { color: #ffffff; font-size: 14px; }
-  .submenu-item .submenu-icon { filter: brightness(0) invert(1); }
-  .submenu-item.active-sub { background-color: #2fb800 !important; color: #ffffff !important; }
-  .submenu-item.active-sub .submenu-icon { filter: brightness(0) invert(1) !important; }
-
-  /* Mengubah area konten utama di HP agar melengkung di bagian atas saja dan mengisi sisa layar */
-  .main-content {
-    position: static;
-    flex: 1;
-    border-radius: 28px 28px 0 0;
-    padding: 25px 20px;
-    margin: 0;
-    display: block;
+  .btn-filter-green {
+    padding: 8px 16px;
+    font-size: 12px;
   }
 
-  /* Mengecilkan ukuran teks judul dan keterangan halaman agar muat di layar HP */
-  .header-titles { margin-bottom: 15px; }
-  .header-titles h1 { font-size: 24px !important; }
-  .header-titles p { font-size: 13px !important; }
-
-  /* Mengatur posisi tombol aksi di HP agar tetap rapi di sisi kanan */
-  .action-row-perizinan {
-    justify-content: flex-end;
-    margin-bottom: 10px; 
+  .section-title {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 16px;
   }
-  
-  /* Menyesuaikan ukuran tombol filter agar lebih kecil dan pas untuk layar HP */
-  .btn-filter-green { padding: 8px 16px; font-size: 12px; }
 
-  /* Mengatur judul tabel (section) di HP agar lebih proporsional */
-  .section-title { font-size: 16px; margin-top: 0; margin-bottom: 10px; }
-  .perizinan-card + .section-title { margin-top: 25px; }
+  .perizinan-card + .section-title {
+    margin-top: 25px;
+  }
 
-  /* Menyesuaikan tinggi dan bentuk kartu tabel perizinan untuk tampilan mobile */
   .perizinan-card {
-    margin-bottom: 20px;
-    border-radius: 12px;
     min-height: 130px;
     height: fit-content;
+    margin-bottom: 20px;
+    border-radius: 12px;
   }
-  
-  /* Mengecilkan ukuran teks dan ruang dalam (padding) pada kepala tabel khusus di layar HP */
-  .card-header-green { font-size: 13px; padding: 12px 15px; }
 
-  /* Mengubah tata letak formulir absensi manual dari dua kolom menjadi satu kolom saja agar tidak sempit */
-  .absen-form-grid { grid-template-columns: 1fr; row-gap: 15px; }
-  .full-width { grid-column: span 1; }
+  .card-header-green {
+    padding: 12px 15px;
+    font-size: 13px;
+  }
 
-  /* Mengatur tombol simpan dan batal di HP agar tersusun vertikal dan memenuhi lebar layar */
-  .form-actions-bottom { grid-column: span 1; flex-direction: column-reverse; gap: 10px; margin-top: 10px; }
-  .btn-simpan-green, .btn-batal-red { width: 100%; text-align: center; }
+  /* Form absensi manual dibuat satu kolom agar nyaman di layar kecil */
+  .absen-form-grid {
+    grid-template-columns: 1fr;
+    row-gap: 15px;
+  }
 
-  /* Menyesuaikan ukuran kotak modal (pop-up) dan jarak dalamnya agar nyaman dilihat di layar HP */
-  .modal-content { padding: 25px 20px; border-radius: 16px; }
-  .modal-header-modern h2 { font-size: 18px; }
+  .full-width {
+    grid-column: span 1;
+  }
 
-  /* Mengubah baris input di dalam modal menjadi satu kolom dan menyusun tombol aksi secara vertikal */
-  .modal-row-split { flex-direction: column; gap: 12px; }
-  .modal-footer-modern { flex-direction: column-reverse; gap: 10px; }
-  .btn-approve-modern, .btn-reject-modern { width: 100%; text-align: center; }
+  .form-actions-bottom {
+    grid-column: span 1;
+    flex-direction: column-reverse;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .btn-simpan-green,
+  .btn-batal-red {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Modal mobile dibuat lebih ringkas */
+  .modal-content {
+    padding: 25px 20px;
+    border-radius: 16px;
+  }
+
+  .modal-header-modern h2 {
+    font-size: 18px;
+  }
+
+  .modal-row-split {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .modal-footer-modern {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+
+  .btn-approve-modern,
+  .btn-reject-modern {
+    width: 100%;
+    text-align: center;
+  }
 }

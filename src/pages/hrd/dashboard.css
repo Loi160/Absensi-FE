@@ -1,6 +1,10 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
-/* Reset dasar untuk menghapus jarak bawaan browser dan mengatur font utama seluruh halaman */
+/* ============================================================================
+// RESET & GLOBAL STYLES
+// ============================================================================ */
+
+/* Menghapus jarak bawaan browser dan menerapkan font utama pada seluruh elemen */
 * {
   margin: 0;
   padding: 0;
@@ -8,64 +12,101 @@
   font-family: "Inter", sans-serif;
 }
 
-/* Mengatur pembungkus utama dashboard dengan latar belakang gradasi hijau yang memenuhi layar */
+/* ============================================================================
+// LAYOUT UTAMA
+// ============================================================================ */
+
+/* Pembungkus utama dashboard dengan latar belakang gradasi hijau */
 .hrd-container {
+  position: relative;
   display: flex;
   width: 100vw;
   height: 100vh;
   background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
   overflow: hidden;
-  position: relative;
 }
-/* Mengatur ukuran, warna teks, dan tata letak panel samping (sidebar) */
+
+/* Panel utama konten dashboard */
+.main-content {
+  position: absolute;
+  top: 25px;
+  right: 35px;
+  bottom: 25px;
+  left: 310px;
+  display: flex;
+  flex-direction: column;
+  padding: 40px;
+  margin: 0;
+  background-color: #fdfdfd;
+  border-radius: 40px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  overflow-y: auto !important;
+  overflow-x: hidden;
+}
+
+/* ============================================================================
+// SIDEBAR & NAVIGATION
+// ============================================================================ */
+
+/* Kolom navigasi samping utama */
 .sidebar {
-  width: 300px;
-  padding: 25px 25px;
-  color: white;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  width: 300px;
   height: 100vh;
+  padding: 25px;
+  color: #ffffff;
 }
-/* Mengatur area logo di dalam sidebar, termasuk mengubah warna logo menjadi putih bersih (filter) */
+
+/* Area logo pada sidebar */
 .logo-area {
   margin-top: 38px;
   margin-bottom: 26px !important;
   padding-left: 10px;
 }
 
+/* Menjaga logo tetap berwarna putih menggunakan filter CSS */
 .logo-img {
+  display: block;
   width: 100%;
   max-width: 250px;
   height: auto;
-  display: block;
   filter: grayscale(100%) brightness(0) invert(1) contrast(1000%) !important;
 }
-/* Mengatur jarak antar item menu navigasi di dalam sidebar */
+
+/* Grup menu navigasi utama */
 .menu-nav {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
-/* Mengatur gaya dasar setiap item menu, seperti susunan ikon, teks, dan animasi transisi saat berinteraksi */
+
+/* Item menu navigasi */
 .menu-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px 20px;
+  color: #ffffff;
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
-  color: #fff;
 }
 
+/* Efek hover untuk menu yang tidak sedang aktif */
+.menu-item:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Area kiri menu yang berisi ikon dan teks */
 .menu-left {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
-/* Mengatur ukuran dan warna putih untuk ikon menu utama serta ikon panah tambahan */
+/* Ikon utama pada setiap item menu */
 .menu-icon-main {
   width: 28px;
   height: 28px;
@@ -73,12 +114,14 @@
   transition: all 0.3s ease;
 }
 
+/* Teks menu utama */
 .menu-text-main {
   font-size: 18px;
   font-weight: 600;
   transition: all 0.3s ease;
 }
 
+/* Ikon panah pada item menu */
 .arrow-icon-main {
   width: 20px;
   height: 20px;
@@ -86,45 +129,73 @@
   opacity: 0.8;
   transition: all 0.3s ease;
 }
-/* Mengatur tampilan item menu saat sedang aktif/dipilih, mengubah warna latar menjadi putih dan teks menjadi hijau */
+
+/* Status aktif menu pada tampilan desktop */
 .menu-item.active {
   background-color: #ffffff !important;
   color: #2fb800 !important;
   border: 1px solid #ffffff;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
-/* Mengubah warna ikon (menggunakan filter) menjadi hijau agar senada dengan teks saat menu aktif */
+
 .menu-item.active .menu-icon-main,
 .menu-item.active .arrow-icon-main {
-  filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg) brightness(95%) contrast(105%) !important;
+  filter: invert(48%) sepia(89%) saturate(1800%) hue-rotate(85deg)
+    brightness(95%) contrast(105%) !important;
   opacity: 1;
 }
 
 .menu-item.active .menu-text-main {
   color: #2fb800 !important;
 }
-/* Memberikan efek warna transparan saat kursor diarahkan ke menu yang tidak sedang aktif */
-.menu-item:hover:not(.active) {
-  background-color: rgba(255, 255, 255, 0.15);
+
+/* Area bawah sidebar untuk tombol logout */
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 25px;
+  padding-bottom: 15px;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Mengatur area konten utama (kanan) seperti kotak putih besar dengan sudut melengkung dan efek bayangan halus */
-.main-content {
-  position: absolute;
-  top: 25px;
-  bottom: 25px;
-  left: 310px;
-  right: 35px;
-  background-color: #fdfdfd;
-  border-radius: 40px;
-  padding: 40px;
-  overflow-y: auto !important;
-  overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+/* Tombol keluar dari sistem */
+.btn-logout {
+  width: 100%;
+  padding: 12px 0;
+  background: transparent;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 50px;
+  font-family: "Inter", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
-/* Mengatur desain batang gulir (scrollbar) agar terlihat lebih minimalis dan modern */
+
+.btn-logout:hover {
+  background-color: #ffffff !important;
+  color: #2fb800 !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ============================================================================
+// MOBILE NAVIGATION DEFAULT STATE
+// ============================================================================ */
+
+/* Elemen khusus mobile disembunyikan secara default pada desktop */
+.mobile-topbar,
+.btn-sidebar-close,
+.sidebar-overlay {
+  display: none;
+}
+
+/* ============================================================================
+// SCROLLBAR: MAIN CONTENT
+// ============================================================================ */
+
+/* Mengatur tampilan scrollbar pada area konten utama */
 .main-content::-webkit-scrollbar {
   width: 8px;
 }
@@ -142,7 +213,12 @@
 .main-content::-webkit-scrollbar-thumb:hover {
   background-color: #8dae12;
 }
-/* Mengatur tata letak bagian judul dan subjudul di dalam dashboard */
+
+/* ============================================================================
+// HEADER DASHBOARD
+// ============================================================================ */
+
+/* Area judul dan subjudul dashboard */
 .dashboard-header-area {
   display: flex;
   flex-direction: column;
@@ -150,68 +226,62 @@
   margin-bottom: 20px;
 }
 
+/* Judul utama dashboard */
 .dashboard-title {
+  margin: 0 0 5px 0;
+  color: #111111;
   font-size: 32px;
   font-weight: 700;
-  color: #111;
-  margin: 0 0 5px 0;
   letter-spacing: -0.5px;
 }
 
+/* Subjudul dashboard */
 .dashboard-subtitle {
-  color: #666;
-  font-size: 15px;
   margin: 0;
+  color: #666666;
+  font-size: 15px;
 }
-/* Mengatur posisi baris filter agar berada di sisi kanan halaman */
+
+/* ============================================================================
+// FILTER DASHBOARD
+// ============================================================================ */
+
+/* Baris filter dashboard di sisi kanan */
 .dashboard-filter-row {
+  position: relative;
+  z-index: 20;
   display: flex;
   justify-content: flex-end;
   margin-bottom: 15px;
-  position: relative;
-  z-index: 20;
 }
-/* Mengatur kotak putih pembungkus grafik kehadiran, termasuk bayangan dan jarak di dalamnya */
-.dashboard-chart-box {
-  background: white;
-  border-radius: 20px;
-  padding: 30px;
-  border: 1px solid #eee;
-  height: 360px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-  margin-bottom: 25px;
-  width: 100%;
-}
-/* Memastikan elemen grafik di dalamnya mengisi seluruh ruang kotak pembungkus secara penuh */
-.chart-container-inner {
-  height: 100%;
-  width: 100%;
-}
-/* Mengatur posisi tombol filter dan desain tombolnya (warna hijau zaitun, sudut melengkung, dan bayangan) */
+
+/* Pembungkus tombol dan dropdown filter */
 .filter-wrapper {
   position: relative;
 }
 
+/* Tombol filter hijau */
 .btn-filter-green {
-  background: #8dae12;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 50px;
-  font-weight: 700;
-  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  padding: 10px 20px;
+  background: #8dae12;
+  color: #ffffff;
+  border: none;
+  border-radius: 50px;
   box-shadow: 0 4px 10px rgba(141, 174, 18, 0.3);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .btn-filter-green:hover {
   background: #7a9610;
 }
-/* Mengatur ikon panah pada filter dan animasi rotasi (berputar) saat menu filter dibuka */
+
+/* Ikon panah pada tombol filter */
 .filter-arrow {
   width: 10px;
   filter: brightness(0) invert(1);
@@ -221,54 +291,84 @@
 .filter-arrow.rotate {
   transform: rotate(180deg);
 }
-/* Mengatur kotak menu pilihan (dropdown) yang muncul di bawah tombol filter, termasuk bayangan dan batas garisnya */
+
+/* Dropdown pilihan filter */
 .filter-dropdown {
   position: absolute;
   top: 120%;
   right: 0;
-  background-color: #ffffff;
-  border-radius: 12px;
-  padding: 5px;
   z-index: 1000;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  border: 1px solid #eee;
-  min-width: 160px;
   display: flex;
   flex-direction: column;
+  min-width: 160px;
+  padding: 5px;
+  background-color: #ffffff;
+  border: 1px solid #eeeeee;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
-/* Mengatur tampilan setiap pilihan di dalam dropdown dan efek warna latar saat disorot kursor */
+
+/* Item pilihan pada dropdown filter */
 .dropdown-item {
   padding: 10px 15px;
+  background-color: transparent;
+  color: #444444;
   border-radius: 8px;
-  cursor: pointer;
   font-size: 13px;
   font-weight: 600;
-  background-color: transparent;
-  color: #444;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .dropdown-item:hover {
   background-color: #f5f5f5;
-  color: #111;
+  color: #111111;
 }
-/* Mengatur tata letak kotak-kotak statistik menjadi 4 kolom yang sejajar secara otomatis */
+
+/* ============================================================================
+// CHART DASHBOARD
+// ============================================================================ */
+
+/* Kotak pembungkus grafik dashboard */
+.dashboard-chart-box {
+  width: 100%;
+  height: 360px;
+  margin-bottom: 25px;
+  padding: 30px;
+  background: #ffffff;
+  border: 1px solid #eeeeee;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+}
+
+/* Area dalam chart agar grafik memenuhi ruang pembungkus */
+.chart-container-inner {
+  width: 100%;
+  height: 100%;
+}
+
+/* ============================================================================
+// STATISTIC CARDS
+// ============================================================================ */
+
+/* Grid kartu statistik dashboard */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
   flex-shrink: 0;
+  gap: 15px;
   padding-bottom: 20px;
 }
-/* Mengatur desain kartu statistik, warna teks, sudut melengkung, serta animasi "melayang" saat kartu disorot */
+
+/* Kartu statistik */
 .stat-card {
-  color: white;
-  padding: 22px 20px;
-  border-radius: 16px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   min-height: 115px;
+  padding: 22px 20px;
+  color: #ffffff;
+  border-radius: 16px;
   transition: transform 0.3s ease, filter 0.3s ease;
 }
 
@@ -276,111 +376,85 @@
   transform: translateY(-5px);
   filter: brightness(1.05);
 }
-/* Mengatur ukuran angka statistik agar terlihat besar dan mencolok, serta mengatur label keterangan di bawahnya */
+
+/* Angka utama pada kartu statistik */
 .stat-value {
+  margin-bottom: 6px;
   font-size: 40px;
   font-weight: 800;
   line-height: 1;
-  margin-bottom: 6px;
   letter-spacing: -1px;
 }
 
+/* Label keterangan pada kartu statistik */
 .stat-label {
+  margin: 0;
   font-size: 15px;
   font-weight: 600;
   opacity: 0.95;
-  margin: 0;
-}
-/* Mengatur area bawah sidebar untuk tombol logout, lengkap dengan garis pembatas transparan */
-.sidebar-footer {
-  margin-top: auto;
-  padding-top: 25px;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  text-align: center;
-  padding-bottom: 15px;
-}
-/* Mendesain tombol logout agar transparan dengan garis tepi, dan berubah menjadi putih saat kursor diarahkan (hover) */
-.btn-logout {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  color: #fff;
-  font-family: "Inter", sans-serif;
-  font-size: 20px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  padding: 12px 0;
-  width: 100%;
-  border-radius: 50px;
 }
 
-.btn-logout:hover {
-  background-color: #ffffff !important;
-  color: #2fb800 !important;
-  border-color: #ffffff !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-}
-/* Menyembunyikan elemen navigasi mobile (seperti tombol hamburger dan overlay) pada tampilan layar besar (Desktop) */
-.mobile-topbar {
-  display: none;
-}
+/* ============================================================================
+// RESPONSIVE: TABLET / LAPTOP KECIL
+// ============================================================================ */
 
-.btn-sidebar-close {
-  display: none;
-}
-
-.sidebar-overlay {
-  display: none;
-}
-/* Mengubah tata letak kartu statistik menjadi 2 kolom saat lebar layar di bawah 1200px (Layar Laptop sedang) */
 @media (max-width: 1200px) {
+  /* Mengubah grid statistik menjadi 2 kolom pada layar sedang */
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
-/* Mengatur tampilan khusus HP (Mobile): mengubah arah tata letak menjadi vertikal dan memunculkan bar navigasi atas (topbar) */
+
+/* ============================================================================
+// RESPONSIVE: MOBILE
+// ============================================================================ */
+
 @media (max-width: 768px) {
+  /* Mengubah layout utama menjadi vertikal untuk perangkat mobile */
   .hrd-container {
+    position: relative;
     flex-direction: column;
     height: 100vh;
-    overflow: hidden;
-    position: relative;
     background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%);
+    overflow: hidden;
   }
-  /* Mengatur baris paling atas di HP yang berisi logo putih dan tombol menu (hamburger) */
+
+  /* Bar navigasi atas khusus mobile */
   .mobile-topbar {
+    position: relative;
+    z-index: 200;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-shrink: 0;
     padding: 16px 20px;
     background: transparent;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 200;
   }
 
+  /* Logo pada topbar mobile */
   .mobile-topbar-logo {
+    display: block;
     width: 130px;
     height: auto;
-    display: block;
-    filter: grayscale(100%) brightness(0) invert(1) contrast(1000%);
     margin: 0;
     padding: 0;
+    filter: grayscale(100%) brightness(0) invert(1) contrast(1000%);
   }
-  /* Mengatur desain tombol menu tiga garis (hamburger) untuk navigasi di HP */
+
+  /* Tombol hamburger untuk membuka sidebar mobile */
   .btn-hamburger {
-    background: transparent;
-    border: none;
-    cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 5px;
-    padding: 4px;
     margin: 0;
+    padding: 4px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
   }
-  /* Mengatur tampilan tiga garis putih pada tombol menu (hamburger) untuk navigasi di HP */
+
   .btn-hamburger span {
     display: block;
     width: 26px;
@@ -389,62 +463,68 @@
     border-radius: 3px;
     transition: all 0.3s ease;
   }
-  /* Mengatur efek latar belakang gelap (transparan) yang menutupi konten saat menu samping sedang terbuka */
+
+  /* Overlay untuk menutup area belakang saat sidebar mobile terbuka */
   .sidebar-overlay {
-    display: block;
     position: fixed;
     inset: 0;
-    background-color: rgba(0, 0, 0, 0.45);
     z-index: 300;
+    display: block;
+    background-color: rgba(0, 0, 0, 0.45);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
   }
-  /* Memunculkan efek latar belakang gelap saat statusnya aktif */
+
   .sidebar-overlay.active {
     opacity: 1;
     pointer-events: all;
   }
-  /* Mengatur posisi panel samping (sidebar) di HP agar tersembunyi di kiri layar dan muncul dengan animasi geser */
+
+  /* Sidebar mobile tersembunyi di sisi kiri secara default */
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
+    z-index: 400;
     width: 280px;
     height: 100vh;
-    z-index: 400;
     padding: 25px 20px;
+    background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%);
     transform: translateX(-100%);
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    background: linear-gradient(180deg, #4cff00 0%, #2fb800 40%, #1f8f3d 100%);
   }
-  /* Menampilkan sidebar dengan menggesernya kembali ke posisi terlihat (tengah) */
+
   .sidebar.open {
     transform: translateX(0);
   }
-  /* Mengatur tombol tutup (ikon silang) di dalam sidebar mobile agar posisinya berada di pojok kanan atas menu */
+
+  /* Tombol untuk menutup sidebar mobile */
   .btn-sidebar-close {
     display: flex;
     align-self: flex-end;
+    margin-bottom: 10px;
+    padding: 0 4px;
     background: transparent;
-    border: none;
     color: #ffffff;
+    border: none;
     font-size: 28px;
     font-weight: 300;
-    cursor: pointer;
     line-height: 1;
-    padding: 0 4px;
-    margin-bottom: 10px;
+    cursor: pointer;
     transition: opacity 0.2s ease;
   }
-  /* Menyesuaikan jarak area logo dan ukuran maksimal logo khusus untuk tampilan menu di HP */
+
   .logo-area {
     margin-top: 10px;
     margin-bottom: 20px !important;
   }
 
-  .logo-img { max-width: 180px; }
-  /* Mengatur gaya item menu di HP agar teks dan ikonnya tetap berwarna putih bersih, baik saat normal maupun saat disorot (hover). */
+  .logo-img {
+    max-width: 180px;
+  }
+
+  /* Menjaga menu mobile tetap putih dan bersih */
   .menu-item {
     background-color: transparent;
     color: #ffffff;
@@ -452,12 +532,24 @@
     box-shadow: none;
   }
 
-  .menu-item .menu-icon-main { filter: brightness(0) invert(1); }
-  .menu-item .menu-text-main { color: #ffffff; }
-  .menu-item .arrow-icon-main { filter: brightness(0) invert(1); opacity: 0.8; }
-  .menu-item:hover:not(.active) { background-color: rgba(255, 255, 255, 0.15); }
-  
-  /* Memberikan penekanan pada menu yang aktif di HP dengan latar belakang hijau yang lebih terang dan efek bayangan (shadow) agar lebih terlihat. */
+  .menu-item .menu-icon-main {
+    filter: brightness(0) invert(1);
+  }
+
+  .menu-item .menu-text-main {
+    color: #ffffff;
+  }
+
+  .menu-item .arrow-icon-main {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+  }
+
+  .menu-item:hover:not(.active) {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  /* Status aktif menu pada tampilan mobile */
   .menu-item.active {
     background-color: #2fb800 !important;
     color: #ffffff !important;
@@ -466,36 +558,80 @@
   }
 
   .menu-item.active .menu-icon-main,
-  .menu-item.active .arrow-icon-main { filter: brightness(0) invert(1) !important; opacity: 1; }
-  .menu-item.active .menu-text-main { color: #ffffff !important; }
-  
-  /* Mengatur area konten utama di HP agar melengkung di bagian atas saja dan mengisi sisa ruang layar secara vertikal. */
+  .menu-item.active .arrow-icon-main {
+    filter: brightness(0) invert(1) !important;
+    opacity: 1;
+  }
+
+  .menu-item.active .menu-text-main {
+    color: #ffffff !important;
+  }
+
+  /* Konten utama mobile dibuat memenuhi sisa layar dengan sudut atas melengkung */
   .main-content {
     position: static;
     flex: 1;
-    border-radius: 28px 28px 0 0;
+    margin: 0;
     padding: 25px 20px;
+    background-color: #fdfdfd;
+    border-radius: 28px 28px 0 0;
     overflow-y: auto !important;
     overflow-x: hidden;
-    margin: 0;
-    background-color: #fdfdfd;
   }
-  /* Mengecilkan ukuran font judul, subjudul, tombol filter, dan kotak grafik agar pas dengan layar HP yang sempit. */
-  .dashboard-header-area { margin-bottom: 15px; }
-  .dashboard-title { font-size: 24px; margin-bottom: 4px; }
-  .dashboard-subtitle { font-size: 13px; }
-  
-  .dashboard-filter-row { margin-bottom: 15px; }
-  .btn-filter-green { padding: 8px 16px; font-size: 12px; }
 
-  .dashboard-chart-box { padding: 15px; height: 260px; border-radius: 16px; margin-bottom: 20px; }
-  
-  /* Mengatur grid statistik di HP menjadi 2 kolom dan menyesuaikan ukuran kartu serta angka di dalamnya agar tidak terlalu besar. */
-  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 25px; }
-  .stat-card { padding: 15px; min-height: 90px; border-radius: 12px; }
-  .stat-value { font-size: 32px; margin-bottom: 4px; }
-  .stat-label { font-size: 13px; }
-  
-  /* Memberikan jarak tambahan di bagian bawah sidebar mobile agar tombol logout tidak terlalu mepet ke pinggir layar. */
-  .sidebar-footer { margin-top: auto; padding-bottom: 30px; }
+  .dashboard-header-area {
+    margin-bottom: 15px;
+  }
+
+  .dashboard-title {
+    margin-bottom: 4px;
+    font-size: 24px;
+  }
+
+  .dashboard-subtitle {
+    font-size: 13px;
+  }
+
+  .dashboard-filter-row {
+    margin-bottom: 15px;
+  }
+
+  .btn-filter-green {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+
+  .dashboard-chart-box {
+    height: 260px;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 16px;
+  }
+
+  /* Grid statistik mobile dibuat 2 kolom agar tetap nyaman dibaca */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding-bottom: 25px;
+  }
+
+  .stat-card {
+    min-height: 90px;
+    padding: 15px;
+    border-radius: 12px;
+  }
+
+  .stat-value {
+    margin-bottom: 4px;
+    font-size: 32px;
+  }
+
+  .stat-label {
+    font-size: 13px;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding-bottom: 30px;
+  }
 }

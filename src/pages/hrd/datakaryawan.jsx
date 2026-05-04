@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { getAuthHeaders } from "../../context/AuthHeaders";
@@ -13,9 +13,25 @@ import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 import iconTambah from "../../assets/tambah.svg";
 
+// ============================================================================
+// CONSTANTS: API & NAVIGATION
+// ============================================================================
+
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+const AUTH_ERROR_STATUSES = [401, 403];
+
 const MENU_ITEMS = [
-  { path: "/hrd/dashboard", icon: iconDashboard, text: "Dashboard" },
-  { path: "/hrd/kelolacabang", icon: iconKelola, text: "Kelola Cabang" },
+  {
+    path: "/hrd/dashboard",
+    icon: iconDashboard,
+    text: "Dashboard",
+  },
+  {
+    path: "/hrd/kelolacabang",
+    icon: iconKelola,
+    text: "Kelola Cabang",
+  },
   {
     path: "/hrd/datakaryawan",
     icon: iconKaryawan,
@@ -28,45 +44,110 @@ const MENU_ITEMS = [
     text: "Kehadiran",
     hasArrow: true,
   },
-  { path: "/hrd/laporan", icon: iconLaporan, text: "Laporan" },
+  {
+    path: "/hrd/laporan",
+    icon: iconLaporan,
+    text: "Laporan",
+  },
 ];
+
+// ============================================================================
+// CONSTANTS: FORM OPTIONS
+// ============================================================================
 
 const ROLE_OPTIONS = [
-  { value: "karyawan", label: "Karyawan" },
-  { value: "managerCabang", label: "Manager Cabang" },
-  { value: "hrd", label: "HRD" },
+  {
+    value: "karyawan",
+    label: "Karyawan",
+  },
+  {
+    value: "managerCabang",
+    label: "Manager Cabang",
+  },
+  {
+    value: "hrd",
+    label: "HRD",
+  },
 ];
 
+const INITIAL_FORM_DATA = {
+  nama: "",
+  nik: "",
+  password: "",
+  role: "karyawan",
+  cabang_id: "",
+  jabatan: "",
+  divisi: "",
+  no_telp: "",
+  status: "Aktif",
+};
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+
+// Mengubah role dari backend menjadi label yang mudah dibaca pengguna.
 const getRoleLabel = (role) => {
-  if (role === "hrd") return "HRD";
-  if (role === "managerCabang") return "Manager Cabang";
+  if (role === "hrd") {
+    return "HRD";
+  }
+
+  if (role === "managerCabang") {
+    return "Manager Cabang";
+  }
+
   return "Karyawan";
 };
 
-const EyeOffIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-    <line x1="1" y1="1" x2="23" y2="23"></line>
-  </svg>
-);
+// Mengecek apakah response API menunjukkan sesi pengguna sudah tidak valid.
+const isAuthError = (status) => {
+  return AUTH_ERROR_STATUSES.includes(status);
+};
+
+// Membersihkan payload sebelum dikirim ke backend.
+const buildEmployeePayload = (formData) => {
+  return {
+    ...formData,
+    nama: formData.nama.trim(),
+    nik: formData.nik.trim(),
+    password: formData.password.trim(),
+    jabatan: formData.jabatan.trim(),
+    divisi: formData.divisi.trim(),
+    no_telp: formData.no_telp.trim(),
+  };
+};
+
+// ============================================================================
+// COMPONENTS: ICON
+// ============================================================================
+
+const EyeOffIcon = () => {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+      <line x1="1" y1="1" x2="23" y2="23"></line>
+    </svg>
+  );
+};
+
+// ============================================================================
+// COMPONENT: DATA KARYAWAN HRD
+// ============================================================================
 
 const DataKaryawanHRD = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const openSidebar = () => setSidebarOpen(true);
-  const closeSidebar = () => setSidebarOpen(false);
-
   const [karyawanList, setKaryawanList] = useState([]);
   const [cabangList, setCabangList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -76,33 +157,123 @@ const DataKaryawanHRD = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
 
-  const [formData, setFormData] = useState({
-    nama: "",
-    nik: "",
-    password: "",
-    role: "karyawan",
-    cabang_id: "",
-    jabatan: "",
-    divisi: "",
-    no_telp: "",
-    status: "Aktif",
-  });
+  const cabangUtamaList = useMemo(() => {
+    return cabangList.filter((cabang) => !cabang.parent_id);
+  }, [cabangList]);
 
+  const cabangOptions = useMemo(() => {
+    if (formData.role === "managerCabang") {
+      return cabangUtamaList;
+    }
+
+    return cabangList;
+  }, [cabangList, cabangUtamaList, formData.role]);
+
+  const filteredData = useMemo(() => {
+    return karyawanList.filter((karyawan) => {
+      return (
+        selectedCabang === "Semua Cabang" ||
+        karyawan.cabang?.nama === selectedCabang
+      );
+    });
+  }, [karyawanList, selectedCabang]);
+
+  // ============================================================================
+  // HANDLERS: AUTH & NAVIGATION
+  // ============================================================================
+
+  // Menghapus sesi pengguna dan mengarahkan kembali ke halaman login.
+  const handleLogout = () => {
+    logout();
+    navigate("/auth/login");
+  };
+
+  const openSidebar = () => {
+    setSidebarOpen(true);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
+  // Mengarahkan pengguna ke halaman yang dipilih dan menutup sidebar mobile.
+  const handleNav = (path) => {
+    closeSidebar();
+    navigate(path);
+  };
+
+  // Membuka halaman detail karyawan dengan membawa data karyawan yang dipilih.
+  const handleRowClick = (karyawan) => {
+    navigate("/hrd/detailkaryawan", {
+      state: {
+        employee: karyawan,
+      },
+    });
+  };
+
+  // ============================================================================
+  // HANDLERS: FORM STATE
+  // ============================================================================
+
+  const resetForm = () => {
+    setFormData(INITIAL_FORM_DATA);
+  };
+
+  const updateFormField = (field, value) => {
+    setFormData((previousData) => ({
+      ...previousData,
+      [field]: value,
+    }));
+  };
+
+  const handleOpenModal = () => {
+    resetForm();
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    if (saving) {
+      return;
+    }
+
+    setShowModal(false);
+    resetForm();
+  };
+
+  // Mengubah role sekaligus mengosongkan cabang agar pilihan penempatan tetap valid.
+  const handleRoleChange = (role) => {
+    setFormData((previousData) => ({
+      ...previousData,
+      role,
+      cabang_id: "",
+    }));
+  };
+
+  // Membatasi input NIK hanya angka agar validasi 8 digit lebih konsisten.
+  const handleNikInput = (event) => {
+    const numericValue = event.target.value.replace(/[^0-9]/g, "");
+
+    event.target.value = numericValue;
+    updateFormField("nik", numericValue);
+  };
+
+  // ============================================================================
+  // DATA FETCHING
+  // ============================================================================
+
+  // Mengambil data cabang dan karyawan dari backend.
   const fetchData = async () => {
     try {
       setLoading(true);
 
-      const resCabang = await fetch(
-        import.meta.env.VITE_API_URL + "/api/cabang",
-        {
-          headers: getAuthHeaders(),
-        }
-      );
+      const resCabang = await fetch(`${API_BASE_URL}/api/cabang`, {
+        headers: getAuthHeaders(),
+      });
 
-      if (resCabang.status === 401 || resCabang.status === 403) {
-        logout();
-        navigate("/auth/login");
+      if (isAuthError(resCabang.status)) {
+        handleLogout();
         return;
       }
 
@@ -112,16 +283,12 @@ const DataKaryawanHRD = () => {
         throw new Error(dataCabang.message || "Gagal mengambil data cabang");
       }
 
-      const resKaryawan = await fetch(
-        import.meta.env.VITE_API_URL + "/api/karyawan",
-        {
-          headers: getAuthHeaders(),
-        }
-      );
+      const resKaryawan = await fetch(`${API_BASE_URL}/api/karyawan`, {
+        headers: getAuthHeaders(),
+      });
 
-      if (resKaryawan.status === 401 || resKaryawan.status === 403) {
-        logout();
-        navigate("/auth/login");
+      if (isAuthError(resKaryawan.status)) {
+        handleLogout();
         return;
       }
 
@@ -135,9 +302,9 @@ const DataKaryawanHRD = () => {
 
       setCabangList(Array.isArray(dataCabang) ? dataCabang : []);
       setKaryawanList(Array.isArray(dataKaryawan) ? dataKaryawan : []);
-    } catch (err) {
-      console.error("Error fetching data:", err);
-      alert(err.message || "Gagal memuat data.");
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      alert(error.message || "Gagal memuat data.");
     } finally {
       setLoading(false);
     }
@@ -147,127 +314,80 @@ const DataKaryawanHRD = () => {
     fetchData();
   }, []);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/auth/login");
-  };
+  // ============================================================================
+  // VALIDATION & SUBMIT
+  // ============================================================================
 
-  const handleNav = (path) => {
-    closeSidebar();
-    navigate(path);
-  };
-
-  const handleRowClick = (karyawan) => {
-    navigate("/hrd/detailkaryawan", { state: { employee: karyawan } });
-  };
-
-  const resetForm = () => {
-    setFormData({
-      nama: "",
-      nik: "",
-      password: "",
-      role: "karyawan",
-      cabang_id: "",
-      jabatan: "",
-      divisi: "",
-      no_telp: "",
-      status: "Aktif",
-    });
-  };
-
-  const handleOpenModal = () => {
-    resetForm();
-    setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    if (saving) return;
-    setShowModal(false);
-    resetForm();
-  };
-
-  const handleRoleChange = (role) => {
-    setFormData((prev) => ({
-      ...prev,
-      role,
-      cabang_id: "",
-    }));
-  };
-
-  const cabangUtamaList = cabangList.filter((c) => !c.parent_id);
-
-  const cabangOptions =
-    formData.role === "managerCabang" ? cabangUtamaList : cabangList;
-
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-
+  // Memvalidasi input tambah karyawan sebelum dikirim ke backend.
+  const validateForm = () => {
     if (!formData.nama.trim()) {
       alert("Nama lengkap wajib diisi.");
-      return;
+      return false;
     }
 
     if (!/^\d{8}$/.test(formData.nik)) {
       alert("NIK harus berupa angka tepat 8 digit.");
-      return;
+      return false;
     }
 
     if (!formData.password.trim()) {
       alert("Password login wajib diisi.");
-      return;
+      return false;
     }
 
     if (!formData.role) {
       alert("Hak akses wajib dipilih.");
-      return;
+      return false;
     }
 
     if (!formData.cabang_id) {
       alert("Pilih cabang penempatan terlebih dahulu.");
-      return;
+      return false;
     }
 
     if (formData.role === "managerCabang") {
-      const selectedBranch = cabangList.find(
-        (c) => Number(c.id) === Number(formData.cabang_id)
-      );
+      const selectedBranch = cabangList.find((cabang) => {
+        return Number(cabang.id) === Number(formData.cabang_id);
+      });
 
       if (selectedBranch?.parent_id) {
         alert(
           "Manager Cabang hanya boleh ditempatkan pada cabang utama, bukan sub-cabang."
         );
-        return;
+        return false;
       }
     }
 
-    const payload = {
-      ...formData,
-      nama: formData.nama.trim(),
-      nik: formData.nik.trim(),
-      password: formData.password.trim(),
-      jabatan: formData.jabatan.trim(),
-      divisi: formData.divisi.trim(),
-      no_telp: formData.no_telp.trim(),
-    };
+    return true;
+  };
+
+  // Menyimpan data karyawan baru ke backend.
+  const handleFormSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    const payload = buildEmployeePayload(formData);
 
     try {
       setSaving(true);
 
-      const res = await fetch(import.meta.env.VITE_API_URL + "/api/karyawan", {
+      const response = await fetch(`${API_BASE_URL}/api/karyawan`, {
         method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify(payload),
       });
 
-      const result = await res.json().catch(() => ({}));
+      const result = await response.json().catch(() => ({}));
 
-      if (res.status === 401 || res.status === 403) {
-        logout();
-        navigate("/auth/login");
+      if (isAuthError(response.status)) {
+        handleLogout();
         return;
       }
 
-      if (!res.ok) {
+      if (!response.ok) {
         alert(
           result.detail
             ? `${result.message}\n\n${result.detail}`
@@ -280,24 +400,187 @@ const DataKaryawanHRD = () => {
       setShowModal(false);
       resetForm();
       fetchData();
-    } catch (err) {
-      console.error("Kesalahan jaringan:", err);
+    } catch (error) {
+      console.error("Kesalahan jaringan:", error);
       alert("Kesalahan jaringan. Pastikan backend sedang berjalan.");
     } finally {
       setSaving(false);
     }
   };
 
-  const filteredData = karyawanList.filter((k) => {
+  // ============================================================================
+  // RENDER HELPERS: SIDEBAR
+  // ============================================================================
+
+  const renderMenuItems = () => {
+    return MENU_ITEMS.map((item) => (
+      <div
+        key={item.path}
+        className={`menu-item ${item.active ? "active" : ""} ${
+          item.hasArrow ? "has-arrow" : ""
+        }`}
+        onClick={() => handleNav(item.path)}
+      >
+        <div className="menu-left">
+          <img src={item.icon} alt="" className="menu-icon-main" />
+          <span className="menu-text-main">{item.text}</span>
+        </div>
+
+        {item.hasArrow && (
+          <img src={iconBawah} alt="down" className="arrow-icon-main" />
+        )}
+      </div>
+    ));
+  };
+
+  // ============================================================================
+  // RENDER HELPERS: FILTER
+  // ============================================================================
+
+  const toggleFilter = () => {
+    setShowFilter((previousValue) => !previousValue);
+  };
+
+  const handleSelectCabang = (cabangName) => {
+    setSelectedCabang(cabangName);
+    setShowFilter(false);
+  };
+
+  const renderFilterDropdown = () => {
+    if (!showFilter) {
+      return null;
+    }
+
     return (
-      selectedCabang === "Semua Cabang" || k.cabang?.nama === selectedCabang
+      <div className="filter-dropdown">
+        <div
+          className="dropdown-item"
+          onClick={() => handleSelectCabang("Semua Cabang")}
+        >
+          Semua Cabang
+        </div>
+
+        {cabangList.map((cabang) => (
+          <div
+            key={cabang.id}
+            className="dropdown-item"
+            onClick={() => handleSelectCabang(cabang.nama)}
+          >
+            {cabang.nama}
+          </div>
+        ))}
+      </div>
     );
-  });
+  };
+
+  // ============================================================================
+  // RENDER HELPERS: TABLE
+  // ============================================================================
+
+  const renderEmptyTableRow = (message) => {
+    return (
+      <tr>
+        <td
+          colSpan="10"
+          style={{
+            textAlign: "center",
+            padding: "30px",
+            color: "#666",
+          }}
+        >
+          {message}
+        </td>
+      </tr>
+    );
+  };
+
+  const renderEmployeeRow = (karyawan) => {
+    const isActive = karyawan.status === "Aktif" || !karyawan.status;
+
+    return (
+      <tr key={karyawan.id} onClick={() => handleRowClick(karyawan)}>
+        <td className="dk-td-name">{karyawan.nama}</td>
+        <td>{karyawan.jabatan || "-"}</td>
+        <td>{karyawan.roleLabel || getRoleLabel(karyawan.role)}</td>
+        <td>{karyawan.nik}</td>
+        <td>
+          <div className="dk-pwd-mask">
+            <span>........</span>
+            <EyeOffIcon />
+          </div>
+        </td>
+        <td>{karyawan.cabang?.nama || "-"}</td>
+        <td>{karyawan.tempat_lahir || "-"}</td>
+        <td>{karyawan.tanggal_lahir || "-"}</td>
+        <td>{karyawan.alamat || "-"}</td>
+        <td className="text-center">
+          <span
+            className={`status-dot ${isActive ? "active" : "inactive"}`}
+          ></span>
+        </td>
+      </tr>
+    );
+  };
+
+  const renderTableBody = () => {
+    if (loading) {
+      return renderEmptyTableRow("Memuat data...");
+    }
+
+    if (filteredData.length === 0) {
+      return renderEmptyTableRow("Tidak ada karyawan.");
+    }
+
+    return filteredData.map((karyawan) => renderEmployeeRow(karyawan));
+  };
+
+  // ============================================================================
+  // RENDER HELPERS: FORM
+  // ============================================================================
+
+  const renderRoleNote = () => {
+    if (formData.role === "hrd") {
+      return (
+        <small
+          style={{
+            color: "#d9480f",
+            fontWeight: "600",
+          }}
+        >
+          Catatan: HRD aktif hanya boleh 1 orang.
+        </small>
+      );
+    }
+
+    if (formData.role === "managerCabang") {
+      return (
+        <small
+          style={{
+            color: "#d9480f",
+            fontWeight: "600",
+          }}
+        >
+          Manager Cabang hanya boleh ditempatkan di cabang utama.
+        </small>
+      );
+    }
+
+    return null;
+  };
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
 
   return (
     <div className="hrd-container">
       <div className="mobile-topbar">
-        <img src={logoPersegi} alt="AMAGACORP" className="mobile-topbar-logo" />
+        <img
+          src={logoPersegi}
+          alt="AMAGACORP"
+          className="mobile-topbar-logo"
+        />
+
         <button className="btn-hamburger" onClick={openSidebar}>
           <span></span>
           <span></span>
@@ -319,26 +602,7 @@ const DataKaryawanHRD = () => {
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
 
-        <nav className="menu-nav">
-          {MENU_ITEMS.map((item, index) => (
-            <div
-              key={index}
-              className={`menu-item ${item.active ? "active" : ""} ${
-                item.hasArrow ? "has-arrow" : ""
-              }`}
-              onClick={() => handleNav(item.path)}
-            >
-              <div className="menu-left">
-                <img src={item.icon} alt="" className="menu-icon-main" />
-                <span className="menu-text-main">{item.text}</span>
-              </div>
-
-              {item.hasArrow && (
-                <img src={iconBawah} alt="down" className="arrow-icon-main" />
-              )}
-            </div>
-          ))}
-        </nav>
+        <nav className="menu-nav">{renderMenuItems()}</nav>
 
         <div className="sidebar-footer">
           <button className="btn-logout" onClick={handleLogout}>
@@ -358,10 +622,7 @@ const DataKaryawanHRD = () => {
         <div className="dk-action-row">
           <div className="dk-action-group">
             <div className="filter-wrapper">
-              <button
-                className="btn-dk-filter"
-                onClick={() => setShowFilter(!showFilter)}
-              >
+              <button className="btn-dk-filter" onClick={toggleFilter}>
                 {selectedCabang}
                 <img
                   src={iconBawah}
@@ -375,32 +636,7 @@ const DataKaryawanHRD = () => {
                 />
               </button>
 
-              {showFilter && (
-                <div className="filter-dropdown">
-                  <div
-                    className="dropdown-item"
-                    onClick={() => {
-                      setSelectedCabang("Semua Cabang");
-                      setShowFilter(false);
-                    }}
-                  >
-                    Semua Cabang
-                  </div>
-
-                  {cabangList.map((c) => (
-                    <div
-                      key={c.id}
-                      className="dropdown-item"
-                      onClick={() => {
-                        setSelectedCabang(c.nama);
-                        setShowFilter(false);
-                      }}
-                    >
-                      {c.nama}
-                    </div>
-                  ))}
-                </div>
-              )}
+              {renderFilterDropdown()}
             </div>
 
             <button className="btn-dk-tambah" onClick={handleOpenModal}>
@@ -429,64 +665,7 @@ const DataKaryawanHRD = () => {
                 </tr>
               </thead>
 
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td
-                      colSpan="10"
-                      style={{
-                        textAlign: "center",
-                        padding: "30px",
-                        color: "#666",
-                      }}
-                    >
-                      Memuat data...
-                    </td>
-                  </tr>
-                ) : filteredData.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan="10"
-                      style={{
-                        textAlign: "center",
-                        padding: "30px",
-                        color: "#666",
-                      }}
-                    >
-                      Tidak ada karyawan.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredData.map((k) => {
-                    const isActive = k.status === "Aktif" || !k.status;
-
-                    return (
-                      <tr key={k.id} onClick={() => handleRowClick(k)}>
-                        <td className="dk-td-name">{k.nama}</td>
-                        <td>{k.jabatan || "-"}</td>
-                        <td>{k.roleLabel || getRoleLabel(k.role)}</td>
-                        <td>{k.nik}</td>
-                        <td>
-                          <div className="dk-pwd-mask">
-                            <span>........</span> <EyeOffIcon />
-                          </div>
-                        </td>
-                        <td>{k.cabang?.nama || "-"}</td>
-                        <td>{k.tempat_lahir || "-"}</td>
-                        <td>{k.tanggal_lahir || "-"}</td>
-                        <td>{k.alamat || "-"}</td>
-                        <td className="text-center">
-                          <span
-                            className={`status-dot ${
-                              isActive ? "active" : "inactive"
-                            }`}
-                          ></span>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
+              <tbody>{renderTableBody()}</tbody>
             </table>
           </div>
         </div>
@@ -494,7 +673,10 @@ const DataKaryawanHRD = () => {
 
       {showModal && (
         <div className="modal-overlay-clean" onClick={handleCloseModal}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="modal-card"
+            onClick={(event) => event.stopPropagation()}
+          >
             <h2 className="modal-title">Tambah Karyawan Baru</h2>
 
             <form onSubmit={handleFormSubmit}>
@@ -506,8 +688,8 @@ const DataKaryawanHRD = () => {
                     className="input-edit"
                     required
                     value={formData.nama}
-                    onChange={(e) =>
-                      setFormData({ ...formData, nama: e.target.value })
+                    onChange={(event) =>
+                      updateFormField("nama", event.target.value)
                     }
                   />
                 </div>
@@ -524,10 +706,7 @@ const DataKaryawanHRD = () => {
                     minLength="8"
                     title="NIK harus berisi 8 digit angka."
                     value={formData.nik}
-                    onInput={(e) => {
-                      e.target.value = e.target.value.replace(/[^0-9]/g, "");
-                      setFormData({ ...formData, nik: e.target.value });
-                    }}
+                    onInput={handleNikInput}
                   />
                 </div>
 
@@ -538,8 +717,8 @@ const DataKaryawanHRD = () => {
                     className="input-edit"
                     required
                     value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
+                    onChange={(event) =>
+                      updateFormField("password", event.target.value)
                     }
                   />
                 </div>
@@ -550,7 +729,7 @@ const DataKaryawanHRD = () => {
                     className="input-edit"
                     required
                     value={formData.role}
-                    onChange={(e) => handleRoleChange(e.target.value)}
+                    onChange={(event) => handleRoleChange(event.target.value)}
                   >
                     {ROLE_OPTIONS.map((role) => (
                       <option key={role.value} value={role.value}>
@@ -559,17 +738,7 @@ const DataKaryawanHRD = () => {
                     ))}
                   </select>
 
-                  {formData.role === "hrd" && (
-                    <small style={{ color: "#d9480f", fontWeight: "600" }}>
-                      Catatan: HRD aktif hanya boleh 1 orang.
-                    </small>
-                  )}
-
-                  {formData.role === "managerCabang" && (
-                    <small style={{ color: "#d9480f", fontWeight: "600" }}>
-                      Manager Cabang hanya boleh ditempatkan di cabang utama.
-                    </small>
-                  )}
+                  {renderRoleNote()}
                 </div>
 
                 <div className="form-group">
@@ -578,14 +747,15 @@ const DataKaryawanHRD = () => {
                     className="input-edit"
                     required
                     value={formData.cabang_id}
-                    onChange={(e) =>
-                      setFormData({ ...formData, cabang_id: e.target.value })
+                    onChange={(event) =>
+                      updateFormField("cabang_id", event.target.value)
                     }
                   >
                     <option value="">Pilih Cabang...</option>
-                    {cabangOptions.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.nama}
+
+                    {cabangOptions.map((cabang) => (
+                      <option key={cabang.id} value={cabang.id}>
+                        {cabang.nama}
                       </option>
                     ))}
                   </select>
@@ -597,8 +767,8 @@ const DataKaryawanHRD = () => {
                     className="input-edit"
                     required
                     value={formData.status}
-                    onChange={(e) =>
-                      setFormData({ ...formData, status: e.target.value })
+                    onChange={(event) =>
+                      updateFormField("status", event.target.value)
                     }
                   >
                     <option value="Aktif">Aktif</option>
@@ -612,8 +782,8 @@ const DataKaryawanHRD = () => {
                     type="text"
                     className="input-edit"
                     value={formData.no_telp}
-                    onChange={(e) =>
-                      setFormData({ ...formData, no_telp: e.target.value })
+                    onChange={(event) =>
+                      updateFormField("no_telp", event.target.value)
                     }
                   />
                 </div>
@@ -625,8 +795,8 @@ const DataKaryawanHRD = () => {
                     className="input-edit"
                     placeholder="Misal: Staff IT"
                     value={formData.jabatan}
-                    onChange={(e) =>
-                      setFormData({ ...formData, jabatan: e.target.value })
+                    onChange={(event) =>
+                      updateFormField("jabatan", event.target.value)
                     }
                   />
                 </div>
@@ -638,8 +808,8 @@ const DataKaryawanHRD = () => {
                     className="input-edit"
                     placeholder="Misal: Operasional"
                     value={formData.divisi}
-                    onChange={(e) =>
-                      setFormData({ ...formData, divisi: e.target.value })
+                    onChange={(event) =>
+                      updateFormField("divisi", event.target.value)
                     }
                   />
                 </div>
@@ -647,7 +817,10 @@ const DataKaryawanHRD = () => {
 
               <div
                 className="detail-footer"
-                style={{ marginTop: "20px", paddingBottom: "0" }}
+                style={{
+                  marginTop: "20px",
+                  paddingBottom: "0",
+                }}
               >
                 <button
                   type="button"

@@ -1,1 +1,6 @@
+/* ============================================================================
+// IMPORT: TAILWIND CSS
+// ============================================================================ */
+
+/* Memuat seluruh konfigurasi dan utility class dari Tailwind CSS */
 @import "tailwindcss";

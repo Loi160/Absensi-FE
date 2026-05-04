@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { getAuthHeaders } from "../../context/AuthHeaders";
@@ -16,7 +16,6 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
-
 import iconDashboard from "../../assets/dashboard.svg";
 import iconKelola from "../../assets/kelola.svg";
 import iconKaryawan from "../../assets/datakaryawan.svg";
@@ -25,7 +24,11 @@ import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 
-// Mendaftarkan elemen-elemen yang dibutuhkan oleh library Chart.js untuk menggambar grafik
+// ============================================================================
+// CHART: REGISTRATION
+// ============================================================================
+
+// Mendaftarkan elemen Chart.js yang dibutuhkan untuk menampilkan grafik garis.
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -33,19 +36,77 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend,
+  Legend
 );
 
-// Daftar menu navigasi yang akan ditampilkan pada sidebar (panel samping)
+// ============================================================================
+// CONSTANTS: API & NAVIGATION
+// ============================================================================
+
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 const MENU_ITEMS = [
-  { path: "/hrd/dashboard", icon: iconDashboard, text: "Dashboard", active: true },
-  { path: "/hrd/kelolacabang", icon: iconKelola, text: "Kelola Cabang" },
-  { path: "/hrd/datakaryawan", icon: iconKaryawan, text: "Data Karyawan" },
-  { path: "/hrd/kehadiran", icon: iconKehadiran, text: "Kehadiran", hasArrow: true },
-  { path: "/hrd/laporan", icon: iconLaporan, text: "Laporan" },
+  {
+    path: "/hrd/dashboard",
+    icon: iconDashboard,
+    text: "Dashboard",
+    active: true,
+  },
+  {
+    path: "/hrd/kelolacabang",
+    icon: iconKelola,
+    text: "Kelola Cabang",
+  },
+  {
+    path: "/hrd/datakaryawan",
+    icon: iconKaryawan,
+    text: "Data Karyawan",
+  },
+  {
+    path: "/hrd/kehadiran",
+    icon: iconKehadiran,
+    text: "Kehadiran",
+    hasArrow: true,
+  },
+  {
+    path: "/hrd/laporan",
+    icon: iconLaporan,
+    text: "Laporan",
+  },
 ];
 
-// Konfigurasi tampilan untuk grafik kehadiran (seperti posisi legenda, warna garis, dan ukuran font)
+const WEEKDAY_LABELS = [
+  "Senin",
+  "Selasa",
+  "Rabu",
+  "Kamis",
+  "Jumat",
+  "Sabtu",
+  "Minggu",
+];
+
+const DEFAULT_STATS = {
+  hadir: 0,
+  sakit: 0,
+  izin: 0,
+  cuti: 0,
+  terlambat: 0,
+  alpha: 0,
+};
+
+const DEFAULT_CHART_DATA = {
+  hadir: [],
+  sakit: [],
+  izin: [],
+  cuti: [],
+  terlambat: [],
+  alpha: [],
+};
+
+// ============================================================================
+// CONSTANTS: CHART CONFIGURATION
+// ============================================================================
+
 const optionsGrafik = {
   responsive: true,
   maintainAspectRatio: false,
@@ -55,7 +116,10 @@ const optionsGrafik = {
       labels: {
         usePointStyle: true,
         boxWidth: 8,
-        font: { size: 12, family: "'Inter', sans-serif" },
+        font: {
+          size: 12,
+          family: "'Inter', sans-serif",
+        },
         color: "#555",
       },
     },
@@ -64,97 +128,38 @@ const optionsGrafik = {
     y: {
       beginAtZero: true,
       suggestedMax: 10,
-      ticks: { stepSize: 5, color: "#999", font: { size: 11 } },
-      grid: { color: "#f0f0f0" },
+      ticks: {
+        stepSize: 5,
+        color: "#999",
+        font: {
+          size: 11,
+        },
+      },
+      grid: {
+        color: "#f0f0f0",
+      },
     },
     x: {
-      ticks: { color: "#999", font: { size: 11 } },
-      grid: { display: false },
+      ticks: {
+        color: "#999",
+        font: {
+          size: 11,
+        },
+      },
+      grid: {
+        display: false,
+      },
     },
   },
 };
 
-// Komponen utama halaman Dashboard HRD untuk menampilkan ringkasan data, grafik, dan mengelola state (data sementara)
-const DashboardHRD = () => {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+// ============================================================================
+// HELPERS: DATA BUILDER
+// ============================================================================
 
-  const [showFilter, setShowFilter] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState("Semua Cabang");
-  const [cabangList, setCabangList] = useState([]);
-
-  const [stats, setStats] = useState({
-    hadir: 0,
-    sakit: 0,
-    izin: 0,
-    cuti: 0,
-    terlambat: 0,
-    alpha: 0,
-  });
-
-  const [chartData, setChartData] = useState({
-    hadir: [],
-    sakit: [],
-    izin: [],
-    cuti: [],
-    terlambat: [],
-    alpha: [],
-  });
-  // Mengambil daftar nama cabang dari backend (API) saat user berhasil login, lalu menyimpannya ke state 'cabangList'
-  useEffect(() => {
-    if (user) {
-      const fetchCabang = async () => {
-        try {
-          const res = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/cabang`,
-            { 
-              headers: getAuthHeaders(),
-            }
-          );
-
-const data = await res.json();
-if (Array.isArray(data)) {
-  setCabangList(data.map((c) => c.nama));
-}
-        } catch (err) {
-          console.error(err);
-        }
-      };
-      fetchCabang();
-    }
-  }, [user]);
-  
-  // Mengambil data statistik kehadiran dan data grafik dari backend berdasarkan filter cabang yang dipilih
-  useEffect(() => {
-    if (user) {
-      const fetchStats = async () => {
-        try {
-          const res = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/dashboard/stats?sub_cabang=${selectedFilter}`,
-            { 
-              headers: getAuthHeaders(),
-            }
-          );
-          const data = await res.json();
-          
-          if (data && data.totals) setStats(data.totals);
-          if (data && data.chart) setChartData(data.chart);
-        } catch (err) {
-          console.error(err);
-        }
-      };
-      fetchStats();
-    }
-  }, [user, selectedFilter]);
-  
-  // Fungsi untuk mengeluarkan user dari sesi saat ini, menghapus data lokal, dan mengarahkannya kembali ke halaman login
-  const handleLogout = () => {
-  logout();
-  navigate("/auth/login");
-};
-  // Konfigurasi tampilan untuk kotak-kotak ringkasan statistik (warna, bayangan, dan nilai yang diambil dari state 'stats')
-  const statsCards = [
+// Menyusun konfigurasi kartu statistik berdasarkan data ringkasan dari backend.
+const buildStatsCards = (stats) => {
+  return [
     {
       label: "Hadir",
       value: stats.hadir,
@@ -192,10 +197,12 @@ if (Array.isArray(data)) {
       shadow: "rgba(26, 188, 156, 0.3)",
     },
   ];
-  
-  // Menyusun struktur data dan warna garis untuk grafik kehadiran berdasarkan hari dalam seminggu
-  const dataGrafik = {
-    labels: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"],
+};
+
+// Menyusun dataset grafik kehadiran berdasarkan data chart dari backend.
+const buildChartConfig = (chartData) => {
+  return {
+    labels: WEEKDAY_LABELS,
     datasets: [
       {
         label: "Hadir",
@@ -247,49 +254,230 @@ if (Array.isArray(data)) {
       },
     ],
   };
+};
+
+// ============================================================================
+// COMPONENT: DASHBOARD HRD
+// ============================================================================
+
+const DashboardHRD = () => {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState("Semua Cabang");
+  const [cabangList, setCabangList] = useState([]);
+  const [stats, setStats] = useState(DEFAULT_STATS);
+  const [chartData, setChartData] = useState(DEFAULT_CHART_DATA);
+
+  const statsCards = useMemo(() => {
+    return buildStatsCards(stats);
+  }, [stats]);
+
+  const dataGrafik = useMemo(() => {
+    return buildChartConfig(chartData);
+  }, [chartData]);
+
+  // ============================================================================
+  // HANDLERS: AUTH & NAVIGATION
+  // ============================================================================
+
+  // Menghapus sesi pengguna dan mengarahkan kembali ke halaman login.
+  const handleLogout = () => {
+    logout();
+    navigate("/auth/login");
+  };
+
+  const openSidebar = () => {
+    setSidebarOpen(true);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
+  // Mengarahkan pengguna ke halaman yang dipilih dan menutup sidebar mobile.
+  const handleNav = (path) => {
+    closeSidebar();
+    navigate(path);
+  };
+
+  // ============================================================================
+  // HANDLERS: FILTER
+  // ============================================================================
+
+  const toggleFilter = () => {
+    setShowFilter((previousValue) => !previousValue);
+  };
+
+  // Mengubah filter cabang dan menutup dropdown setelah cabang dipilih.
+  const handleSelectFilter = (value) => {
+    setSelectedFilter(value);
+    setShowFilter(false);
+  };
+
+  // ============================================================================
+  // DATA FETCHING
+  // ============================================================================
+
+  // Mengambil daftar nama cabang dari backend untuk pilihan filter dashboard.
+  const fetchCabang = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/cabang`, {
+        headers: getAuthHeaders(),
+      });
+
+      const data = await response.json();
+
+      if (Array.isArray(data)) {
+        setCabangList(data.map((cabang) => cabang.nama));
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Mengambil data statistik dan grafik berdasarkan filter cabang yang dipilih.
+  const fetchStats = async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/dashboard/stats?sub_cabang=${selectedFilter}`,
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data && data.totals) {
+        setStats(data.totals);
+      }
+
+      if (data && data.chart) {
+        setChartData(data.chart);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchCabang();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchStats();
+    }
+  }, [user, selectedFilter]);
+
+  // ============================================================================
+  // RENDER HELPERS
+  // ============================================================================
+
+  const renderMenuItems = () => {
+    return MENU_ITEMS.map((item) => (
+      <div
+        key={item.path}
+        className={`menu-item ${item.active ? "active" : ""} ${
+          item.hasArrow ? "has-arrow" : ""
+        }`}
+        onClick={() => handleNav(item.path)}
+      >
+        <div className="menu-left">
+          <img src={item.icon} alt="" className="menu-icon-main" />
+          <span className="menu-text-main">{item.text}</span>
+        </div>
+
+        {item.hasArrow && (
+          <img src={iconBawah} alt="" className="arrow-icon-main" />
+        )}
+      </div>
+    ));
+  };
+
+  const renderFilterDropdown = () => {
+    if (!showFilter) {
+      return null;
+    }
+
+    return (
+      <div className="filter-dropdown">
+        <div
+          className="dropdown-item"
+          onClick={() => handleSelectFilter("Semua Cabang")}
+        >
+          Semua Cabang
+        </div>
+
+        {cabangList.map((cabang) => (
+          <div
+            key={cabang}
+            className="dropdown-item"
+            onClick={() => handleSelectFilter(cabang)}
+          >
+            {cabang}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const renderStatsCards = () => {
+    return statsCards.map((item) => (
+      <div
+        className="stat-card"
+        key={item.label}
+        style={{
+          background: item.gradient,
+          boxShadow: `0 8px 20px ${item.shadow}`,
+        }}
+      >
+        <h1 className="stat-value">{item.value}</h1>
+        <p className="stat-label">{item.label}</p>
+      </div>
+    ));
+  };
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
 
   return (
     <div className="hrd-container">
       <div className="mobile-topbar">
-        <img src={logoPersegi} alt="AMAGACORP" className="mobile-topbar-logo" />
-        <button className="btn-hamburger" onClick={() => setSidebarOpen(true)}>
+        <img
+          src={logoPersegi}
+          alt="AMAGACORP"
+          className="mobile-topbar-logo"
+        />
+
+        <button className="btn-hamburger" onClick={openSidebar}>
           <span></span>
           <span></span>
           <span></span>
         </button>
       </div>
+
       <div
         className={`sidebar-overlay ${sidebarOpen ? "active" : ""}`}
-        onClick={() => setSidebarOpen(false)}
+        onClick={closeSidebar}
       />
 
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
-        <button className="btn-sidebar-close" onClick={() => setSidebarOpen(false)}>
+        <button className="btn-sidebar-close" onClick={closeSidebar}>
           ✕
         </button>
+
         <div className="logo-area">
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
-        <nav className="menu-nav">
-          {MENU_ITEMS.map((item, index) => (
-            <div
-              key={index}
-              className={`menu-item ${item.active ? "active" : ""} ${item.hasArrow ? "has-arrow" : ""}`}
-              onClick={() => {
-                setSidebarOpen(false);
-                navigate(item.path);
-              }}
-            >
-              <div className="menu-left">
-                <img src={item.icon} alt="" className="menu-icon-main" />
-                <span className="menu-text-main">{item.text}</span>
-              </div>
-              {item.hasArrow && (
-                <img src={iconBawah} alt="" className="arrow-icon-main" />
-              )}
-            </div>
-          ))}
-        </nav>
+
+        <nav className="menu-nav">{renderMenuItems()}</nav>
+
         <div className="sidebar-footer">
           <button className="btn-logout" onClick={handleLogout}>
             Log Out
@@ -307,10 +495,7 @@ if (Array.isArray(data)) {
 
         <div className="dashboard-filter-row">
           <div className="filter-wrapper">
-            <button
-              className="btn-filter-green"
-              onClick={() => setShowFilter(!showFilter)}
-            >
+            <button className="btn-filter-green" onClick={toggleFilter}>
               {selectedFilter}{" "}
               <img
                 src={iconBawah}
@@ -318,31 +503,8 @@ if (Array.isArray(data)) {
                 className={showFilter ? "filter-arrow rotate" : "filter-arrow"}
               />
             </button>
-            {showFilter && (
-              <div className="filter-dropdown">
-                <div
-                  className="dropdown-item"
-                  onClick={() => {
-                    setSelectedFilter("Semua Cabang");
-                    setShowFilter(false);
-                  }}
-                >
-                  Semua Cabang
-                </div>
-                {cabangList.map((c) => (
-                  <div
-                    key={c}
-                    className="dropdown-item"
-                    onClick={() => {
-                      setSelectedFilter(c);
-                      setShowFilter(false);
-                    }}
-                  >
-                    {c}
-                  </div>
-                ))}
-              </div>
-            )}
+
+            {renderFilterDropdown()}
           </div>
         </div>
 
@@ -352,21 +514,7 @@ if (Array.isArray(data)) {
           </div>
         </div>
 
-        <div className="stats-grid">
-          {statsCards.map((item, index) => (
-            <div
-              className="stat-card"
-              key={index}
-              style={{
-                background: item.gradient,
-                boxShadow: `0 8px 20px ${item.shadow}`,
-              }}
-            >
-              <h1 className="stat-value">{item.value}</h1>
-              <p className="stat-label">{item.label}</p>
-            </div>
-          ))}
-        </div>
+        <div className="stats-grid">{renderStatsCards()}</div>
       </main>
     </div>
   );
