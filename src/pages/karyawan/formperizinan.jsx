@@ -164,12 +164,12 @@ const FormPerizinan = () => {
       const result = await response.json();
 
       // Cek respon server, kalau sukses arahkan karyawan ke halaman riwayat
-      if (response.ok) {
-        alert("Pengajuan Berhasil Dikirim!");
-        navigate("/karyawan/riwayat");
-      } else {
-        alert(`Gagal: ${result.message}`);
-      }
+if (response.ok) {
+  alert("Pengajuan Berhasil Dikirim!");
+  navigate("/karyawan/riwayat");
+} else {
+  alert(`Gagal: ${result.message}${result.detail ? `\nDetail: ${result.detail}` : ""}`);
+}
     } catch (error) {
       console.error(error);
       alert(error.message || "Terjadi kesalahan jaringan.");

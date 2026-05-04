@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { getAuthHeaders } from "../../context/AuthHeaders";
 import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import "./laporan.css";
 
 import iconDashboard from "../../assets/dashboard.svg";
@@ -13,16 +15,19 @@ import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 
-// Konfigurasi daftar menu navigasi di sidebar dengan menu Laporan dalam keadaan aktif
 const MENU_ITEMS = [
   { path: "/hrd/dashboard", icon: iconDashboard, text: "Dashboard" },
   { path: "/hrd/kelolacabang", icon: iconKelola, text: "Kelola Cabang" },
   { path: "/hrd/datakaryawan", icon: iconKaryawan, text: "Data Karyawan" },
-  { path: "/hrd/kehadiran", icon: iconKehadiran, text: "Kehadiran", hasArrow: true },
+  {
+    path: "/hrd/kehadiran",
+    icon: iconKehadiran,
+    text: "Kehadiran",
+    hasArrow: true,
+  },
   { path: "/hrd/laporan", icon: iconLaporan, text: "Laporan", active: true },
 ];
 
-// Mengubah format tanggal mentah dari JavaScript menjadi format YYYY-MM-DD yang standar untuk database
 const formatDate = (dateObj) => {
   const yyyy = dateObj.getFullYear();
   const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
@@ -30,11 +35,13 @@ const formatDate = (dateObj) => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
-// Menghitung otomatis rentang tanggal cut-off bulanan (tanggal 26 bulan lalu s.d 25 bulan ini)
 const getCutoffDates = () => {
   const d = new Date();
   const date = d.getDate();
-  let start, end;
+
+  let start;
+  let end;
+
   if (date <= 25) {
     start = new Date(d.getFullYear(), d.getMonth() - 1, 26);
     end = new Date(d.getFullYear(), d.getMonth(), 25);
@@ -42,46 +49,43 @@ const getCutoffDates = () => {
     start = new Date(d.getFullYear(), d.getMonth(), 26);
     end = new Date(d.getFullYear(), d.getMonth() + 1, 25);
   }
+
   return { start, end };
 };
 
-// Memberikan warna peringatan (kuning, oranye, merah) pada baris tabel berdasarkan jumlah keterlambatan karyawan
 const getRowTerlambatClass = (jumlahTerlambat) => {
   const angka = parseInt(jumlahTerlambat, 10);
+
   if (isNaN(angka)) return "";
   if (angka === 3) return "row-warn-yellow";
   if (angka >= 4 && angka <= 5) return "row-warn-orange";
   if (angka >= 6) return "row-warn-red";
+
   return "";
 };
 
-// Komponen utama untuk menampilkan dan merekap laporan kehadiran seluruh karyawan
 const Laporan = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
-  // State untuk mengontrol tampilan menu sidebar pada perangkat mobile (HP)
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const openSidebar = () => setSidebarOpen(true);
-  const closeSidebar = () => setSidebarOpen(false);
-
-  // State untuk mengontrol tampilan menu pop-up (dropdown) filter cabang dan export file
   const [showFilter, setShowFilter] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
 
-  // State untuk menyimpan nilai filter dan pencarian yang sedang aktif
   const [selectedFilter, setSelectedFilter] = useState("Semua Cabang");
   const [searchTerm, setSearchTerm] = useState("");
   const [cabangList, setCabangList] = useState([]);
 
-  // State untuk menyimpan data laporan dari server beserta status loading-nya
   const [dataLaporan, setDataLaporan] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // State untuk mengatur rentang waktu laporan yang ditarik dari server (default: cut-off saat ini)
-  const [startDate, setStartDate] = useState(() => formatDate(getCutoffDates().start));
-  const [endDate, setEndDate] = useState(() => formatDate(getCutoffDates().end));
-  
-  // State untuk mengatur jendela modal detail kehadiran (pop-up) saat angka di tabel diklik
+  const [startDate, setStartDate] = useState(() =>
+    formatDate(getCutoffDates().start)
+  );
+  const [endDate, setEndDate] = useState(() =>
+    formatDate(getCutoffDates().end)
+  );
+
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [modalInfo, setModalInfo] = useState({
     title: "",
@@ -90,20 +94,32 @@ const Laporan = () => {
     jenisData: "",
     data: [],
   });
-  
-  // State khusus untuk menampilkan foto bukti kehadiran dalam ukuran penuh di dalam modal
+
   const [previewImage, setPreviewImage] = useState(null);
 
-  // Menjalankan fungsi tarik data laporan dan cabang secara otomatis setiap kali tanggal filter diubah
+  const openSidebar = () => setSidebarOpen(true);
+  const closeSidebar = () => setSidebarOpen(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const resCabang = await fetch(`${import.meta.env.VITE_API_URL}/api/cabang`, {
-          headers: getAuthHeaders(),
-        });
+
+        const resCabang = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/cabang`,
+          {
+            headers: getAuthHeaders(),
+          }
+        );
+
+        if (resCabang.status === 401 || resCabang.status === 403) {
+          logout();
+          navigate("/auth/login");
+          return;
+        }
+
         const listC = await resCabang.json();
-        setCabangList(listC.map((c) => c.nama));
+        setCabangList(Array.isArray(listC) ? listC.map((c) => c.nama) : []);
 
         const resLaporan = await fetch(
           `${import.meta.env.VITE_API_URL}/api/laporan?start_date=${startDate}&end_date=${endDate}`,
@@ -111,207 +127,457 @@ const Laporan = () => {
             headers: getAuthHeaders(),
           }
         );
+
+        if (resLaporan.status === 401 || resLaporan.status === 403) {
+          logout();
+          navigate("/auth/login");
+          return;
+        }
+
         const dataLap = await resLaporan.json();
-        setDataLaporan(dataLap);
+        setDataLaporan(Array.isArray(dataLap) ? dataLap : []);
       } catch (err) {
-        console.error("Gagal mengambil data:", err);
+        console.error("Gagal mengambil data laporan:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
-  }, [startDate, endDate]);
 
-  // Membersihkan sesi pengguna dan mengarahkan kembali ke halaman login
+    fetchData();
+  }, [startDate, endDate, logout, navigate]);
+
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("session_token");
+    logout();
     navigate("/auth/login");
   };
 
-  // Berpindah halaman menggunakan menu navigasi sekaligus menutup sidebar
   const handleNav = (path) => {
     closeSidebar();
     navigate(path);
   };
 
-  // Membuka atau menutup pilihan filter cabang serta mengatur cabang mana yang sedang dipilih
-  const toggleFilter = () => setShowFilter(!showFilter);
+  const toggleFilter = () => {
+    setShowFilter(!showFilter);
+  };
+
   const handleSelectFilter = (val) => {
     setSelectedFilter(val);
     setShowFilter(false);
   };
 
-  // Menyaring data laporan berdasarkan nama yang dicari di kolom pencarian dan cabang yang dipilih
-  const filteredData = dataLaporan.filter((item) => {
-    const matchName = item.nama.toLowerCase().includes(searchTerm.toLowerCase());
-    let matchBranch = true;
-    if (selectedFilter !== "Semua Cabang") {
-      matchBranch = item.cabang === selectedFilter;
-    }
-    return matchName && matchBranch;
-  });
+  const filteredData = Array.isArray(dataLaporan)
+    ? dataLaporan.filter((item) => {
+        const nama = item.nama || "";
+        const cabang = item.cabang || "";
 
-  // Menjumlahkan seluruh data pada kolom tabel yang sedang difilter untuk ditampilkan di baris paling bawah
+        const matchName = nama.toLowerCase().includes(searchTerm.toLowerCase());
+
+        let matchBranch = true;
+        if (selectedFilter !== "Semua Cabang") {
+          matchBranch = cabang === selectedFilter;
+        }
+
+        return matchName && matchBranch;
+      })
+    : [];
+
   const getTotals = () => {
-    let t = { hadirApp: 0, hadirManual: 0, terlambat: 0, fimtk: 0, sakit: 0, izin: 0, cuti: 0, alpha: 0, lembur: 0 };
+    const t = {
+      hadirApp: 0,
+      hadirManual: 0,
+      terlambat: 0,
+      fimtk: 0,
+      sakit: 0,
+      izin: 0,
+      cuti: 0,
+      alpha: 0,
+      lembur: 0,
+    };
+
     filteredData.forEach((item) => {
-      t.hadirApp += parseInt(item.hadirApp) || 0;
-      t.hadirManual += parseInt(item.hadirManual) || 0;
-      t.terlambat += parseInt(item.terlambat) || 0;
-      t.fimtk += parseInt(item.fimtk) || 0;
-      t.sakit += parseInt(item.sakit) || 0;
-      t.izin += parseInt(item.izin) || 0;
-      t.cuti += parseInt(item.cuti) || 0;
-      t.alpha += parseInt(item.alpha) || 0;
-      t.lembur += parseInt(item.lembur) || 0;
+      t.hadirApp += parseInt(item.hadirApp, 10) || 0;
+      t.hadirManual += parseInt(item.hadirManual, 10) || 0;
+      t.terlambat += parseInt(item.terlambat, 10) || 0;
+      t.fimtk += parseInt(item.fimtk, 10) || 0;
+      t.sakit += parseInt(item.sakit, 10) || 0;
+      t.izin += parseInt(item.izin, 10) || 0;
+      t.cuti += parseInt(item.cuti, 10) || 0;
+      t.alpha += parseInt(item.alpha, 10) || 0;
+      t.lembur += parseInt(item.lembur, 10) || 0;
     });
+
     return t;
   };
 
-  // Menyusun ulang data yang ada di tabel ke format Excel (.xlsx) dan memicu proses unduhan
+  const handleExportPdf = () => {
+    const doc = new jsPDF({
+      orientation: "landscape",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const printedAt = new Date().toLocaleString("id-ID", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+
+    const totals = getTotals();
+
+    const tableBody = filteredData.map((item) => [
+      item.nama || "-",
+      `${item.hadirApp || "0"} / ${item.hadirManual || "0"}`,
+      item.terlambat || "0",
+      item.fimtk || "0",
+      item.sakit || "0",
+      item.izin || "0",
+      item.cuti || "0",
+      item.alpha || "0",
+      item.lembur || "0 Jam",
+    ]);
+
+    tableBody.push([
+      "TOTAL KESELURUHAN",
+      `${totals.hadirApp} / ${totals.hadirManual}`,
+      totals.terlambat,
+      totals.fimtk,
+      totals.sakit,
+      totals.izin,
+      totals.cuti,
+      totals.alpha,
+      `${totals.lembur} Jam`,
+    ]);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("Laporan Kehadiran", 14, 14);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text("Data rekapitulasi absensi seluruh karyawan", 14, 20);
+    doc.text(`Periode: ${startDate} s/d ${endDate}`, 14, 26);
+    doc.text(`Cabang: ${selectedFilter}`, 14, 32);
+
+    autoTable(doc, {
+      startY: 38,
+      head: [
+        [
+          "Nama Karyawan",
+          "Hadir App / Manual",
+          "Terlambat",
+          "FIMTK",
+          "Sakit",
+          "Izin",
+          "Cuti",
+          "Alpha",
+          "Lembur",
+        ],
+      ],
+      body: tableBody,
+      theme: "grid",
+      margin: {
+        top: 38,
+        left: 14,
+        right: 14,
+        bottom: 16,
+      },
+      styles: {
+        fontSize: 7,
+        cellPadding: 1.8,
+        valign: "middle",
+        overflow: "linebreak",
+        lineWidth: 0.1,
+        lineColor: [180, 180, 180],
+      },
+      headStyles: {
+        fillColor: [141, 174, 18],
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+        halign: "center",
+      },
+      columnStyles: {
+        0: { cellWidth: 58, halign: "left" },
+        1: { cellWidth: 30, halign: "center" },
+        2: { cellWidth: 24, halign: "center" },
+        3: { cellWidth: 20, halign: "center" },
+        4: { cellWidth: 20, halign: "center" },
+        5: { cellWidth: 20, halign: "center" },
+        6: { cellWidth: 20, halign: "center" },
+        7: { cellWidth: 20, halign: "center" },
+        8: { cellWidth: 25, halign: "center" },
+      },
+      didParseCell: (data) => {
+        const isTotalRow = data.row.index === tableBody.length - 1;
+
+        if (isTotalRow) {
+          data.cell.styles.fontStyle = "bold";
+          data.cell.styles.fillColor = [245, 245, 245];
+          data.cell.styles.textColor = [0, 0, 0];
+        }
+      },
+    });
+
+    const totalPages = doc.internal.getNumberOfPages();
+
+    for (let i = 1; i <= totalPages; i += 1) {
+      doc.setPage(i);
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(80);
+
+      doc.text(`Dicetak: ${printedAt}`, 14, pageHeight - 8);
+      doc.text(`Halaman ${i} / ${totalPages}`, pageWidth - 42, pageHeight - 8);
+    }
+
+    doc.save(`Rekap_Kehadiran_HRD_${startDate}_sd_${endDate}.pdf`);
+  };
+
   const handleExportExcel = () => {
     const exportData = filteredData.map((item) => ({
       "Nama Karyawan": item.nama,
-      "NIK": item.nik,
-      "Cabang": item.cabang,
-      "Hadir via App": parseInt(item.hadirApp) || 0,
-      "Hadir Manual": parseInt(item.hadirManual) || 0,
-      "Terlambat": parseInt(item.terlambat) || 0,
-      "FIMTK": parseInt(item.fimtk) || 0,
-      "Sakit": parseInt(item.sakit) || 0,
-      "Izin": parseInt(item.izin) || 0,
-      "Cuti": parseInt(item.cuti) || 0,
-      "Alpha": parseInt(item.alpha) || 0,
-      "Lembur": item.lembur,
+      NIK: item.nik,
+      Cabang: item.cabang,
+      "Hadir via App": parseInt(item.hadirApp, 10) || 0,
+      "Hadir Manual": parseInt(item.hadirManual, 10) || 0,
+      Terlambat: parseInt(item.terlambat, 10) || 0,
+      FIMTK: parseInt(item.fimtk, 10) || 0,
+      Sakit: parseInt(item.sakit, 10) || 0,
+      Izin: parseInt(item.izin, 10) || 0,
+      Cuti: parseInt(item.cuti, 10) || 0,
+      Alpha: parseInt(item.alpha, 10) || 0,
+      Lembur: item.lembur,
     }));
 
-    // Menyisipkan baris total keseluruhan di bagian paling bawah data Excel
     const totals = getTotals();
+
     exportData.push({
       "Nama Karyawan": "TOTAL KESELURUHAN",
-      "NIK": "-",
-      "Cabang": "-",
+      NIK: "-",
+      Cabang: "-",
       "Hadir via App": totals.hadirApp,
       "Hadir Manual": totals.hadirManual,
-      "Terlambat": totals.terlambat,
-      "FIMTK": totals.fimtk,
-      "Sakit": totals.sakit,
-      "Izin": totals.izin,
-      "Cuti": totals.cuti,
-      "Alpha": totals.alpha,
-      "Lembur": totals.lembur,
+      Terlambat: totals.terlambat,
+      FIMTK: totals.fimtk,
+      Sakit: totals.sakit,
+      Izin: totals.izin,
+      Cuti: totals.cuti,
+      Alpha: totals.alpha,
+      Lembur: `${totals.lembur} Jam`,
     });
 
-    // Mengkonversi format data ke worksheet dan mendownloadnya menggunakan library XLSX
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Kehadiran");
 
-    XLSX.writeFile(workbook, `Rekap_Kehadiran_HRD_${startDate}_sd_${endDate}.xlsx`);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Kehadiran");
+    XLSX.writeFile(
+      workbook,
+      `Rekap_Kehadiran_HRD_${startDate}_sd_${endDate}.xlsx`
+    );
   };
 
-  // Menampilkan modal pop-up yang berisi rincian (history) dari angka yang diklik di tabel
   const openDetail = (item, jenis, jumlah) => {
-    // Mencegah modal terbuka jika data yang diklik kosong atau bernilai nol
     if (jumlah === "0" || jumlah === "-" || jumlah === "0 Jam") return;
 
-    const { nama, nik, cabang, rawAbsensi = [], rawPerizinan = [], rawAlpha = [] } = item;
+    const {
+      nama,
+      nik,
+      cabang,
+      rawAbsensi = [],
+      rawPerizinan = [],
+      rawAlpha = [],
+    } = item;
+
     let realData = [];
     let title = `Rincian ${jenis}`;
 
-    // Memfilter dan menyusun format data log absensi mandiri karyawan lewat aplikasi
     if (jenis === "Hadir via App") {
       title = "Log Absensi Mandiri (Karyawan)";
+
       const dataApp = rawAbsensi.filter((a) => !a.is_manual_masuk);
+
       realData = dataApp.map((a) => ({
-        tipe: "absen", tanggal: a.tanggal, cabang: cabang,
-        masuk: { jam: a.waktu_masuk || "-", isManual: false, foto: a.foto_masuk || null, keterangan: "", admin: "" },
-        pulang: { jam: a.waktu_pulang || "-", isManual: false, foto: a.foto_pulang || null, keterangan: "", admin: "" },
+        tipe: "absen",
+        tanggal: a.tanggal,
+        cabang,
+        masuk: {
+          jam: a.waktu_masuk || "-",
+          isManual: false,
+          foto: a.foto_masuk || null,
+          keterangan: "",
+          admin: "",
+        },
+        pulang: {
+          jam: a.waktu_pulang || "-",
+          isManual: false,
+          foto: a.foto_pulang || null,
+          keterangan: "",
+          admin: "",
+        },
       }));
-    
-    // Memfilter dan menyusun format data log absensi yang diinputkan secara manual oleh HRD/Admin
     } else if (jenis === "Hadir Manual") {
       title = "Log Rekapitulasi Manual (Admin HRD)";
+
       const dataManual = rawAbsensi.filter((a) => a.is_manual_masuk);
+
       realData = dataManual.map((a) => ({
-        tipe: "absen", isLogManual: true, tanggal: a.tanggal, cabang: cabang,
-        masuk: { jam: a.waktu_masuk || "-", isManual: true, foto: null, keterangan: a.keterangan_manual || "-", admin: "HRD" },
-        pulang: { jam: a.waktu_pulang || "-", isManual: true, foto: null, keterangan: a.keterangan_manual || "-", admin: "HRD" },
+        tipe: "absen",
+        isLogManual: true,
+        tanggal: a.tanggal,
+        cabang,
+        masuk: {
+          jam: a.waktu_masuk || "-",
+          isManual: true,
+          foto: null,
+          keterangan: a.keterangan_manual || "-",
+          admin: "HRD",
+        },
+        pulang: {
+          jam: a.waktu_pulang || "-",
+          isManual: true,
+          foto: null,
+          keterangan: a.keterangan_manual || "-",
+          admin: "HRD",
+        },
       }));
-    
-    // Memfilter daftar hari di mana karyawan masuk kerja tapi melewati batas jam masuk (keterlambatan)
     } else if (jenis === "Terlambat") {
       title = "Rincian Keterlambatan";
+
       const dataTelat = rawAbsensi.filter((a) => a.menit_terlambat > 0);
+
       realData = dataTelat.map((a) => ({
-        tipe: "terlambat", tanggal: a.tanggal, cabang: cabang, jamMasuk: a.waktu_masuk || "-", menitTelat: a.menit_terlambat, isManual: a.is_manual_masuk,
+        tipe: "terlambat",
+        tanggal: a.tanggal,
+        cabang,
+        jamMasuk: a.waktu_masuk || "-",
+        menitTelat: a.menit_terlambat,
+        isManual: a.is_manual_masuk,
       }));
-    
-    // Memfilter data perizinan yang disetujui dengan kategori sakit
     } else if (jenis === "Sakit") {
-      title = `Log Perizinan (Sakit)`;
-      const dataSakit = rawPerizinan.filter((p) => p.kategori === "Izin" && p.jenis_izin === "Sakit");
+      title = "Log Perizinan (Sakit)";
+
+      const dataSakit = rawPerizinan.filter(
+        (p) => p.kategori === "Izin" && p.jenis_izin === "Sakit"
+      );
+
       realData = dataSakit.map((p) => ({
-        tipe: "izin_sakit", jenisIzin: "Sakit", tanggalMulai: p.tanggal_mulai, tanggalAkhir: p.tanggal_selesai, keterangan: p.keterangan || "-", foto: p.bukti_foto || null,
+        tipe: "izin_sakit",
+        jenisIzin: "Sakit",
+        tanggalMulai: p.tanggal_mulai,
+        tanggalAkhir: p.tanggal_selesai,
+        keterangan: p.keterangan || "-",
+        foto: p.bukti_foto || null,
       }));
-    
-    // Memfilter data perizinan di luar sakit (seperti izin acara keluarga, menikah, dll)
     } else if (jenis === "Izin") {
-      title = `Log Perizinan (Izin)`;
-      const dataIzin = rawPerizinan.filter((p) => p.kategori === "Izin" && p.jenis_izin !== "Sakit");
+      title = "Log Perizinan (Izin)";
+
+      const dataIzin = rawPerizinan.filter(
+        (p) => p.kategori === "Izin" && p.jenis_izin !== "Sakit"
+      );
+
       realData = dataIzin.map((p) => ({
-        tipe: "izin_sakit", jenisIzin: p.jenis_izin || "Lainnya", tanggalMulai: p.tanggal_mulai, tanggalAkhir: p.tanggal_selesai, keterangan: p.keterangan || p.keperluan || "-", foto: p.bukti_foto || null,
+        tipe: "izin_sakit",
+        jenisIzin: p.jenis_izin || "Lainnya",
+        tanggalMulai: p.tanggal_mulai,
+        tanggalAkhir: p.tanggal_selesai,
+        keterangan: p.keterangan || p.keperluan || "-",
+        foto: p.bukti_foto || null,
       }));
-    
-    // Memfilter data khusus perizinan cuti tahunan/panjang
     } else if (jenis === "Cuti") {
-      title = `Log Perizinan (Cuti)`;
+      title = "Log Perizinan (Cuti)";
+
       const dataCuti = rawPerizinan.filter((p) => p.kategori === "Cuti");
+
       realData = dataCuti.map((p) => ({
-        tipe: "cuti", cabang: cabang, jabatan: item.jabatan || "-", divisi: item.divisi || "-", jenisCuti: p.jenis_izin || "Cuti Tahunan", tanggalMulai: p.tanggal_mulai, tanggalAkhir: p.tanggal_selesai, keterangan: p.keterangan || p.keperluan || "-", noTelp: item.noTelp || "-",
+        tipe: "cuti",
+        cabang,
+        jabatan: item.jabatan || "-",
+        divisi: item.divisi || "-",
+        jenisCuti: p.jenis_izin || "Cuti Tahunan",
+        tanggalMulai: p.tanggal_mulai,
+        tanggalAkhir: p.tanggal_selesai,
+        keterangan: p.keterangan || p.keperluan || "-",
+        noTelp: item.noTelp || "-",
       }));
-    
-    // Memfilter Form Izin Meninggalkan Tempat Kerja (FIMTK)
     } else if (jenis === "FIMTK") {
-      title = `Log Perizinan (FIMTK)`;
+      title = "Log Perizinan (FIMTK)";
+
       const dataFimtk = rawPerizinan.filter((p) => p.kategori === "FIMTK");
+
       realData = dataFimtk.map((p) => ({
-        tipe: "fimtk", cabang: cabang, jabatan: item.jabatan || "-", divisi: item.divisi || "-", izinMTK: p.jenis_izin || "FIMTK", tanggal: p.tanggal_mulai, jamMulai: p.jam_mulai || "-", jamAkhir: p.jam_selesai || "-", keperluan: p.keperluan || "-", kendaraan: p.kendaraan || "-", alasan: p.keterangan || "-",
+        tipe: "fimtk",
+        cabang,
+        jabatan: item.jabatan || "-",
+        divisi: item.divisi || "-",
+        izinMTK: p.jenis_izin || "FIMTK",
+        tanggal: p.tanggal_mulai,
+        jamMulai: p.jam_mulai || "-",
+        jamAkhir: p.jam_selesai || "-",
+        keperluan: p.keperluan || "-",
+        kendaraan: p.kendaraan || "-",
+        alasan: p.keterangan || "-",
       }));
-    
-    // Mengambil data ketidakhadiran tanpa keterangan (Alpha)
     } else if (jenis === "Alpha") {
       title = "Rincian Alpha";
+
       realData = rawAlpha.map((a) => ({
-        tipe: "alpha", tanggal: a.tanggal, cabang: cabang, jadwal: "Sesuai Jam Operasional", status: "ALPHA", keterangan: a.keterangan,
+        tipe: "alpha",
+        tanggal: a.tanggal,
+        cabang,
+        jadwal: "Sesuai Jam Operasional",
+        status: "ALPHA",
+        keterangan: a.keterangan,
       }));
-    
-    // Mengambil rincian menit lembur dan mendeteksi alasan lembur (reguler atau akibat tidak istirahat)
     } else if (jenis === "Lembur") {
       title = "Rincian Lembur";
+
       const dataLembur = rawAbsensi.filter((a) => a.menit_lembur > 0);
+
       realData = dataLembur.map((a) => {
         let alasan = "Lembur reguler di luar jam kerja";
+
         if (!a.waktu_istirahat_mulai) {
-          alasan = "Kompensasi lembur karena tidak mengambil hak istirahat (3 Jam)";
-          if (a.menit_lembur > 180) alasan = "Kompensasi tidak istirahat & lembur reguler";
+          alasan =
+            "Kompensasi lembur karena tidak mengambil hak istirahat (3 Jam)";
+
+          if (a.menit_lembur > 180) {
+            alasan = "Kompensasi tidak istirahat & lembur reguler";
+          }
         }
+
         return {
-          tipe: "lembur", tanggal: a.tanggal, cabang: cabang, jamPulang: a.waktu_pulang || "-", menitLembur: a.menit_lembur, alasan: alasan, isManual: a.is_manual_masuk,
+          tipe: "lembur",
+          tanggal: a.tanggal,
+          cabang,
+          jamPulang: a.waktu_pulang || "-",
+          menitLembur: a.menit_lembur,
+          alasan,
+          isManual: a.is_manual_masuk,
         };
       });
     }
 
-    // Mengurutkan data di dalam modal agar yang terbaru selalu berada di paling atas
     realData.sort((a, b) => {
       const dateA = new Date(a.tanggal || a.tanggalMulai).getTime();
       const dateB = new Date(b.tanggal || b.tanggalMulai).getTime();
+
       return dateB - dateA;
     });
 
-    // Menampung semua data yang sudah diproses ke state untuk ditampilkan di layar
-    setModalInfo({ title, nama, nik, jenisData: jenis, data: realData });
+    setModalInfo({
+      title,
+      nama,
+      nik,
+      jenisData: jenis,
+      data: realData,
+    });
+
     setShowDetailModal(true);
   };
 
@@ -324,31 +590,43 @@ const Laporan = () => {
               <label className="lap-modal-label">Tanggal Absensi</label>
               <div className="lap-modal-input">{item.tanggal}</div>
             </div>
+
             <div className="lap-modal-group">
               <label className="lap-modal-label">Cabang</label>
               <div className="lap-modal-input">{item.cabang}</div>
             </div>
           </div>
+
           <div className="lap-modal-row">
             <div className="lap-modal-group">
-              <label className="lap-modal-label">{item.isLogManual ? "Absen Masuk" : "Jam Masuk"}</label>
+              <label className="lap-modal-label">
+                {item.isLogManual ? "Absen Masuk" : "Jam Masuk"}
+              </label>
               <div className="lap-modal-input">{item.masuk.jam}</div>
             </div>
+
             <div className="lap-modal-group">
-              <label className="lap-modal-label">{item.isLogManual ? "Absen Pulang" : "Jam Pulang"}</label>
+              <label className="lap-modal-label">
+                {item.isLogManual ? "Absen Pulang" : "Jam Pulang"}
+              </label>
               <div className="lap-modal-input">{item.pulang.jam}</div>
             </div>
           </div>
+
           {(item.masuk.isManual || item.pulang.isManual) && (
             <div className="lap-modal-row">
               <div className="lap-modal-group" style={{ flex: 1 }}>
                 <label className="lap-modal-label">Keterangan</label>
-                <div className="lap-modal-input" style={{ minHeight: "40px", height: "auto" }}>
+                <div
+                  className="lap-modal-input"
+                  style={{ minHeight: "40px", height: "auto" }}
+                >
                   {item.masuk.keterangan}
                 </div>
               </div>
             </div>
           )}
+
           {!item.isLogManual && (
             <div className="lap-foto-container">
               <div className="lap-foto-box">
@@ -364,12 +642,23 @@ const Laporan = () => {
                   </div>
                 ) : (
                   <>
-                    <img src={item.masuk.foto} alt="Masuk" className="lap-foto-img" />
+                    <img
+                      src={item.masuk.foto}
+                      alt="Masuk"
+                      className="lap-foto-img"
+                    />
                     <div className="lap-foto-overlay">Absen Masuk</div>
-                    <button type="button" className="lap-zoom-btn" onClick={() => setPreviewImage(item.masuk.foto)}>🔍</button>
+                    <button
+                      type="button"
+                      className="lap-zoom-btn"
+                      onClick={() => setPreviewImage(item.masuk.foto)}
+                    >
+                      🔍
+                    </button>
                   </>
                 )}
               </div>
+
               <div className="lap-foto-box">
                 {!item.pulang.foto ? (
                   <div className="lap-manual-placeholder">
@@ -383,9 +672,19 @@ const Laporan = () => {
                   </div>
                 ) : (
                   <>
-                    <img src={item.pulang.foto} alt="Pulang" className="lap-foto-img" />
+                    <img
+                      src={item.pulang.foto}
+                      alt="Pulang"
+                      className="lap-foto-img"
+                    />
                     <div className="lap-foto-overlay">Absen Pulang</div>
-                    <button type="button" className="lap-zoom-btn" onClick={() => setPreviewImage(item.pulang.foto)}>🔍</button>
+                    <button
+                      type="button"
+                      className="lap-zoom-btn"
+                      onClick={() => setPreviewImage(item.pulang.foto)}
+                    >
+                      🔍
+                    </button>
                   </>
                 )}
               </div>
@@ -401,29 +700,60 @@ const Laporan = () => {
               <label className="lap-modal-label">Tanggal</label>
               <div className="lap-modal-input">{item.tanggal}</div>
             </div>
+
             <div className="lap-modal-group">
               <label className="lap-modal-label">Cabang</label>
               <div className="lap-modal-input">{item.cabang}</div>
             </div>
           </div>
+
           <div className="lap-modal-row">
             <div className="lap-modal-group">
               <label className="lap-modal-label">Jam Masuk</label>
-              <div className="lap-modal-input" style={{ color: "#d9480f", fontWeight: "700" }}>{item.jamMasuk}</div>
+              <div
+                className="lap-modal-input"
+                style={{ color: "#d9480f", fontWeight: "700" }}
+              >
+                {item.jamMasuk}
+              </div>
             </div>
+
             <div className="lap-modal-group">
               <label className="lap-modal-label">Keterlambatan</label>
-              <div className="lap-modal-input" style={{ background: "#fff5f5", borderColor: "#ffc9c9", color: "#c92a2a", fontWeight: "700" }}>
+              <div
+                className="lap-modal-input"
+                style={{
+                  background: "#fff5f5",
+                  borderColor: "#ffc9c9",
+                  color: "#c92a2a",
+                  fontWeight: "700",
+                }}
+              >
                 {item.menitTelat} Menit
               </div>
             </div>
           </div>
+
           {item.isManual && (
             <div className="lap-modal-row">
               <div className="lap-modal-group" style={{ flex: 1 }}>
-                <label className="lap-modal-label" style={{ color: "#d9480f" }}>⚠️ Diinput Manual oleh HRD</label>
-                <div className="lap-modal-input" style={{ background: "#fff9db", borderColor: "#fcc419", color: "#b06500", fontSize: "13px" }}>
-                  Data kehadiran dan keterlambatan ini tercatat melalui sistem Absensi Manual.
+                <label
+                  className="lap-modal-label"
+                  style={{ color: "#d9480f" }}
+                >
+                  ⚠️ Diinput Manual oleh HRD
+                </label>
+                <div
+                  className="lap-modal-input"
+                  style={{
+                    background: "#fff9db",
+                    borderColor: "#fcc419",
+                    color: "#b06500",
+                    fontSize: "13px",
+                  }}
+                >
+                  Data kehadiran dan keterlambatan ini tercatat melalui sistem
+                  Absensi Manual.
                 </div>
               </div>
             </div>
@@ -438,37 +768,80 @@ const Laporan = () => {
               <label className="lap-modal-label">Tanggal</label>
               <div className="lap-modal-input">{item.tanggal}</div>
             </div>
+
             <div className="lap-modal-group">
               <label className="lap-modal-label">Cabang</label>
               <div className="lap-modal-input">{item.cabang}</div>
             </div>
           </div>
+
           <div className="lap-modal-row">
             <div className="lap-modal-group">
               <label className="lap-modal-label">Jam Pulang Aktual</label>
-              <div className="lap-modal-input" style={{ color: "#2980b9", fontWeight: "700" }}>{item.jamPulang}</div>
+              <div
+                className="lap-modal-input"
+                style={{ color: "#2980b9", fontWeight: "700" }}
+              >
+                {item.jamPulang}
+              </div>
             </div>
+
             <div className="lap-modal-group">
               <label className="lap-modal-label">Durasi Lembur</label>
-              <div className="lap-modal-input" style={{ background: "#e3f2fd", borderColor: "#90caf9", color: "#1565c0", fontWeight: "700" }}>
-                {Math.floor(item.menitLembur / 60)} Jam {item.menitLembur % 60} Menit
+              <div
+                className="lap-modal-input"
+                style={{
+                  background: "#e3f2fd",
+                  borderColor: "#90caf9",
+                  color: "#1565c0",
+                  fontWeight: "700",
+                }}
+              >
+                {Math.floor(item.menitLembur / 60)} Jam{" "}
+                {item.menitLembur % 60} Menit
               </div>
             </div>
           </div>
+
           {item.isManual && (
             <div className="lap-modal-row">
               <div className="lap-modal-group" style={{ flex: 1 }}>
-                <label className="lap-modal-label" style={{ color: "#d9480f" }}>⚠️ Diinput Manual oleh HRD</label>
-                <div className="lap-modal-input" style={{ background: "#fff9db", borderColor: "#fcc419", color: "#b06500", fontSize: "13px" }}>
-                  Data kehadiran dan lembur ini tercatat melalui sistem Absensi Manual.
+                <label
+                  className="lap-modal-label"
+                  style={{ color: "#d9480f" }}
+                >
+                  ⚠️ Diinput Manual oleh HRD
+                </label>
+                <div
+                  className="lap-modal-input"
+                  style={{
+                    background: "#fff9db",
+                    borderColor: "#fcc419",
+                    color: "#b06500",
+                    fontSize: "13px",
+                  }}
+                >
+                  Data kehadiran dan lembur ini tercatat melalui sistem Absensi
+                  Manual.
                 </div>
               </div>
             </div>
           )}
+
           <div className="lap-modal-row">
             <div className="lap-modal-group" style={{ flex: 1 }}>
-              <label className="lap-modal-label">Keterangan / Catatan Sistem</label>
-              <div className="lap-modal-input" style={{ background: "#f8f9fa", borderColor: "#ddd", color: "#555", fontSize: "13px" }}>
+              <label className="lap-modal-label">
+                Keterangan / Catatan Sistem
+              </label>
+              <div
+                className="lap-modal-input"
+                style={{
+                  background: "#f8f9fa",
+                  borderColor: "#ddd",
+                  color: "#555",
+                  fontSize: "13px",
+                }}
+              >
                 {item.alasan}
               </div>
             </div>
@@ -483,28 +856,44 @@ const Laporan = () => {
               <label className="lap-modal-label">Jenis Izin</label>
               <div className="lap-modal-input">{item.jenisIzin}</div>
             </div>
+
             <div className="lap-modal-group">
               <label className="lap-modal-label">Tanggal Mulai</label>
               <div className="lap-modal-input">{item.tanggalMulai}</div>
             </div>
           </div>
+
           <div className="lap-modal-row">
             <div className="lap-modal-group">
               <label className="lap-modal-label">Tanggal Akhir</label>
               <div className="lap-modal-input">{item.tanggalAkhir}</div>
             </div>
+
             <div className="lap-modal-group">
               <label className="lap-modal-label">Keterangan</label>
               <div className="lap-modal-input">{item.keterangan}</div>
             </div>
           </div>
+
           <div className="lap-foto-container">
             <div className="lap-foto-box">
               {item.foto ? (
                 <>
-                  <img src={item.foto} alt="Bukti" className="lap-foto-img" />
-                  <div className="lap-foto-overlay">Bukti Dokumen / Surat</div>
-                  <button type="button" className="lap-zoom-btn" onClick={() => setPreviewImage(item.foto)}>🔍</button>
+                  <img
+                    src={item.foto}
+                    alt="Bukti"
+                    className="lap-foto-img"
+                  />
+                  <div className="lap-foto-overlay">
+                    Bukti Dokumen / Surat
+                  </div>
+                  <button
+                    type="button"
+                    className="lap-zoom-btn"
+                    onClick={() => setPreviewImage(item.foto)}
+                  >
+                    🔍
+                  </button>
                 </>
               ) : (
                 <div className="lap-manual-placeholder">
@@ -513,10 +902,12 @@ const Laporan = () => {
                 </div>
               )}
             </div>
-            <div style={{ flex: 1 }}></div>
+
+            <div style={{ flex: 1 }} />
           </div>
         </>
       )}
+
       {item.tipe === "cuti" && (
         <>
           <div className="lap-modal-row">
@@ -524,37 +915,49 @@ const Laporan = () => {
               <label className="lap-modal-label">Cabang</label>
               <div className="lap-modal-input">{item.cabang}</div>
             </div>
+
             <div className="lap-modal-group">
               <label className="lap-modal-label">Jenis Cuti</label>
               <div className="lap-modal-input">{item.jenisCuti}</div>
             </div>
           </div>
+
           <div className="lap-modal-row">
             <div className="lap-modal-group">
               <label className="lap-modal-label">Jabatan</label>
               <div className="lap-modal-input">{item.jabatan}</div>
             </div>
+
             <div className="lap-modal-group">
               <label className="lap-modal-label">Divisi</label>
               <div className="lap-modal-input">{item.divisi}</div>
             </div>
           </div>
+
           <div className="lap-modal-row">
             <div className="lap-modal-group">
               <label className="lap-modal-label">Tanggal Mulai</label>
               <div className="lap-modal-input">{item.tanggalMulai}</div>
             </div>
+
             <div className="lap-modal-group">
               <label className="lap-modal-label">Tanggal Akhir</label>
               <div className="lap-modal-input">{item.tanggalAkhir}</div>
             </div>
           </div>
+
           <div className="lap-modal-row">
             <div className="lap-modal-group" style={{ flex: 1 }}>
               <label className="lap-modal-label">Keterangan</label>
-              <div className="lap-modal-input" style={{ minHeight: "40px", height: "auto" }}>{item.keterangan}</div>
+              <div
+                className="lap-modal-input"
+                style={{ minHeight: "40px", height: "auto" }}
+              >
+                {item.keterangan}
+              </div>
             </div>
           </div>
+
           <div className="lap-modal-row">
             <div className="lap-modal-group" style={{ flex: 1 }}>
               <label className="lap-modal-label">Nomor Telepon</label>
@@ -563,6 +966,7 @@ const Laporan = () => {
           </div>
         </>
       )}
+
       {item.tipe === "fimtk" && (
         <>
           <div className="lap-modal-row">
@@ -571,54 +975,69 @@ const Laporan = () => {
               <div className="lap-modal-input">{item.cabang}</div>
             </div>
           </div>
+
           <div className="lap-modal-row">
             <div className="lap-modal-group">
               <label className="lap-modal-label">Jabatan</label>
               <div className="lap-modal-input">{item.jabatan}</div>
             </div>
+
             <div className="lap-modal-group">
               <label className="lap-modal-label">Divisi</label>
               <div className="lap-modal-input">{item.divisi}</div>
             </div>
           </div>
+
           <div className="lap-modal-row">
             <div className="lap-modal-group">
               <label className="lap-modal-label">Izin MTK</label>
               <div className="lap-modal-input">{item.izinMTK}</div>
             </div>
+
             <div className="lap-modal-group">
               <label className="lap-modal-label">Tanggal</label>
               <div className="lap-modal-input">{item.tanggal}</div>
             </div>
           </div>
+
           <div className="lap-modal-row">
             <div className="lap-modal-group">
               <label className="lap-modal-label">Jam Mulai</label>
               <div className="lap-modal-input">{item.jamMulai}</div>
             </div>
+
             <div className="lap-modal-group">
               <label className="lap-modal-label">Jam Akhir</label>
               <div className="lap-modal-input">{item.jamAkhir}</div>
             </div>
           </div>
+
           <div className="lap-modal-row">
             <div className="lap-modal-group">
               <label className="lap-modal-label">Keperluan</label>
               <div className="lap-modal-input">{item.keperluan}</div>
             </div>
+
             <div className="lap-modal-group">
               <label className="lap-modal-label">Kendaraan</label>
               <div className="lap-modal-input">{item.kendaraan}</div>
             </div>
           </div>
+
           <div className="lap-modal-row">
             <div className="lap-modal-group" style={{ flex: 1 }}>
               <label className="lap-modal-label">Alasan</label>
-              <div className="lap-modal-input" style={{ minHeight: "40px", height: "auto" }}>{item.alasan}</div>
+              <div
+                className="lap-modal-input"
+                style={{ minHeight: "40px", height: "auto" }}
+              >
+                {item.alasan}
+              </div>
             </div>
           </div>
         </>
       )}
+
       {item.tipe === "alpha" && (
         <>
           <div className="lap-modal-row">
@@ -626,25 +1045,44 @@ const Laporan = () => {
               <label className="lap-modal-label">Tanggal</label>
               <div className="lap-modal-input">{item.tanggal}</div>
             </div>
+
             <div className="lap-modal-group">
               <label className="lap-modal-label">Cabang</label>
               <div className="lap-modal-input">{item.cabang}</div>
             </div>
           </div>
+
           <div className="lap-modal-row">
             <div className="lap-modal-group">
               <label className="lap-modal-label">Jadwal Kerja Seharusnya</label>
               <div className="lap-modal-input">{item.jadwal}</div>
             </div>
+
             <div className="lap-modal-group">
               <label className="lap-modal-label">Status</label>
-              <div className="lap-modal-input" style={{ color: "#e03131", fontWeight: "700" }}>{item.status}</div>
+              <div
+                className="lap-modal-input"
+                style={{ color: "#e03131", fontWeight: "700" }}
+              >
+                {item.status}
+              </div>
             </div>
           </div>
+
           <div className="lap-modal-row">
             <div className="lap-modal-group" style={{ flex: 1 }}>
-              <label className="lap-modal-label">Keterangan / Catatan Sistem</label>
-              <div className="lap-modal-input" style={{ background: "#fff5f5", borderColor: "#ffc9c9", color: "#c92a2a", fontSize: "13px" }}>
+              <label className="lap-modal-label">
+                Keterangan / Catatan Sistem
+              </label>
+              <div
+                className="lap-modal-input"
+                style={{
+                  background: "#fff5f5",
+                  borderColor: "#ffc9c9",
+                  color: "#c92a2a",
+                  fontSize: "13px",
+                }}
+              >
                 {item.keterangan}
               </div>
             </div>
@@ -660,6 +1098,7 @@ const Laporan = () => {
     return (
       <div className="neo-table-card">
         <div className="neo-table-header">{headerText}</div>
+
         <div className="neo-table-wrapper">
           <table className="neo-table">
             <thead>
@@ -675,73 +1114,209 @@ const Laporan = () => {
                 <th className="text-center">Lembur</th>
               </tr>
             </thead>
+
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="9" className="empty-state">Memuat data...</td>
+                  <td colSpan="9" className="empty-state">
+                    Memuat data...
+                  </td>
                 </tr>
               ) : tableData.length > 0 ? (
                 tableData.map((item) => {
                   const rowClass = getRowTerlambatClass(item.terlambat);
+
                   return (
                     <tr key={item.id} className={rowClass}>
                       <td className="neo-td-name">{item.nama}</td>
+
                       <td className="text-center">
                         <div className="neo-dual-badge-container">
-                          <span className={`neo-badge ${item.hadirApp !== "0" ? "clickable-badge" : ""}`} onClick={() => openDetail(item, "Hadir via App", item.hadirApp)}>{item.hadirApp}</span>
-                          <span className={`neo-badge manual ${item.hadirManual !== "0" ? "clickable-badge" : ""}`} onClick={() => openDetail(item, "Hadir Manual", item.hadirManual)}>{item.hadirManual}</span>
+                          <span
+                            className={`neo-badge ${
+                              item.hadirApp !== "0" ? "clickable-badge" : ""
+                            }`}
+                            onClick={() =>
+                              openDetail(item, "Hadir via App", item.hadirApp)
+                            }
+                          >
+                            {item.hadirApp}
+                          </span>
+
+                          <span
+                            className={`neo-badge manual ${
+                              item.hadirManual !== "0"
+                                ? "clickable-badge"
+                                : ""
+                            }`}
+                            onClick={() =>
+                              openDetail(
+                                item,
+                                "Hadir Manual",
+                                item.hadirManual
+                              )
+                            }
+                          >
+                            {item.hadirManual}
+                          </span>
                         </div>
                       </td>
+
                       <td className="text-center">
-                        <span className={`neo-badge ${rowClass ? "warn-badge" : ""} ${item.terlambat !== "0" && item.terlambat !== "-" ? "clickable-badge" : ""}`} onClick={() => openDetail(item, "Terlambat", item.terlambat)}>{item.terlambat}</span>
+                        <span
+                          className={`neo-badge ${
+                            rowClass ? "warn-badge" : ""
+                          } ${
+                            item.terlambat !== "0" && item.terlambat !== "-"
+                              ? "clickable-badge"
+                              : ""
+                          }`}
+                          onClick={() =>
+                            openDetail(item, "Terlambat", item.terlambat)
+                          }
+                        >
+                          {item.terlambat}
+                        </span>
                       </td>
+
                       <td className="text-center">
-                        <span className={`neo-badge info ${item.fimtk !== "0" && item.fimtk !== "-" ? "clickable-badge" : ""}`} onClick={() => openDetail(item, "FIMTK", item.fimtk)}>{item.fimtk}</span>
+                        <span
+                          className={`neo-badge info ${
+                            item.fimtk !== "0" && item.fimtk !== "-"
+                              ? "clickable-badge"
+                              : ""
+                          }`}
+                          onClick={() => openDetail(item, "FIMTK", item.fimtk)}
+                        >
+                          {item.fimtk}
+                        </span>
                       </td>
+
                       <td className="text-center">
-                        <span className={`neo-badge ${item.sakit !== "0" && item.sakit !== "-" ? "clickable-badge" : ""}`} onClick={() => openDetail(item, "Sakit", item.sakit)}>{item.sakit}</span>
+                        <span
+                          className={`neo-badge ${
+                            item.sakit !== "0" && item.sakit !== "-"
+                              ? "clickable-badge"
+                              : ""
+                          }`}
+                          onClick={() => openDetail(item, "Sakit", item.sakit)}
+                        >
+                          {item.sakit}
+                        </span>
                       </td>
+
                       <td className="text-center">
-                        <span className={`neo-badge ${item.izin !== "0" && item.izin !== "-" ? "clickable-badge" : ""}`} onClick={() => openDetail(item, "Izin", item.izin)}>{item.izin}</span>
+                        <span
+                          className={`neo-badge ${
+                            item.izin !== "0" && item.izin !== "-"
+                              ? "clickable-badge"
+                              : ""
+                          }`}
+                          onClick={() => openDetail(item, "Izin", item.izin)}
+                        >
+                          {item.izin}
+                        </span>
                       </td>
+
                       <td className="text-center">
-                        <span className={`neo-badge ${item.cuti !== "0" && item.cuti !== "-" ? "clickable-badge" : ""}`} onClick={() => openDetail(item, "Cuti", item.cuti)}>{item.cuti}</span>
+                        <span
+                          className={`neo-badge ${
+                            item.cuti !== "0" && item.cuti !== "-"
+                              ? "clickable-badge"
+                              : ""
+                          }`}
+                          onClick={() => openDetail(item, "Cuti", item.cuti)}
+                        >
+                          {item.cuti}
+                        </span>
                       </td>
+
                       <td className="text-center">
-                        <span className={`neo-badge alert ${item.alpha !== "0" && item.alpha !== "-" ? "clickable-badge" : ""}`} onClick={() => openDetail(item, "Alpha", item.alpha)}>{item.alpha}</span>
+                        <span
+                          className={`neo-badge alert ${
+                            item.alpha !== "0" && item.alpha !== "-"
+                              ? "clickable-badge"
+                              : ""
+                          }`}
+                          onClick={() => openDetail(item, "Alpha", item.alpha)}
+                        >
+                          {item.alpha}
+                        </span>
                       </td>
+
                       <td className="text-center">
-                        <span className={`neo-badge info ${item.lembur !== "0" && item.lembur !== "-" && item.lembur !== "0 Jam" ? "clickable-badge" : ""}`} onClick={() => openDetail(item, "Lembur", item.lembur)}>{item.lembur}</span>
+                        <span
+                          className={`neo-badge info ${
+                            item.lembur !== "0" &&
+                            item.lembur !== "-" &&
+                            item.lembur !== "0 Jam"
+                              ? "clickable-badge"
+                              : ""
+                          }`}
+                          onClick={() => openDetail(item, "Lembur", item.lembur)}
+                        >
+                          {item.lembur}
+                        </span>
                       </td>
                     </tr>
                   );
                 })
               ) : (
                 <tr>
-                  <td colSpan="9" className="empty-state">Data karyawan tidak ditemukan.</td>
+                  <td colSpan="9" className="empty-state">
+                    Data karyawan tidak ditemukan.
+                  </td>
                 </tr>
               )}
-            </tbody>
-            {tableData.length > 0 && !loading && (
-              <tfoot>
-                <tr>
-                  <td className="neo-td-name" style={{ textAlign: "right", paddingRight: "20px" }}>TOTAL KESELURUHAN</td>
+
+              {tableData && tableData.length > 0 && !loading && (
+                <tr className="total-row-print">
+                  <td
+                    className="neo-td-name"
+                    style={{ textAlign: "right", paddingRight: "20px" }}
+                  >
+                    TOTAL KESELURUHAN
+                  </td>
+
                   <td className="text-center">
                     <div className="neo-dual-badge-container">
                       <span className="neo-badge">{totals.hadirApp}</span>
-                      <span className="neo-badge manual">{totals.hadirManual}</span>
+                      <span className="neo-badge manual">
+                        {totals.hadirManual}
+                      </span>
                     </div>
                   </td>
-                  <td className="text-center"><span className="neo-badge">{totals.terlambat}</span></td>
-                  <td className="text-center"><span className="neo-badge info">{totals.fimtk}</span></td>
-                  <td className="text-center"><span className="neo-badge">{totals.sakit}</span></td>
-                  <td className="text-center"><span className="neo-badge">{totals.izin}</span></td>
-                  <td className="text-center"><span className="neo-badge">{totals.cuti}</span></td>
-                  <td className="text-center"><span className="neo-badge alert">{totals.alpha}</span></td>
-                  <td className="text-center"><span className="neo-badge info">{totals.lembur}</span></td>
+
+                  <td className="text-center">
+                    <span className="neo-badge">{totals.terlambat}</span>
+                  </td>
+
+                  <td className="text-center">
+                    <span className="neo-badge info">{totals.fimtk}</span>
+                  </td>
+
+                  <td className="text-center">
+                    <span className="neo-badge">{totals.sakit}</span>
+                  </td>
+
+                  <td className="text-center">
+                    <span className="neo-badge">{totals.izin}</span>
+                  </td>
+
+                  <td className="text-center">
+                    <span className="neo-badge">{totals.cuti}</span>
+                  </td>
+
+                  <td className="text-center">
+                    <span className="neo-badge alert">{totals.alpha}</span>
+                  </td>
+
+                  <td className="text-center">
+                    <span className="neo-badge info">{totals.lembur}</span>
+                  </td>
                 </tr>
-              </tfoot>
-            )}
+              )}
+            </tbody>
           </table>
         </div>
       </div>
@@ -751,31 +1326,67 @@ const Laporan = () => {
   return (
     <div className="hrd-container">
       <div className="mobile-topbar">
-        <img src={logoPersegi} alt="AMAGACORP" className="mobile-topbar-logo" />
-        <button className="btn-hamburger" onClick={openSidebar} aria-label="Buka menu"><span></span><span></span><span></span></button>
+        <img
+          src={logoPersegi}
+          alt="AMAGACORP"
+          className="mobile-topbar-logo"
+        />
+
+        <button
+          className="btn-hamburger"
+          onClick={openSidebar}
+          aria-label="Buka menu"
+        >
+          <span />
+          <span />
+          <span />
+        </button>
       </div>
 
-      <div className={`sidebar-overlay ${sidebarOpen ? "active" : ""}`} onClick={closeSidebar} />
+      <div
+        className={`sidebar-overlay ${sidebarOpen ? "active" : ""}`}
+        onClick={closeSidebar}
+      />
 
       <aside className={`sidebar no-print ${sidebarOpen ? "open" : ""}`}>
-        <button className="btn-sidebar-close" onClick={closeSidebar} aria-label="Tutup menu">✕</button>
-        <div className="logo-area"><img src={logoPersegi} alt="AMAGACORP" className="logo-img" /></div>
+        <button
+          className="btn-sidebar-close"
+          onClick={closeSidebar}
+          aria-label="Tutup menu"
+        >
+          ✕
+        </button>
+
+        <div className="logo-area">
+          <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
+        </div>
+
         <nav className="menu-nav">
           {MENU_ITEMS.map((item, index) => (
             <div
               key={index}
-              className={`menu-item ${item.active ? "active" : ""} ${item.hasArrow ? "has-arrow" : ""}`}
+              className={`menu-item ${item.active ? "active" : ""} ${
+                item.hasArrow ? "has-arrow" : ""
+              }`}
               onClick={() => handleNav(item.path)}
             >
               <div className="menu-left">
                 <img src={item.icon} alt="" className="menu-icon-main" />
                 <span className="menu-text-main">{item.text}</span>
               </div>
-              {item.hasArrow && <img src={iconBawah} alt="down" className="arrow-icon-main" />}
+
+              {item.hasArrow && (
+                <img src={iconBawah} alt="down" className="arrow-icon-main" />
+              )}
             </div>
           ))}
         </nav>
-        <div className="sidebar-footer"><button className="btn-logout" onClick={handleLogout}>Log Out</button></div>
+
+        <div className="sidebar-footer">
+          <button className="btn-logout" onClick={handleLogout}>
+            Log Out
+          </button>
+        </div>
       </aside>
 
       <main className="main-content">
@@ -790,38 +1401,105 @@ const Laporan = () => {
           <div className="input-group-neo">
             <div className="neo-field">
               <label>Cari Nama</label>
-              <input type="text" placeholder="Ketik nama..." className="neo-input" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+              <input
+                type="text"
+                placeholder="Ketik nama..."
+                className="neo-input"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
+
             <div className="neo-field">
               <label>Tanggal Mulai</label>
-              <input type="date" className="neo-input" value={startDate} onChange={(e) => { setStartDate(e.target.value); if (endDate && e.target.value > endDate) setEndDate(""); }} />
+              <input
+                type="date"
+                className="neo-input"
+                value={startDate}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+
+                  if (endDate && e.target.value > endDate) {
+                    setEndDate("");
+                  }
+                }}
+              />
             </div>
+
             <div className="neo-field">
               <label>Tanggal Selesai</label>
-              <input type="date" className="neo-input" min={startDate} value={endDate} onChange={(e) => setEndDate(e.target.value)} disabled={!startDate} />
+              <input
+                type="date"
+                className="neo-input"
+                min={startDate}
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                disabled={!startDate}
+              />
             </div>
           </div>
 
           <div className="button-group-vertical-right">
             <div className="dropdown-neo-bottom-wrapper">
-              <button className="btn-neo-print-top no-print" onClick={() => setShowExportMenu(!showExportMenu)}>Print</button>
+              <button
+                className="btn-neo-print-top no-print"
+                onClick={() => setShowExportMenu(!showExportMenu)}
+              >
+                Print
+              </button>
+
               {showExportMenu && (
                 <div className="neo-dropdown-list-right" style={{ top: "115%" }}>
-                  <div className="neo-drop-item" onClick={() => { window.print(); setShowExportMenu(false); }}>Unduh PDF</div>
-                  <div className="neo-drop-item" onClick={() => { handleExportExcel(); setShowExportMenu(false); }}>Unduh Excel</div>
+                  <div
+                    className="neo-drop-item"
+                    onClick={() => {
+                      handleExportPdf();
+                      setShowExportMenu(false);
+                    }}
+                  >
+                    Unduh PDF
+                  </div>
+
+                  <div
+                    className="neo-drop-item"
+                    onClick={() => {
+                      handleExportExcel();
+                      setShowExportMenu(false);
+                    }}
+                  >
+                    Unduh Excel
+                  </div>
                 </div>
               )}
             </div>
 
             <div className="dropdown-neo-bottom-wrapper">
               <button className="btn-neo-filter-bottom" onClick={toggleFilter}>
-                {selectedFilter} <img src={iconBawah} alt="v" className={showFilter ? "rotate" : ""} />
+                {selectedFilter}
+                <img
+                  src={iconBawah}
+                  alt="v"
+                  className={showFilter ? "rotate" : ""}
+                />
               </button>
+
               {showFilter && (
                 <div className="neo-dropdown-list-right">
-                  <div className="neo-drop-item" onClick={() => handleSelectFilter("Semua Cabang")}>Semua Cabang</div>
+                  <div
+                    className="neo-drop-item"
+                    onClick={() => handleSelectFilter("Semua Cabang")}
+                  >
+                    Semua Cabang
+                  </div>
+
                   {cabangList.map((c) => (
-                    <div key={c} className="neo-drop-item" onClick={() => handleSelectFilter(c)}>{c}</div>
+                    <div
+                      key={c}
+                      className="neo-drop-item"
+                      onClick={() => handleSelectFilter(c)}
+                    >
+                      {c}
+                    </div>
                   ))}
                 </div>
               )}
@@ -833,23 +1511,58 @@ const Laporan = () => {
       </main>
 
       {showDetailModal && (
-        <div className="modal-overlay-lap" onClick={() => setShowDetailModal(false)}>
-          <div className="modal-content-lap" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="modal-overlay-lap"
+          onClick={() => setShowDetailModal(false)}
+        >
+          <div
+            className="modal-content-lap"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-header-lap">
               <h2>{modalInfo.title}</h2>
-              <button className="close-btn-lap" onClick={() => setShowDetailModal(false)}>&times;</button>
+              <button
+                className="close-btn-lap"
+                onClick={() => setShowDetailModal(false)}
+              >
+                &times;
+              </button>
             </div>
+
             <div className="modal-body-lap">
               <div className="lap-modal-row">
-                <div className="lap-modal-group"><label className="lap-modal-label">Nama</label><div className="lap-modal-input">{modalInfo.nama}</div></div>
-                <div className="lap-modal-group"><label className="lap-modal-label">NIK</label><div className="lap-modal-input">{modalInfo.nik}</div></div>
+                <div className="lap-modal-group">
+                  <label className="lap-modal-label">Nama</label>
+                  <div className="lap-modal-input">{modalInfo.nama}</div>
+                </div>
+
+                <div className="lap-modal-group">
+                  <label className="lap-modal-label">NIK</label>
+                  <div className="lap-modal-input">{modalInfo.nik}</div>
+                </div>
               </div>
-              <hr style={{ border: "none", borderBottom: "1px solid #eee", margin: "20px 0" }} />
+
+              <hr
+                style={{
+                  border: "none",
+                  borderBottom: "1px solid #eee",
+                  margin: "20px 0",
+                }}
+              />
+
               <div className="lap-modal-scroll-area">
                 {modalInfo.data.length > 0 ? (
                   modalInfo.data.map((item, idx) => renderModalBody(item, idx))
                 ) : (
-                  <p style={{ textAlign: "center", color: "#888", marginTop: "20px" }}>Belum ada riwayat detail yang tercatat.</p>
+                  <p
+                    style={{
+                      textAlign: "center",
+                      color: "#888",
+                      marginTop: "20px",
+                    }}
+                  >
+                    Belum ada riwayat detail yang tercatat.
+                  </p>
                 )}
               </div>
             </div>
@@ -858,9 +1571,23 @@ const Laporan = () => {
       )}
 
       {previewImage && (
-        <div className="lap-preview-overlay" onClick={() => setPreviewImage(null)}>
-          <button className="lap-preview-close" onClick={() => setPreviewImage(null)}>&times;</button>
-          <img src={previewImage} alt="Preview" className="lap-preview-img" onClick={(e) => e.stopPropagation()} />
+        <div
+          className="lap-preview-overlay"
+          onClick={() => setPreviewImage(null)}
+        >
+          <button
+            className="lap-preview-close"
+            onClick={() => setPreviewImage(null)}
+          >
+            &times;
+          </button>
+
+          <img
+            src={previewImage}
+            alt="Preview"
+            className="lap-preview-img"
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
       )}
     </div>

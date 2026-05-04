@@ -451,18 +451,72 @@
   background: #fff; 
   border: 1px solid #ddd; 
   border-radius: 10px; 
-  height: 90px; 
+  min-height: 90px; 
   display: flex; 
   justify-content: center; 
   align-items: center; 
+  text-align: center;
   cursor: pointer; 
   transition: 0.2s; 
+  padding: 12px;
 }
 
 .doc-card:hover { 
   border-color: #8dae12; 
   background: #fafafa; 
 }
+
+.doc-card-editable {
+  cursor: pointer;
+}
+
+.doc-upload-area {
+  width: 100%;
+  min-height: 66px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.doc-file-input {
+  display: none;
+}
+
+.doc-upload-placeholder {
+  color: #333;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.doc-upload-success {
+  color: #2fb800;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.doc-upload-note {
+  font-size: 11px;
+  color: #888;
+  text-align: center;
+}
+
+.doc-link {
+  color: #2980b9;
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+}
+
+.doc-empty-text {
+  color: #aaa;
+  font-style: italic;
+  text-align: center;
+}
+
 /* Mengatur warna dan gaya teks label di dalam kartu dokumen */
 .doc-text { 
   color: #8dae12; 

@@ -108,18 +108,20 @@ const DetailKaryawan = () => {
       return;
     }
 
-    const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "application/pdf"];
-    if (!allowedTypes.includes(file.type)) {
-      alert("Format file tidak didukung! Hanya diperbolehkan JPG, PNG, atau PDF.");
-      event.target.value = null;
-      return;
-    }
+  const allowedTypes = ["image/jpeg", "image/png", "application/pdf"];
+const allowedExtensions = ["jpg", "jpeg", "png", "pdf"];
+const fileExt = file.name.split(".").pop().toLowerCase();
+
+if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
+  alert("Format file tidak didukung! Silahkan kirim ulang format JPG, JPEG, PNG, atau PDF.");
+  event.target.value = null;
+  return;
+}
 
     // Mengatur status sedang mengunggah, membuat nama file unik, dan mengirim file ke storage Supabase agar mendapatkan link publiknya
     try {
       setUploadingState(`Sedang mengunggah file untuk ${dbColumnName}...`);
 
-      const fileExt = file.name.split(".").pop();
       const safeName = formData.nama.replace(/\s+/g, "_").toLowerCase();
       const fileName = `${safeName}_${formData.nik}_${dbColumnName}_${Date.now()}.${fileExt}`;
 
@@ -505,46 +507,43 @@ const DetailKaryawan = () => {
               {dokumenList.map((doc, idx) => (
                 <div key={idx} className="doc-box">
                   <span className="doc-label">{doc.label}</span>
-                  <div
-                    className="doc-card"
-                    style={{
-                      backgroundColor: isEditing ? "#fff" : "#f9f9f9",
-                      border: isEditing && formData[doc.dbKey] ? "1px solid #2fb800" : "1px solid #ddd",
-                      padding: "12px",
-                    }}
-                  >
-                    {isEditing ? (
-                      <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-                        {formData[doc.dbKey] && (
-                          <span style={{ fontSize: "13px", color: "#2fb800", fontWeight: "bold" }}>
-                            ✅ Dokumen Berhasil Diunggah
-                          </span>
-                        )}
-                        <input
-                          type="file"
-                          style={{ fontSize: "11px", width: "100%", marginTop: "5px" }}
-                          accept="image/jpeg, image/png, application/pdf"
-                          onChange={(e) => handleFileUpload(e, doc.dbKey)}
-                        />
-                        <small style={{ fontSize: "11px", color: "#888", marginTop: "2px" }}>
-                          Max 2MB (JPG/PNG/PDF)
-                        </small>
-                      </div>
-                    ) : formData[doc.dbKey] ? (
-                      <a
-                        href={formData[doc.dbKey]}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{ color: "#2980b9", fontWeight: "bold", textDecoration: "none" }}
-                      >
-                        Lihat Dokumen
-                      </a>
-                    ) : (
-                      <span style={{ color: "#aaa", fontStyle: "italic" }}>
-                        Belum ada dokumen
-                      </span>
-                    )}
-                  </div>
+                 <div
+  className={`doc-card ${isEditing ? "doc-card-editable" : ""}`}
+  style={{
+    backgroundColor: isEditing ? "#fff" : "#f9f9f9",
+    border: isEditing && formData[doc.dbKey] ? "1px solid #2fb800" : "1px solid #ddd",
+  }}
+>
+  {isEditing ? (
+    <label className="doc-upload-area">
+      {formData[doc.dbKey] ? (
+        <span className="doc-upload-success">Dokumen Berhasil Diunggah</span>
+      ) : (
+        <span className="doc-upload-placeholder">Pilih/Upload Dokumen</span>
+      )}
+
+      <input
+        type="file"
+        className="doc-file-input"
+        accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+        onChange={(e) => handleFileUpload(e, doc.dbKey)}
+      />
+
+      <small className="doc-upload-note">Max 2MB (JPG/PNG/PDF)</small>
+    </label>
+  ) : formData[doc.dbKey] ? (
+    <a
+      href={formData[doc.dbKey]}
+      target="_blank"
+      rel="noreferrer"
+      className="doc-link"
+    >
+      Lihat Dokumen
+    </a>
+  ) : (
+    <span className="doc-empty-text">Belum ada dokumen</span>
+  )}
+</div>
                 </div>
               ))}
             </div>

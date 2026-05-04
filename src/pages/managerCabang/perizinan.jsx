@@ -212,8 +212,12 @@ const PerizinanManagerCabang = () => {
       fetchData();
       handleCloseModal();
     } else {
-      alert(result.message || "Gagal mengupdate status.");
-    }
+  alert(
+    `Gagal: ${result.message || "Gagal mengupdate status."}${
+      result.detail ? `\nDetail: ${result.detail}` : ""
+    }`
+  );
+}
   } catch (err) {
     alert("Terjadi kesalahan jaringan.");
   }
