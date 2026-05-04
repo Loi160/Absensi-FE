@@ -1,29 +1,36 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { getAuthHeaders } from "../../context/AuthHeaders";
 import "../hrd/datakaryawan.css";
 
 import iconDashboard from "../../assets/dashboard.svg";
 import iconKaryawan from "../../assets/datakaryawan.svg";
 import iconPerizinan from "../../assets/perizinan.svg";
 import iconLaporan from "../../assets/laporan.svg";
-import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 
-/* Menyimpan daftar menu yang ditampilkan pada sidebar */
 const MENU_ITEMS = [
   { path: "/managerCabang/dashboard", icon: iconDashboard, text: "Dashboard" },
-  { path: "/managerCabang/datakaryawan", icon: iconKaryawan, text: "Data Karyawan", active: true },
+  {
+    path: "/managerCabang/datakaryawan",
+    icon: iconKaryawan,
+    text: "Data Karyawan",
+    active: true,
+  },
   { path: "/managerCabang/perizinan", icon: iconPerizinan, text: "Perizinan" },
   { path: "/managerCabang/laporan", icon: iconLaporan, text: "Laporan" },
 ];
 
-/* Menampilkan icon mata tertutup */
+const getRoleLabel = (role) => {
+  if (role === "hrd") return "HRD";
+  if (role === "managerCabang") return "Manager Cabang";
+  return "Karyawan";
+};
+
 const EyeOffIcon = () => (
   <svg
-    width="16"
-    height="16"
+    width="20"
+    height="20"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -36,92 +43,54 @@ const EyeOffIcon = () => (
   </svg>
 );
 
-/* Komponen utama halaman data karyawan manager cabang */
-const DataKaryawanManagerCabang = () => {
+const DetailKaryawanManagerCabang = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const location = useLocation();
+  const { logout } = useAuth();
+
+  const employee = location.state?.employee;
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showPassword] = useState(false);
 
-  /* Membuka sidebar */
   const openSidebar = () => setSidebarOpen(true);
-
-  /* Menutup sidebar */
   const closeSidebar = () => setSidebarOpen(false);
 
-  const [userData, setUserData] = useState({
-    nama: "Manager",
-    cabangUtama: "Memuat...",
-    subCabang: [],
-  });
-  const [karyawanList, setKaryawanList] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const [showFilter, setShowFilter] = useState(false);
-  const [selectedCabang, setSelectedCabang] = useState("Semua Sub-Cabang");
-
-  /* Mengambil data user dan data karyawan sesuai cabang manager */
-  useEffect(() => {
-    if (user) {
-      setUserData({
-        nama: user.nama,
-        cabangUtama: user.cabangUtama,
-        subCabang: user.subCabang || [],
-      });
-
-      const fetchAllData = async () => {
-        try {
-          setLoading(true);
-          const res = await fetch(import.meta.env.VITE_API_URL + "/api/karyawan", {
-            headers: getAuthHeaders(),
-          });
-          const data = await res.json();
-          
-          const allMyBranches = [user.cabangUtama, ...(user.subCabang || [])];
-          const filteredByBranch = data.filter((k) =>
-            allMyBranches.includes(k.cabang?.nama),
-          );
-          setKaryawanList(filteredByBranch);
-        } catch (err) {
-          console.error(err);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchAllData();
-    }
-  }, [user]);
-
-  /* Mengecek apakah manager memiliki sub cabang */
-  const hasSubCabang = userData.subCabang.length > 0;
-
-  /* Menghapus data login dan mengarahkan user ke halaman login */
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("session_token");
+    logout();
     navigate("/auth/login");
   };
 
-  /* Mengarahkan user ke halaman sesuai menu yang dipilih */
   const handleNav = (path) => {
     closeSidebar();
     navigate(path);
   };
 
-  /* Mengarahkan user ke halaman detail karyawan yang dipilih */
-  const handleRowClick = (karyawan) => {
-    navigate("/managerCabang/detailkaryawan", {
-      state: { employee: karyawan },
-    });
-  };
+  if (!employee) {
+    return (
+      <div style={{ padding: 40, textAlign: "center", fontFamily: "Inter" }}>
+        <h2>Data Karyawan Tidak Ditemukan</h2>
+        <p>Silakan kembali ke halaman Data Karyawan.</p>
+        <button
+          onClick={() => navigate("/managerCabang/datakaryawan")}
+          className="btn-batal"
+          style={{ marginTop: "20px" }}
+        >
+          Kembali
+        </button>
+      </div>
+    );
+  }
 
-  /* Menyaring data karyawan berdasarkan sub cabang yang dipilih */
-  const filteredData = karyawanList.filter((k) => {
-    if (!hasSubCabang) return true;
-    if (selectedCabang === "Semua Sub-Cabang") return true;
-    return k.cabang?.nama === selectedCabang;
-  });
+  const dokumenList = [
+    { label: "Foto Profil Karyawan", dbKey: "foto_karyawan" },
+    { label: "Kartu Tanda Penduduk (KTP)", dbKey: "ktp" },
+    { label: "Kartu Keluarga (KK)", dbKey: "kk" },
+    { label: "SKCK", dbKey: "skck" },
+    { label: "Surat Izin Mengemudi (SIM)", dbKey: "sim" },
+    { label: "Sertifikat Pendukung", dbKey: "sertifikat" },
+    { label: "Dokumen Tambahan", dbKey: "dokumen_tambahan" },
+  ];
 
   return (
     <div className="hrd-container">
@@ -133,6 +102,7 @@ const DataKaryawanManagerCabang = () => {
           <span></span>
         </button>
       </div>
+
       <div
         className={`sidebar-overlay ${sidebarOpen ? "active" : ""}`}
         onClick={closeSidebar}
@@ -142,9 +112,11 @@ const DataKaryawanManagerCabang = () => {
         <button className="btn-sidebar-close" onClick={closeSidebar}>
           ✕
         </button>
+
         <div className="logo-area">
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
+
         <nav className="menu-nav">
           {MENU_ITEMS.map((item, index) => (
             <div
@@ -159,6 +131,7 @@ const DataKaryawanManagerCabang = () => {
             </div>
           ))}
         </nav>
+
         <div className="sidebar-footer">
           <button className="btn-logout" onClick={handleLogout}>
             Log Out
@@ -168,143 +141,214 @@ const DataKaryawanManagerCabang = () => {
 
       <main className="main-content">
         <header className="dk-header-area">
-          <h1 className="dk-title">Data Karyawan - {userData.cabangUtama}</h1>
-          <p className="dk-subtitle">
-            Daftar pusat informasi dan detail administrasi karyawan (Read-Only)
-          </p>
+          <div className="dk-title-group">
+            <h1 className="dk-title">Detail Karyawan</h1>
+            <p className="dk-subtitle">
+              Informasi profil {employee.nama || "karyawan"} - View Only
+            </p>
+          </div>
         </header>
 
-        <div className="dk-action-row">
-          <div className="dk-action-group">
-            <div className="filter-wrapper">
-              <button
-                className="btn-dk-filter"
-                onClick={() => {
-                  if (hasSubCabang) setShowFilter(!showFilter);
-                }}
+        <form>
+          <div className="detail-form-grid">
+            <div className="form-group">
+              <label>Nama Lengkap</label>
+              <input
+                type="text"
+                className="input-read"
+                readOnly
+                value={employee.nama || ""}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>NIK (Username)</label>
+              <input
+                type="text"
+                className="input-read"
+                readOnly
+                value={employee.nik || ""}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Cabang Penempatan</label>
+              <input
+                type="text"
+                className="input-read"
+                readOnly
+                value={employee.cabang?.nama || "-"}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Jabatan</label>
+              <input
+                type="text"
+                className="input-read"
+                readOnly
+                value={employee.jabatan || ""}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Tanggal Masuk</label>
+              <input
+                type="text"
+                className="input-read"
+                readOnly
+                value={employee.tanggal_masuk || ""}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Divisi</label>
+              <input
+                type="text"
+                className="input-read"
+                readOnly
+                value={employee.divisi || ""}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Password</label>
+              <div className="pwd-wrapper">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="input-read"
+                  readOnly
+                  value="********"
+                />
+                <button type="button" className="btn-eye">
+                  <EyeOffIcon />
+                </button>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Tempat Lahir</label>
+              <input
+                type="text"
+                className="input-read"
+                readOnly
+                value={employee.tempat_lahir || ""}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Tanggal Lahir</label>
+              <input
+                type="text"
+                className="input-read"
+                readOnly
+                value={employee.tanggal_lahir || ""}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Jenis Kelamin</label>
+              <input
+                type="text"
+                className="input-read"
+                readOnly
+                value={employee.jenis_kelamin || "-"}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Status Karyawan</label>
+              <input
+                type="text"
+                className="input-read"
+                readOnly
+                value={employee.status || "Aktif"}
                 style={{
-                  cursor: hasSubCabang ? "pointer" : "default",
-                  opacity: hasSubCabang ? 1 : 0.8,
+                  color:
+                    employee.status === "Nonaktif" ? "#e74c3c" : "#2fb800",
+                  fontWeight: "700",
                 }}
-              >
-                {!hasSubCabang ? userData.cabangUtama : selectedCabang}
-                {hasSubCabang && (
-                  <img
-                    src={iconBawah}
-                    alt="v"
-                    style={{
-                      width: "10px",
-                      filter: "brightness(0) invert(1)",
-                      transform: showFilter ? "rotate(180deg)" : "none",
-                      transition: "0.2s",
-                    }}
-                  />
-                )}
-              </button>
-              {showFilter && hasSubCabang && (
-                <div className="filter-dropdown">
-                  <div
-                    className="dropdown-item"
-                    onClick={() => {
-                      setSelectedCabang("Semua Sub-Cabang");
-                      setShowFilter(false);
-                    }}
-                  >
-                    Semua Sub-Cabang
-                  </div>
-                  {userData.subCabang.map((c, idx) => (
-                    <div
-                      key={idx}
-                      className="dropdown-item"
-                      onClick={() => {
-                        setSelectedCabang(c);
-                        setShowFilter(false);
-                      }}
-                    >
-                      {c}
-                    </div>
-                  ))}
-                </div>
-              )}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Hak Akses</label>
+              <input
+                type="text"
+                className="input-read"
+                readOnly
+                value={employee.roleLabel || getRoleLabel(employee.role)}
+                style={{
+                  fontWeight: "700",
+                  color:
+                    employee.role === "hrd"
+                      ? "#c92a2a"
+                      : employee.role === "managerCabang"
+                        ? "#1565c0"
+                        : "#2fb800",
+                }}
+              />
+            </div>
+
+            <div className="form-group" style={{ gridColumn: "1 / -1" }}>
+              <label>Alamat</label>
+              <input
+                type="text"
+                className="input-read"
+                readOnly
+                value={employee.alamat || ""}
+              />
             </div>
           </div>
-        </div>
 
-        <div className="dk-table-container">
-          <div className="dk-table-header-title">Daftar Karyawan</div>
-          <div className="dk-table-wrapper">
-            <table className="dk-table">
-              <thead>
-                <tr>
-                  <th>Nama</th>
-                  <th>Jabatan</th>
-                  <th>NIK (Username)</th>
-                  <th>Password</th>
-                  <th>Tempat Lahir</th>
-                  <th>Tanggal Lahir</th>
-                  <th>Alamat</th>
-                  <th className="text-center">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td
-                      colSpan="8"
-                      style={{
-                        textAlign: "center",
-                        padding: "30px",
-                        color: "#666",
-                      }}
-                    >
-                      Memuat data...
-                    </td>
-                  </tr>
-                ) : filteredData.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan="8"
-                      style={{
-                        textAlign: "center",
-                        padding: "30px",
-                        color: "#666",
-                      }}
-                    >
-                      Tidak ada karyawan.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredData.map((k) => {
-                    const isActive = k.status === "Aktif" || !k.status;
-                    return (
-                      <tr key={k.id} onClick={() => handleRowClick(k)}>
-                        <td className="dk-td-name">{k.nama}</td>
-                        <td>{k.jabatan || "-"}</td>
-                        <td>{k.nik}</td>
-                        <td>
-                          <div className="dk-pwd-mask">
-                            <span>........</span> <EyeOffIcon />
-                          </div>
-                        </td>
-                        <td>{k.tempat_lahir || "-"}</td>
-                        <td>{k.tanggal_lahir || "-"}</td>
-                        <td>{k.alamat || "-"}</td>
-                        <td className="text-center">
-                          <span
-                            className={`status-dot ${isActive ? "active" : "inactive"}`}
-                          ></span>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+          <div className="docs-section">
+            <h4 className="docs-title">Dokumen Pendukung</h4>
+
+            <div className="docs-grid">
+              {dokumenList.map((doc, idx) => (
+                <div key={idx} className="doc-box">
+                  <span className="doc-label">{doc.label}</span>
+
+                  <div
+                    className="doc-card"
+                    style={{
+                      backgroundColor: "#f9f9f9",
+                      border: "1px solid #ddd",
+                    }}
+                  >
+                    {employee[doc.dbKey] ? (
+                      <a
+                        href={employee[doc.dbKey]}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="doc-link"
+                      >
+                        Lihat Dokumen
+                      </a>
+                    ) : (
+                      <span className="doc-empty-text">
+                        Belum ada dokumen
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+
+          <div className="detail-footer">
+            <button
+              type="button"
+              className="btn-batal"
+              onClick={() => navigate(-1)}
+            >
+              Kembali
+            </button>
+          </div>
+        </form>
       </main>
     </div>
   );
 };
 
-export default DataKaryawanManagerCabang;
+export default DetailKaryawanManagerCabang;

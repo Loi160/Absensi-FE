@@ -11,15 +11,24 @@ import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 
-/* Menyimpan daftar menu sidebar manager cabang */
 const MENU_ITEMS = [
   { path: "/managerCabang/dashboard", icon: iconDashboard, text: "Dashboard" },
-  { path: "/managerCabang/datakaryawan", icon: iconKaryawan, text: "Data Karyawan", active: true },
+  {
+    path: "/managerCabang/datakaryawan",
+    icon: iconKaryawan,
+    text: "Data Karyawan",
+    active: true,
+  },
   { path: "/managerCabang/perizinan", icon: iconPerizinan, text: "Perizinan" },
   { path: "/managerCabang/laporan", icon: iconLaporan, text: "Laporan" },
 ];
 
-/* Menampilkan icon mata tertutup untuk status tertentu */
+const getRoleLabel = (role) => {
+  if (role === "hrd") return "HRD";
+  if (role === "managerCabang") return "Manager Cabang";
+  return "Karyawan";
+};
+
 const EyeOffIcon = () => (
   <svg
     width="16"
@@ -36,92 +45,101 @@ const EyeOffIcon = () => (
   </svg>
 );
 
-/* Komponen utama halaman data karyawan manager cabang */
 const DataKaryawanManagerCabang = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  /* Membuka sidebar */
-  const openSidebar = () => setSidebarOpen(true);
-
-  /* Menutup sidebar */
-  const closeSidebar = () => setSidebarOpen(false);
-
-  const [userData, setUserData] = useState({
-    nama: "Manager",
-    cabangUtama: "Memuat...",
-    subCabang: [],
-  });
   const [karyawanList, setKaryawanList] = useState([]);
+  const [cabangList, setCabangList] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [selectedCabang, setSelectedCabang] = useState("Semua Cabang Saya");
   const [showFilter, setShowFilter] = useState(false);
-  const [selectedCabang, setSelectedCabang] = useState("Semua Sub-Cabang");
 
-  /* Mengambil data user dan data seluruh karyawan */
-  useEffect(() => {
-    if (user) {
-      setUserData({
-        nama: user.nama,
-        cabangUtama: user.cabangUtama,
-        subCabang: user.subCabang || [],
-      });
+  const openSidebar = () => setSidebarOpen(true);
+  const closeSidebar = () => setSidebarOpen(false);
 
-      const fetchAllData = async () => {
-        try {
-          setLoading(true);
-          const res = await fetch(import.meta.env.VITE_API_URL + "/api/karyawan", {
-            headers: getAuthHeaders(),
-          });
-          const data = await res.json();
-          
-          const allMyBranches = [user.cabangUtama, ...(user.subCabang || [])];
-          const filteredByBranch = data.filter((k) =>
-            allMyBranches.includes(k.cabang?.nama),
-          );
-          setKaryawanList(filteredByBranch);
-        } catch (err) {
-          console.error(err);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchAllData();
-    }
-  }, [user]);
-
-  /* Mengecek apakah manager memiliki sub cabang */
-  const hasSubCabang = userData.subCabang.length > 0;
-
-  /* Menghapus data login dan mengarahkan user ke halaman login */
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("session_token");
+    logout();
     navigate("/auth/login");
   };
 
-  /* Mengarahkan user ke halaman yang dipilih dari sidebar */
   const handleNav = (path) => {
     closeSidebar();
     navigate(path);
   };
 
-  /* Mengarahkan user ke halaman detail karyawan */
   const handleRowClick = (karyawan) => {
     navigate("/managerCabang/detailkaryawan", {
       state: { employee: karyawan },
     });
   };
 
-  /* Menyaring data karyawan berdasarkan cabang yang dipilih */
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+
+      const resCabang = await fetch(
+        import.meta.env.VITE_API_URL + "/api/cabang",
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+
+      if (resCabang.status === 401 || resCabang.status === 403) {
+        logout();
+        navigate("/auth/login");
+        return;
+      }
+
+      const dataCabang = await resCabang.json();
+
+      if (!resCabang.ok) {
+        throw new Error(dataCabang.message || "Gagal mengambil data cabang");
+      }
+
+      const resKaryawan = await fetch(
+        import.meta.env.VITE_API_URL + "/api/karyawan",
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+
+      if (resKaryawan.status === 401 || resKaryawan.status === 403) {
+        logout();
+        navigate("/auth/login");
+        return;
+      }
+
+      const dataKaryawan = await resKaryawan.json();
+
+      if (!resKaryawan.ok) {
+        throw new Error(
+          dataKaryawan.message || "Gagal mengambil data karyawan"
+        );
+      }
+
+      setCabangList(Array.isArray(dataCabang) ? dataCabang : []);
+      setKaryawanList(Array.isArray(dataKaryawan) ? dataKaryawan : []);
+    } catch (err) {
+      console.error("Error fetching manager data:", err);
+      alert(err.message || "Gagal memuat data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const filteredData = karyawanList.filter((k) => {
-    if (!hasSubCabang) return true;
-    if (selectedCabang === "Semua Sub-Cabang") return true;
+    if (selectedCabang === "Semua Cabang Saya") return true;
     return k.cabang?.nama === selectedCabang;
   });
+
+  const titleCabang = user?.cabangUtama || "Cabang Saya";
 
   return (
     <div className="hrd-container">
@@ -133,6 +151,7 @@ const DataKaryawanManagerCabang = () => {
           <span></span>
         </button>
       </div>
+
       <div
         className={`sidebar-overlay ${sidebarOpen ? "active" : ""}`}
         onClick={closeSidebar}
@@ -142,9 +161,11 @@ const DataKaryawanManagerCabang = () => {
         <button className="btn-sidebar-close" onClick={closeSidebar}>
           ✕
         </button>
+
         <div className="logo-area">
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
+
         <nav className="menu-nav">
           {MENU_ITEMS.map((item, index) => (
             <div
@@ -159,6 +180,7 @@ const DataKaryawanManagerCabang = () => {
             </div>
           ))}
         </nav>
+
         <div className="sidebar-footer">
           <button className="btn-logout" onClick={handleLogout}>
             Log Out
@@ -168,9 +190,9 @@ const DataKaryawanManagerCabang = () => {
 
       <main className="main-content">
         <header className="dk-header-area">
-          <h1 className="dk-title">Data Karyawan - {userData.cabangUtama}</h1>
+          <h1 className="dk-title">Data Karyawan - {titleCabang}</h1>
           <p className="dk-subtitle">
-            Daftar pusat informasi dan detail administrasi karyawan (Read-Only)
+            Daftar informasi karyawan cabang utama dan sub-cabang Anda
           </p>
         </header>
 
@@ -179,49 +201,43 @@ const DataKaryawanManagerCabang = () => {
             <div className="filter-wrapper">
               <button
                 className="btn-dk-filter"
-                onClick={() => {
-                  if (hasSubCabang) setShowFilter(!showFilter);
-                }}
-                style={{
-                  cursor: hasSubCabang ? "pointer" : "default",
-                  opacity: hasSubCabang ? 1 : 0.8,
-                }}
+                onClick={() => setShowFilter(!showFilter)}
               >
-                {!hasSubCabang ? userData.cabangUtama : selectedCabang}
-                {hasSubCabang && (
-                  <img
-                    src={iconBawah}
-                    alt="v"
-                    style={{
-                      width: "10px",
-                      filter: "brightness(0) invert(1)",
-                      transform: showFilter ? "rotate(180deg)" : "none",
-                      transition: "0.2s",
-                    }}
-                  />
-                )}
+                {selectedCabang}
+                <img
+                  src={iconBawah}
+                  alt="v"
+                  style={{
+                    width: "10px",
+                    filter: "brightness(0) invert(1)",
+                    transform: showFilter ? "rotate(180deg)" : "none",
+                    transition: "0.2s",
+                  }}
+                />
               </button>
-              {showFilter && hasSubCabang && (
+
+              {showFilter && (
                 <div className="filter-dropdown">
                   <div
                     className="dropdown-item"
                     onClick={() => {
-                      setSelectedCabang("Semua Sub-Cabang");
+                      setSelectedCabang("Semua Cabang Saya");
                       setShowFilter(false);
                     }}
                   >
-                    Semua Sub-Cabang
+                    Semua Cabang Saya
                   </div>
-                  {userData.subCabang.map((c, idx) => (
+
+                  {cabangList.map((c) => (
                     <div
-                      key={idx}
+                      key={c.id}
                       className="dropdown-item"
                       onClick={() => {
-                        setSelectedCabang(c);
+                        setSelectedCabang(c.nama);
                         setShowFilter(false);
                       }}
                     >
-                      {c}
+                      {c.nama}
                     </div>
                   ))}
                 </div>
@@ -232,25 +248,29 @@ const DataKaryawanManagerCabang = () => {
 
         <div className="dk-table-container">
           <div className="dk-table-header-title">Daftar Karyawan</div>
+
           <div className="dk-table-wrapper">
             <table className="dk-table">
               <thead>
                 <tr>
                   <th>Nama</th>
                   <th>Jabatan</th>
+                  <th>Hak Akses</th>
                   <th>NIK (Username)</th>
                   <th>Password</th>
+                  <th>Cabang</th>
                   <th>Tempat Lahir</th>
                   <th>Tanggal Lahir</th>
                   <th>Alamat</th>
                   <th className="text-center">Status</th>
                 </tr>
               </thead>
+
               <tbody>
                 {loading ? (
                   <tr>
                     <td
-                      colSpan="8"
+                      colSpan="10"
                       style={{
                         textAlign: "center",
                         padding: "30px",
@@ -263,7 +283,7 @@ const DataKaryawanManagerCabang = () => {
                 ) : filteredData.length === 0 ? (
                   <tr>
                     <td
-                      colSpan="8"
+                      colSpan="10"
                       style={{
                         textAlign: "center",
                         padding: "30px",
@@ -276,22 +296,27 @@ const DataKaryawanManagerCabang = () => {
                 ) : (
                   filteredData.map((k) => {
                     const isActive = k.status === "Aktif" || !k.status;
+
                     return (
                       <tr key={k.id} onClick={() => handleRowClick(k)}>
                         <td className="dk-td-name">{k.nama}</td>
                         <td>{k.jabatan || "-"}</td>
+                        <td>{k.roleLabel || getRoleLabel(k.role)}</td>
                         <td>{k.nik}</td>
                         <td>
                           <div className="dk-pwd-mask">
                             <span>........</span> <EyeOffIcon />
                           </div>
                         </td>
+                        <td>{k.cabang?.nama || "-"}</td>
                         <td>{k.tempat_lahir || "-"}</td>
                         <td>{k.tanggal_lahir || "-"}</td>
                         <td>{k.alamat || "-"}</td>
                         <td className="text-center">
                           <span
-                            className={`status-dot ${isActive ? "active" : "inactive"}`}
+                            className={`status-dot ${
+                              isActive ? "active" : "inactive"
+                            }`}
                           ></span>
                         </td>
                       </tr>

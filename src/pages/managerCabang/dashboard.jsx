@@ -90,7 +90,7 @@ const DashboardManagerCabang = () => {
   });
 
   const [showFilter, setShowFilter] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState("Semua Sub-Cabang");
+  const [selectedFilter, setSelectedFilter] = useState("Semua Cabang Saya");
 
   const [stats, setStats] = useState({
     hadir: 0,
@@ -330,30 +330,41 @@ const DashboardManagerCabang = () => {
             </button>
 
             {showFilter && hasSubCabang && (
-              <div className="filter-dropdown">
-                <div
-                  className="dropdown-item"
-                  onClick={() => {
-                    setSelectedFilter("Semua Sub-Cabang");
-                    setShowFilter(false);
-                  }}
-                >
-                  Semua Sub-Cabang
-                </div>
-                {userData.subCabang.map((c, idx) => (
-                  <div
-                    key={idx}
-                    className="dropdown-item"
-                    onClick={() => {
-                      setSelectedFilter(c);
-                      setShowFilter(false);
-                    }}
-                  >
-                    {c}
-                  </div>
-                ))}
-              </div>
-            )}
+  <div className="filter-dropdown">
+    <div
+      className="dropdown-item"
+      onClick={() => {
+        setSelectedFilter("Semua Sub-Cabang");
+        setShowFilter(false);
+      }}
+    >
+      Semua Cabang Saya
+    </div>
+
+    <div
+      className="dropdown-item"
+      onClick={() => {
+        setSelectedFilter(userData.cabangUtama);
+        setShowFilter(false);
+      }}
+    >
+      {userData.cabangUtama}
+    </div>
+
+    {userData.subCabang.map((c, idx) => (
+      <div
+        key={idx}
+        className="dropdown-item"
+        onClick={() => {
+          setSelectedFilter(c);
+          setShowFilter(false);
+        }}
+      >
+        {c}
+      </div>
+    ))}
+  </div>
+)}
           </div>
         </div>
 

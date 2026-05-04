@@ -12,28 +12,54 @@ import iconLaporan from "../../assets/laporan.svg";
 import iconBawah from "../../assets/bawah.svg";
 import logoPersegi from "../../assets/logopersegi.svg";
 
-// Inisialisasi koneksi ke layanan Supabase untuk manajemen penyimpanan dokumen
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Ikon mata terbuka untuk fitur toggle tampilan kata sandi
+const ROLE_OPTIONS = [
+  { value: "karyawan", label: "Karyawan" },
+  { value: "managerCabang", label: "Manager Cabang" },
+  { value: "hrd", label: "HRD" },
+];
+
+const getRoleLabel = (role) => {
+  if (role === "hrd") return "HRD";
+  if (role === "managerCabang") return "Manager Cabang";
+  return "Karyawan";
+};
+
 const EyeOpenIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
     <circle cx="12" cy="12" r="3"></circle>
   </svg>
 );
 
-// Ikon mata tertutup untuk fitur toggle tampilan kata sandi
 const EyeOffIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
     <line x1="1" y1="1" x2="23" y2="23"></line>
   </svg>
 );
 
-// Komponen utama untuk menampilkan dan mengedit detail data karyawan serta berkas pendukungnya
 const DetailKaryawan = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -44,63 +70,163 @@ const DetailKaryawan = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [cabangList, setCabangList] = useState([]);
   const [uploadingState, setUploadingState] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const openSidebar = () => setSidebarOpen(true);
   const closeSidebar = () => setSidebarOpen(false);
 
-  // Mengambil data pengguna dari penyimpanan lokal untuk menentukan hak akses navigasi
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
   const isManager = storedUser.role === "managerCabang";
+  const isHrd = storedUser.role === "hrd";
   const basePath = isManager ? "/managerCabang" : "/hrd";
+  const canEdit = isHrd && !isManager;
 
-  // Menutup sidebar otomatis saat berpindah halaman melalui menu navigasi
   const handleNav = (path) => {
     closeSidebar();
     navigate(path);
   };
 
-  // Konfigurasi item menu yang ditampilkan di sidebar berdasarkan peran pengguna
-  const MENU_ITEMS = [
-    { path: `${basePath}/dashboard`, icon: iconDashboard, text: "Dashboard", show: true },
-    { path: `${basePath}/kelolacabang`, icon: iconKelola, text: "Kelola Cabang", show: !isManager },
-    { path: `${basePath}/datakaryawan`, icon: iconKaryawan, text: "Data Karyawan", show: true, active: true },
-    { path: `${basePath}/absenmanual`, icon: iconKehadiran, text: "Kehadiran", show: !isManager, hasArrow: true },
-    { path: `${basePath}/laporan`, icon: iconLaporan, text: "Laporan", show: true },
-  ];
+  const MENU_ITEMS = isManager
+    ? [
+        {
+          path: "/managerCabang/dashboard",
+          icon: iconDashboard,
+          text: "Dashboard",
+          show: true,
+        },
+        {
+          path: "/managerCabang/datakaryawan",
+          icon: iconKaryawan,
+          text: "Data Karyawan",
+          show: true,
+          active: true,
+        },
+        {
+          path: "/managerCabang/perizinan",
+          icon: iconKehadiran,
+          text: "Perizinan",
+          show: true,
+        },
+        {
+          path: "/managerCabang/laporan",
+          icon: iconLaporan,
+          text: "Laporan",
+          show: true,
+        },
+      ]
+    : [
+        {
+          path: "/hrd/dashboard",
+          icon: iconDashboard,
+          text: "Dashboard",
+          show: true,
+        },
+        {
+          path: "/hrd/kelolacabang",
+          icon: iconKelola,
+          text: "Kelola Cabang",
+          show: true,
+        },
+        {
+          path: "/hrd/datakaryawan",
+          icon: iconKaryawan,
+          text: "Data Karyawan",
+          show: true,
+          active: true,
+        },
+        {
+          path: "/hrd/kehadiran",
+          icon: iconKehadiran,
+          text: "Kehadiran",
+          show: true,
+          hasArrow: true,
+        },
+        {
+          path: "/hrd/laporan",
+          icon: iconLaporan,
+          text: "Laporan",
+          show: true,
+        },
+      ];
 
-  // Memuat daftar cabang dari server untuk keperluan pemilihan lokasi kerja karyawan
   useEffect(() => {
     const fetchCabang = async () => {
       try {
         const res = await fetch(import.meta.env.VITE_API_URL + "/api/cabang", {
           headers: getAuthHeaders(),
         });
-        setCabangList((await res.json()) || []);
+
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem("user");
+          localStorage.removeItem("session_token");
+          navigate("/auth/login");
+          return;
+        }
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || "Gagal mengambil data cabang.");
+        }
+
+        setCabangList(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error(err);
+        console.error("Gagal mengambil cabang:", err);
       }
     };
-    fetchCabang();
-  }, []);
 
-  // Menghapus data sesi dan mengarahkan pengguna kembali ke halaman login
+    fetchCabang();
+  }, [navigate]);
+
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("session_token");
     navigate("/auth/login");
   };
 
-  // Memperbarui state data formulir secara dinamis saat ada perubahan pada input
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  // Melakukan validasi berkas dan mengunggahnya ke penyimpanan cloud Supabase
+  const handleRoleChange = (e) => {
+    const newRole = e.target.value;
+
+    setFormData((prev) => {
+      const selectedBranch = cabangList.find(
+        (c) => Number(c.id) === Number(prev.cabang_id)
+      );
+
+      const shouldResetCabang =
+        newRole === "managerCabang" && selectedBranch?.parent_id;
+
+      return {
+        ...prev,
+        role: newRole,
+        cabang_id: shouldResetCabang ? "" : prev.cabang_id,
+      };
+    });
+  };
+
+  const cabangUtamaList = cabangList.filter((c) => !c.parent_id);
+
+  const cabangOptions =
+    formData.role === "managerCabang" ? cabangUtamaList : cabangList;
+
   const handleFileUpload = async (event, dbColumnName) => {
     const file = event.target.files[0];
     if (!file) return;
+
+    if (!canEdit) {
+      alert("Anda tidak memiliki akses untuk mengubah dokumen.");
+      event.target.value = null;
+      return;
+    }
 
     if (file.size > 2 * 1024 * 1024) {
       alert("File terlalu besar! Maksimal ukuran file adalah 2 MB.");
@@ -108,22 +234,31 @@ const DetailKaryawan = () => {
       return;
     }
 
-  const allowedTypes = ["image/jpeg", "image/png", "application/pdf"];
-const allowedExtensions = ["jpg", "jpeg", "png", "pdf"];
-const fileExt = file.name.split(".").pop().toLowerCase();
+    const allowedTypes = ["image/jpeg", "image/png", "application/pdf"];
+    const allowedExtensions = ["jpg", "jpeg", "png", "pdf"];
+    const fileExt = file.name.split(".").pop().toLowerCase();
 
-if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
-  alert("Format file tidak didukung! Silahkan kirim ulang format JPG, JPEG, PNG, atau PDF.");
-  event.target.value = null;
-  return;
-}
+    if (
+      !allowedTypes.includes(file.type) ||
+      !allowedExtensions.includes(fileExt)
+    ) {
+      alert(
+        "Format file tidak didukung! Silakan kirim ulang format JPG, JPEG, PNG, atau PDF."
+      );
+      event.target.value = null;
+      return;
+    }
 
-    // Mengatur status sedang mengunggah, membuat nama file unik, dan mengirim file ke storage Supabase agar mendapatkan link publiknya
     try {
       setUploadingState(`Sedang mengunggah file untuk ${dbColumnName}...`);
 
-      const safeName = formData.nama.replace(/\s+/g, "_").toLowerCase();
-      const fileName = `${safeName}_${formData.nik}_${dbColumnName}_${Date.now()}.${fileExt}`;
+      const safeName = (formData.nama || "karyawan")
+        .replace(/\s+/g, "_")
+        .toLowerCase();
+
+      const safeNik = formData.nik || "tanpa_nik";
+
+      const fileName = `${safeName}_${safeNik}_${dbColumnName}_${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("dokumen_karyawan")
@@ -141,40 +276,105 @@ if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
       }));
     } catch (error) {
       console.error("Error upload:", error);
-      alert("Gagal mengunggah file. Pastikan kamu sudah membuat 'New Policy' di menu Storage Supabase agar diizinkan upload.");
+      alert(
+        "Gagal mengunggah file. Pastikan bucket dokumen_karyawan dan policy storage Supabase sudah benar."
+      );
     } finally {
       setUploadingState("");
     }
   };
 
-  // Memvalidasi NIK harus 8 digit sebelum mengirim data terbaru karyawan ke server untuk disimpan
   const handleSaveEdit = async (e) => {
     e.preventDefault();
-    
-    if (!/^\d{8}$/.test(formData.nik)) {
-        return alert("Simpan Gagal: NIK harus berupa angka tepat 8 digit!");
+
+    if (!canEdit) {
+      alert("Manager Cabang hanya memiliki akses melihat data.");
+      return;
+    }
+
+    if (!formData.nama?.trim()) {
+      alert("Nama lengkap wajib diisi.");
+      return;
+    }
+
+    if (!/^\d{8}$/.test(formData.nik || "")) {
+      alert("Simpan gagal: NIK harus berupa angka tepat 8 digit.");
+      return;
+    }
+
+    if (!formData.password?.trim()) {
+      alert("Password wajib diisi.");
+      return;
+    }
+
+    if (!formData.role) {
+      alert("Hak Akses wajib dipilih.");
+      return;
+    }
+
+    if (!formData.cabang_id) {
+      alert("Cabang penempatan wajib dipilih.");
+      return;
+    }
+
+    if (!["Aktif", "Nonaktif"].includes(formData.status || "Aktif")) {
+      alert("Status karyawan hanya boleh Aktif atau Nonaktif.");
+      return;
+    }
+
+    if (formData.role === "managerCabang") {
+      const selectedBranch = cabangList.find(
+        (c) => Number(c.id) === Number(formData.cabang_id)
+      );
+
+      if (selectedBranch?.parent_id) {
+        alert(
+          "Manager Cabang hanya boleh ditempatkan pada cabang utama, bukan sub-cabang."
+        );
+        return;
+      }
     }
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/karyawan/${formData.id}`, {
-        method: "PUT",
-        headers: getAuthHeaders(),
-        body: JSON.stringify(formData),
-      });
+      setSaving(true);
 
-      if (res.ok) {
-        alert("Data Karyawan berhasil diperbarui!");
-        setIsEditing(false);
-      } else {
-        const errorData = await res.json();
-        alert(`Gagal menyimpan perubahan. Detail: ${errorData.detail || errorData.message}`);
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/karyawan/${formData.id}`,
+        {
+          method: "PUT",
+          headers: getAuthHeaders(),
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const result = await res.json().catch(() => ({}));
+
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem("user");
+        localStorage.removeItem("session_token");
+        navigate("/auth/login");
+        return;
       }
+
+      if (!res.ok) {
+        alert(
+          result.detail
+            ? `${result.message}\n\n${result.detail}`
+            : result.message || "Gagal menyimpan perubahan."
+        );
+        return;
+      }
+
+      alert("Data karyawan berhasil diperbarui.");
+      setIsEditing(false);
     } catch (err) {
-      alert("Terjadi kesalahan jaringan.");
+      console.error("Gagal menyimpan data:", err);
+      alert("Terjadi kesalahan jaringan. Pastikan backend sedang berjalan.");
+    } finally {
+      setSaving(false);
     }
   };
 
-  // Menampilkan pesan darurat jika data karyawan tidak ditemukan saat halaman dibuka
   if (!employee) {
     return (
       <div style={{ padding: 40, textAlign: "center", fontFamily: "Inter" }}>
@@ -191,7 +391,6 @@ if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
     );
   }
 
-  // Daftar label dan kunci database untuk mempermudah pemetaan dokumen karyawan di bagian lampiran
   const dokumenList = [
     { label: "Foto Profil Karyawan", dbKey: "foto_karyawan" },
     { label: "Kartu Tanda Penduduk (KTP)", dbKey: "ktp" },
@@ -212,6 +411,7 @@ if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
           <span></span>
         </button>
       </div>
+
       <div
         className={`sidebar-overlay ${sidebarOpen ? "active" : ""}`}
         onClick={closeSidebar}
@@ -221,24 +421,32 @@ if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
         <button className="btn-sidebar-close" onClick={closeSidebar}>
           ✕
         </button>
+
         <div className="logo-area">
           <img src={logoPersegi} alt="AMAGACORP" className="logo-img" />
         </div>
+
         <nav className="menu-nav">
-          {MENU_ITEMS.filter(item => item.show).map((item, index) => (
+          {MENU_ITEMS.filter((item) => item.show).map((item, index) => (
             <div
               key={index}
-              className={`menu-item ${item.active ? "active" : ""} ${item.hasArrow ? "has-arrow" : ""}`}
+              className={`menu-item ${item.active ? "active" : ""} ${
+                item.hasArrow ? "has-arrow" : ""
+              }`}
               onClick={() => handleNav(item.path)}
             >
               <div className="menu-left">
                 <img src={item.icon} alt="" className="menu-icon-main" />
                 <span className="menu-text-main">{item.text}</span>
               </div>
-              {item.hasArrow && <img src={iconBawah} alt="" className="arrow-icon-main" />}
+
+              {item.hasArrow && (
+                <img src={iconBawah} alt="" className="arrow-icon-main" />
+              )}
             </div>
           ))}
         </nav>
+
         <div className="sidebar-footer">
           <button className="btn-logout" onClick={handleLogout}>
             Log Out
@@ -250,14 +458,22 @@ if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
         <header className="dk-header-area">
           <div className="dk-title-group">
             <h1 className="dk-title">Detail Karyawan</h1>
-            <p className="dk-subtitle">Informasi profil {formData.nama}</p>
+            <p className="dk-subtitle">
+              Informasi profil {formData.nama || "karyawan"}
+            </p>
           </div>
         </header>
 
         <div className="dk-action-row">
-          <div className="dk-action-group" style={{ justifyContent: "flex-end", width: "100%" }}>
-            {!isEditing && (
-              <button className="btn-edit-outline" onClick={() => setIsEditing(true)}>
+          <div
+            className="dk-action-group"
+            style={{ justifyContent: "flex-end", width: "100%" }}
+          >
+            {canEdit && !isEditing && (
+              <button
+                className="btn-edit-outline"
+                onClick={() => setIsEditing(true)}
+              >
                 <svg
                   width="16"
                   height="16"
@@ -302,12 +518,12 @@ if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
                 type="text"
                 className={isEditing ? "input-edit" : "input-read"}
                 readOnly={!isEditing}
-                value={formData.nama}
+                value={formData.nama || ""}
                 onChange={handleInputChange}
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label>NIK (Username)</label>
               <input
@@ -315,19 +531,19 @@ if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
                 type="text"
                 className={isEditing ? "input-edit" : "input-read"}
                 readOnly={!isEditing}
-                value={formData.nik}
+                value={formData.nik || ""}
                 onChange={(e) => {
-                    if(isEditing) {
-                        e.target.value = e.target.value.replace(/[^0-9]/g, '');
-                        handleInputChange(e);
-                    }
+                  if (isEditing) {
+                    e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                    handleInputChange(e);
+                  }
                 }}
                 required
                 pattern="\d{8}"
                 maxLength="8"
                 minLength="8"
                 title="NIK harus berisi 8 digit angka."
-                placeholder="Wajib 8 Digit Angka"
+                placeholder="Wajib 8 digit angka"
               />
             </div>
 
@@ -339,9 +555,10 @@ if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
                   className="input-edit"
                   value={formData.cabang_id || ""}
                   onChange={handleInputChange}
+                  required
                 >
                   <option value="">Pilih Cabang...</option>
-                  {cabangList.map((c) => (
+                  {cabangOptions.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.nama}
                     </option>
@@ -355,7 +572,7 @@ if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
                 />
               )}
             </div>
-            
+
             <div className="form-group">
               <label>Jabatan</label>
               <input
@@ -367,7 +584,7 @@ if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
                 onChange={handleInputChange}
               />
             </div>
-            
+
             <div className="form-group">
               <label>Tanggal Masuk</label>
               <input
@@ -379,7 +596,7 @@ if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
                 onChange={handleInputChange}
               />
             </div>
-            
+
             <div className="form-group">
               <label>Divisi</label>
               <input
@@ -400,7 +617,7 @@ if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
                   type={showPassword ? "text" : "password"}
                   className={isEditing ? "input-edit" : "input-read"}
                   readOnly={!isEditing}
-                  value={formData.password}
+                  value={formData.password || ""}
                   onChange={handleInputChange}
                   required
                 />
@@ -425,7 +642,7 @@ if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
                 onChange={handleInputChange}
               />
             </div>
-            
+
             <div className="form-group">
               <label>Tanggal Lahir</label>
               <input
@@ -437,7 +654,7 @@ if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
                 onChange={handleInputChange}
               />
             </div>
-            
+
             <div className="form-group">
               <label>Jenis Kelamin</label>
               {isEditing ? (
@@ -472,7 +689,6 @@ if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
                 >
                   <option value="Aktif">Aktif</option>
                   <option value="Nonaktif">Nonaktif</option>
-                  <option value="Resign">Resign</option>
                 </select>
               ) : (
                 <input
@@ -481,8 +697,58 @@ if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
                   readOnly
                   value={formData.status || "Aktif"}
                   style={{
-                    color: formData.status === "Nonaktif" || formData.status === "Resign" ? "#e74c3c" : "#2fb800",
+                    color:
+                      formData.status === "Nonaktif" ? "#e74c3c" : "#2fb800",
                     fontWeight: "700",
+                  }}
+                />
+              )}
+            </div>
+
+            <div className="form-group">
+              <label>Hak Akses</label>
+              {isEditing ? (
+                <>
+                  <select
+                    name="role"
+                    className="input-edit"
+                    value={formData.role || "karyawan"}
+                    onChange={handleRoleChange}
+                    required
+                  >
+                    {ROLE_OPTIONS.map((role) => (
+                      <option key={role.value} value={role.value}>
+                        {role.label}
+                      </option>
+                    ))}
+                  </select>
+
+                  {formData.role === "hrd" && (
+                    <small style={{ color: "#d9480f", fontWeight: "600" }}>
+                      Catatan: HRD aktif hanya boleh 1 orang.
+                    </small>
+                  )}
+
+                  {formData.role === "managerCabang" && (
+                    <small style={{ color: "#d9480f", fontWeight: "600" }}>
+                      Manager Cabang hanya boleh ditempatkan di cabang utama.
+                    </small>
+                  )}
+                </>
+              ) : (
+                <input
+                  type="text"
+                  className="input-read"
+                  readOnly
+                  value={getRoleLabel(formData.role)}
+                  style={{
+                    fontWeight: "700",
+                    color:
+                      formData.role === "hrd"
+                        ? "#c92a2a"
+                        : formData.role === "managerCabang"
+                          ? "#1565c0"
+                          : "#2fb800",
                   }}
                 />
               )}
@@ -503,64 +769,81 @@ if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExt)) {
 
           <div className="docs-section">
             <h4 className="docs-title">Dokumen Pendukung</h4>
+
             <div className="docs-grid">
               {dokumenList.map((doc, idx) => (
                 <div key={idx} className="doc-box">
                   <span className="doc-label">{doc.label}</span>
-                 <div
-  className={`doc-card ${isEditing ? "doc-card-editable" : ""}`}
-  style={{
-    backgroundColor: isEditing ? "#fff" : "#f9f9f9",
-    border: isEditing && formData[doc.dbKey] ? "1px solid #2fb800" : "1px solid #ddd",
-  }}
->
-  {isEditing ? (
-    <label className="doc-upload-area">
-      {formData[doc.dbKey] ? (
-        <span className="doc-upload-success">Dokumen Berhasil Diunggah</span>
-      ) : (
-        <span className="doc-upload-placeholder">Pilih/Upload Dokumen</span>
-      )}
 
-      <input
-        type="file"
-        className="doc-file-input"
-        accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-        onChange={(e) => handleFileUpload(e, doc.dbKey)}
-      />
+                  <div
+                    className={`doc-card ${
+                      isEditing ? "doc-card-editable" : ""
+                    }`}
+                    style={{
+                      backgroundColor: isEditing ? "#fff" : "#f9f9f9",
+                      border:
+                        isEditing && formData[doc.dbKey]
+                          ? "1px solid #2fb800"
+                          : "1px solid #ddd",
+                    }}
+                  >
+                    {isEditing ? (
+                      <label className="doc-upload-area">
+                        {formData[doc.dbKey] ? (
+                          <span className="doc-upload-success">
+                            Dokumen Berhasil Diunggah
+                          </span>
+                        ) : (
+                          <span className="doc-upload-placeholder">
+                            Pilih/Upload Dokumen
+                          </span>
+                        )}
 
-      <small className="doc-upload-note">Max 2MB (JPG/PNG/PDF)</small>
-    </label>
-  ) : formData[doc.dbKey] ? (
-    <a
-      href={formData[doc.dbKey]}
-      target="_blank"
-      rel="noreferrer"
-      className="doc-link"
-    >
-      Lihat Dokumen
-    </a>
-  ) : (
-    <span className="doc-empty-text">Belum ada dokumen</span>
-  )}
-</div>
+                        <input
+                          type="file"
+                          className="doc-file-input"
+                          accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                          onChange={(e) => handleFileUpload(e, doc.dbKey)}
+                        />
+
+                        <small className="doc-upload-note">
+                          Max 2MB (JPG/PNG/PDF)
+                        </small>
+                      </label>
+                    ) : formData[doc.dbKey] ? (
+                      <a
+                        href={formData[doc.dbKey]}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="doc-link"
+                      >
+                        Lihat Dokumen
+                      </a>
+                    ) : (
+                      <span className="doc-empty-text">
+                        Belum ada dokumen
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="detail-footer">
-            {isEditing && (
-              <button type="submit" className="btn-simpan">
-                Simpan Perubahan
+            {isEditing && canEdit && (
+              <button type="submit" className="btn-simpan" disabled={saving}>
+                {saving ? "Menyimpan..." : "Simpan Perubahan"}
               </button>
             )}
+
             <button
               type="button"
               className="btn-batal"
+              disabled={saving}
               onClick={() => (isEditing ? setIsEditing(false) : navigate(-1))}
             >
-              Kembali
+              {isEditing ? "Batal" : "Kembali"}
             </button>
           </div>
         </form>
