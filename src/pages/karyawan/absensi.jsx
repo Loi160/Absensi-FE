@@ -58,6 +58,36 @@ const getFormatDateIndo = () => {
 // ============================================================================
 // HELPERS: FILE & LOCATION
 // ============================================================================
+// HELPERS: IMAGE PROCESSING
+// ============================================================================
+
+// Mengecilkan ukuran gambar dan mengompres kualitasnya sebelum diunggah
+const compressImage = (dataUrl, maxWidth = 800, quality = 0.7) => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.src = dataUrl;
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const scale = maxWidth / img.width;
+      
+      if (scale < 1) {
+        canvas.width = maxWidth;
+        canvas.height = img.height * scale;
+      } else {
+        canvas.width = img.width;
+        canvas.height = img.height;
+      }
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      
+      // Mengembalikan dalam format JPEG dengan kualitas yang ditentukan
+      resolve(canvas.toDataURL("image/jpeg", quality));
+    };
+  });
+};
+
+// Mengubah gambar Base64 dari canvas menjadi File agar dapat diunggah
 
 // Mengubah gambar Base64 dari canvas menjadi File agar dapat diunggah
 const dataURLtoFile = (dataUrl, filename) => {
@@ -336,36 +366,49 @@ const Absensi = () => {
   // API: UPLOAD FOTO
   // ==========================================================================
 
-  // Mengunggah foto absensi ke Supabase Storage dan mengembalikan public URL
-  const uploadFotoKeSupabase = async () => {
+  // Mengunggah foto absensi ke Cloudinary dan mengembalikan public URL
+  const uploadFotoKeCloudinary = async () => {
     if (!capturedPhoto) {
       return null;
     }
 
     try {
-      const fileToUpload = dataURLtoFile(
-        capturedPhoto,
-        `${user.nik}_absen_${activeTab.toLowerCase()}_${Date.now()}.jpg`
+      // 1. Kompres gambar terlebih dahulu (dari ~3MB jadi ~50KB)
+      const compressedPhoto = await compressImage(capturedPhoto);
+
+      // 2. Persiapkan form data untuk Cloudinary
+      const formData = new FormData();
+      formData.append("file", compressedPhoto);
+      formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
+      formData.append("folder", "foto_absensi");
+
+      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+      
+      // 3. Upload ke Cloudinary API
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
       );
 
-      const { error: uploadError } = await supabase.storage
-        .from("foto_absensi")
-        .upload(fileToUpload.name, fileToUpload);
+      const data = await response.json();
 
-      if (uploadError) {
-        throw uploadError;
+      if (!response.ok) {
+        throw new Error(data.error?.message || "Gagal upload ke Cloudinary");
       }
 
-      const { data: publicUrlData } = supabase.storage
-        .from("foto_absensi")
-        .getPublicUrl(fileToUpload.name);
-
-      return publicUrlData.publicUrl;
+      // Mengembalikan URL foto yang sudah di-upload
+      return data.secure_url;
     } catch (error) {
-      console.error("Error upload foto:", error);
-      throw new Error("Gagal mengunggah foto");
+      console.error("Error upload foto Cloudinary:", error);
+      throw new Error("Gagal mengunggah foto ke CDN");
     }
   };
+
+  // Alias untuk kompatibilitas dengan fungsi yang sudah ada
+  const uploadFotoKeSupabase = uploadFotoKeCloudinary;
 
   // ==========================================================================
   // HANDLERS: ABSENSI
