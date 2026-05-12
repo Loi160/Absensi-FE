@@ -4,7 +4,6 @@
 // RESET & GLOBAL STYLES
 // ============================================================================ */
 
-/* Mengatur reset dasar agar tampilan konsisten di berbagai browser */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -16,7 +15,6 @@
 // LAYOUT UTAMA
 // ============================================================================ */
 
-/* Pembungkus utama halaman dashboard */
 .main-wrapper {
   background-color: #e5e5e5;
   min-height: 100vh;
@@ -24,7 +22,6 @@
   justify-content: center;
 }
 
-/* Kontainer utama aplikasi dengan tampilan dasar mobile */
 .card-container {
   width: 100%;
   max-width: 480px;
@@ -34,13 +31,13 @@
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  margin: 0 auto;
 }
 
 /* ============================================================================
 // DISPLAY UTILITIES
 // ============================================================================ */
 
-/* Utility class untuk mengatur visibilitas elemen mobile dan desktop */
 .desktop-only {
   display: none !important;
 }
@@ -53,12 +50,10 @@
 // HEADER MOBILE
 // ============================================================================ */
 
-/* Header utama dengan gradasi hijau pada tampilan mobile */
 .header-section {
   background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
-  height: 40vh;
-  min-height: 320px;
-  padding: 40px 20px 0 20px;
+  /* padding bawah besar = ruang untuk konten header + overlap card */
+  padding: 20px 15px 100px 15px;
   color: #ffffff;
   position: relative;
   z-index: 1;
@@ -66,72 +61,90 @@
   border-bottom-right-radius: 40px;
 }
 
-/* Baris atas header untuk profil pengguna dan tombol logout */
+/* Baris atas header: foto profil + nama + tombol logout */
 .header-top-mobile {
   display: flex !important;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 0 10px;
+  margin-bottom: 100px;
 }
 
-/* Pembungkus foto profil dan informasi pengguna */
 .header-user-info {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  /* PERBAIKAN: Hapus margin-top negatif yang menyebabkan foto terpotong */
 }
 
-/* Foto profil pengguna pada tampilan mobile */
 .mobile-profile-img {
-  width: 55px;
-  height: 55px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background-color: #ffffff;
   object-fit: cover;
   border: 2px solid rgba(255, 255, 255, 0.8);
+  flex-shrink: 0;
 }
 
-/* Pembungkus teks sapaan pengguna */
 .mobile-greeting {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
+  min-width: 0;
+  flex: 1;
 }
 
 .mobile-greeting h2 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
   margin: 0;
   color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
 }
 
 .mobile-greeting p {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   margin: 0;
   opacity: 0.9;
   color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
 }
 
-/* Tombol logout khusus tampilan mobile */
+/* PERBAIKAN: Tombol logout dengan padding touch-friendly */
 .mobile-header-logout {
   background: transparent;
   border: none;
   cursor: pointer;
+  flex-shrink: 0;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* PERBAIKAN: Area sentuh minimal 44x44px sesuai standar aksesibilitas */
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .mobile-header-logout img {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
 }
 
 /* ============================================================================
 // DASHBOARD CONTENT
 // ============================================================================ */
 
-/* Area konten dashboard di bawah header */
 .dashboard-content {
   position: relative;
   z-index: 10;
@@ -143,15 +156,15 @@
 // INFO CARD
 // ============================================================================ */
 
-/* Kartu informasi utama yang menampilkan logo, tanggal, dan waktu */
 .info-card {
   position: relative;
   z-index: 20;
-  margin-top: -260px;
-  margin-left: 20px;
-  margin-right: 20px;
+  /* tarik naik sesuai padding bawah header (100px) dikurangi sedikit untuk overlap */
+  margin-top: -75px;
+  margin-left: 15px;
+  margin-right: 15px;
   background: #ffffff;
-  padding: 40px 20px;
+  padding: 20px 15px;
   border-radius: 20px;
   box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1);
   display: flex;
@@ -159,160 +172,271 @@
   align-items: center;
 }
 
-/* Logo perusahaan pada kartu informasi */
 .company-logo {
-  width: 250px;
-  margin-bottom: 25px;
+  width: 100%;
+  max-width: 180px;
+  margin-bottom: 16px;
   display: block;
 }
 
-/* Baris tanggal dan waktu */
 .datetime-row {
   display: flex;
   width: 100%;
   justify-content: space-between;
   align-items: center;
+  gap: 5px;
 }
 
-/* Kolom tanggal */
 .date-box {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding-left: 5px;
+  padding-left: 3px;
+  min-width: 0;
 }
 
-/* Kolom waktu */
 .time-box {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding-left: 10px;
+  padding-left: 8px;
+  min-width: 0;
 }
 
-/* Label kecil pada informasi tanggal dan waktu */
 .dt-label {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 400;
-  letter-spacing: 0;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   color: #888888;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
-/* Ikon pendukung pada label tanggal dan waktu */
 .black-icon {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   opacity: 0.6;
   filter: grayscale(1);
+  flex-shrink: 0;
 }
 
-/* Nilai tanggal */
 .dt-value {
-  font-size: 14px;
+  font-size: 12px;
   color: #222222;
   font-weight: 700;
   text-align: left;
-  white-space: nowrap;
+  /* PERBAIKAN: Izinkan teks tanggal wrap agar tidak terpotong */
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.4;
 }
 
-/* Nilai jam digital */
 .time-big {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
   color: #222222;
-  letter-spacing: 0;
-  text-align: left;
   white-space: nowrap;
+  line-height: 1.3;
 }
 
-/* Garis pemisah antara tanggal dan waktu */
 .divider-vertical {
   width: 1.5px;
   background-color: #eeeeee;
-  height: 50px;
-  margin: 0 10px;
+  height: 45px;
+  flex-shrink: 0;
+  margin: 0 8px;
 }
 
 /* ============================================================================
 // MENU CARD
 // ============================================================================ */
 
-/* Kartu menu utama dashboard karyawan */
 .menu-card {
-  margin: 20px 20px 40px 20px;
+  margin: 16px 15px 40px 15px;
   background: #ffffff;
-  padding: 25px 20px;
+  padding: 16px 12px;
   border-radius: 25px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   position: relative;
   z-index: 20;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 10px;
 }
 
-/* Tombol menu utama */
 .menu-btn-item {
   background-color: #0029ff;
   color: #ffffff;
   width: 100%;
-  padding: 20px 25px;
-  border-radius: 20px;
+  padding: 16px 18px;
+  border-radius: 18px;
   border: none;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 14px;
   cursor: pointer;
   box-shadow: 0 4px 15px rgba(0, 41, 255, 0.2);
+  transition: transform 0.2s ease;
 }
 
-/* Pembungkus ikon pada tombol menu */
+.menu-btn-item:active {
+  transform: scale(0.98);
+}
+
 .icon-box {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-shrink: 0;
 }
 
-/* Ikon putih pada tombol menu */
 .white-icon {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   filter: brightness(0) invert(1);
+  flex-shrink: 0;
 }
 
-/* Pembungkus teks pada tombol menu */
 .text-content {
   display: flex;
   flex-direction: column;
   text-align: left;
+  min-width: 0;
 }
 
-/* Judul tombol menu */
 .btn-title {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 800;
   margin-bottom: 2px;
+  line-height: 1.2;
 }
 
-/* Subjudul tombol menu */
 .btn-subtitle {
-  font-size: 12px;
+  font-size: 11px;
   opacity: 0.85;
   font-weight: 400;
+  line-height: 1.3;
+  /* PERBAIKAN: Pastikan subtitle tidak overflow */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ============================================================================
-// MEDIA QUERY: DESKTOP
+// MEDIA QUERY: EXTRA SMALL MOBILE (< 360px)
+// ============================================================================ */
+
+@media (max-width: 360px) {
+  .header-section {
+    padding: 16px 12px 90px 12px;
+  }
+
+  .mobile-profile-img {
+    width: 42px;
+    height: 42px;
+  }
+
+  .mobile-greeting h2 {
+    font-size: 14px;
+    max-width: 150px;
+  }
+
+  .mobile-greeting p {
+    font-size: 11px;
+    max-width: 150px;
+  }
+
+  .mobile-header-logout img {
+    width: 22px;
+    height: 22px;
+  }
+
+  .info-card {
+    margin-top: -65px;
+    margin-left: 12px;
+    margin-right: 12px;
+    padding: 16px 12px;
+  }
+
+  .company-logo {
+    max-width: 150px;
+    margin-bottom: 12px;
+  }
+
+  .dt-label {
+    font-size: 11px;
+  }
+
+  .dt-value {
+    font-size: 11px;
+  }
+
+  .time-big {
+    font-size: 14px;
+  }
+
+  .divider-vertical {
+    height: 38px;
+    margin: 0 6px;
+  }
+
+  .menu-card {
+    margin: 12px 12px 30px 12px;
+    padding: 12px 10px;
+    gap: 8px;
+  }
+
+  .menu-btn-item {
+    padding: 13px 14px;
+    gap: 12px;
+  }
+
+  .white-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .btn-title {
+    font-size: 14px;
+  }
+
+  .btn-subtitle {
+    font-size: 10px;
+  }
+}
+
+/* ============================================================================
+// MEDIA QUERY: STANDARD MOBILE (361px - 480px)
+// ============================================================================ */
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .mobile-greeting h2 {
+    max-width: 180px;
+  }
+}
+
+/* ============================================================================
+// MEDIA QUERY: BACKGROUND MOBILE (< 480px)
+// ============================================================================ */
+
+@media (max-width: 480px) {
+  .main-wrapper {
+    background-color: #e5e5e5;
+  }
+
+  .card-container {
+    max-width: 100%;
+  }
+}
+
+/* ============================================================================
+// MEDIA QUERY: DESKTOP (>= 1024px)
 // ============================================================================ */
 
 @media (min-width: 1024px) {
-  /* Mengubah layout utama menjadi tampilan desktop dengan sidebar kiri */
   .main-wrapper {
     background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
     height: 100vh;
@@ -328,11 +452,6 @@
     height: 100vh;
   }
 
-  /* ==========================================================================
-  // DESKTOP DISPLAY UTILITIES
-  // ========================================================================== */
-
-  /* Membalik visibilitas elemen khusus desktop dan mobile */
   .desktop-only {
     display: flex !important;
   }
@@ -341,17 +460,16 @@
     display: none !important;
   }
 
-  /* ==========================================================================
+  /* ======================================================================
   // DESKTOP SIDEBAR
-  // ========================================================================== */
+  // ====================================================================== */
 
-  /* Header mobile diubah menjadi sidebar kiri pada tampilan desktop */
   .header-section {
     position: relative;
     width: 300px;
     flex-shrink: 0;
     height: 100vh;
-    border-radius: 0;
+    border-radius: 0 !important;
     padding: 25px !important;
     z-index: 100;
     display: flex !important;
@@ -361,7 +479,6 @@
     background: transparent !important;
   }
 
-  /* Menyesuaikan posisi identitas karyawan di tengah sidebar */
   .logo-center-area,
   .title-form,
   .subtitle-form {
@@ -369,7 +486,6 @@
     top: -40px;
   }
 
-  /* Logo perusahaan pada sidebar desktop */
   .sidebar-logo-desktop {
     position: absolute !important;
     top: 60px !important;
@@ -387,7 +503,6 @@
     filter: brightness(0) invert(1) !important;
   }
 
-  /* Area foto profil pada sidebar desktop */
   .logo-center-area {
     margin-bottom: 10px !important;
   }
@@ -398,6 +513,7 @@
     border: 5px solid rgba(255, 255, 255, 0.3) !important;
     background: #ffffff;
     object-fit: cover;
+    border-radius: 50%;
   }
 
   .title-form {
@@ -416,11 +532,10 @@
     color: #ffffff !important;
   }
 
-  /* ==========================================================================
+  /* ======================================================================
   // DESKTOP LOGOUT BUTTON
-  // ========================================================================== */
+  // ====================================================================== */
 
-  /* Tombol logout desktop yang ditempatkan di bagian bawah sidebar */
   .btn-logout-desktop {
     position: absolute !important;
     bottom: 40px !important;
@@ -458,11 +573,10 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
   }
 
-  /* ==========================================================================
+  /* ======================================================================
   // DESKTOP DASHBOARD CONTENT
-  // ========================================================================== */
+  // ====================================================================== */
 
-  /* Area konten utama desktop di sisi kanan sidebar */
   .dashboard-content {
     flex: 1;
     background-color: #fdfdfd;
@@ -474,7 +588,6 @@
     height: calc(100vh - 60px);
   }
 
-  /* Kartu informasi desktop untuk tanggal dan waktu */
   .info-card {
     margin: 0 0 30px 0 !important;
     flex-direction: row;
@@ -497,6 +610,7 @@
 
   .dt-value {
     font-size: 22px !important;
+    white-space: nowrap !important;
   }
 
   .time-big {
@@ -507,11 +621,10 @@
     height: 80px !important;
   }
 
-  /* ==========================================================================
+  /* ======================================================================
   // DESKTOP MENU GRID
-  // ========================================================================== */
+  // ====================================================================== */
 
-  /* Menu desktop menggunakan grid tiga kolom */
   .menu-card {
     margin: 0 !important;
     display: grid !important;
@@ -523,7 +636,6 @@
     border-radius: 0 !important;
   }
 
-  /* Tombol menu desktop dibuat sebagai kartu tinggi */
   .menu-btn-item {
     background: #ffffff !important;
     color: #333333 !important;
@@ -533,7 +645,7 @@
     text-align: center;
     border-radius: 16px !important;
     border: 1px solid rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
   }
 
@@ -554,6 +666,7 @@
     color: #0029ff !important;
     text-align: center;
     transition: all 0.3s ease;
+    white-space: normal !important;
   }
 
   .btn-subtitle {
@@ -562,9 +675,10 @@
     text-align: center;
     margin-top: 8px;
     transition: all 0.3s ease;
+    white-space: normal !important;
+    overflow: visible !important;
   }
 
-  /* Efek hover pada kartu menu desktop */
   .menu-btn-item:hover {
     background: linear-gradient(135deg, #0029ff 0%, #001fbd 100%) !important;
     transform: translateY(-5px) !important;

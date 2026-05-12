@@ -4,7 +4,6 @@
 // RESET & GLOBAL STYLES
 // ============================================================================ */
 
-/* Mengatur reset dasar agar tampilan konsisten di berbagai browser */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -16,7 +15,6 @@
 // LAYOUT UTAMA
 // ============================================================================ */
 
-/* Pembungkus utama halaman yang mengatur posisi aplikasi di tengah layar */
 .main-wrapper {
   background-color: #d1a5a5;
   min-height: 100vh;
@@ -25,7 +23,6 @@
   align-items: flex-start;
 }
 
-/* Kontainer utama aplikasi dengan tampilan dasar menyerupai layar mobile */
 .card-container {
   width: 100%;
   max-width: 450px;
@@ -34,31 +31,37 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  margin: 0 auto;
 }
 
 /* ============================================================================
 // HEADER SECTION
 // ============================================================================ */
 
-/* Area header dengan gradasi hijau dan informasi utama karyawan */
 .header-section {
   background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
-  height: 45vh;
-  padding-top: 40px;
+  /* PERBAIKAN: Ganti height fixed dengan padding agar fleksibel */
+  padding-top: 50px;
+  padding-bottom: 30px;
   text-align: center;
   color: #ffffff;
   position: relative;
   border-bottom-left-radius: 40px;
   border-bottom-right-radius: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  /* PERBAIKAN: Hapus height: 45vh yang kaku */
 }
 
 /* ============================================================================
 // UTILITY DISPLAY
 // ============================================================================ */
 
-/* Utility class untuk mengatur visibilitas elemen berdasarkan perangkat */
 .desktop-only {
-  display: none;
+  display: none !important;
 }
 
 .mobile-only {
@@ -73,11 +76,10 @@ button.mobile-only {
 // BUTTONS
 // ============================================================================ */
 
-/* Tombol kembali versi mobile yang berada di pojok kiri atas */
 .btn-back {
   position: absolute;
-  top: 30px;
-  left: 25px;
+  top: 16px;
+  left: 16px;
   width: 40px;
   height: 40px;
   background: transparent;
@@ -88,17 +90,16 @@ button.mobile-only {
   align-items: center;
   cursor: pointer;
   z-index: 50;
+  flex-shrink: 0;
 }
 
-/* Tombol kembali versi desktop disembunyikan secara default */
 .btn-back-desktop {
   display: none;
 }
 
-/* Tombol utama untuk membuka kamera */
 .btn-camera-open {
   width: 100%;
-  padding: 12px;
+  padding: 14px 12px;
   background: #e3f2fd;
   border: 1px solid #bbdefb;
   border-radius: 10px;
@@ -110,9 +111,11 @@ button.mobile-only {
   font-size: 13px;
   font-weight: 600;
   color: #333333;
+  /* PERBAIKAN: Pastikan tidak overflow */
+  overflow: hidden;
+  word-break: break-word;
 }
 
-/* Tombol aksi utama untuk mengirim absensi */
 .btn-submit-primary {
   width: 100%;
   padding: 15px;
@@ -127,76 +130,86 @@ button.mobile-only {
   display: flex;
   justify-content: center;
   align-items: center;
+  /* PERBAIKAN: Pastikan teks tidak terpotong */
+  min-height: 50px;
+  word-break: break-word;
+  text-align: center;
+}
+
+.btn-submit-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* ============================================================================
 // PROFILE & HEADER CONTENT
 // ============================================================================ */
 
-/* Area untuk menempatkan gambar profil atau logo di tengah header */
 .logo-center-area {
   display: flex;
   justify-content: center;
-  margin-bottom: 15px;
+  flex-shrink: 0;
 }
 
-/* Gambar profil/logo agar tetap proporsional */
 .img-circle-content {
-  width: 180px;
-  height: 180px;
+  width: 100px;
+  height: 100px;
   object-fit: contain;
 }
 
-/* Teks nama karyawan pada header */
 .title-form {
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 700;
+  line-height: 1.2;
+  /* PERBAIKAN: Padding horizontal agar tidak menempel ke tepi */
+  padding: 0 20px;
 }
 
-/* Teks jabatan atau informasi tambahan pada header */
 .subtitle-form {
-  font-size: 14px;
+  font-size: 13px;
   opacity: 0.9;
+  line-height: 1.3;
+  padding: 0 20px;
+  margin-top: -2px;
+  margin-bottom: 24px;
 }
 
 /* ============================================================================
 // FORM SECTION
 // ============================================================================ */
 
-/* Area form utama yang dibuat menimpa sebagian header pada tampilan mobile */
 .form-section {
   background: #ffffff;
-  margin: -60px 25px 0 25px;
-  padding: 25px 20px;
-  border-radius: 30px;
+  /* PERBAIKAN: Kurangi overlap negatif agar tidak terlalu jauh naik */
+  margin: -30px 15px 0 15px;
+  padding: 20px 15px;
+  border-radius: 25px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   z-index: 10;
+  /* PERBAIKAN: Tambahkan overflow hidden agar konten tidak keluar */
+  overflow: hidden;
 }
 
-/* Pembungkus judul form dan tombol kembali pada area form */
 .form-header-wrapper {
   display: block;
 }
 
-/* Judul utama pada form absensi */
 .form-header-text {
-  font-size: 20px;
-  margin-bottom: 20px;
+  font-size: 18px;
+  margin-bottom: 15px;
   font-weight: 700;
   color: #000000;
 }
 
-/* Grup input untuk menjaga jarak antar field */
 .input-group {
-  margin-bottom: 18px;
+  margin-bottom: 15px;
 }
 
-/* Label input agar instruksi form terlihat jelas */
 label {
   display: block;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   color: #000000;
 }
 
@@ -204,16 +217,17 @@ label {
 // TAB ABSENSI
 // ============================================================================ */
 
-/* Kontainer tab pilihan status absensi */
 .tab-container {
   display: flex;
-  gap: 8px;
+  gap: 6px;
+  /* PERBAIKAN: Tambahkan wrap jika tidak cukup ruang */
+  flex-wrap: nowrap;
 }
 
-/* Tombol tab standar */
 .tab-item {
   flex: 1;
-  padding: 10px 5px;
+  /* PERBAIKAN: Kurangi padding agar muat di layar kecil */
+  padding: 10px 4px;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   background: #ffffff;
@@ -221,9 +235,18 @@ label {
   font-weight: 600;
   cursor: pointer;
   color: #000000;
+  transition: all 0.2s ease;
+  /* PERBAIKAN: Jangan biarkan teks overflow */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
-/* Status aktif pada tombol tab */
+.tab-item:active {
+  transform: scale(0.97);
+}
+
 .tab-item.active {
   background: #008000;
   color: #ffffff;
@@ -235,17 +258,15 @@ label {
 // SELECT INPUT
 // ============================================================================ */
 
-/* Pembungkus select agar ikon panah dapat diposisikan secara absolut */
 .select-wrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-/* Select custom dengan tampilan yang konsisten antar browser */
 .custom-select {
   width: 100%;
-  padding: 12px 15px;
+  padding: 12px 40px 12px 15px; /* PERBAIKAN: padding kanan agar tidak tertindih ikon */
   border: 1px solid #e0e0e0;
   border-radius: 10px;
   background: #ffffff;
@@ -254,59 +275,182 @@ label {
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
+  /* PERBAIKAN: Pastikan teks tidak overflow */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* Ikon dropdown di sisi kanan select */
 .select-icon {
   position: absolute;
   right: 12px;
   pointer-events: none;
   color: #000000;
+  flex-shrink: 0;
 }
 
 /* ============================================================================
 // TIME DISPLAY
 // ============================================================================ */
 
-/* Baris informasi waktu agar dua kolom tampil sejajar */
 .time-row {
   display: flex;
-  gap: 12px;
-  margin-bottom: 18px;
+  gap: 10px;
+  margin-bottom: 15px;
+  /* PERBAIKAN: Pastikan tidak overflow */
+  width: 100%;
 }
 
-/* Utility untuk membagi lebar elemen secara rata */
 .flex-1 {
   flex: 1;
+  min-width: 0; /* PERBAIKAN: Kunci penting agar flex child tidak overflow */
 }
 
-/* Kotak penampil waktu absensi */
 .time-display {
   width: 100%;
-  padding: 12px;
+  padding: 12px 8px;
   background: #e3f2fd;
   border: 1px solid #bbdefb;
   border-radius: 10px;
   text-align: center;
   font-size: 13px;
   font-weight: 600;
+  /* PERBAIKAN: Input time perlu display block dan min-width 0 */
+  display: block;
+  min-width: 0;
+  -webkit-appearance: none;
+}
+
+/* PERBAIKAN: Styling khusus untuk input type=time */
+input[type="time"].time-display {
+  font-family: "Inter", sans-serif;
+  color: #333333;
+  cursor: pointer;
+  /* Pastikan konsisten di iOS */
+  -webkit-appearance: none;
+  appearance: none;
+  background: #e3f2fd;
 }
 
 /* ============================================================================
-// SPACING
+// SPACING & UTILITY
 // ============================================================================ */
 
-/* Ruang kosong bawah agar konten tidak terlalu menempel ke tepi layar */
+.mt-24 {
+  margin-top: 24px;
+}
+
 .bottom-gap {
-  height: 60px;
+  height: 40px;
+  flex-shrink: 0;
 }
 
 /* ============================================================================
-// MEDIA QUERY: MOBILE KECIL
+// MEDIA QUERY: EXTRA SMALL MOBILE (iPhone SE, lebar < 360px)
+// ============================================================================ */
+
+@media (max-width: 360px) {
+  .header-section {
+    padding-top: 45px;
+    padding-bottom: 25px;
+    gap: 6px;
+  }
+
+  .btn-back {
+    width: 34px;
+    height: 34px;
+    top: 12px;
+    left: 12px;
+  }
+
+  .img-circle-content {
+    width: 80px;
+    height: 80px;
+  }
+
+  .title-form {
+    font-size: 20px;
+  }
+
+  .subtitle-form {
+    font-size: 11px;
+  }
+
+  .form-section {
+    margin: -25px 10px 0 10px;
+    padding: 16px 12px;
+  }
+
+  .form-header-text {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  .input-group {
+    margin-bottom: 12px;
+  }
+
+  label {
+    font-size: 12px;
+    margin-bottom: 5px;
+  }
+
+  .tab-item {
+    font-size: 11px;
+    padding: 9px 3px;
+  }
+
+  .custom-select,
+  .time-display {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+
+  .btn-submit-primary {
+    padding: 13px;
+    font-size: 14px;
+  }
+
+  .btn-camera-open {
+    padding: 11px 10px;
+    font-size: 12px;
+  }
+}
+
+/* ============================================================================
+// MEDIA QUERY: SMALL MOBILE (375px - 480px)
+// ============================================================================ */
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .header-section {
+    padding-top: 48px;
+    padding-bottom: 28px;
+  }
+
+  .img-circle-content {
+    width: 90px;
+    height: 90px;
+  }
+
+  .title-form {
+    font-size: 22px;
+  }
+
+  .subtitle-form {
+    font-size: 12px;
+  }
+
+  .form-section {
+    margin: -28px 13px 0 13px;
+    padding: 18px 14px;
+  }
+}
+
+/* ============================================================================
+// MEDIA QUERY: BACKGROUND KHUSUS MOBILE (< 480px)
 // ============================================================================ */
 
 @media (max-width: 480px) {
-  /* Menyesuaikan layout agar memenuhi layar perangkat mobile kecil */
   .main-wrapper {
     background-color: #e0e0e0;
     padding: 0;
@@ -319,16 +463,35 @@ label {
   }
 
   .header-section {
-    border-radius: 0;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
   }
 }
 
 /* ============================================================================
-// MEDIA QUERY: DESKTOP
+// MEDIA QUERY: TABLET (481px - 1023px)
+// ============================================================================ */
+
+@media (min-width: 481px) and (max-width: 1023px) {
+  .card-container {
+    max-width: 450px;
+  }
+
+  .img-circle-content {
+    width: 110px;
+    height: 110px;
+  }
+
+  .title-form {
+    font-size: 28px;
+  }
+}
+
+/* ============================================================================
+// MEDIA QUERY: DESKTOP (>= 1024px)
 // ============================================================================ */
 
 @media (min-width: 1024px) {
-  /* Mengubah layout utama menjadi tampilan desktop dengan sidebar kiri */
   .main-wrapper {
     background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
     height: 100vh;
@@ -347,11 +510,10 @@ label {
     background-color: transparent !important;
   }
 
-  /* ========================================================================
+  /* ======================================================================
   // DESKTOP DISPLAY UTILITIES
-  // ======================================================================== */
+  // ====================================================================== */
 
-  /* Membalik visibilitas elemen khusus desktop dan mobile */
   .desktop-only {
     display: flex !important;
   }
@@ -368,17 +530,16 @@ label {
     display: none !important;
   }
 
-  /* ========================================================================
+  /* ======================================================================
   // DESKTOP SIDEBAR
-  // ======================================================================== */
+  // ====================================================================== */
 
-  /* Header mobile diubah menjadi sidebar kiri pada tampilan desktop */
   .header-section {
     position: relative;
     width: 300px;
     flex-shrink: 0;
     height: 100vh;
-    border-radius: 0;
+    border-radius: 0 !important;
     padding: 25px !important;
     display: flex !important;
     flex-direction: column !important;
@@ -386,9 +547,9 @@ label {
     align-items: center !important;
     background: transparent !important;
     z-index: 100;
+    gap: 10px;
   }
 
-  /* Menyesuaikan posisi profil agar berada pada area tengah sidebar */
   .header-section > .logo-center-area,
   .header-section > .title-form,
   .header-section > .subtitle-form {
@@ -396,7 +557,6 @@ label {
     top: -40px;
   }
 
-  /* Logo perusahaan pada sidebar desktop */
   .sidebar-logo-desktop {
     position: absolute !important;
     top: 60px !important;
@@ -415,7 +575,6 @@ label {
     opacity: 1 !important;
   }
 
-  /* Area foto profil pada tampilan desktop */
   .logo-center-area {
     margin: 0 0 10px 0 !important;
     display: flex !important;
@@ -440,6 +599,7 @@ label {
     color: #ffffff !important;
     margin: 0 !important;
     text-align: center !important;
+    padding: 0 15px !important;
   }
 
   .subtitle-form {
@@ -448,13 +608,13 @@ label {
     opacity: 0.9 !important;
     margin-top: 5px !important;
     text-align: center !important;
+    padding: 0 15px !important;
   }
 
-  /* ========================================================================
+  /* ======================================================================
   // DESKTOP LOGOUT BUTTON
-  // ======================================================================== */
+  // ====================================================================== */
 
-  /* Tombol logout desktop yang ditempatkan di bagian bawah sidebar */
   .btn-logout-desktop {
     position: absolute !important;
     bottom: 40px !important;
@@ -492,11 +652,10 @@ label {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
   }
 
-  /* ========================================================================
+  /* ======================================================================
   // DESKTOP FORM SECTION
-  // ======================================================================== */
+  // ====================================================================== */
 
-  /* Area form desktop dibuat memenuhi ruang kanan sidebar */
   .form-section {
     flex: 1;
     background-color: #fdfdfd;
@@ -507,6 +666,7 @@ label {
     height: calc(100vh - 60px);
     overflow-y: auto;
     max-width: none !important;
+    overflow-x: hidden;
   }
 
   .form-header-wrapper {
@@ -524,6 +684,7 @@ label {
     border-radius: 50% !important;
     width: 45px !important;
     height: 45px !important;
+    min-width: 45px !important;
     cursor: pointer !important;
     display: flex !important;
     justify-content: center !important;
@@ -540,15 +701,15 @@ label {
     margin-bottom: 0 !important;
   }
 
-  /* ========================================================================
+  /* ======================================================================
   // DESKTOP FORM CONTROLS
-  // ======================================================================== */
+  // ====================================================================== */
 
-  /* Menyesuaikan ukuran kontrol form agar proporsional di layar desktop */
   .tab-item {
     font-size: 20px !important;
     padding: 15px 5px !important;
     font-weight: 700 !important;
+    white-space: nowrap !important;
   }
 
   .input-group label {
@@ -559,21 +720,30 @@ label {
   .custom-select,
   .btn-camera-open,
   .time-display {
-    padding: 18px;
-    font-size: 16px;
-    border-radius: 15px;
+    padding: 18px !important;
+    font-size: 16px !important;
+    border-radius: 15px !important;
+  }
+
+  input[type="time"].time-display {
+    padding: 18px !important;
+    font-size: 16px !important;
   }
 
   .btn-submit-primary {
-    padding: 20px;
-    font-size: 20px;
-    margin-top: 30px;
-    border-radius: 18px;
-    transition: all 0.3s ease;
+    padding: 20px !important;
+    font-size: 20px !important;
+    margin-top: 30px !important;
+    border-radius: 18px !important;
+    transition: all 0.3s ease !important;
   }
 
-  .btn-submit-primary:hover {
-    background-color: #3ca32b;
-    transform: translateY(-3px);
+  .btn-submit-primary:hover:not(:disabled) {
+    background-color: #3ca32b !important;
+    transform: translateY(-3px) !important;
+  }
+
+  .time-row {
+    margin-bottom: 18px;
   }
 }

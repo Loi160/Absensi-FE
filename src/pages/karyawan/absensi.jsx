@@ -662,6 +662,7 @@ const Absensi = () => {
             <img
               src={logoAmaga}
               alt="Logo Amaga"
+              height={12}
               className="img-circle-content mobile-only"
             />
 
@@ -683,7 +684,7 @@ const Absensi = () => {
           </button>
         </div>
 
-        <div className="form-section">
+        <div className="form-section mt-24">
           <div className="form-header-wrapper">
             <button
               className="btn-back-desktop desktop-only"

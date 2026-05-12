@@ -33,22 +33,31 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* Background hijau tetap di bagian atas untuk tampilan mobile */
 .rw-mobile-bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  max-width: 480px;
-  margin: 0 auto;
-  height: 38vh;
-  min-height: 300px;
-  background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
-  border-radius: 0;
-  z-index: 1;
+  display: none;
+}
+
+/* Scrollbar styling untuk mobile */
+.rw-content-list-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.rw-content-list-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.rw-content-list-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.rw-content-list-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 }
 
 /* ============================================================================
@@ -76,16 +85,13 @@ button.mobile-only {
 // HEADER MOBILE
 // ============================================================================ */
 
-/* Header utama mobile dengan posisi sticky */
+/* Header utama mobile dengan posisi fixed */
 .rw-header-section {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background-image: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
-  background-size: 100% max(38vh, 300px);
-  background-position: top center;
-  background-repeat: no-repeat;
-  box-shadow: none;
+  position: relative;
+  flex-shrink: 0;
+  z-index: 100;
+  background: linear-gradient(180deg, #4cff00 0%, #2fb800 55%, #1f8f3d 100%);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   border-radius: 0;
   padding: 35px 20px 15px 20px;
   color: #ffffff;
@@ -144,27 +150,30 @@ button.mobile-only {
 .rw-content-list-wrapper {
   z-index: 10;
   position: relative;
-  background-color: transparent;
+  background-color: #e5e5e5;
   padding-top: 15px;
   padding-bottom: 50px;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Daftar kartu riwayat */
 .rw-content-list {
-  padding: 0 20px;
+  padding: 0 15px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 12px;
 }
 
 /* Kartu item riwayat */
 .rw-card-item {
   background: #ffffff;
-  border-radius: 20px;
-  padding: 20px;
+  border-radius: 18px;
+  padding: 16px;
   display: flex;
-  gap: 15px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  gap: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   transition: 0.2s ease;
   position: relative;
@@ -172,13 +181,19 @@ button.mobile-only {
 
 /* Efek hover pada kartu riwayat */
 .rw-card-item:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.rw-card-item:active {
+  transform: scale(0.98);
 }
 
 /* Ikon utama pada kartu riwayat */
 .rw-icon-main {
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
   filter: brightness(0) saturate(100%) invert(18%) sepia(88%) saturate(3025%) hue-rotate(224deg) brightness(90%) contrast(98%);
 }
 
@@ -198,15 +213,15 @@ button.mobile-only {
 /* Teks tipe riwayat */
 .rw-type-text {
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14px;
   color: #111111;
 }
 
 /* Nama karyawan pada kartu riwayat */
 .rw-name {
   font-weight: 700;
-  font-size: 14px;
-  margin-bottom: 6px;
+  font-size: 13px;
+  margin-bottom: 5px;
   color: #222222;
 }
 
@@ -214,10 +229,10 @@ button.mobile-only {
 .rw-meta-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  font-size: 11px;
+  gap: 10px;
+  font-size: 10px;
   color: #555555;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 
 /* Item metadata dengan ikon dan teks */
@@ -236,8 +251,9 @@ button.mobile-only {
 
 /* Catatan tambahan pada kartu */
 .rw-note {
-  font-size: 12px;
+  font-size: 11px;
   color: #666666;
+  line-height: 1.4;
 }
 
 /* Tombol hapus pengajuan */
@@ -263,9 +279,9 @@ button.mobile-only {
 
 /* Style dasar badge status */
 .rw-badge {
-  font-size: 10px;
-  padding: 4px 10px;
-  border-radius: 8px;
+  font-size: 9px;
+  padding: 4px 8px;
+  border-radius: 6px;
   font-weight: 800;
   text-transform: uppercase;
   display: inline-flex;
@@ -273,6 +289,7 @@ button.mobile-only {
   align-items: center;
   text-align: center;
   line-height: 1;
+  white-space: nowrap;
 }
 
 /* Badge hadir penuh */
@@ -551,6 +568,72 @@ button.mobile-only {
 // MEDIA QUERY: DESKTOP
 // ============================================================================ */
 
+/* ============================================================================
+// MEDIA QUERY: SMALL MOBILE (iPhone SE, etc)
+// ============================================================================ */
+
+@media (max-width: 375px) {
+  /* Kartu riwayat lebih compact */
+  .rw-card-item {
+    padding: 14px;
+    gap: 10px;
+    border-radius: 16px;
+  }
+
+  .rw-icon-main {
+    width: 34px;
+    height: 34px;
+  }
+
+  .rw-type-text {
+    font-size: 13px;
+  }
+
+  .rw-name {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .rw-meta-row {
+    font-size: 9px;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .rw-note {
+    font-size: 10px;
+  }
+
+  .rw-badge {
+    font-size: 8px;
+    padding: 3px 7px;
+  }
+
+  /* Header lebih compact */
+  .rw-title-text {
+    font-size: 20px;
+  }
+
+  .rw-subtitle-text {
+    font-size: 11px;
+  }
+
+  .rw-btn-back {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* Content list padding lebih kecil */
+  .rw-content-list {
+    padding: 0 12px;
+    gap: 10px;
+  }
+
+  .rw-content-list-wrapper {
+    padding-top: 12px;
+  }
+}
+
 @media (min-width: 1024px) {
   /* ==========================================================================
   // DESKTOP DISPLAY UTILITIES
@@ -742,6 +825,7 @@ button.mobile-only {
     height: calc(100vh - 60px) !important;
     max-height: none !important;
     overflow-y: auto !important;
+    overflow-x: hidden !important;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   }
 
